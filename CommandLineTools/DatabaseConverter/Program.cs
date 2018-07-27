@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
+using System;
 using System.IO;
-using MikuMikuLibrary.Databases;
 using System.Xml.Serialization;
 
 namespace DatabaseConverter
@@ -21,8 +17,8 @@ namespace DatabaseConverter
 
             switch ( fileName )
             {
-                //case "aetdb":
-                //    return new AetDatabase();
+                case "aetdb":
+                    return new AetDatabase();
                 case "bonedata":
                     return new BoneDatabase();
                 //case "editdb":
@@ -69,7 +65,7 @@ namespace DatabaseConverter
             if ( destinationFileName == null )
                 destinationFileName = sourceFileName;
 
-            if ( sourceFileName.EndsWith(".bin", StringComparison.OrdinalIgnoreCase ) )
+            if ( sourceFileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 destinationFileName = Path.ChangeExtension( destinationFileName, "xml" );
 
@@ -82,7 +78,7 @@ namespace DatabaseConverter
 
                 database.Dispose();
             }
-            else if ( sourceFileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase ) )
+            else if ( sourceFileName.EndsWith( ".xml", StringComparison.OrdinalIgnoreCase ) )
             {
                 destinationFileName = Path.ChangeExtension( destinationFileName, "bin" );
 
