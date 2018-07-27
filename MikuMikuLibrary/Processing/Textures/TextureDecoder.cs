@@ -38,29 +38,29 @@ namespace MikuMikuLibrary.Processing.Textures
 
         public unsafe static Bitmap Decode( Texture texture )
         {
-            var m = texture.MipMaps[ 0 ];
-            var bitmap = new Bitmap( m.Width, m.Height );
+            var subTexture = texture[ 0 ];
+            var bitmap = new Bitmap( subTexture.Width, subTexture.Height );
             var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );
 
-            if ( m.Format == TextureFormat.RGB )
+            if ( subTexture.Format == TextureFormat.RGB )
             {
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb );
-                Marshal.Copy( m.Data, 0, bitmapData.Scan0, m.Data.Length );
+                Marshal.Copy( subTexture.Data, 0, bitmapData.Scan0, subTexture.Data.Length );
                 bitmap.UnlockBits( bitmapData );
             }
-            else if ( m.Format == TextureFormat.RGBA )
+            else if ( subTexture.Format == TextureFormat.RGBA )
             {
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
-                Marshal.Copy( m.Data, 0, bitmapData.Scan0, m.Data.Length );
+                Marshal.Copy( subTexture.Data, 0, bitmapData.Scan0, subTexture.Data.Length );
                 bitmap.UnlockBits( bitmapData );
             }
             else if ( texture.IsYCbCr )
             {
                 var lumBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture.MipMaps[ 0 ].Data, texture.MipMaps[ 0 ].Width, texture.MipMaps[ 0 ].Height, GetDDSPixelFormat( texture.MipMaps[ 0 ].Format ) );
+                    texture[ 0 ].Data, texture[ 0 ].Width, texture[ 0 ].Height, GetDDSPixelFormat( texture.Format ) );
 
                 var cbrBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture.MipMaps[ 1 ].Data, texture.MipMaps[ 1 ].Width, texture.MipMaps[ 1 ].Height, GetDDSPixelFormat( texture.MipMaps[ 1 ].Format ) );
+                    texture[ 1 ].Data, texture[ 1 ].Width, texture[ 1 ].Height, GetDDSPixelFormat( texture.Format ) );
 
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
                 fixed ( byte* lumPtr = lumBuffer )
@@ -77,7 +77,7 @@ namespace MikuMikuLibrary.Processing.Textures
 
             else
             {
-                var buffer = DDSCodec.DecompressPixelDataToRGBA( m.Data, m.Width, m.Height, GetDDSPixelFormat( m.Format ) );
+                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height, GetDDSPixelFormat( subTexture.Format ) );
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
                 Marshal.Copy( buffer, 0, bitmapData.Scan0, buffer.Length );
                 bitmap.UnlockBits( bitmapData );
@@ -94,22 +94,35 @@ namespace MikuMikuLibrary.Processing.Textures
 
         public static void DecodeToDDS( Texture texture, Stream destination )
         {
-            var topMipMap = texture.MipMaps[ 0 ];
+            var ddsHeader = new DDSHeader( texture.Width, texture.Height, GetDDSPixelFormat( texture.Format ) );
 
-            var ddsHeader = new DDSHeader(
-                topMipMap.Width, topMipMap.Height, GetDDSPixelFormat( topMipMap.Format ) );
-
-            if ( texture.MipMaps.Count > 1 )
+            if ( texture.UsesDepth )
             {
-                ddsHeader.MipMapCount = texture.MipMaps.Count;
+                ddsHeader.Depth = texture.Depth;
+                ddsHeader.Flags |= DDSHeaderFlags.Depth;
+                ddsHeader.Caps |= DDSHeaderCaps.Complex;
+                ddsHeader.Caps2 |= DDSHeaderCaps2.CubeMap |
+                    DDSHeaderCaps2.CubeMapPositiveX | DDSHeaderCaps2.CubeMapNegativeX |
+                    DDSHeaderCaps2.CubeMapPositiveY | DDSHeaderCaps2.CubeMapNegativeY |
+                    DDSHeaderCaps2.CubeMapPositiveZ | DDSHeaderCaps2.CubeMapNegativeZ;
+            }
+
+            if ( texture.UsesMipMaps )
+            {
+                ddsHeader.MipMapCount = texture.MipMapCount;
                 ddsHeader.Flags |= DDSHeaderFlags.MipMapCount;
-                ddsHeader.Caps |= DDSHeaderCaps.MipMap;
+                ddsHeader.Caps |= DDSHeaderCaps.Complex;
             }
 
             ddsHeader.Save( destination );
 
-            foreach ( var mipMap in texture.MipMaps )
-                destination.Write( mipMap.Data, 0, mipMap.Data.Length );
+            foreach ( var level in texture.EnumerateLevels() )
+            {
+                foreach ( var mipMap in level )
+                {
+                    destination.Write( mipMap.Data, 0, mipMap.Data.Length );
+                }
+            }
         }
 
         public static void DecodeToDDS( Texture texture, string destinationFileName )

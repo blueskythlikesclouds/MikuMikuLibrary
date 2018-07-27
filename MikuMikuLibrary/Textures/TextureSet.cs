@@ -41,9 +41,7 @@ namespace MikuMikuLibrary.Textures
                 {
                     reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
                     {
-                        var texture = new Texture();
-                        texture.Read( reader );
-                        Textures.Add( texture );
+                        Textures.Add( new Texture( reader ) );
                     } );
                 }
 

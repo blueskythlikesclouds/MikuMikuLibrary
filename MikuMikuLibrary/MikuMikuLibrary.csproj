@@ -95,8 +95,9 @@
     <Compile Include="Motions\Motion.cs" />
     <Compile Include="Motions\MotionSet.cs" />
     <Compile Include="Textures\Texture.cs" />
+    <Compile Include="Textures\TextureFormat.cs" />
     <Compile Include="Textures\TextureSet.cs" />
-    <Compile Include="Textures\TextureMipMap.cs" />
+    <Compile Include="Textures\SubTexture.cs" />
     <Compile Include="IO\AlignmentUtilities.cs" />
     <Compile Include="IO\EndianBinaryReader.cs" />
     <Compile Include="IO\EndianBinaryWriter.cs" />

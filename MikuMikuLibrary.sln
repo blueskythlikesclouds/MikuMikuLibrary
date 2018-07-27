@@ -5,13 +5,13 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikuMikuLibrary", "MikuMikuLibrary\MikuMikuLibrary.csproj", "{9C7171CA-7379-458F-A9CA-293BBF2C74DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikuMikuLibraryTest", "MikuMikuLibraryTest\MikuMikuLibraryTest.csproj", "{1959C854-977E-4A5B-A4D5-A4402CB74DA7}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommandLineTools", "CommandLineTools", "{A8B4CE90-CD9B-4AFE-AE12-B53838BB02F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseConverter", "CommandLineTools\DatabaseConverter\DatabaseConverter.csproj", "{AED51515-37B5-4549-AB70-2A624083E86B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarcPack", "CommandLineTools\FarcPack\FarcPack.csproj", "{D27E2934-CDF4-4735-B92E-02705DCB1310}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TxpConverter", "CommandLineTools\TxpConverter\TxpConverter.csproj", "{EC3E5054-0044-43D6-8A3F-B1E33E7B2176}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,6 @@ Global
 		{9C7171CA-7379-458F-A9CA-293BBF2C74DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C7171CA-7379-458F-A9CA-293BBF2C74DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C7171CA-7379-458F-A9CA-293BBF2C74DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1959C854-977E-4A5B-A4D5-A4402CB74DA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1959C854-977E-4A5B-A4D5-A4402CB74DA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1959C854-977E-4A5B-A4D5-A4402CB74DA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1959C854-977E-4A5B-A4D5-A4402CB74DA7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AED51515-37B5-4549-AB70-2A624083E86B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AED51515-37B5-4549-AB70-2A624083E86B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AED51515-37B5-4549-AB70-2A624083E86B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -35,6 +31,10 @@ Global
 		{D27E2934-CDF4-4735-B92E-02705DCB1310}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D27E2934-CDF4-4735-B92E-02705DCB1310}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D27E2934-CDF4-4735-B92E-02705DCB1310}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC3E5054-0044-43D6-8A3F-B1E33E7B2176}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC3E5054-0044-43D6-8A3F-B1E33E7B2176}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC3E5054-0044-43D6-8A3F-B1E33E7B2176}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC3E5054-0044-43D6-8A3F-B1E33E7B2176}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,6 +42,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AED51515-37B5-4549-AB70-2A624083E86B} = {A8B4CE90-CD9B-4AFE-AE12-B53838BB02F7}
 		{D27E2934-CDF4-4735-B92E-02705DCB1310} = {A8B4CE90-CD9B-4AFE-AE12-B53838BB02F7}
+		{EC3E5054-0044-43D6-8A3F-B1E33E7B2176} = {A8B4CE90-CD9B-4AFE-AE12-B53838BB02F7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AB11611B-9F72-4107-B41B-476540FE1329}

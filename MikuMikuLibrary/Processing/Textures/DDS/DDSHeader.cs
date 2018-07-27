@@ -32,7 +32,7 @@ namespace MikuMikuLibrary.Processing.Textures.DDS
 
         public DDSHeaderCaps Caps { get; set; }
 
-        public int Caps2 { get; set; }
+        public DDSHeaderCaps2 Caps2 { get; set; }
 
         public int Caps3 { get; set; }
 
@@ -105,7 +105,7 @@ namespace MikuMikuLibrary.Processing.Textures.DDS
 
             PixelFormat.Read( reader );
             Caps = ( DDSHeaderCaps )reader.ReadInt32();
-            Caps2 = reader.ReadInt32();
+            Caps2 = ( DDSHeaderCaps2 )reader.ReadInt32();
             Caps3 = reader.ReadInt32();
             Caps4 = reader.ReadInt32();
             Reserved2 = reader.ReadInt32();
@@ -129,7 +129,7 @@ namespace MikuMikuLibrary.Processing.Textures.DDS
 
             PixelFormat.Write( writer );
             writer.Write( ( int )Caps );
-            writer.Write( Caps2 );
+            writer.Write( ( int )Caps2 );
             writer.Write( Caps3 );
             writer.Write( Caps4 );
             writer.Write( Reserved2 );

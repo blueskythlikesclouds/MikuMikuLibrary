@@ -11,26 +11,23 @@ namespace MikuMikuLibrary.Processing.Textures
         {
             var ddsHeader = new DDSHeader( source );
 
+            int depth = 1;
+            if ( ddsHeader.Flags.HasFlag( DDSHeaderFlags.Depth ) )
+                depth = ddsHeader.Depth;
+
             int mipMapCount = 1;
-            if ( ddsHeader.Flags.HasFlag( DDSHeaderFlags.MipMapCount ) &&
-                 ddsHeader.Caps.HasFlag( DDSHeaderCaps.MipMap ) )
-            {
+            if ( ddsHeader.Flags.HasFlag( DDSHeaderFlags.MipMapCount ) )
                 mipMapCount = ddsHeader.MipMapCount;
-            }
 
             var format = GetTextureFormat( ddsHeader.PixelFormat );
 
-            var texture = new Texture();
-            for ( int i = 0; i < mipMapCount; i++ )
+            var texture = new Texture( ddsHeader.Width, ddsHeader.Height, format, depth, mipMapCount );
+            foreach ( var level in texture.EnumerateLevels() )
             {
-                var mipMap = new TextureMipMap();
-                mipMap.ID = i;
-                mipMap.Format = format;
-                mipMap.Width = ddsHeader.Width >> i;
-                mipMap.Height = ddsHeader.Height >> i;
-                mipMap.Data = new byte[ ddsHeader.PitchOrLinearSize >> i >> i ];
-                source.Read( mipMap.Data, 0, mipMap.Data.Length );
-                texture.MipMaps.Add( mipMap );
+                foreach ( var mipMap in level )
+                {
+                    source.Read( mipMap.Data, 0, mipMap.Data.Length );
+                }
             }
 
             return texture;

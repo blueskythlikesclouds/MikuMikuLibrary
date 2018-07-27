@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle( "MikuMikuLibraryTest" )]
+[assembly: AssemblyTitle( "TxpConverter" )]
 [assembly: AssemblyDescription( "" )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
-[assembly: AssemblyProduct( "MikuMikuLibraryTest" )]
+[assembly: AssemblyProduct( "TxpConverter" )]
 [assembly: AssemblyCopyright( "Copyright ©  2018" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible( false )]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid( "1959c854-977e-4a5b-a4d5-a4402cb74da7" )]
+[assembly: Guid( "ec3e5054-0044-43d6-8a3f-b1e33e7b2176" )]
 
 // Version information for an assembly consists of the following four values:
 //
