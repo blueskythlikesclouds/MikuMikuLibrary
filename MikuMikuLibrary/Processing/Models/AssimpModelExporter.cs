@@ -297,12 +297,14 @@ namespace MikuMikuLibrary.Processing.Models
             aiMaterial.Name = material.Name;
 
             var diffuse = ConvertTextureSlotFromTextureID( material.Diffuse.TextureID, Ai.TextureType.Diffuse, textures );
+            var ambient = ConvertTextureSlotFromTextureID( material.Ambient.TextureID, Ai.TextureType.Ambient, textures );
             var normal = ConvertTextureSlotFromTextureID( material.Normal.TextureID, Ai.TextureType.Normals, textures );
             var specular = ConvertTextureSlotFromTextureID( material.Specular.TextureID, Ai.TextureType.Specular, textures );
             var reflection = ConvertTextureSlotFromTextureID( material.Reflection.TextureID, Ai.TextureType.Reflection, textures );
             var specularPower = ConvertTextureSlotFromTextureID( material.SpecularPower.TextureID, Ai.TextureType.Shininess, textures );
 
             aiMaterial.AddMaterialTexture( ref diffuse );
+            aiMaterial.AddMaterialTexture( ref ambient );
             aiMaterial.AddMaterialTexture( ref normal );
             aiMaterial.AddMaterialTexture( ref specular );
             aiMaterial.AddMaterialTexture( ref reflection );

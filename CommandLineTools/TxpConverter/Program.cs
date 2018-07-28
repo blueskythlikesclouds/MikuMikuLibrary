@@ -1,7 +1,9 @@
 ﻿using MikuMikuLibrary.Processing.Textures;
+using MikuMikuLibrary.Processing.Textures.DDS;
 using MikuMikuLibrary.Textures;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 
 namespace TxpConverter
@@ -38,16 +40,36 @@ namespace TxpConverter
 
                 var textureSet = new TextureSet();
                 var textures = new SortedList<int, Texture>();
-                foreach ( var textureFileName in Directory.EnumerateFiles( sourceFileName, "*.dds" ) )
+                foreach ( var textureFileName in Directory.EnumerateFiles( sourceFileName ) )
                 {
-                    var cleanFileName = Path.GetFileNameWithoutExtension( textureFileName );
-                    if ( int.TryParse( cleanFileName, out int index ) )
+                    if ( textureFileName.EndsWith( ".dds", StringComparison.OrdinalIgnoreCase ) ||
+                        textureFileName.EndsWith( ".png", StringComparison.OrdinalIgnoreCase ) )
                     {
-                        textures.Add( index, TextureEncoder.Encode( textureFileName ) );
-                    }
+                        var cleanFileName = Path.GetFileNameWithoutExtension( textureFileName );
+                        if ( int.TryParse( cleanFileName, out int index ) )
+                        {
+                            Texture texture;
 
-                    else
-                        Console.WriteLine( "WARNING: Skipped '{0}' because it didn't match the expected name format", Path.GetFileName( textureFileName ) );
+                            if ( textureFileName.EndsWith( ".png", StringComparison.OrdinalIgnoreCase ) )
+                            {
+                                var bitmap = new Bitmap( textureFileName );
+                                var format = TextureFormat.RGB;
+
+                                if ( DDSCodec.HasTransparency( bitmap ) )
+                                    format = TextureFormat.RGBA;
+
+                                texture = TextureEncoder.Encode( new Bitmap( textureFileName ), format, false );
+                            }
+
+                            else
+                                texture = TextureEncoder.Encode( textureFileName );
+
+                            textures.Add( index, texture );
+                        }
+
+                        else
+                            Console.WriteLine( "WARNING: Skipped '{0}' because it didn't match the expected name format", Path.GetFileName( textureFileName ) );
+                    }
                 }
 
                 textureSet.Textures.Capacity = textures.Count;
@@ -67,8 +89,12 @@ namespace TxpConverter
                 Directory.CreateDirectory( destinationFileName );
                 for ( int i = 0; i < textureSet.Textures.Count; i++ )
                 {
-                    string outputFileName = Path.Combine( destinationFileName, $"{i}.dds" );
-                    TextureDecoder.DecodeToDDS( textureSet.Textures[ i ], outputFileName );
+                    var texture = textureSet.Textures[ i ];
+                    if ( TextureFormatUtilities.IsCompressed( texture.Format ) )
+                        TextureDecoder.DecodeToDDS( texture, Path.Combine( destinationFileName, $"{i}.dds" ) );
+
+                    else
+                        TextureDecoder.DecodeToPNG( texture, Path.Combine( destinationFileName, $"{i}.png" ) );
                 }
 
                 textureSet.Dispose();

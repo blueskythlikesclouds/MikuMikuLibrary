@@ -64,12 +64,24 @@ namespace MikuMikuLibrary.Processing.Models
                     {
                         if ( material.Diffuse.TextureID == texture.ID )
                             material.Diffuse.TextureID = textureEntry.ID;
+
+                        if ( material.Ambient.TextureID == texture.ID )
+                            material.Ambient.TextureID = textureEntry.ID;
+
                         if ( material.Normal.TextureID == texture.ID )
                             material.Normal.TextureID = textureEntry.ID;
+
                         if ( material.Specular.TextureID == texture.ID )
                             material.Specular.TextureID = textureEntry.ID;
+
+                        if ( material.ToonCurve.TextureID == texture.ID )
+                            material.ToonCurve.TextureID = textureEntry.ID;
+
                         if ( material.Reflection.TextureID == texture.ID )
                             material.Reflection.TextureID = textureEntry.ID;
+
+                        if ( material.SpecularPower.TextureID == texture.ID )
+                            material.SpecularPower.TextureID = textureEntry.ID;
                     }
                 }
 
@@ -78,7 +90,7 @@ namespace MikuMikuLibrary.Processing.Models
             }
         }
 
-        private static Texture ConvertTextureFromDDS( string fileName, TextureSet textureSet )
+        private static Texture ConvertTexture( string fileName, TextureSet textureSet )
         {
             fileName = Path.ChangeExtension( fileName, "dds" );
 
@@ -117,25 +129,25 @@ namespace MikuMikuLibrary.Processing.Models
             foreach ( var textureSlot in aiMaterial.GetAllMaterialTextures() )
             {
                 if ( textureSlot.TextureType == Ai.TextureType.Diffuse && diffuse == null )
-                    diffuse = ConvertTextureFromDDS( textureSlot.FilePath, textureSet );
+                    diffuse = ConvertTexture( textureSlot.FilePath, textureSet );
 
                 else if ( textureSlot.TextureType == Ai.TextureType.Ambient && ambient == null )
-                    ambient = ConvertTextureFromDDS( textureSlot.FilePath, textureSet );
+                    ambient = ConvertTexture( textureSlot.FilePath, textureSet );
 
                 else if ( textureSlot.TextureType == Ai.TextureType.Normals && normal == null )
-                    normal = ConvertTextureFromDDS( textureSlot.FilePath, textureSet );
+                    normal = ConvertTexture( textureSlot.FilePath, textureSet );
 
                 else if ( textureSlot.TextureType == Ai.TextureType.Specular && specular == null )
-                    specular = ConvertTextureFromDDS( textureSlot.FilePath, textureSet );
+                    specular = ConvertTexture( textureSlot.FilePath, textureSet );
 
                 else if ( textureSlot.TextureType == Ai.TextureType.Opacity && toonCurve == null )
-                    toonCurve = ConvertTextureFromDDS( textureSlot.FilePath, textureSet );
+                    toonCurve = ConvertTexture( textureSlot.FilePath, textureSet );
 
                 else if ( textureSlot.TextureType == Ai.TextureType.Reflection && reflection == null )
-                    reflection = ConvertTextureFromDDS( textureSlot.FilePath, textureSet );
+                    reflection = ConvertTexture( textureSlot.FilePath, textureSet );
 
                 else if ( textureSlot.TextureType == Ai.TextureType.Shininess && specularPower == null )
-                    specularPower = ConvertTextureFromDDS( textureSlot.FilePath, textureSet );
+                    specularPower = ConvertTexture( textureSlot.FilePath, textureSet );
             }
 
             var preset = tagList.GetValue( "PRST", 0, "PHONGF" );

@@ -2,6 +2,9 @@
 using MikuMikuLibrary.Textures;
 using System;
 using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace MikuMikuLibrary.Processing.Textures
 {
@@ -19,7 +22,7 @@ namespace MikuMikuLibrary.Processing.Textures
             if ( ddsHeader.Flags.HasFlag( DDSHeaderFlags.MipMapCount ) )
                 mipMapCount = ddsHeader.MipMapCount;
 
-            var format = GetTextureFormat( ddsHeader.PixelFormat );
+            var format = TextureUtilities.GetTextureFormat( ddsHeader.PixelFormat );
 
             var texture = new Texture( ddsHeader.Width, ddsHeader.Height, format, depth, mipMapCount );
             foreach ( var level in texture.EnumerateLevels() )
@@ -33,39 +36,104 @@ namespace MikuMikuLibrary.Processing.Textures
             return texture;
         }
 
-        public static Texture Encode( string sourceFileName )
+        public static Texture Encode( Bitmap bitmap, TextureFormat format, bool generateMipMaps )
         {
-            using ( var source = File.OpenRead( sourceFileName ) )
-                return Encode( source );
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+
+            if ( TextureFormatUtilities.IsCompressed( format ) )
+            {
+                width = NextPowerOfTwo( bitmap.Width );
+                height = NextPowerOfTwo( bitmap.Height );
+            }
+
+            Texture texture;
+
+            if ( generateMipMaps && TextureFormatUtilities.IsCompressed( format ) )
+                texture = new Texture( width, height, format, 1, ( int )Math.Log( Math.Max( width, height ), 2 ) + 1 );
+
+            else
+                texture = new Texture( width, height, format );
+
+            for ( int i = 0; i < texture.MipMapCount; i++ )
+                Encode( texture[ i ], bitmap );
+
+            return texture;
+
+            int NextPowerOfTwo( int value )
+            {
+                value--;
+                value |= value >> 1;
+                value |= value >> 2;
+                value |= value >> 4;
+                value |= value >> 8;
+                value |= value >> 16;
+                value++;
+
+                return value;
+            }
         }
 
-        private static TextureFormat GetTextureFormat( DDSPixelFormat pixelFormat )
+        private unsafe static void Encode( SubTexture subTexture, Bitmap bitmap )
         {
-            switch ( pixelFormat.FourCC )
+            bool ownsBitmap = false;
+
+            if ( subTexture.Width != bitmap.Width || subTexture.Height != bitmap.Height )
             {
-                case DDSPixelFormatFourCC.R8G8B8:
-                    return TextureFormat.RGB;
+                ownsBitmap = true;
+                bitmap = new Bitmap( bitmap, subTexture.Width, subTexture.Height );
+            }
 
-                case DDSPixelFormatFourCC.A8R8G8B8:
-                    return TextureFormat.RGBA;
+            var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );
 
-                case DDSPixelFormatFourCC.DXT1:
-                    return TextureFormat.DXT1;
+            if ( subTexture.Format == TextureFormat.RGB )
+            {
+                var bitmapData = bitmap.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb );
+                Marshal.Copy( bitmapData.Scan0, subTexture.Data, 0, subTexture.Data.Length );
+                bitmap.UnlockBits( bitmapData );
+            }
+            else if ( subTexture.Format == TextureFormat.RGBA )
+            {
+                var bitmapData = bitmap.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
 
-                case DDSPixelFormatFourCC.DXT3:
-                    return TextureFormat.DXT3;
+                fixed ( byte* ptr = subTexture.Data )
+                    Int32RGBAToByte( ( int* )bitmapData.Scan0, ptr, subTexture.Data.Length );
 
-                case DDSPixelFormatFourCC.DXT5:
-                    return TextureFormat.DXT5;
+                bitmap.UnlockBits( bitmapData );
+            }
+            else
+            {
+                var compressedPixels = DDSCodec.CompressPixelData( bitmap, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
+                Array.Copy( compressedPixels, subTexture.Data, subTexture.Data.Length );
+            }
 
-                case DDSPixelFormatFourCC.ATI1:
-                    return TextureFormat.ATI1;
+            if ( ownsBitmap )
+                bitmap.Dispose();
+        }
 
-                case DDSPixelFormatFourCC.ATI2N_3Dc:
-                    return TextureFormat.ATI2;
+        public static Texture Encode( string sourceFileName )
+        {
+            if ( sourceFileName.EndsWith( ".dds", StringComparison.OrdinalIgnoreCase ) )
+            {
+                using ( var source = File.OpenRead( sourceFileName ) )
+                    return Encode( source );
+            }
 
-                default:
-                    throw new ArgumentException( nameof( pixelFormat ) );
+            using ( var bitmap = new Bitmap( sourceFileName ) )
+                return Encode( bitmap, DDSCodec.HasTransparency( bitmap ) ? TextureFormat.DXT5 : TextureFormat.DXT1, true );
+        }
+
+        private unsafe static void Int32RGBAToByte( int *source, byte *destination, int length )
+        {
+            byte* end = destination + length;
+
+            while ( destination < end )
+            {
+                var color = Color.FromArgb( *source++ );
+                *destination++ = color.R;
+                *destination++ = color.G;
+                *destination++ = color.B;
+                *destination++ = color.A;
             }
         }
     }

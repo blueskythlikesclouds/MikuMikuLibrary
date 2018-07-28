@@ -51,16 +51,19 @@ namespace MikuMikuLibrary.Processing.Textures
             else if ( subTexture.Format == TextureFormat.RGBA )
             {
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
-                Marshal.Copy( subTexture.Data, 0, bitmapData.Scan0, subTexture.Data.Length );
+
+                fixed ( byte* ptr = subTexture.Data )
+                    ByteRGBAToInt32( ptr, ( int* )bitmapData.Scan0, subTexture.Data.Length );
+
                 bitmap.UnlockBits( bitmapData );
             }
             else if ( texture.IsYCbCr )
             {
                 var lumBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture[ 0 ].Data, texture[ 0 ].Width, texture[ 0 ].Height, GetDDSPixelFormat( texture.Format ) );
+                    texture[ 0 ].Data, texture[ 0 ].Width, texture[ 0 ].Height, TextureUtilities.GetDDSPixelFormat( texture.Format ) );
 
                 var cbrBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture[ 1 ].Data, texture[ 1 ].Width, texture[ 1 ].Height, GetDDSPixelFormat( texture.Format ) );
+                    texture[ 1 ].Data, texture[ 1 ].Width, texture[ 1 ].Height, TextureUtilities.GetDDSPixelFormat( texture.Format ) );
 
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
                 fixed ( byte* lumPtr = lumBuffer )
@@ -77,7 +80,7 @@ namespace MikuMikuLibrary.Processing.Textures
 
             else
             {
-                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height, GetDDSPixelFormat( subTexture.Format ) );
+                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
                 Marshal.Copy( buffer, 0, bitmapData.Scan0, buffer.Length );
                 bitmap.UnlockBits( bitmapData );
@@ -94,7 +97,7 @@ namespace MikuMikuLibrary.Processing.Textures
 
         public static void DecodeToDDS( Texture texture, Stream destination )
         {
-            var ddsHeader = new DDSHeader( texture.Width, texture.Height, GetDDSPixelFormat( texture.Format ) );
+            var ddsHeader = new DDSHeader( texture.Width, texture.Height, TextureUtilities.GetDDSPixelFormat( texture.Format ) );
 
             if ( texture.UsesDepth )
             {
@@ -131,33 +134,17 @@ namespace MikuMikuLibrary.Processing.Textures
                 DecodeToDDS( texture, destination );
         }
 
-        private static DDSPixelFormatFourCC GetDDSPixelFormat( TextureFormat textureFormat )
+        private unsafe static void ByteRGBAToInt32( byte* source, int* destination, int length )
         {
-            switch ( textureFormat )
+            byte* end = source + length;
+            while ( source < end )
             {
-                case TextureFormat.RGB:
-                    return DDSPixelFormatFourCC.R8G8B8;
+                byte red = *source++;
+                byte green = *source++;
+                byte blue = *source++;
+                byte alpha = *source++;
 
-                case TextureFormat.RGBA:
-                    return DDSPixelFormatFourCC.A8R8G8B8;
-
-                case TextureFormat.DXT1:
-                    return DDSPixelFormatFourCC.DXT1;
-
-                case TextureFormat.DXT3:
-                    return DDSPixelFormatFourCC.DXT3;
-
-                case TextureFormat.DXT5:
-                    return DDSPixelFormatFourCC.DXT5;
-
-                case TextureFormat.ATI1:
-                    return DDSPixelFormatFourCC.ATI1;
-
-                case TextureFormat.ATI2:
-                    return DDSPixelFormatFourCC.ATI2N_3Dc;
-
-                default:
-                    throw new ArgumentException( nameof( textureFormat ) );
+                *destination++ = Color.FromArgb( alpha, red, green, blue ).ToArgb();
             }
         }
     }

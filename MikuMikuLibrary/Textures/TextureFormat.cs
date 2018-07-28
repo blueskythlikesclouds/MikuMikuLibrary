@@ -15,6 +15,25 @@ namespace MikuMikuLibrary.Textures
 
     public static class TextureFormatUtilities
     {
+        public static bool IsCompressed( TextureFormat format )
+        {
+            switch ( format )
+            {
+                case TextureFormat.RGB:
+                case TextureFormat.RGBA:
+                    return false;
+
+                case TextureFormat.DXT1:
+                case TextureFormat.DXT3:
+                case TextureFormat.DXT5:
+                case TextureFormat.ATI1:
+                case TextureFormat.ATI2:
+                    return true;
+            }
+
+            return false;
+        }
+
         public static int GetBlockSize( TextureFormat format )
         {
             switch ( format )
