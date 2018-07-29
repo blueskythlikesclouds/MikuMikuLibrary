@@ -40,13 +40,14 @@ namespace MikuMikuLibrary.Databases
         }
 
         public List<ObjectEntry> Objects { get; }
+        public int Unknown { get; set; }
 
         protected override void InternalRead( Stream source )
         {
             var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian );
 
             int objectCount = reader.ReadInt32();
-            int maxID = reader.ReadInt32();
+            Unknown = reader.ReadInt32();
             uint objectsOffset = reader.ReadUInt32();
             int meshCount = reader.ReadInt32();
             uint meshesOffset = reader.ReadUInt32();
@@ -97,8 +98,7 @@ namespace MikuMikuLibrary.Databases
             using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
             {
                 writer.Write( Objects.Count );
-                writer.Write( Objects.Max( x => x.ID ) );
-                writer.WriteNulls( 2 );
+                writer.Write( Unknown );
                 writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
                 writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
                 {
@@ -112,12 +112,14 @@ namespace MikuMikuLibrary.Databases
                         writer.AddStringToStringTable( objectEntry.ArchiveFileName );
                         writer.WriteNulls( 16 );
                     }
+                    writer.PopStringTable();
                 } );
                 writer.Write( Objects.Sum( x => x.Meshes.Count ) );
                 writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
                 {
                     foreach ( var objectEntry in Objects )
                     {
+                        writer.PushStringTableAligned( 4, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
                         foreach ( var meshEntry in objectEntry.Meshes )
                         {
                             writer.Write( meshEntry.ID );
@@ -125,6 +127,7 @@ namespace MikuMikuLibrary.Databases
                             writer.AddStringToStringTable( meshEntry.Name );
                         }
                     }
+                    writer.PopStringTablesReversed();
                 } );
                 writer.DoEnqueuedOffsetWrites();
                 writer.PopStringTablesReversed();

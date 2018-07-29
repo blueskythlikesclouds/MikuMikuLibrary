@@ -80,14 +80,17 @@ namespace MikuMikuLibrary.Sprites
                     foreach ( var sprite in Sprites )
                         sprite.WriteFirst( writer );
                 } );
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
                 writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
                 {
+                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
                     foreach ( var texture in TextureSet.Textures )
                         writer.AddStringToStringTable( texture.Name );
+
+                    writer.PopStringTablesReversed();
                 } );
                 writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
                 {
+                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
                     foreach ( var sprite in Sprites )
                         writer.AddStringToStringTable( sprite.Name );
                 } );
@@ -96,8 +99,7 @@ namespace MikuMikuLibrary.Sprites
                     foreach ( var sprite in Sprites )
                         sprite.WriteSecondary( writer );
                 } );
-                writer.DoEnqueuedOffsetWrites();
-                writer.PopStringTablesReversed();
+                writer.DoEnqueuedOffsetWritesReversed();
             }
         }
 

@@ -295,11 +295,11 @@ namespace MikuMikuLibrary.Archives.Farc
                 {
                     writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
                     writer.EnqueueOffsetWriteAligned( 16, 0x78, AlignmentKind.Left, () => entry.Stream.CopyTo( destination ) );
-                    writer.Write( 0 );
+                    writer.Write( ( uint )entry.Stream.Length );
                 }
 
                 long headerEnd = destination.Position;
-                writer.WriteAtOffsetThenSeekBack( writer.PeekOffset(), () => writer.Write( ( uint )( headerEnd - writer.PopOffset() - 4 ) ) );
+                writer.WriteAtOffsetAndSeekBack( writer.PeekOffset(), () => writer.Write( ( uint )( headerEnd - writer.PopOffset() - 4 ) ) );
                 writer.DoEnqueuedOffsetWrites();
             }
         }

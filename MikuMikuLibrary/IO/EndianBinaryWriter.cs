@@ -188,7 +188,7 @@ namespace MikuMikuLibrary.IO
             body.Invoke();
         }
 
-        public void WriteAtOffsetThenSeekBack( long offset, Action body )
+        public void WriteAtOffsetAndSeekBack( long offset, Action body )
         {
             long previousOffset = Position;
 
@@ -307,6 +307,12 @@ namespace MikuMikuLibrary.IO
                 DoOffsetWrite( offsetWriteQueue.Dequeue(), 0 );
 
             this.offsetWriteQueue.Clear();
+        }
+
+        public void DoEnqueuedOffsetWritesReversed()
+        {
+            offsetWriteQueue = new Queue<OffsetWrite>( offsetWriteQueue.Reverse() );
+            DoEnqueuedOffsetWrites();
         }
 
         public void PushStringTable( StringBinaryFormat format, int fixedLength = -1 )
