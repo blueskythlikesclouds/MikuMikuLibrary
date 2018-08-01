@@ -250,7 +250,7 @@ namespace MikuMikuLibrary.Archives.Farc
                         if ( entryOffset + entrySize > reader.BaseStreamLength )
                             entrySize = reader.BaseStreamLength - entryOffset;
 
-                        Stream entryStream = source.CreateSubView( entryOffset, entryCompressedSize );
+                        Stream entryStream = source.CreateSubView( entryOffset, entrySize );
                         if ( entryUncompressedSize != entryCompressedSize )
                             entryStream = new GZipStream( entryStream, CompressionMode.Decompress );
 
