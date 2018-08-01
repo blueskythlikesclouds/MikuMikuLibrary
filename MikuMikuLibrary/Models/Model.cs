@@ -26,14 +26,7 @@ namespace MikuMikuLibrary.Models
 
         public int BoneCount
         {
-            get
-            {
-                var ids = new List<int>();
-                foreach ( var mesh in Meshes )
-                    ids.AddRange( mesh.Bones.Select( x => x.ID ) );
-
-                return ids.Distinct().Count();
-            }
+            get { return Meshes.SelectMany( x => x.Bones.Select( y => y.ID ) ).Distinct().Count(); }
         }
 
         protected override void InternalRead( Stream source )
@@ -41,6 +34,9 @@ namespace MikuMikuLibrary.Models
             using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
             {
                 uint signature = reader.ReadUInt32();
+                if ( signature != 0x5062500 )
+                    throw new InvalidDataException( "Invalid signature (expected 0x5062500)" );
+
                 int meshCount = reader.ReadInt32();
                 int globalBoneCount = reader.ReadInt32();
                 uint meshesOffset = reader.ReadUInt32();
