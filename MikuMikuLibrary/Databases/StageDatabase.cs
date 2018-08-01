@@ -5,13 +5,51 @@ using System.Text;
 
 namespace MikuMikuLibrary.Databases
 {
+    // Most of the fields were tested & documented by Stewie1.0
     public class StageEntry
     {
+        public enum StageEffect
+        {
+            Empty = -1,
+            None = 0,
+            // Brighter Stage?
+            BrighterStage = 2,
+            Snow = 4,
+            WaterSplash = 6,
+            Rain = 7,
+            WaterSplashOnFeet = 12,
+            Fog = 16,
+            // Reflection on Character(?) (Have to test it in FT)
+            ReflectionOnCharacter = 19,
+            // This one only works in FT. It crashes in F
+            Reflection = 20,
+        }
+
         // Section 1
         public string Name { get; set; }
         public string Auth3DName { get; set; }
-        public int ObjectID { get; set; }
+        public short ObjectID1 { get; set; }
+        public short ObjectIDFlag1 { get; set; }
+        public short ObjectID2 { get; set; }
+        public short ObjectIDFlag2 { get; set; }
+        public short ObjectID3 { get; set; }
+        public short ObjectIDFlag3 { get; set; }
+        public short ObjectID4 { get; set; }
+        public short ObjectIDFlag4 { get; set; }
+        public short ObjectID5 { get; set; }
+        public short ObjectIDFlag5 { get; set; }
+        public short ObjectID6 { get; set; }
+        public short ObjectIDFlag6 { get; set; }
+        public short ObjectID7 { get; set; }
+        public short ObjectIDFlag7 { get; set; }
+        public int LensFlareScaleX { get; set; }
+        public int LensFlareScaleY { get; set; }
+        public int LensFlareScaleZ { get; set; }
+        public float Field00 { get; set; }
+        public int Field01 { get; set; } // It's always set to 0
+        public int Field02 { get; set; }
         public int Field03 { get; set; }
+        public string CollisionFilePath { get; set; } // Unused
         public int Field04 { get; set; }
         public int Field05 { get; set; }
         public int Field06 { get; set; }
@@ -19,104 +57,128 @@ namespace MikuMikuLibrary.Databases
         public int Field08 { get; set; }
         public int Field09 { get; set; }
         public int Field10 { get; set; }
-        public int Field11 { get; set; }
-        public int Field12 { get; set; }
-        public int Field13 { get; set; }
-        public int Field14 { get; set; }
-        public int Field15 { get; set; }
-        public string Field16 { get; set; }
-        public int Field17 { get; set; }
+        public float Field11 { get; set; }
+        public float Field12 { get; set; }
+        public float Field13 { get; set; }
+        public float Field14 { get; set; }
+        public float Field15 { get; set; }
+        // Future Tone Exclusive
+        public float Field16 { get; set; }
+
+        // Section 2
         public int Field18 { get; set; }
         public int Field19 { get; set; }
         public int Field20 { get; set; }
-        public float Field21 { get; set; }
-        public float Field22 { get; set; }
-        public float Field23 { get; set; }
-        public float Field24 { get; set; }
-        public float Field25 { get; set; }
-        public float Field26 { get; set; }
-        // Future Tone Exclusive
-        public float Field27 { get; set; }
-
-        // Section 2
-        public int Field28 { get; set; }
+        public int Field21 { get; set; }
+        public int Field22 { get; set; }
+        public int Field23 { get; set; }
+        public int Field24 { get; set; }
+        public int Field25 { get; set; }
+        public StageEffect StageEffect1 { get; set; }
+        public StageEffect StageEffect2 { get; set; }
+        public StageEffect StageEffect3 { get; set; }
+        public StageEffect StageEffect4 { get; set; }
+        public StageEffect StageEffect5 { get; set; }
+        public StageEffect StageEffect6 { get; set; }
+        public StageEffect StageEffect7 { get; set; }
+        public StageEffect StageEffect8 { get; set; }
+        public StageEffect StageEffect9 { get; set; }
+        public StageEffect StageEffect10 { get; set; }
+        public StageEffect StageEffect11 { get; set; }
+        public StageEffect StageEffect12 { get; set; }
+        public StageEffect StageEffect13 { get; set; }
+        public StageEffect StageEffect14 { get; set; }
+        public StageEffect StageEffect15 { get; set; }
+        public StageEffect StageEffect16 { get; set; }
 
         // Section 3
-        public int Field29 { get; set; }
-        public int Field30 { get; set; }
-        public int Field31 { get; set; }
-        public int Field32 { get; set; }
-        public int Field33 { get; set; }
-        public int Field34 { get; set; }
-        public int Field35 { get; set; }
-        public int Field36 { get; set; }
-        public int Field37 { get; set; }
-        public int Field38 { get; set; }
-        public int Field39 { get; set; }
-        public int Field40 { get; set; }
-        public int Field41 { get; set; }
-        public int Field42 { get; set; }
-        public int Field43 { get; set; }
-        public int Field44 { get; set; }
-        public int Field45 { get; set; }
-        public int Field46 { get; set; }
-        public int Field47 { get; set; }
-        public int Field48 { get; set; }
-        public int Field49 { get; set; }
-        public int Field50 { get; set; }
-        public int Field51 { get; set; }
-        public int Field52 { get; set; }
+        public int Field17 { get; set; }
 
         // Section 4
         public int Index { get; set; }
-        public int Field54 { get; set; }
-        public int Field55 { get; set; }
+        public int Field26 { get; set; }
+        public int Field27 { get; set; }
 
         internal void ReadFirst( EndianBinaryReader reader, bool isFutureTone )
         {
             Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
             Auth3DName = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-            ObjectID = reader.ReadInt32();
+            ObjectID1 = reader.ReadInt16();
+            ObjectIDFlag1 = reader.ReadInt16();
+            ObjectID2 = reader.ReadInt16();
+            ObjectIDFlag2 = reader.ReadInt16();
+            ObjectID3 = reader.ReadInt16();
+            ObjectIDFlag3 = reader.ReadInt16();
+            ObjectID4 = reader.ReadInt16();
+            ObjectIDFlag4 = reader.ReadInt16();
+            ObjectID5 = reader.ReadInt16();
+            ObjectIDFlag5 = reader.ReadInt16();
+            ObjectID6 = reader.ReadInt16();
+            ObjectIDFlag6 = reader.ReadInt16();
+            ObjectID7 = reader.ReadInt16();
+            ObjectIDFlag7 = reader.ReadInt16();
+            LensFlareScaleX = reader.ReadInt32();
+            LensFlareScaleY = reader.ReadInt32();
+            LensFlareScaleZ = reader.ReadInt32();
+            Field00 = reader.ReadSingle();
+            Field01 = reader.ReadInt32();
+            Field02 = reader.ReadInt32();
             Field03 = reader.ReadInt32();
+            CollisionFilePath = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
             Field04 = reader.ReadInt32();
             Field05 = reader.ReadInt32();
-            Field06 = reader.ReadInt32();
-            Field07 = reader.ReadInt32();
-            Field08 = reader.ReadInt32();
+            reader.ReadAtOffsetAndSeekBackIfNotZero( reader.ReadUInt32(), () =>
+            {
+                Field06 = reader.ReadInt32();
+                Field07 = reader.ReadInt32();
+                Field08 = reader.ReadInt32();
+            } );
             Field09 = reader.ReadInt32();
             Field10 = reader.ReadInt32();
-            Field11 = reader.ReadInt32();
-            Field12 = reader.ReadInt32();
-            Field13 = reader.ReadInt32();
-            Field14 = reader.ReadInt32();
-            Field15 = reader.ReadInt32();
-            Field16 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-            Field17 = reader.ReadInt32();
-            Field18 = reader.ReadInt32();
-            Field19 = reader.ReadInt32();
-            Field20 = reader.ReadInt32();
-            Field21 = reader.ReadSingle();
-            Field22 = reader.ReadSingle();
-            Field23 = reader.ReadSingle();
-            Field24 = reader.ReadSingle();
-            Field25 = reader.ReadSingle();
-            Field26 = reader.ReadSingle();
+            Field11 = reader.ReadSingle();
+            Field12 = reader.ReadSingle();
+            Field13 = reader.ReadSingle();
+            Field14 = reader.ReadSingle();
+            Field15 = reader.ReadSingle();
 
             if ( isFutureTone )
-                Field27 = reader.ReadSingle();
+                Field16 = reader.ReadSingle();
         }
 
         internal void WriteFirst( EndianBinaryWriter writer, bool isFutureTone )
         {
             writer.AddStringToStringTable( Name );
             writer.AddStringToStringTable( Auth3DName );
-            writer.Write( ObjectID );
+            writer.Write( ObjectID1 );
+            writer.Write( ObjectIDFlag1 );
+            writer.Write( ObjectID2 );
+            writer.Write( ObjectIDFlag2 );
+            writer.Write( ObjectID3 );
+            writer.Write( ObjectIDFlag3 );
+            writer.Write( ObjectID4 );
+            writer.Write( ObjectIDFlag4 );
+            writer.Write( ObjectID5 );
+            writer.Write( ObjectIDFlag5 );
+            writer.Write( ObjectID6 );
+            writer.Write( ObjectIDFlag6 );
+            writer.Write( ObjectID7 );
+            writer.Write( ObjectIDFlag7 );
+            writer.Write( LensFlareScaleX );
+            writer.Write( LensFlareScaleY );
+            writer.Write( LensFlareScaleZ );
+            writer.Write( Field00 );
+            writer.Write( Field01 );
+            writer.Write( Field02 );
             writer.Write( Field03 );
+            writer.AddStringToStringTable( CollisionFilePath );
             writer.Write( Field04 );
             writer.Write( Field05 );
-            writer.Write( Field06 );
-            writer.Write( Field07 );
-            writer.Write( Field08 );
+            writer.EnqueueOffsetWriteAlignedIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentKind.Left, () =>
+            {
+                writer.Write( Field06 );
+                writer.Write( Field07 );
+                writer.Write( Field08 );
+            } );
             writer.Write( Field09 );
             writer.Write( Field10 );
             writer.Write( Field11 );
@@ -124,8 +186,41 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Field13 );
             writer.Write( Field14 );
             writer.Write( Field15 );
-            writer.AddStringToStringTable( Field16 );
-            writer.Write( Field17 );
+
+            if ( isFutureTone )
+                writer.Write( Field16 );
+        }
+
+        internal void ReadSecond( EndianBinaryReader reader )
+        {
+            Field18 = reader.ReadInt32();
+            Field19 = reader.ReadInt32();
+            Field20 = reader.ReadInt32();
+            Field21 = reader.ReadInt32();
+            Field22 = reader.ReadInt32();
+            Field23 = reader.ReadInt32();
+            Field24 = reader.ReadInt32();
+            Field25 = reader.ReadInt32();
+            StageEffect1 = ( StageEffect )reader.ReadInt32();
+            StageEffect2 = ( StageEffect )reader.ReadInt32();
+            StageEffect3 = ( StageEffect )reader.ReadInt32();
+            StageEffect4 = ( StageEffect )reader.ReadInt32();
+            StageEffect5 = ( StageEffect )reader.ReadInt32();
+            StageEffect6 = ( StageEffect )reader.ReadInt32();
+            StageEffect7 = ( StageEffect )reader.ReadInt32();
+            StageEffect8 = ( StageEffect )reader.ReadInt32();
+            StageEffect9 = ( StageEffect )reader.ReadInt32();
+            StageEffect10 = ( StageEffect )reader.ReadInt32();
+            StageEffect11 = ( StageEffect )reader.ReadInt32();
+            StageEffect12 = ( StageEffect )reader.ReadInt32();
+            StageEffect13 = ( StageEffect )reader.ReadInt32();
+            StageEffect14 = ( StageEffect )reader.ReadInt32();
+            StageEffect15 = ( StageEffect )reader.ReadInt32();
+            StageEffect16 = ( StageEffect )reader.ReadInt32();
+        }
+
+        internal void WriteSecond( EndianBinaryWriter writer )
+        {
             writer.Write( Field18 );
             writer.Write( Field19 );
             writer.Write( Field20 );
@@ -134,76 +229,32 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Field23 );
             writer.Write( Field24 );
             writer.Write( Field25 );
-            writer.Write( Field26 );
-
-            if ( isFutureTone )
-                writer.Write( Field27 );
-        }
-
-        internal void ReadSecond( EndianBinaryReader reader )
-        {
-            Field29 = reader.ReadInt32();
-            Field30 = reader.ReadInt32();
-            Field31 = reader.ReadInt32();
-            Field32 = reader.ReadInt32();
-            Field33 = reader.ReadInt32();
-            Field34 = reader.ReadInt32();
-            Field35 = reader.ReadInt32();
-            Field36 = reader.ReadInt32();
-            Field37 = reader.ReadInt32();
-            Field38 = reader.ReadInt32();
-            Field39 = reader.ReadInt32();
-            Field40 = reader.ReadInt32();
-            Field41 = reader.ReadInt32();
-            Field42 = reader.ReadInt32();
-            Field43 = reader.ReadInt32();
-            Field44 = reader.ReadInt32();
-            Field45 = reader.ReadInt32();
-            Field46 = reader.ReadInt32();
-            Field47 = reader.ReadInt32();
-            Field48 = reader.ReadInt32();
-            Field49 = reader.ReadInt32();
-            Field50 = reader.ReadInt32();
-            Field51 = reader.ReadInt32();
-            Field52 = reader.ReadInt32();
-        }
-
-        internal void WriteSecond( EndianBinaryWriter writer )
-        {
-            writer.Write( Field29 );
-            writer.Write( Field30 );
-            writer.Write( Field31 );
-            writer.Write( Field32 );
-            writer.Write( Field33 );
-            writer.Write( Field34 );
-            writer.Write( Field35 );
-            writer.Write( Field36 );
-            writer.Write( Field37 );
-            writer.Write( Field38 );
-            writer.Write( Field39 );
-            writer.Write( Field40 );
-            writer.Write( Field41 );
-            writer.Write( Field42 );
-            writer.Write( Field43 );
-            writer.Write( Field44 );
-            writer.Write( Field45 );
-            writer.Write( Field46 );
-            writer.Write( Field47 );
-            writer.Write( Field48 );
-            writer.Write( Field49 );
-            writer.Write( Field50 );
-            writer.Write( Field51 );
-            writer.Write( Field52 );
+            writer.Write( ( int )StageEffect1 );
+            writer.Write( ( int )StageEffect2 );
+            writer.Write( ( int )StageEffect3 );
+            writer.Write( ( int )StageEffect4 );
+            writer.Write( ( int )StageEffect5 );
+            writer.Write( ( int )StageEffect6 );
+            writer.Write( ( int )StageEffect7 );
+            writer.Write( ( int )StageEffect8 );
+            writer.Write( ( int )StageEffect9 );
+            writer.Write( ( int )StageEffect10 );
+            writer.Write( ( int )StageEffect11 );
+            writer.Write( ( int )StageEffect12 );
+            writer.Write( ( int )StageEffect13 );
+            writer.Write( ( int )StageEffect14 );
+            writer.Write( ( int )StageEffect15 );
+            writer.Write( ( int )StageEffect16 );
         }
 
         internal void ReadThird( EndianBinaryReader reader )
         {
-            Field28 = reader.ReadInt32();
+            Field17 = reader.ReadInt32();
         }
 
         internal void WriteThird( EndianBinaryWriter writer )
         {
-            writer.Write( Field28 );
+            writer.Write( Field17 );
         }
 
         internal void ReadFourth( EndianBinaryReader reader )
@@ -211,8 +262,8 @@ namespace MikuMikuLibrary.Databases
             Index = reader.ReadInt32();
             reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
             {
-                Field54 = reader.ReadInt32();
-                Field55 = reader.ReadInt32();
+                Field26 = reader.ReadInt32();
+                Field27 = reader.ReadInt32();
             } );
         }
 
@@ -221,8 +272,8 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Index );
             writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
             {
-                writer.Write( Field54 );
-                writer.Write( Field55 );
+                writer.Write( Field26 );
+                writer.Write( Field27 );
             } );
         }
     }
@@ -252,7 +303,7 @@ namespace MikuMikuLibrary.Databases
                 uint section3Offset = reader.ReadUInt32();
                 uint section4Offset = reader.ReadUInt32();
 
-                IsFutureTone = ( ( float )( section2Offset - section1Offset ) / count ) == 112;
+                IsFutureTone = ( ( section2Offset - section1Offset ) / count ) != 108;
 
                 reader.ReadAtOffset( section1Offset, () =>
                 {
