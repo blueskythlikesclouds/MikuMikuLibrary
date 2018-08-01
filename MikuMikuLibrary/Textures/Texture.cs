@@ -1,4 +1,5 @@
 ﻿using MikuMikuLibrary.IO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -77,13 +78,9 @@ namespace MikuMikuLibrary.Textures
         {
             reader.PushBaseOffset();
 
-            var signature = reader.ReadString( StringBinaryFormat.FixedLength, 3 );
-            if ( signature != "TXP" )
-                throw new InvalidDataException( "Invalid signature (expected TXP)" );
-
-            byte typeNum = reader.ReadByte();
-            if ( typeNum != 4 && typeNum != 5 )
-                throw new InvalidDataException( "Invalid type number (expected 4 or 5)" );
+            var signature = reader.ReadInt32();
+            if ( signature != 0x04505854 && signature != 0x05505854 )
+                throw new InvalidDataException( "Invalid signature (expected TXP with type 4 or 5)" );
 
             int subTextureCount = reader.ReadInt32();
             byte mipMapCount = reader.ReadByte();
@@ -108,8 +105,7 @@ namespace MikuMikuLibrary.Textures
         internal void Write( EndianBinaryWriter writer )
         {
             writer.PushBaseOffset();
-            writer.Write( "TXP", StringBinaryFormat.FixedLength, 3 );
-            writer.Write( ( byte )( UsesDepth ? 5 : 4 ) );
+            writer.Write( UsesDepth ? 0x05505854 : 0x04505854 );
             writer.Write( MipMapCount * Depth );
             writer.Write( ( byte )MipMapCount );
             writer.Write( ( byte )Depth );
@@ -130,17 +126,10 @@ namespace MikuMikuLibrary.Textures
 
         private void Init( int width, int height, TextureFormat format, int depth, int mipMapCount )
         {
-            if ( width < 1 )
-                width = 1;
-
-            if ( height < 1 )
-                height = 1;
-
-            if ( depth < 1 )
-                depth = 1;
-
-            if ( mipMapCount < 1 )
-                mipMapCount = 1;
+            width = Math.Max( 1, width );
+            height = Math.Max( 1, height );
+            depth = Math.Max( 1, depth );
+            mipMapCount = Math.Max( 1, mipMapCount );
 
             subTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )

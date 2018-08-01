@@ -17,6 +17,8 @@ namespace MikuMikuLibrary.Textures
             get { return true; }
         }
 
+        public Endianness Endianness { get; set; }
+
         public List<Texture> Textures { get; }
 
         protected override void InternalRead( Stream source )
@@ -25,13 +27,15 @@ namespace MikuMikuLibrary.Textures
             {
                 reader.PushBaseOffset();
 
-                var signature = reader.ReadString( StringBinaryFormat.FixedLength, 3 );
-                if ( signature != "TXP" )
-                    throw new InvalidDataException( "Invalid signature (expected TXP)" );
+                int signature = reader.ReadInt32();
+                if ( signature != 0x03505854 )
+                {
+                    Endianness = Endianness.BigEndian;
+                    signature = EndiannessSwapUtilities.Swap( signature );
+                }
 
-                byte typeNum = reader.ReadByte();
-                if ( typeNum != 3 )
-                    throw new InvalidDataException( "Invalid type number (expected 3)" );
+                if ( signature != 0x03505854 )
+                    throw new InvalidDataException( "Invalid signature (expected TXP with type 3)" );
 
                 int textureCount = reader.ReadInt32();
                 int textureCountWithRubbish = reader.ReadInt32();
@@ -51,12 +55,11 @@ namespace MikuMikuLibrary.Textures
 
         protected override void InternalWrite( Stream destination )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness ) )
             {
                 writer.PushBaseOffset();
 
-                writer.Write( "TXP", StringBinaryFormat.FixedLength, 3 );
-                writer.Write( ( byte )3 );
+                writer.Write( 0x03505854 );
                 writer.Write( Textures.Count );
                 writer.Write( Textures.Count | 0x01010100 );
 
@@ -74,6 +77,7 @@ namespace MikuMikuLibrary.Textures
 
         public TextureSet()
         {
+            Endianness = Endianness.LittleEndian;
             Textures = new List<Texture>();
         }
     }

@@ -1,4 +1,5 @@
 ﻿using MikuMikuLibrary.IO;
+using System;
 using System.IO;
 
 namespace MikuMikuLibrary.Textures
@@ -13,13 +14,9 @@ namespace MikuMikuLibrary.Textures
 
         internal void Read( EndianBinaryReader reader )
         {
-            var signature = reader.ReadString( StringBinaryFormat.FixedLength, 3 );
-            if ( signature != "TXP" )
-                throw new InvalidDataException( "Invalid signature (expected TXP)" );
-
-            byte typeNum = reader.ReadByte();
-            if ( typeNum != 2 )
-                throw new InvalidDataException( "Invalid type number (expected 2)" );
+            var signature = reader.ReadInt32();
+            if ( signature != 0x02505854 )
+                throw new InvalidDataException( "Invalid signature (expected TXP with type 2)" );
 
             Width = reader.ReadInt32();
             Height = reader.ReadInt32();
@@ -32,8 +29,7 @@ namespace MikuMikuLibrary.Textures
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.Write( "TXP", StringBinaryFormat.FixedLength, 3 );
-            writer.Write( ( byte )2 );
+            writer.Write( 0x02505854 );
             writer.Write( Width );
             writer.Write( Height );
             writer.Write( ( int )Format );
@@ -49,14 +45,8 @@ namespace MikuMikuLibrary.Textures
 
         internal SubTexture( int width, int height, TextureFormat format, int id )
         {
-            if ( width < 1 )
-                width = 1;
-
-            if ( height < 1 )
-                height = 1;
-
-            Width = width;
-            Height = height;
+            Width = Math.Max( 1, width );
+            Height = Math.Max( 1, height );
             Format = format;
             ID = id;
             Data = new byte[ TextureFormatUtilities.CalculateDataSize( width, height, format ) ];
