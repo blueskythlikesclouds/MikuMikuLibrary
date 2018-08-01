@@ -243,25 +243,25 @@ namespace MikuMikuLibrary.IO
             Write( 0u );
         }
 
-        public void EnqueueOffsetWriteIf( bool expression, Action body )
+        public void EnqueueOffsetWriteIf( bool condition, Action body )
         {
-            if ( expression )
+            if ( condition )
                 EnqueueOffsetWrite( body );
             else
                 Write( 0 );
         }
 
-        public void EnqueueOffsetWriteAlignedIf( bool expression, int alignment, AlignmentKind alignmentKind, Action body )
+        public void EnqueueOffsetWriteAlignedIf( bool condition, int alignment, AlignmentKind alignmentKind, Action body )
         {
-            if ( expression )
+            if ( condition )
                 EnqueueOffsetWriteAligned( alignment, alignmentKind, body );
             else
                 Write( 0 );
         }
 
-        public void EnqueueOffsetWriteAlignedIf( bool expression, int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, Action body )
+        public void EnqueueOffsetWriteAlignedIf( bool condition, int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, Action body )
         {
-            if ( expression )
+            if ( condition )
                 EnqueueOffsetWriteAligned( alignment, alignmentFillerByte, alignmentKind, body );
             else
                 Write( 0 );

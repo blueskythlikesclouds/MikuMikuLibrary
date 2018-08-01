@@ -13,7 +13,7 @@ namespace MikuMikuLibrary.IO
 {
     public class EndianBinaryReader : BinaryReader
     {
-        private List<byte> chars;
+        private StringBuilder stringBuilder;
         private Endianness endianness;
         private bool swap;
         private Encoding encoding;
@@ -70,7 +70,7 @@ namespace MikuMikuLibrary.IO
 
         private void Init( Encoding encoding, Endianness endianness )
         {
-            chars = new List<byte>();
+            stringBuilder = new StringBuilder();
             this.encoding = encoding;
             offsetStack = new Stack<long>();
             baseOffsetStack = new Stack<long>();
@@ -151,9 +151,9 @@ namespace MikuMikuLibrary.IO
             body.Invoke();
         }
 
-        public void ReadAtOffsetIf( bool expression, long offset, Action body )
+        public void ReadAtOffsetIf( bool condition, long offset, Action body )
         {
-            if ( expression )
+            if ( condition )
                 ReadAtOffset( offset, body );
         }
 
@@ -175,9 +175,9 @@ namespace MikuMikuLibrary.IO
             SeekBegin( positionTemp );
         }
 
-        public void ReadAtOffsetAndSeekBackIf( bool expression, long offset, Action body )
+        public void ReadAtOffsetAndSeekBackIf( bool condition, long offset, Action body )
         {
-            if ( expression )
+            if ( condition )
                 ReadAtOffsetAndSeekBack( offset, body );
         }
 
@@ -411,15 +411,15 @@ namespace MikuMikuLibrary.IO
 
         public string ReadString( StringBinaryFormat format, int fixedLength = -1 )
         {
-            chars.Clear();
+            stringBuilder.Clear();
 
             switch ( format )
             {
                 case StringBinaryFormat.NullTerminated:
                     {
-                        byte b;
-                        while ( ( b = ReadByte() ) != 0 )
-                            chars.Add( b );
+                        char b;
+                        while ( ( b = ReadChar() ) != 0 )
+                            stringBuilder.Append( b );
                     }
                     break;
 
@@ -428,12 +428,12 @@ namespace MikuMikuLibrary.IO
                         if ( fixedLength == -1 )
                             throw new ArgumentException( "Invalid fixed length specified" );
 
-                        byte b;
+                        char b;
                         for ( int i = 0; i < fixedLength; i++ )
                         {
-                            b = ReadByte();
+                            b = ReadChar();
                             if ( b != 0 )
-                                chars.Add( b );
+                                stringBuilder.Append( b );
                         }
                     }
                     break;
@@ -442,7 +442,7 @@ namespace MikuMikuLibrary.IO
                     {
                         byte length = ReadByte();
                         for ( int i = 0; i < length; i++ )
-                            chars.Add( ReadByte() );
+                            stringBuilder.Append( ReadChar() );
                     }
                     break;
 
@@ -450,7 +450,7 @@ namespace MikuMikuLibrary.IO
                     {
                         ushort length = ReadUInt16();
                         for ( int i = 0; i < length; i++ )
-                            chars.Add( ReadByte() );
+                            stringBuilder.Append( ReadChar() );
                     }
                     break;
 
@@ -458,7 +458,7 @@ namespace MikuMikuLibrary.IO
                     {
                         uint length = ReadUInt32();
                         for ( int i = 0; i < length; i++ )
-                            chars.Add( ReadByte() );
+                            stringBuilder.Append( ReadChar() );
                     }
                     break;
 
@@ -466,7 +466,7 @@ namespace MikuMikuLibrary.IO
                     throw new ArgumentException( "Unknown string format", nameof( format ) );
             }
 
-            return encoding.GetString( chars.ToArray() );
+            return stringBuilder.ToString();
         }
 
         public string[] ReadStrings( int count, StringBinaryFormat format, int fixedLength = -1 )
