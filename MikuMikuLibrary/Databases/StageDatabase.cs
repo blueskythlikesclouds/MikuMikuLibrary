@@ -12,16 +12,13 @@ namespace MikuMikuLibrary.Databases
         {
             Empty = -1,
             None = 0,
-            // Brighter Stage?
-            BrighterStage = 2,
+            Leaf = 2,
             Snow = 4,
             WaterSplash = 6,
             Rain = 7,
             WaterSplashOnFeet = 12,
             Fog = 16,
-            // Reflection on Character(?) (Have to test it in FT)
-            ReflectionOnCharacter = 19,
-            // This one only works in FT. It crashes in F
+            LightProjection = 19,
             Reflection = 20,
         }
 
