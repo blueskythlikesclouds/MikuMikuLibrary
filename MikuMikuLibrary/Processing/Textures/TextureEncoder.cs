@@ -1,9 +1,10 @@
-﻿using MikuMikuLibrary.Processing.Textures.DDS;
+﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.Processing.Textures.DDS;
 using MikuMikuLibrary.Textures;
 using System;
-using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace MikuMikuLibrary.Processing.Textures
@@ -43,8 +44,8 @@ namespace MikuMikuLibrary.Processing.Textures
 
             if ( TextureFormatUtilities.IsCompressed( format ) )
             {
-                width = NextPowerOfTwo( bitmap.Width );
-                height = NextPowerOfTwo( bitmap.Height );
+                width = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Width );
+                height = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Height );
             }
 
             Texture texture;
@@ -59,19 +60,6 @@ namespace MikuMikuLibrary.Processing.Textures
                 Encode( texture[ i ], bitmap );
 
             return texture;
-
-            int NextPowerOfTwo( int value )
-            {
-                value--;
-                value |= value >> 1;
-                value |= value >> 2;
-                value |= value >> 4;
-                value |= value >> 8;
-                value |= value >> 16;
-                value++;
-
-                return value;
-            }
         }
 
         private unsafe static void Encode( SubTexture subTexture, Bitmap bitmap )
