@@ -8,5 +8,10 @@
         {
             R = r; G = g; B = b; A = a;
         }
+
+        public override string ToString()
+        {
+            return $"<{R}, {G}, {B}, {A}>";
+        }
     }
 }

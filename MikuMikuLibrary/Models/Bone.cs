@@ -25,5 +25,10 @@ namespace MikuMikuLibrary.Models
     {
         public float Weight1, Weight2, Weight3, Weight4;
         public int Index1, Index2, Index3, Index4;
+
+        public override string ToString()
+        {
+            return $"<({Index1}, {Weight1}), ({Index2}, {Weight2}), ({Index3}, {Weight3}), ({Index4}, {Weight4})>";
+        }
     }
 }
