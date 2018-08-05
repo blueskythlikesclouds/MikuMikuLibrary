@@ -70,11 +70,11 @@ namespace MikuMikuLibrary.IO
                 var memoryStream = new MemoryStream();
                 source.CopyTo( memoryStream );
                 memoryStream.Seek( 0, SeekOrigin.Begin );
-                InternalRead( memoryStream );
+                Read( memoryStream );
             }
             else
             {
-                InternalRead( source );
+                Read( source );
             }
         }
 
@@ -102,13 +102,13 @@ namespace MikuMikuLibrary.IO
             //    memoryStream.CopyTo( destination );
             //}
 
-            InternalWrite( destination );
+            Write( destination );
 
             if ( !leaveOpen )
                 destination.Close();
         }
 
-        protected abstract void InternalRead( Stream source );
-        protected abstract void InternalWrite( Stream destination );
+        protected abstract void Read( Stream source );
+        protected abstract void Write( Stream destination );
     }
 }

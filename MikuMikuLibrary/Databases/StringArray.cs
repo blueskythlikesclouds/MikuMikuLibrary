@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.Databases
 
         public Endianness Endianness { get; set; }
 
-        protected override void InternalRead( Stream source )
+        protected override void Read( Stream source )
         {
             var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian );
 
@@ -52,7 +52,7 @@ namespace MikuMikuLibrary.Databases
             reader.Close();
         }
 
-        protected override void InternalWrite( Stream destination )
+        protected override void Write( Stream destination )
         {
             using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness ) )
             {

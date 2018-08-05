@@ -102,7 +102,7 @@ namespace MikuMikuLibrary.Archives.Farc
             return EnumerateEntries().GetEnumerator();
         }
 
-        protected override void InternalRead( Stream source )
+        protected override void Read( Stream source )
         {
             var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.BigEndian );
 
@@ -282,7 +282,7 @@ namespace MikuMikuLibrary.Archives.Farc
             }
         }
 
-        protected override void InternalWrite( Stream destination )
+        protected override void Write( Stream destination )
         {
             using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.BigEndian ) )
             {

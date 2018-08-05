@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.Textures
 
         public List<Texture> Textures { get; }
 
-        protected override void InternalRead( Stream source )
+        protected override void Read( Stream source )
         {
             using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
             {
@@ -53,7 +53,7 @@ namespace MikuMikuLibrary.Textures
             }
         }
 
-        protected override void InternalWrite( Stream destination )
+        protected override void Write( Stream destination )
         {
             using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness ) )
             {
