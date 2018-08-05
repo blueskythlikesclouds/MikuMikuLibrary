@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.Processing.Sprites
             return croppedBitmap;
         }
 
-        public static List<Tuple<Sprite, Bitmap>> Crop( SpriteSet spriteSet )
+        public static Dictionary<Sprite, Bitmap> Crop( SpriteSet spriteSet )
         {
             var bitmaps = new List<Bitmap>( spriteSet.TextureSet.Textures.Count );
             foreach ( var texture in spriteSet.TextureSet.Textures )
@@ -31,13 +31,13 @@ namespace MikuMikuLibrary.Processing.Sprites
                 bitmaps.Add( bitmap );
             }
 
-            var sprites = new List<Tuple<Sprite, Bitmap>>( spriteSet.Sprites.Count );
+            var sprites = new Dictionary<Sprite, Bitmap>( spriteSet.Sprites.Count );
             foreach ( var sprite in spriteSet.Sprites )
             {
                 var sourceBitmap = bitmaps[ sprite.TextureIndex ];
                 var bitmap = sourceBitmap.Clone(
                     new RectangleF( sprite.X, sprite.Y, sprite.Width, sprite.Height ), sourceBitmap.PixelFormat );
-                sprites.Add( new Tuple<Sprite, Bitmap>( sprite, bitmap ) );
+                sprites.Add( sprite, bitmap );
             }
 
             return sprites;
