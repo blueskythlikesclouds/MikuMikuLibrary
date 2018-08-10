@@ -11,6 +11,7 @@ namespace MikuMikuLibrary.Databases
     {
         public ushort ID { get; set; }
         public string Name { get; set; }
+        public ushort Index { get; set; }
     }
 
     public class AetSetEntry
@@ -87,13 +88,10 @@ namespace MikuMikuLibrary.Databases
                     {
                         ID = id,
                         Name = name,
+                        Index = index,
                     };
 
-                    var aetSetEntry = AetSets[ setIndex ];
-                    if ( index > aetSetEntry.Aets.Count )
-                        aetSetEntry.Aets.Add( aetEntry );
-                    else
-                        aetSetEntry.Aets.Insert( index, aetEntry );
+                    AetSets[ setIndex ].Aets.Add( aetEntry );
                 }
             } );
         }
@@ -122,13 +120,12 @@ namespace MikuMikuLibrary.Databases
                 for ( int i = 0; i < AetSets.Count; i++ )
                 {
                     var aetSetEntry = AetSets[ i ];
-                    for ( int j = 0; j < aetSetEntry.Aets.Count; j++ )
+                    foreach ( var aetEntry in aetSetEntry.Aets )
                     {
-                        var aetEntry = aetSetEntry.Aets[ j ];
                         writer.Write( aetEntry.ID );
                         writer.WriteNulls( 2 );
                         writer.AddStringToStringTable( aetEntry.Name );
-                        writer.Write( ( ushort )j );
+                        writer.Write( aetEntry.Index );
                         writer.Write( ( ushort )i );
                     }
                 }

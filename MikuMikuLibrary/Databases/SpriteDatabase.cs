@@ -11,12 +11,14 @@ namespace MikuMikuLibrary.Databases
     {
         public ushort ID { get; set; }
         public string Name { get; set; }
+        public ushort Index { get; set; }
     }
 
     public class SpriteTextureEntry
     {
         public ushort ID { get; set; }
         public string Name { get; set; }
+        public ushort Index { get; set; }
     }
 
     public class SpriteSetEntry
@@ -86,24 +88,22 @@ namespace MikuMikuLibrary.Databases
                     var set = SpriteSets[ setIndex & 0xFFF ];
                     if ( ( setIndex & 0x1000 ) == 0x1000 )
                     {
-                        var textureEntry = new SpriteTextureEntry
-                        { Name = name, ID = id };
-
-                        if ( index > set.Textures.Count )
-                            set.Textures.Add( textureEntry );
-                        else
-                            set.Textures.Insert( index, textureEntry );
+                        set.Textures.Add( new SpriteTextureEntry
+                        {
+                            ID = id,
+                            Name = name,
+                            Index = index,
+                        } );
                     }
 
                     else
                     {
-                        var spriteEntry = new SpriteEntry
-                        { Name = name, ID = id };
-
-                        if ( index > set.Sprites.Count )
-                            set.Sprites.Add( spriteEntry );
-                        else
-                            set.Sprites.Insert( index, spriteEntry );
+                        set.Sprites.Add( new SpriteEntry
+                        {
+                            ID = id,
+                            Name = name,
+                            Index = index,
+                        } );
                     }
                 }
             } );
@@ -130,23 +130,21 @@ namespace MikuMikuLibrary.Databases
                 for ( int i = 0; i < SpriteSets.Count; i++ )
                 {
                     var spriteSetEntry = SpriteSets[ i ];
-                    for ( int j = 0; j < spriteSetEntry.Sprites.Count; j++ )
+                    foreach ( var spriteEntry in spriteSetEntry.Sprites )
                     {
-                        var spriteEntry = spriteSetEntry.Sprites[ j ];
                         writer.Write( spriteEntry.ID );
                         writer.WriteNulls( 2 );
                         writer.AddStringToStringTable( spriteEntry.Name );
-                        writer.Write( ( ushort )j );
+                        writer.Write( spriteEntry.Index );
                         writer.Write( ( ushort )i );
                     }
 
-                    for ( int j = 0; j < spriteSetEntry.Textures.Count; j++ )
+                    foreach ( var textureEntry in spriteSetEntry.Textures )
                     {
-                        var textureEntry = spriteSetEntry.Textures[ j ];
                         writer.Write( textureEntry.ID );
                         writer.WriteNulls( 2 );
                         writer.AddStringToStringTable( textureEntry.Name );
-                        writer.Write( ( ushort )j );
+                        writer.Write( textureEntry.Index );
                         writer.Write( ( ushort )( i | 0x1000 ) );
                     }
                 }
