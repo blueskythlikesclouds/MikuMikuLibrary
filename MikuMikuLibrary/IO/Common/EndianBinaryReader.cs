@@ -2,6 +2,7 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
+using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Models;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public class EndianBinaryReader : BinaryReader
     {
@@ -352,6 +353,23 @@ namespace MikuMikuLibrary.IO
             return array;
         }
 
+        public Half ReadHalf()
+        {
+            if ( swap )
+                return Half.ToHalf( EndiannessSwapUtilities.Swap( base.ReadUInt16() ) );
+            else
+                return Half.ToHalf( base.ReadUInt16() );
+        }
+
+        public Half[] ReadHalfs( int count )
+        {
+            Half[] array = new Half[ count ];
+            for ( int i = 0; i < array.Length; i++ )
+                array[ i ] = ReadHalf();
+
+            return array;
+        }
+
         public override float ReadSingle()
         {
             if ( swap )
@@ -492,6 +510,11 @@ namespace MikuMikuLibrary.IO
             return value;
         }
 
+        public Vector2 ReadVector2Half()
+        {
+            return new Vector2( ReadHalf(), ReadHalf() );
+        }
+
         public Vector3 ReadVector3()
         {
             return new Vector3( ReadSingle(), ReadSingle(), ReadSingle() );
@@ -504,6 +527,11 @@ namespace MikuMikuLibrary.IO
                 value[ i ] = ReadVector3();
 
             return value;
+        }
+
+        public Vector3 ReadVector3Int16()
+        {
+            return new Vector3( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
         }
 
         public Vector4 ReadVector4()
@@ -550,6 +578,11 @@ namespace MikuMikuLibrary.IO
                 value[ i ] = ReadColor();
 
             return value;
+        }
+
+        public Color ReadColorHalf()
+        {
+            return new Color( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
         }
     }
 }

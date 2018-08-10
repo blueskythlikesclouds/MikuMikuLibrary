@@ -1,7 +1,9 @@
 ﻿using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.Models;
 using MikuMikuLibrary.Processing.Textures.DDS;
 using MikuMikuLibrary.Textures;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -34,15 +36,39 @@ namespace MikuMikuLibrary.Processing.Textures
                 RenameTexture( texture, textures, textureDatabase );
         }
 
+        public static string GetFileName( Texture texture )
+        {
+            if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
+                return texture.Name + ".png";
+            else
+                return texture.Name + ".dds";
+        }
+
         public static void SaveTextures( TextureSet textures, string outputDirectory )
         {
             Directory.CreateDirectory( outputDirectory );
 
             foreach ( var texture in textures.Textures )
             {
-                using ( var destination = File.Create( Path.Combine( outputDirectory, texture.Name + ".dds" ) ) )
-                    TextureDecoder.DecodeToDDS( texture, destination );
+                if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
+                    TextureDecoder.DecodeToPNG( texture, Path.Combine( outputDirectory, texture.Name + ".png" ) );
+                else
+                    TextureDecoder.DecodeToDDS( texture, Path.Combine( outputDirectory, texture.Name + ".dds" ) );
             }
+        }
+
+        public static void ReAssignTextureIDs( Model model, List<int> newTextureIDs )
+        {
+            var dictionary = new Dictionary<int, int>( model.TextureIDs.Count );
+            for ( int i = 0; i < model.TextureIDs.Count; i++ )
+            {
+                dictionary.Add( model.TextureIDs[ i ], newTextureIDs[ i ] );
+                model.TextureIDs[ i ] = newTextureIDs[ i ];
+                model.TextureSet.Textures[ i ].ID = newTextureIDs[ i ];
+            }
+
+            foreach ( var materialTexture in model.Meshes.SelectMany( x => x.Materials ).SelectMany( x => x.EnumerateActiveMaterialTextures() ) )
+                materialTexture.TextureID = dictionary[ materialTexture.TextureID ];
         }
 
         public static DDSPixelFormatFourCC GetDDSPixelFormat( TextureFormat textureFormat )

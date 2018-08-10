@@ -2,7 +2,6 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
-using MikuMikuLibrary.IO;
 using System.IO;
 using System.Text;
 
@@ -60,7 +59,7 @@ namespace MikuMikuLibrary.Processing.Textures.DDS
 
         public DDSHeader( Stream stream, bool leaveOpen = true )
         {
-            using ( var reader = new EndianBinaryReader( stream, Encoding.Default, leaveOpen, Endianness.LittleEndian ) )
+            using ( var reader = new BinaryReader( stream, Encoding.Default, leaveOpen ) )
                 Read( reader );
         }
 
@@ -73,7 +72,7 @@ namespace MikuMikuLibrary.Processing.Textures.DDS
 
         public void Save( Stream stream, bool leaveOpen = true )
         {
-            using ( var writer = new EndianBinaryWriter( stream, Encoding.Default, leaveOpen, Endianness.LittleEndian ) )
+            using ( var writer = new BinaryWriter( stream, Encoding.Default, leaveOpen ) )
                 Write( writer );
         }
 

@@ -1,114 +1,108 @@
-﻿using System;
+﻿using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
+using System;
 using System.IO;
+using System.Text;
 
 namespace MikuMikuLibrary.IO
 {
-    public abstract class BinaryFile : IDisposable
+    public abstract class BinaryFile : IBinaryFile
     {
-        protected Stream stream;
-        protected bool ownsStream;
+        public abstract BinaryFileFlags Flags { get; }
+        public virtual BinaryFormat Format { get; set; }
+        public virtual Endianness Endianness { get; set; }
 
-        public abstract bool CanLoad { get; }
-        public abstract bool CanSave { get; }
-
-        public static T Load<T>( Stream source, bool leaveOpen = false ) where T : BinaryFile
+        public static T Load<T>( Stream source ) where T : IBinaryFile
         {
-            var instance = Activator.CreateInstance<T>() as T;
-            instance.Load( source, leaveOpen );
+            var instance = Activator.CreateInstance<T>();
+            instance.Load( source );
             return instance;
         }
 
-        public static T Load<T>( string fileName ) where T : BinaryFile
+        public static T Load<T>( string filePath ) where T : IBinaryFile
         {
-            var instance = Activator.CreateInstance<T>() as T;
-            instance.Load( fileName );
+            var instance = Activator.CreateInstance<T>();
+            instance.Load( filePath );
             return instance;
         }
 
-        public static T LoadIfExist<T>( string fileName ) where T : BinaryFile
+        public void Load( Stream source )
         {
-            var instance = Activator.CreateInstance<T>() as T;
-            instance.LoadIfExist( fileName );
-            return instance;
-        }
+            if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
+                throw new NotSupportedException( "Binary file is not able to load" );
 
-        public virtual void Dispose()
-        {
-            if ( ownsStream && stream != null )
-                stream.Dispose();
-        }
-
-        public virtual void Load( string fileName )
-        {
-            if ( !CanLoad )
-                throw new NotSupportedException( "Loading is not supported" );
-
-            Load( File.OpenRead( fileName ), false );
-        }
-
-        public virtual void LoadIfExist( string fileName )
-        {
-            if ( !CanLoad )
-                throw new NotSupportedException( "Loading is not supported" );
-
-            if ( !File.Exists( fileName ) )
-                return;
-
-            Load( fileName );
-        }
-
-        public virtual void Load( Stream source, bool leaveOpen = false )
-        {
-            if ( !CanLoad )
-                throw new NotSupportedException( "Loading is not supported" );
-
-            stream = source;
-            ownsStream = !leaveOpen;
-
-            if ( !source.CanSeek ) //|| source is FileStream )
+            // Attempt to detect the section format and read with that
+            if ( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) )
             {
-                var memoryStream = new MemoryStream();
-                source.CopyTo( memoryStream );
-                memoryStream.Seek( 0, SeekOrigin.Begin );
-                Read( memoryStream );
+                if ( SectionManager.SingleSectionInfosByDataType.TryGetValue( GetType(), out SectionInfo sectionInfo ) )
+                {
+                    long position = source.Position;
+                    var signatureBytes = new byte[ 4 ];
+                    source.Read( signatureBytes, 0, signatureBytes.Length );
+                    source.Seek( position, SeekOrigin.Begin );
+
+                    if ( Encoding.ASCII.GetString( signatureBytes ) == sectionInfo.Signature )
+                    {
+                        Format = BinaryFormat.F2nd;
+                        sectionInfo.Create( source, this );
+                        return;
+                    }
+                }
             }
-            else
+
+            // Or try to read in the old fashioned way
+            using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness ) )
+                Read( reader );
+        }
+
+        public void Load( string filePath )
+        {
+            if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
+                throw new NotSupportedException( "Binary file is not able to load" );
+
+            using ( var stream = File.OpenRead( filePath ) )
+                Load( stream );
+        }
+
+        public void Save( Stream destination )
+        {
+            if ( !Flags.HasFlag( BinaryFileFlags.Save ) )
+                throw new NotSupportedException( "Binary file is not able to save" );
+
+            // See if we are supposed to write in sectioned format
+            if ( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) && BinaryFormatUtilities.IsModern( Format ) )
             {
-                Read( source );
+                if ( SectionManager.SingleSectionInfosByDataType.TryGetValue( GetType(), out SectionInfo sectionInfo ) )
+                {
+                    sectionInfo.Create( this, Endianness ).Write( destination );
+                    return;
+                }
+            }
+
+            // Or try to write in the old fashioned way
+            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness ) )
+            {
+                // Push a string table
+                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
+
+                Write( writer );
+
+                // Do the enqueued offset writes & string tables
+                writer.DoEnqueuedOffsetWrites();
+                writer.PopStringTablesReversed();
             }
         }
 
-        public virtual void Save( string fileName )
+        public void Save( string filePath )
         {
-            if ( !CanSave )
-                throw new NotSupportedException( "Saving is not supported" );
+            if ( !Flags.HasFlag( BinaryFileFlags.Save ) )
+                throw new NotSupportedException( "Binary file is not able to save" );
 
-            Save( File.Create( fileName ), false );
+            using ( var stream = File.Create( filePath ) )
+                Save( stream );
         }
 
-        public virtual void Save( Stream destination, bool leaveOpen = false )
-        {
-            if ( !CanSave )
-                throw new NotSupportedException( "Saving is not supported" );
-
-            //stream = destination;
-            //ownsStream = !leaveOpen;
-
-            //if ( destination is FileStream )
-            //{
-            //    var memoryStream = new MemoryStream();
-            //    InternalWrite( memoryStream );
-            //    memoryStream.Seek( 0, SeekOrigin.Begin );
-            //    memoryStream.CopyTo( destination );
-            //}
-
-            Write( destination );
-
-            if ( !leaveOpen )
-                destination.Close();
-        }
-
-        protected abstract void Read( Stream source );
-        protected abstract void Write( Stream destination );
+        internal abstract void Read( EndianBinaryReader reader, Section section = null );
+        internal abstract void Write( EndianBinaryWriter writer, Section section = null );
     }
 }

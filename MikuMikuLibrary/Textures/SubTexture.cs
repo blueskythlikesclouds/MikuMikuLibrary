@@ -1,4 +1,4 @@
-﻿using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO.Common;
 using System;
 using System.IO;
 

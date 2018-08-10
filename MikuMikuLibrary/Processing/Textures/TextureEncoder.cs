@@ -1,4 +1,4 @@
-﻿using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.Processing.Textures.DDS;
 using MikuMikuLibrary.Textures;
 using System;

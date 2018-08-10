@@ -1,7 +1,7 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -13,56 +13,42 @@ namespace MikuMikuLibrary.Databases
 
     public class TextureDatabase : BinaryFile
     {
-        public override bool CanLoad
+        public override BinaryFileFlags Flags
         {
-            get { return true; }
-        }
-
-        public override bool CanSave
-        {
-            get { return true; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat; }
         }
 
         public List<TextureEntry> Textures { get; }
 
-        protected override void Read( Stream source )
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
-            {
-                int textureCount = reader.ReadInt32();
-                uint texturesOffset = reader.ReadUInt32();
+            int textureCount = reader.ReadInt32();
+            uint texturesOffset = reader.ReadUInt32();
 
-                reader.ReadAtOffset( texturesOffset, () =>
+            reader.ReadAtOffset( texturesOffset, () =>
+            {
+                Textures.Capacity = textureCount;
+                for ( int i = 0; i < textureCount; i++ )
                 {
-                    Textures.Capacity = textureCount;
-                    for ( int i = 0; i < textureCount; i++ )
-                    {
-                        var textureEntry = new TextureEntry();
-                        textureEntry.ID = reader.ReadInt32();
-                        textureEntry.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-                        Textures.Add( textureEntry );
-                    }
-                } );
-            }
+                    var textureEntry = new TextureEntry();
+                    textureEntry.ID = reader.ReadInt32();
+                    textureEntry.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    Textures.Add( textureEntry );
+                }
+            } );
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            writer.Write( Textures.Count );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
             {
-                writer.Write( Textures.Count );
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+                foreach ( var textureEntry in Textures )
                 {
-                    foreach ( var textureEntry in Textures )
-                    {
-                        writer.Write( textureEntry.ID );
-                        writer.AddStringToStringTable( textureEntry.Name );
-                    }
-                } );
-                writer.DoEnqueuedOffsetWrites();
-                writer.PopStringTablesReversed();
-            }
+                    writer.Write( textureEntry.ID );
+                    writer.AddStringToStringTable( textureEntry.Name );
+                }
+            } );
         }
 
         public TextureDatabase()

@@ -767,6 +767,8 @@ namespace MikuMikuLibrary.Processing.Textures.DDS
 
                     // Decompress pixels
                     pixels = reader.ReadBytes( 4 );
+                    if ( pixels.Length != 4 )
+                        return decompressedChannels;
                 }
             }
             catch //(EndOfStreamException e)

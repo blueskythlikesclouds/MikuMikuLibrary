@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
 
 namespace MikuMikuLibrary.Models
@@ -21,7 +22,8 @@ namespace MikuMikuLibrary.Models
 
     public class IndexTable
     {
-        public const int ByteSize = 0x5C;
+        public const int ByteSizeClassic = 0x5C;
+        public const int ByteSizeModern = 0x70;
 
         public BoundingSphere BoundingSphere { get; set; }
         public ushort[] Indices { get; set; }
@@ -29,7 +31,16 @@ namespace MikuMikuLibrary.Models
         public int MaterialIndex { get; set; }
         public IndexTableType Type { get; set; }
 
-        internal void Read( EndianBinaryReader reader )
+        // Modern Formats
+        public float Field00 { get; set; }
+        public float Field01 { get; set; }
+        public float Field02 { get; set; }
+        public float Field03 { get; set; }
+        public float Field04 { get; set; }
+        public float Field05 { get; set; }
+        public int Field06 { get; set; }
+
+        internal void Read( EndianBinaryReader reader, MeshSection section = null )
         {
             BoundingSphere = BoundingSphere.FromReader( reader );
             MaterialIndex = reader.ReadInt32();
@@ -42,18 +53,38 @@ namespace MikuMikuLibrary.Models
             int indexCount = reader.ReadInt32();
             uint indicesOffset = reader.ReadUInt32();
 
+            if ( section != null )
+            {
+                reader.SeekCurrent( 0x14 );
+                Field00 = reader.ReadSingle();
+                Field01 = reader.ReadSingle();
+                Field02 = reader.ReadSingle();
+                Field03 = reader.ReadSingle();
+                Field04 = reader.ReadSingle();
+                Field05 = reader.ReadSingle();
+                Field06 = reader.ReadInt32();
+            }
+
             reader.ReadAtOffsetIf( field00 == 4, boneIndicesOffset, () =>
             {
                 BoneIndices = reader.ReadUInt16s( boneIndexCount );
             } );
 
-            reader.ReadAtOffset( indicesOffset, () =>
+            if ( section == null )
             {
-                Indices = reader.ReadUInt16s( indexCount );
-            } );
+                reader.ReadAtOffset( indicesOffset, () =>
+                {
+                    Indices = reader.ReadUInt16s( indexCount );
+                } );
+            }
+            else
+            {
+                section.IndexData.Reader.SeekBegin( indicesOffset );
+                Indices = section.IndexData.Reader.ReadUInt16s( indexCount );
+            }
         }
 
-        internal void Write( EndianBinaryWriter writer )
+        internal void Write( EndianBinaryWriter writer, MeshSection section = null )
         {
             BoundingSphere.Write( writer );
             writer.Write( MaterialIndex );
@@ -67,11 +98,37 @@ namespace MikuMikuLibrary.Models
             writer.Write( ( int )Type );
             writer.Write( 1 );
             writer.Write( Indices.Length );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+
+            // Modern Format
+            if ( section != null )
             {
-                writer.Write( Indices );
-            } );
-            writer.WriteNulls( 32 );
+                section.IndexData.Writer.WriteAlignmentPadding( 4 );
+                writer.Write( ( uint )section.IndexData.Data.Position );
+
+                // Write the indices to the index data
+                section.IndexData.Writer.Write( Indices );
+
+                // Unknown data that I newly discovered
+                writer.WriteNulls( 20 );
+                writer.Write( Field00 );
+                writer.Write( Field01 );
+                writer.Write( Field02 );
+                writer.Write( Field03 );
+                writer.Write( Field04 );
+                writer.Write( Field05 );
+                writer.Write( Field06 );
+                writer.Write( 0 );
+            }
+
+            else
+            {
+                writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+                {
+                    writer.Write( Indices );
+                } );
+
+                writer.WriteNulls( 32 );
+            }
         }
 
         public unsafe List<Triangle> GetTriangles()

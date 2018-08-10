@@ -1,8 +1,8 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -29,23 +29,16 @@ namespace MikuMikuLibrary.Databases
 
     public class ObjectDatabase : BinaryFile
     {
-        public override bool CanLoad
+        public override BinaryFileFlags Flags
         {
-            get { return true; }
-        }
-
-        public override bool CanSave
-        {
-            get { return true; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat; }
         }
 
         public List<ObjectEntry> Objects { get; }
         public int Unknown { get; set; }
 
-        protected override void Read( Stream source )
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian );
-
             int objectCount = reader.ReadInt32();
             Unknown = reader.ReadInt32();
             uint objectsOffset = reader.ReadUInt32();
@@ -93,45 +86,38 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            writer.Write( Objects.Count );
+            writer.Write( Unknown );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
             {
-                writer.Write( Objects.Count );
-                writer.Write( Unknown );
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+                foreach ( var objectEntry in Objects )
                 {
-                    foreach ( var objectEntry in Objects )
+                    writer.AddStringToStringTable( objectEntry.Name );
+                    writer.Write( objectEntry.ID );
+                    writer.WriteNulls( 2 );
+                    writer.AddStringToStringTable( objectEntry.FileName );
+                    writer.AddStringToStringTable( objectEntry.TextureFileName );
+                    writer.AddStringToStringTable( objectEntry.ArchiveFileName );
+                    writer.WriteNulls( 16 );
+                }
+                writer.PopStringTable();
+            } );
+            writer.Write( Objects.Sum( x => x.Meshes.Count ) );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var objectEntry in Objects )
+                {
+                    foreach ( var meshEntry in objectEntry.Meshes )
                     {
-                        writer.AddStringToStringTable( objectEntry.Name );
+                        writer.Write( meshEntry.ID );
                         writer.Write( objectEntry.ID );
-                        writer.WriteNulls( 2 );
-                        writer.AddStringToStringTable( objectEntry.FileName );
-                        writer.AddStringToStringTable( objectEntry.TextureFileName );
-                        writer.AddStringToStringTable( objectEntry.ArchiveFileName );
-                        writer.WriteNulls( 16 );
+                        writer.AddStringToStringTable( meshEntry.Name );
                     }
-                    writer.PopStringTable();
-                } );
-                writer.Write( Objects.Sum( x => x.Meshes.Count ) );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    foreach ( var objectEntry in Objects )
-                    {
-                        writer.PushStringTableAligned( 4, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                        foreach ( var meshEntry in objectEntry.Meshes )
-                        {
-                            writer.Write( meshEntry.ID );
-                            writer.Write( objectEntry.ID );
-                            writer.AddStringToStringTable( meshEntry.Name );
-                        }
-                    }
-                    writer.PopStringTablesReversed();
-                } );
-                writer.DoEnqueuedOffsetWrites();
+                }
                 writer.PopStringTablesReversed();
-            }
+            } );
         }
 
         public ObjectDatabase()

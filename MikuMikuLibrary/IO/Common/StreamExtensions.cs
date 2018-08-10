@@ -4,7 +4,7 @@
 
 using System.IO;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public static class StreamExtensions
     {

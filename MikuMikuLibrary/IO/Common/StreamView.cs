@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public class StreamView : Stream
     {

@@ -1,4 +1,4 @@
-﻿using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO.Common;
 using System.Numerics;
 
 namespace MikuMikuLibrary.Models
@@ -13,6 +13,11 @@ namespace MikuMikuLibrary.Models
             writer.Write( 0 );
             writer.Write( Center );
             writer.Write( Radius );
+        }
+
+        public override string ToString()
+        {
+            return $"<{Center}, {Radius}>";
         }
 
         internal static BoundingSphere FromReader( EndianBinaryReader reader )

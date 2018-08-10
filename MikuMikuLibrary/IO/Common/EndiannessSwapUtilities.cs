@@ -5,7 +5,7 @@
 using System;
 using System.Linq;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public static class EndiannessSwapUtilities
     {

@@ -2,7 +2,7 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public enum StringBinaryFormat
     {

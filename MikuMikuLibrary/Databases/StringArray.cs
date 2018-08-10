@@ -1,35 +1,26 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace MikuMikuLibrary.Databases
 {
     public class StringArray : BinaryFile
     {
+        public override BinaryFileFlags Flags
+        {
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
+        }
+
         public List<string> Strings { get; }
 
-        public override bool CanLoad
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            get { return true; }
-        }
-
-        public override bool CanSave
-        {
-            get { return true; }
-        }
-
-        public Endianness Endianness { get; set; }
-
-        protected override void Read( Stream source )
-        {
-            var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian );
-
             var offsets = new List<long>();
 
             // Try to determine endianness (apparently DT uses big endian string arrays)
             uint stringOffset = reader.ReadUInt32();
-            if ( stringOffset >= source.Length )
+            if ( stringOffset >= reader.BaseStreamLength )
             {
                 reader.Endianness = Endianness.BigEndian;
                 stringOffset = EndiannessSwapUtilities.Swap( stringOffset );
@@ -48,28 +39,17 @@ namespace MikuMikuLibrary.Databases
                 reader.SeekBegin( offset );
                 Strings.Add( reader.ReadString( StringBinaryFormat.NullTerminated ) );
             }
-
-            reader.Close();
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness ) )
-            {
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-
-                foreach ( var str in Strings )
-                    writer.AddStringToStringTable( str );
-
-                writer.DoEnqueuedOffsetWrites();
-                writer.PopStringTablesReversed();
-            }
+            foreach ( var str in Strings )
+                writer.AddStringToStringTable( str );
         }
 
         public StringArray()
         {
             Strings = new List<string>();
-            Endianness = Endianness.LittleEndian;
         }
     }
 }

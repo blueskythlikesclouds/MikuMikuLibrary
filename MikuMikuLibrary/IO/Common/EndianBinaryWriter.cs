@@ -2,6 +2,7 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
+using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Models;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public enum AlignmentKind
     {
@@ -34,6 +35,7 @@ namespace MikuMikuLibrary.IO
 
         private class StringTable
         {
+            public long BaseOffset;
             public Dictionary<string, List<long>> Strings;
             public AlignmentKind AlignmentKind;
             public int Alignment;
@@ -53,6 +55,7 @@ namespace MikuMikuLibrary.IO
         private Stack<long> baseOffsetStack;
         private Queue<OffsetWrite> offsetWriteQueue;
         private Stack<StringTable> stringTableStack;
+        private List<long> offsetPositions;
 
         public Endianness Endianness
         {
@@ -84,6 +87,11 @@ namespace MikuMikuLibrary.IO
             get { return BaseStream.Length; }
         }
 
+        public List<long> OffsetPositions
+        {
+            get { return offsetPositions; }
+        }
+
         public EndianBinaryWriter( Stream input, Endianness endianness )
             : base( input )
         {
@@ -110,6 +118,7 @@ namespace MikuMikuLibrary.IO
             baseOffsetStack = new Stack<long>();
             offsetWriteQueue = new Queue<OffsetWrite>();
             stringTableStack = new Stack<StringTable>();
+            offsetPositions = new List<long>();
         }
 
         public void Seek( long offset, SeekOrigin origin )
@@ -294,6 +303,9 @@ namespace MikuMikuLibrary.IO
             Write( ( uint )( offset - baseOffset ) );
             SeekBegin( endOffset );
 
+            // For the relocation table
+            offsetPositions.Add( offsetWrite.FieldOffset );
+
             var offsetWriteQueueForThisOffsetWrite = offsetWriteQueue;
             while ( offsetWriteQueueForThisOffsetWrite.Count > 0 )
                 DoOffsetWrite( offsetWriteQueueForThisOffsetWrite.Dequeue(), baseOffset );
@@ -319,6 +331,7 @@ namespace MikuMikuLibrary.IO
         {
             stringTableStack.Push( new StringTable
             {
+                BaseOffset = baseOffsetStack.Count > 0 ? baseOffsetStack.Peek() : 0,
                 Strings = new Dictionary<string, List<long>>(),
                 AlignmentKind = AlignmentKind.None,
                 Alignment = 0,
@@ -331,6 +344,7 @@ namespace MikuMikuLibrary.IO
         {
             stringTableStack.Push( new StringTable
             {
+                BaseOffset = baseOffsetStack.Count > 0 ? baseOffsetStack.Peek() : 0,
                 Strings = new Dictionary<string, List<long>>(),
                 AlignmentKind = alignmentKind,
                 Alignment = alignment,
@@ -361,7 +375,8 @@ namespace MikuMikuLibrary.IO
                 foreach ( var offset in keyValuePair.Value )
                 {
                     SeekBegin( offset );
-                    Write( ( uint )stringOffset );
+                    Write( ( uint )( stringOffset - stringTable.BaseOffset ) );
+                    offsetPositions.Add( offset );
                 }
 
                 SeekBegin( endOffset );
@@ -504,6 +519,17 @@ namespace MikuMikuLibrary.IO
                 Write( value );
         }
 
+        public void WriteHalf( Half value )
+        {
+            base.Write( swap ? EndiannessSwapUtilities.Swap( value.value ) : value.value );
+        }
+
+        public void WriteHalfs( Half[] values )
+        {
+            foreach ( var value in values )
+                Write( value );
+        }
+
         public override void Write( decimal value )
         {
             base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
@@ -584,6 +610,12 @@ namespace MikuMikuLibrary.IO
                 Write( value );
         }
 
+        public void WriteVector2Half( Vector2 value )
+        {
+            WriteHalf( ( Half )value.X );
+            WriteHalf( ( Half )value.Y );
+        }
+
         public void Write( Vector3 value )
         {
             Write( value.X );
@@ -595,6 +627,13 @@ namespace MikuMikuLibrary.IO
         {
             foreach ( var value in values )
                 Write( value );
+        }
+
+        public void WriteVector3Int16( Vector3 value )
+        {
+            Write( ( short )( value.X * 32768f ) );
+            Write( ( short )( value.Y * 32768f ) );
+            Write( ( short )( value.Z * 32768f ) );
         }
 
         public void Write( Vector4 value )
@@ -649,6 +688,14 @@ namespace MikuMikuLibrary.IO
         {
             foreach ( var value in values )
                 Write( value );
+        }
+
+        public void WriteColorHalf( Color value )
+        {
+            WriteHalf( ( Half )value.R );
+            WriteHalf( ( Half )value.G );
+            WriteHalf( ( Half )value.B );
+            WriteHalf( ( Half )value.A );
         }
 
         protected override void Dispose( bool disposing )

@@ -1,4 +1,6 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,14 +16,14 @@ namespace MikuMikuLibrary.Archives.Farc
     {
         private readonly List<InternalEntry> entries;
 
-        public override bool CanLoad
+        public override BinaryFileFlags Flags
         {
-            get { return true; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
         }
 
-        public override bool CanSave
+        public override Endianness Endianness
         {
-            get { return true; }
+            get { return Endianness.BigEndian; }
         }
 
         public bool CanAdd
@@ -46,6 +48,7 @@ namespace MikuMikuLibrary.Archives.Farc
                         throw new InvalidOperationException( $"Entry already exists ({handle})" );
 
                     case ConflictPolicy.Replace:
+                        entry.Dispose();
                         entry.Stream = source;
                         entry.OwnsStream = !leaveOpen;
                         break;
@@ -55,7 +58,10 @@ namespace MikuMikuLibrary.Archives.Farc
                 }
             }
 
-            entries.Add( new InternalEntry( handle, source, !leaveOpen ) );
+            else
+            {
+                entries.Add( new InternalEntry( handle, source, !leaveOpen ) );
+            }
         }
 
         public void Add( string handle, string fileName, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
@@ -70,6 +76,17 @@ namespace MikuMikuLibrary.Archives.Farc
 
             if ( entry != null )
             {
+                entry.Dispose();
+                entries.Remove( entry );
+            }
+        }
+
+
+        public void Clear()
+        {
+            while ( entries.Count != 0 )
+            {
+                var entry = entries[ 0 ];
                 entry.Dispose();
                 entries.Remove( entry );
             }
@@ -102,10 +119,8 @@ namespace MikuMikuLibrary.Archives.Farc
             return EnumerateEntries().GetEnumerator();
         }
 
-        protected override void Read( Stream source )
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.BigEndian );
-
             string signature = reader.ReadString( StringBinaryFormat.FixedLength, 4 );
             if ( !( signature == "FARC" || signature == "FArC" || signature == "FArc" ) )
                 throw new InvalidDataException( "Invalid signature, excepted FARC/FArC/FArc" );
@@ -147,7 +162,7 @@ namespace MikuMikuLibrary.Archives.Farc
                     decryptedArchive.Write( ivBytes, 0, 16 );
 
                     using ( var crypto = new CryptoStream(
-                        source, decryptor, CryptoStreamMode.Read ) )
+                        reader.BaseStream, decryptor, CryptoStreamMode.Read ) )
                     {
                         crypto.CopyTo( decryptedArchive );
                     }
@@ -250,7 +265,7 @@ namespace MikuMikuLibrary.Archives.Farc
                         if ( entryOffset + entrySize > reader.BaseStreamLength )
                             entrySize = reader.BaseStreamLength - entryOffset;
 
-                        Stream entryStream = source.CreateSubView( entryOffset, entrySize );
+                        Stream entryStream = reader.BaseStream.CreateSubView( entryOffset, entrySize );
                         if ( entryUncompressedSize != entryCompressedSize )
                             entryStream = new GZipStream( entryStream, CompressionMode.Decompress );
 
@@ -282,34 +297,23 @@ namespace MikuMikuLibrary.Archives.Farc
             }
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.BigEndian ) )
-            {
-                writer.Write( "FArc", StringBinaryFormat.FixedLength, 4 );
-                writer.PushOffset();
-                writer.Write( 0 );
-                writer.Write( 16 );
-
-                foreach ( var entry in entries )
-                {
-                    writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
-                    writer.EnqueueOffsetWriteAligned( 16, 0x78, AlignmentKind.Left, () => entry.Stream.CopyTo( destination ) );
-                    writer.Write( ( uint )entry.Stream.Length );
-                }
-
-                long headerEnd = destination.Position;
-                writer.WriteAtOffsetAndSeekBack( writer.PeekOffset(), () => writer.Write( ( uint )( headerEnd - writer.PopOffset() - 4 ) ) );
-                writer.DoEnqueuedOffsetWrites();
-            }
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
+            writer.Write( "FArc", StringBinaryFormat.FixedLength, 4 );
+            writer.PushOffset();
+            writer.Write( 0 );
+            writer.Write( 16 );
 
             foreach ( var entry in entries )
-                entry.Dispose();
+            {
+                writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
+                writer.EnqueueOffsetWriteAligned( 16, 0x78, AlignmentKind.Left, () => entry.Stream.CopyTo( writer.BaseStream ) );
+                writer.Write( ( uint )entry.Stream.Length );
+            }
+
+            long headerEnd = writer.Position;
+            writer.WriteAtOffsetAndSeekBack( writer.PeekOffset(), () => writer.Write( ( uint )( headerEnd - writer.PopOffset() - 4 ) ) );
+            writer.DoEnqueuedOffsetWrites();
         }
 
         public FarcArchive()

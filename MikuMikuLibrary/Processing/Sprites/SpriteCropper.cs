@@ -1,6 +1,5 @@
 ﻿using MikuMikuLibrary.Processing.Textures;
 using MikuMikuLibrary.Sprites;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 

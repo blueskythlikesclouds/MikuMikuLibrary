@@ -20,8 +20,11 @@ namespace MikuMikuLibrary.Processing.Models
         {
             AssimpSceneUtilities.Export( ConvertAiSceneFromModel( model, textureDatabase, appendTags ), outputFileName );
 
-            var texturesOutputDirectory = Path.Combine( Path.GetDirectoryName( outputFileName ), TexturesDirectoryName );
-            TextureUtilities.SaveTextures( model.TextureSet, texturesOutputDirectory );
+            if ( model.TextureSet != null )
+            {
+                var texturesOutputDirectory = Path.Combine( Path.GetDirectoryName( outputFileName ), TexturesDirectoryName );
+                TextureUtilities.SaveTextures( model.TextureSet, texturesOutputDirectory );
+            }
         }
 
         public static Ai.Scene ConvertAiSceneFromModel( Model model, TextureDatabase textureDatabase = null, bool appendTags = false )
@@ -29,21 +32,22 @@ namespace MikuMikuLibrary.Processing.Models
             var aiScene = new Ai.Scene();
             aiScene.RootNode = new Ai.Node( "RootNode" );
 
-            TextureUtilities.RenameTextures( model.TextureSet, textureDatabase );
+            if ( model.TextureSet != null )
+                TextureUtilities.RenameTextures( model.TextureSet, textureDatabase );
 
             foreach ( var mesh in model.Meshes )
                 ConvertAiMaterialsFromMaterials( aiScene, mesh.Materials, model.TextureSet );
 
             var bones = new List<Bone>();
             var boneParentMap = new Dictionary<string, string>();
-            foreach ( var mesh in model.Meshes )
+            foreach ( var mesh in model.Meshes.Where( x => x.Skin != null ) )
             {
-                foreach ( var bone in mesh.Bones )
+                foreach ( var bone in mesh.Skin.Bones )
                 {
                     if ( !boneParentMap.ContainsKey( bone.Name ) )
                     {
                         var parentBone =
-                            mesh.Bones.FirstOrDefault( x => x.ID == bone.ParentID );
+                            mesh.Skin.Bones.FirstOrDefault( x => x.ID == bone.ParentID );
 
                         bones.Add( bone );
                         boneParentMap.Add( bone.Name, parentBone?.Name );
@@ -61,7 +65,7 @@ namespace MikuMikuLibrary.Processing.Models
             AssimpSceneUtilities.Export( ConvertAiSceneFromModels( models, textureDatabase ), outputFileName );
 
             var texturesOutputDirectory = Path.Combine( Path.GetDirectoryName( outputFileName ), TexturesDirectoryName );
-            foreach ( var model in models )
+            foreach ( var model in models.Where( x => x.TextureSet != null ) )
                 TextureUtilities.SaveTextures( model.TextureSet, texturesOutputDirectory );
         }
 
@@ -70,7 +74,7 @@ namespace MikuMikuLibrary.Processing.Models
             var aiScene = new Ai.Scene();
             aiScene.RootNode = new Ai.Node( "RootNode" );
 
-            foreach ( var model in models )
+            foreach ( var model in models.Where( x => x.TextureSet != null ) )
                 TextureUtilities.RenameTextures( model.TextureSet, textureDatabase );
 
             foreach ( var model in models )
@@ -83,14 +87,14 @@ namespace MikuMikuLibrary.Processing.Models
             var boneParentMap = new Dictionary<string, string>();
             foreach ( var model in models )
             {
-                foreach ( var mesh in model.Meshes )
+                foreach ( var mesh in model.Meshes.Where( x => x.Skin != null ) )
                 {
-                    foreach ( var bone in mesh.Bones )
+                    foreach ( var bone in mesh.Skin.Bones )
                     {
                         if ( !boneParentMap.ContainsKey( bone.Name ) )
                         {
                             var parentBone =
-                                mesh.Bones.FirstOrDefault( x => x.ID == bone.ParentID );
+                                mesh.Skin.Bones.FirstOrDefault( x => x.ID == bone.ParentID );
 
                             bones.Add( bone );
                             boneParentMap.Add( bone.Name, parentBone?.Name );
@@ -125,17 +129,18 @@ namespace MikuMikuLibrary.Processing.Models
             }
         }
 
+        private static unsafe Ai.Matrix4x4 GetAiMatrix4x4FromMatrix4x4( Matrix4x4 m )
+        {
+            return *( Ai.Matrix4x4* )&m;
+        } 
+
         private static Ai.Node ConvertAiNodeFromBone( Ai.Node parent, Matrix4x4 inverseParentTransform, Bone bone, bool appendTags = false )
         {
             Matrix4x4.Invert( bone.Matrix, out Matrix4x4 inverse );
             var transform = Matrix4x4.Multiply( inverseParentTransform, inverse );
 
             var aiNode = new Ai.Node( bone.Name, parent );
-            aiNode.Transform = new Ai.Matrix4x4(
-                transform.M11, transform.M12, transform.M13, transform.M14,
-                transform.M21, transform.M22, transform.M23, transform.M24,
-                transform.M31, transform.M32, transform.M33, transform.M34,
-                transform.M41, transform.M42, transform.M43, transform.M44 );
+            aiNode.Transform = GetAiMatrix4x4FromMatrix4x4( transform );
 
             if ( appendTags )
                 aiNode.Name = $"{aiNode.Name}{Tag.Create( "ID", bone.ID )}";
@@ -210,14 +215,10 @@ namespace MikuMikuLibrary.Processing.Models
                         for ( int i = 0; i < indexTable.BoneIndices.Length; i++ )
                         {
                             int boneIndex = indexTable.BoneIndices[ i ];
-                            var bone = mesh.Bones[ boneIndex ];
+                            var bone = mesh.Skin.Bones[ boneIndex ];
                             var aiBone = new Ai.Bone();
                             aiBone.Name = bone.Name;
-                            aiBone.OffsetMatrix = new Ai.Matrix4x4(
-                                bone.Matrix.M11, bone.Matrix.M12, bone.Matrix.M13, bone.Matrix.M14,
-                                bone.Matrix.M21, bone.Matrix.M22, bone.Matrix.M23, bone.Matrix.M24,
-                                bone.Matrix.M31, bone.Matrix.M32, bone.Matrix.M33, bone.Matrix.M34,
-                                bone.Matrix.M41, bone.Matrix.M42, bone.Matrix.M43, bone.Matrix.M44 );
+                            aiBone.OffsetMatrix = GetAiMatrix4x4FromMatrix4x4( bone.Matrix );
 
                             if ( appendTags )
                                 aiBone.Name = $"{aiBone.Name}{Tag.Create( "ID", bone.ID )}";
@@ -278,14 +279,14 @@ namespace MikuMikuLibrary.Processing.Models
 
         private static Ai.TextureSlot ConvertTextureSlotFromTextureID( int textureID, Ai.TextureType type, TextureSet textureList )
         {
-            if ( textureID < 0 )
+            if ( textureID == -1 || textureList == null )
                 return default( Ai.TextureSlot );
 
             var texture = textureList.Textures.FirstOrDefault( x => x.ID == textureID );
             if ( texture != null )
             {
                 return new Ai.TextureSlot(
-                    Path.Combine( TexturesDirectoryName, texture.Name + ".dds" ), type, 0, Ai.TextureMapping.FromUV, 0, 0, Ai.TextureOperation.Add, Ai.TextureWrapMode.Wrap, Ai.TextureWrapMode.Wrap, 0 );
+                    Path.Combine( TexturesDirectoryName, TextureUtilities.GetFileName( texture ) ), type, 0, Ai.TextureMapping.FromUV, 0, 0, Ai.TextureOperation.Add, Ai.TextureWrapMode.Wrap, Ai.TextureWrapMode.Wrap, 0 );
             }
 
             return default( Ai.TextureSlot );
@@ -296,19 +297,21 @@ namespace MikuMikuLibrary.Processing.Models
             var aiMaterial = new Ai.Material();
             aiMaterial.Name = material.Name;
 
-            var diffuse = ConvertTextureSlotFromTextureID( material.Diffuse.TextureID, Ai.TextureType.Diffuse, textures );
-            var ambient = ConvertTextureSlotFromTextureID( material.Ambient.TextureID, Ai.TextureType.Ambient, textures );
-            var normal = ConvertTextureSlotFromTextureID( material.Normal.TextureID, Ai.TextureType.Normals, textures );
-            var specular = ConvertTextureSlotFromTextureID( material.Specular.TextureID, Ai.TextureType.Specular, textures );
-            var reflection = ConvertTextureSlotFromTextureID( material.Reflection.TextureID, Ai.TextureType.Reflection, textures );
-            var specularPower = ConvertTextureSlotFromTextureID( material.SpecularPower.TextureID, Ai.TextureType.Shininess, textures );
+            ConvertMaterialTexture( material.Diffuse, Ai.TextureType.Diffuse );
+            ConvertMaterialTexture( material.Ambient, Ai.TextureType.Ambient );
+            ConvertMaterialTexture( material.Normal, Ai.TextureType.Normals );
+            ConvertMaterialTexture( material.Specular, Ai.TextureType.Specular );
+            ConvertMaterialTexture( material.Reflection, Ai.TextureType.Reflection );
+            ConvertMaterialTexture( material.SpecularPower, Ai.TextureType.Shininess );
 
-            aiMaterial.AddMaterialTexture( ref diffuse );
-            aiMaterial.AddMaterialTexture( ref ambient );
-            aiMaterial.AddMaterialTexture( ref normal );
-            aiMaterial.AddMaterialTexture( ref specular );
-            aiMaterial.AddMaterialTexture( ref reflection );
-            aiMaterial.AddMaterialTexture( ref specularPower );
+            void ConvertMaterialTexture( MaterialTexture materialTexture, Ai.TextureType textureType )
+            {
+                if ( materialTexture.IsActive )
+                {
+                    var texture = ConvertTextureSlotFromTextureID( materialTexture.TextureID, textureType, textures );
+                    aiMaterial.AddMaterialTexture( ref texture );
+                }
+            }
 
             return aiMaterial;
         }

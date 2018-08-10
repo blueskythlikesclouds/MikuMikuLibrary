@@ -24,6 +24,7 @@ namespace MikuMikuLibrary.Processing.Models
         public static Model ConvertModelFromAiScene( Ai.Scene aiScene, TextureDatabase textureDatabase = null )
         {
             var model = new Model();
+            model.TextureSet = new TextureSet();
 
             ConvertMeshesFromAiNodesRecursively(
                 aiScene.RootNode, aiScene, model.Meshes, model.TextureSet );
@@ -31,7 +32,7 @@ namespace MikuMikuLibrary.Processing.Models
             model.TextureIDs.AddRange( model.TextureSet.Textures.Select( x => x.ID ) );
 
             if ( textureDatabase != null )
-                ReAssingTextureIDsToModel( model, textureDatabase );
+                ReAssignTextureIDsToModel( model, textureDatabase );
 
             return model;
         }
@@ -41,8 +42,10 @@ namespace MikuMikuLibrary.Processing.Models
             throw new NotImplementedException( "TODO" );
         }
 
-        private static void ReAssingTextureIDsToModel( Model model, TextureDatabase textureDatabase )
+        private static void ReAssignTextureIDsToModel( Model model, TextureDatabase textureDatabase )
         {
+            var ids = new List<int>( model.TextureIDs.Count );
+
             for ( int i = 0; i < model.TextureSet.Textures.Count; i++ )
             {
                 var texture = model.TextureSet.Textures[ i ];
@@ -57,43 +60,14 @@ namespace MikuMikuLibrary.Processing.Models
                     textureDatabase.Textures.Add( textureEntry );
                 }
 
-                // Fix IDs within materials
-                foreach ( var mesh in model.Meshes )
-                {
-                    foreach ( var material in mesh.Materials )
-                    {
-                        if ( material.Diffuse.TextureID == texture.ID )
-                            material.Diffuse.TextureID = textureEntry.ID;
-
-                        if ( material.Ambient.TextureID == texture.ID )
-                            material.Ambient.TextureID = textureEntry.ID;
-
-                        if ( material.Normal.TextureID == texture.ID )
-                            material.Normal.TextureID = textureEntry.ID;
-
-                        if ( material.Specular.TextureID == texture.ID )
-                            material.Specular.TextureID = textureEntry.ID;
-
-                        if ( material.ToonCurve.TextureID == texture.ID )
-                            material.ToonCurve.TextureID = textureEntry.ID;
-
-                        if ( material.Reflection.TextureID == texture.ID )
-                            material.Reflection.TextureID = textureEntry.ID;
-
-                        if ( material.SpecularPower.TextureID == texture.ID )
-                            material.SpecularPower.TextureID = textureEntry.ID;
-                    }
-                }
-
-                texture.ID = textureEntry.ID;
-                model.TextureIDs[ i ] = textureEntry.ID;
+                ids.Add( textureEntry.ID );
             }
+
+            TextureUtilities.ReAssignTextureIDs( model, ids );
         }
 
         private static Texture ConvertTexture( string fileName, TextureSet textureSet )
         {
-            fileName = Path.ChangeExtension( fileName, "dds" );
-
             if ( !File.Exists( fileName ) )
                 return null;
 
@@ -179,13 +153,9 @@ namespace MikuMikuLibrary.Processing.Models
             return material;
         }
 
-        private static Matrix4x4 GetMatrix4x4FromAiMatrix4x4( Ai.Matrix4x4 m )
+        private static unsafe Matrix4x4 GetMatrix4x4FromAiMatrix4x4( Ai.Matrix4x4 m )
         {
-            return new Matrix4x4(
-                m.A1, m.A2, m.A3, m.A4,
-                m.B1, m.B2, m.B3, m.B4,
-                m.C1, m.C2, m.C3, m.C4,
-                m.D1, m.D2, m.D3, m.D4 );
+            return *( Matrix4x4* )&m;
         }
 
         private static Bone ConvertBoneFromAiBone( Ai.Bone aiBone, Ai.Scene aiScene, int defaultID = 0 )
@@ -352,6 +322,7 @@ namespace MikuMikuLibrary.Processing.Models
                 var tagList = TagList.Parse( aiNode.Name );
                 mesh.Name = tagList.Name;
                 mesh.ID = tagList.GetValue<int>( "ID" );
+                mesh.Skin = new MeshSkin();
 
                 var meshBoundingBox = new BoundingBox();
                 var boneMap = new Dictionary<string, ushort>();
@@ -362,7 +333,7 @@ namespace MikuMikuLibrary.Processing.Models
                     var aiMesh = aiScene.Meshes[ meshIndex ];
 
                     var submesh = ConvertSubmeshFromAiMesh(
-                        aiMesh, aiScene, transform, mesh.Bones, mesh.Materials, boneMap, materialMap, textureSet );
+                        aiMesh, aiScene, transform, mesh.Skin.Bones, mesh.Materials, boneMap, materialMap, textureSet );
 
                     foreach ( var vertex in submesh.Vertices )
                         meshBoundingBox.AddPoint( vertex );
@@ -374,6 +345,9 @@ namespace MikuMikuLibrary.Processing.Models
                 }
 
                 mesh.BoundingSphere = BoundingSphere.FromBoundingBox( meshBoundingBox );
+
+                if ( mesh.Skin.Bones.Count == 0 )
+                    mesh.Skin = null;
 
                 return mesh;
             }

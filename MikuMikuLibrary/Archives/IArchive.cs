@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using MikuMikuLibrary.IO;
+using System.Collections.Generic;
 using System.IO;
 
 namespace MikuMikuLibrary.Archives
 {
-    public interface IArchive<THandle> : IEnumerable<THandle>
+    public interface IArchive<THandle> : IEnumerable<THandle>, IBinaryFile
     {
-        bool CanLoad { get; }
-        bool CanSave { get; }
         bool CanAdd { get; }
         bool CanRemove { get; }
 
@@ -14,13 +13,9 @@ namespace MikuMikuLibrary.Archives
         void Add( THandle handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy );
         void Add( THandle handle, string fileName, ConflictPolicy conflictPolicy );
         void Remove( THandle handle );
+        void Clear();
 
         EntryStream<THandle> Open( THandle handle );
         IEnumerable<THandle> EnumerateEntries();
-
-        void Load( string fileName );
-        void Load( Stream source, bool leaveOpen );
-        void Save( string fileName );
-        void Save( Stream destination, bool leaveOpen );
     }
 }

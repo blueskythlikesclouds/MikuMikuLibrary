@@ -4,7 +4,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public static class AlignmentUtilities
     {

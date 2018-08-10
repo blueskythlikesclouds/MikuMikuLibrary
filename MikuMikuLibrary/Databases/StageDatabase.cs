@@ -1,8 +1,8 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -93,10 +93,9 @@ namespace MikuMikuLibrary.Databases
         public int Field19 { get; set; }
 
         // Section 4
-        public int Auth3DID1 { get; set; }
-        public int Auth3DID2 { get; set; }
+        public List<int> Auth3DIDs { get; }
 
-        internal void ReadFirst( EndianBinaryReader reader, bool isFutureTone )
+        internal void ReadFirst( EndianBinaryReader reader, BinaryFormat format )
         {
             Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
             Auth3DName = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
@@ -138,11 +137,11 @@ namespace MikuMikuLibrary.Databases
             RingRectangleHeight = reader.ReadSingle();
             RingRingHeight = reader.ReadSingle();
 
-            if ( isFutureTone )
+            if ( format == BinaryFormat.FT )
                 RingOutHeight = reader.ReadSingle();
         }
 
-        internal void WriteFirst( EndianBinaryWriter writer, bool isFutureTone )
+        internal void WriteFirst( EndianBinaryWriter writer, BinaryFormat format )
         {
             writer.AddStringToStringTable( Name );
             writer.AddStringToStringTable( Auth3DName );
@@ -184,7 +183,7 @@ namespace MikuMikuLibrary.Databases
             writer.Write( RingRectangleHeight );
             writer.Write( RingRingHeight );
 
-            if ( isFutureTone )
+            if ( format == BinaryFormat.FT )
                 writer.Write( RingOutHeight );
         }
 
@@ -258,8 +257,9 @@ namespace MikuMikuLibrary.Databases
         {
             reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
             {
-                Auth3DID1 = reader.ReadInt32();
-                Auth3DID2 = reader.ReadInt32();
+                int id;
+                while ( ( id = reader.ReadInt32() ) >= 0 )
+                    Auth3DIDs.Add( id );
             } );
         }
 
@@ -267,104 +267,99 @@ namespace MikuMikuLibrary.Databases
         {
             writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
             {
-                writer.Write( Auth3DID1 );
-                writer.Write( Auth3DID2 );
+                foreach ( var id in Auth3DIDs )
+                    writer.Write( id );
+
+                writer.Write( -1 );
             } );
+        }
+
+        public StageEntry()
+        {
+            Auth3DIDs = new List<int>();
         }
     }
 
     public class StageDatabase : BinaryFile
     {
-        public override bool CanLoad
+        public override BinaryFileFlags Flags
         {
-            get { return true; }
-        }
-
-        public override bool CanSave
-        {
-            get { return true; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
         }
 
         public List<StageEntry> Stages { get; }
         public bool IsFutureTone { get; set; }
 
-        protected override void Read( Stream source )
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            int count = reader.ReadInt32();
+            uint section1Offset = reader.ReadUInt32();
+            uint section2Offset = reader.ReadUInt32();
+            uint section3Offset = reader.ReadUInt32();
+            uint section4Offset = reader.ReadUInt32();
+
+            Format = ( ( section2Offset - section1Offset ) / count ) != 108 ? BinaryFormat.FT : BinaryFormat.F;
+
+            reader.ReadAtOffset( section1Offset, () =>
             {
-                int count = reader.ReadInt32();
-                uint section1Offset = reader.ReadUInt32();
-                uint section2Offset = reader.ReadUInt32();
-                uint section3Offset = reader.ReadUInt32();
-                uint section4Offset = reader.ReadUInt32();
-
-                IsFutureTone = ( ( section2Offset - section1Offset ) / count ) != 108;
-
-                reader.ReadAtOffset( section1Offset, () =>
+                Stages.Capacity = count;
+                for ( int i = 0; i < count; i++ )
                 {
-                    Stages.Capacity = count;
-                    for ( int i = 0; i < count; i++ )
-                    {
-                        var stageEntry = new StageEntry();
-                        stageEntry.ReadFirst( reader, IsFutureTone );
-                        Stages.Add( stageEntry );
-                    }
-                } );
+                    var stageEntry = new StageEntry();
+                    stageEntry.ReadFirst( reader, Format );
+                    Stages.Add( stageEntry );
+                }
+            } );
 
-                reader.ReadAtOffset( section2Offset, () =>
-                {
-                    foreach ( var stageEntry in Stages )
-                        stageEntry.ReadSecond( reader );
-                } );
+            reader.ReadAtOffset( section2Offset, () =>
+            {
+                foreach ( var stageEntry in Stages )
+                    stageEntry.ReadSecond( reader );
+            } );
 
-                reader.ReadAtOffset( section3Offset, () =>
-                {
-                    foreach ( var stageEntry in Stages )
-                        stageEntry.ReadThird( reader );
-                } );
+            reader.ReadAtOffset( section3Offset, () =>
+            {
+                foreach ( var stageEntry in Stages )
+                    stageEntry.ReadThird( reader );
+            } );
 
-                reader.ReadAtOffset( section4Offset, () =>
+            reader.ReadAtOffset( section4Offset, () =>
+            {
+                for ( int i = 0; i < Stages.Count; i++ )
                 {
-                    for ( int i = 0; i < Stages.Count; i++ )
-                    {
-                        int index = reader.ReadInt32();
-                        Debug.Assert( i == index );
-                        Stages[ index ].ReadFourth( reader );
-                    }
-                } );
-            }
+                    int index = reader.ReadInt32();
+                    Debug.Assert( i == index );
+                    Stages[ index ].ReadFourth( reader );
+                }
+            } );
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            writer.Write( Stages.Count );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
             {
-                writer.Write( Stages.Count );
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+                foreach ( var stageEntry in Stages )
+                    stageEntry.WriteFirst( writer, Format );
+            } );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var stageEntry in Stages )
+                    stageEntry.WriteSecond( writer );
+            } );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var stageEntry in Stages )
+                    stageEntry.WriteThird( writer );
+            } );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                for ( int i = 0; i < Stages.Count; i++ )
                 {
-                    foreach ( var stageEntry in Stages )
-                        stageEntry.WriteFirst( writer, IsFutureTone );
-                } );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    foreach ( var stageEntry in Stages )
-                        stageEntry.WriteSecond( writer );
-                } );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    foreach ( var stageEntry in Stages )
-                        stageEntry.WriteThird( writer );
-                } );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    for ( int i = 0; i < Stages.Count; i++ )
-                    {
-                        writer.Write( i );
-                        Stages[ i ].WriteFourth( writer );
-                    }
-                } );
-            }
+                    writer.Write( i );
+                    Stages[ i ].WriteFourth( writer );
+                }
+            } );
         }
 
         public StageDatabase()

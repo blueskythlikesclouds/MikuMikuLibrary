@@ -75,8 +75,6 @@ namespace DatabaseConverter
                 var serializer = new XmlSerializer( database.GetType() );
                 using ( var destination = File.CreateText( destinationFileName ) )
                     serializer.Serialize( destination, database );
-
-                database.Dispose();
             }
             else if ( sourceFileName.EndsWith( ".xml", StringComparison.OrdinalIgnoreCase ) )
             {
@@ -89,7 +87,6 @@ namespace DatabaseConverter
                     database = ( BinaryFile )serializer.Deserialize( source );
 
                 database.Save( destinationFileName );
-                database.Dispose();
             }
         }
     }

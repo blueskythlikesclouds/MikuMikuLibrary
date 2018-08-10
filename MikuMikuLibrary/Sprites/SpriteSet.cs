@@ -1,106 +1,92 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Textures;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace MikuMikuLibrary.Sprites
 {
     public class SpriteSet : BinaryFile
     {
-        public override bool CanLoad
+        public override BinaryFileFlags Flags
         {
-            get { return true; }
-        }
-
-        public override bool CanSave
-        {
-            get { return true; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat; }
         }
 
         public List<Sprite> Sprites { get; }
         public TextureSet TextureSet { get; }
 
-        protected override void Read( Stream source )
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            int signature = reader.ReadInt32();
+            uint texturesOffset = reader.ReadUInt32();
+            int textureCount = reader.ReadInt32();
+            int spriteCount = reader.ReadInt32();
+            uint spritesOffset = reader.ReadUInt32();
+            uint textureNamesOffset = reader.ReadUInt32();
+            uint spriteNamesOffset = reader.ReadUInt32();
+            uint spriteUnknownsOffset = reader.ReadUInt32();
+
+            reader.ReadAtOffset( texturesOffset, () => TextureSet.Load( reader.BaseStream ) );
+
+            Sprites.Capacity = spriteCount;
+            reader.ReadAtOffset( spritesOffset, () =>
             {
-                int signature = reader.ReadInt32();
-                uint texturesOffset = reader.ReadUInt32();
-                int textureCount = reader.ReadInt32();
-                int spriteCount = reader.ReadInt32();
-                uint spritesOffset = reader.ReadUInt32();
-                uint textureNamesOffset = reader.ReadUInt32();
-                uint spriteNamesOffset = reader.ReadUInt32();
-                uint spriteUnknownsOffset = reader.ReadUInt32();
-
-                reader.ReadAtOffset( texturesOffset, () => TextureSet.Load( source, true ) );
-
-                Sprites.Capacity = spriteCount;
-                reader.ReadAtOffset( spritesOffset, () =>
+                for ( int i = 0; i < spriteCount; i++ )
                 {
-                    for ( int i = 0; i < spriteCount; i++ )
-                    {
-                        var sprite = new Sprite();
-                        sprite.ReadFirst( reader );
-                        Sprites.Add( sprite );
-                    }
-                } );
+                    var sprite = new Sprite();
+                    sprite.ReadFirst( reader );
+                    Sprites.Add( sprite );
+                }
+            } );
 
-                reader.ReadAtOffset( textureNamesOffset, () =>
-                {
-                    foreach ( var texture in TextureSet.Textures )
-                        texture.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-                } );
+            reader.ReadAtOffset( textureNamesOffset, () =>
+            {
+                foreach ( var texture in TextureSet.Textures )
+                    texture.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            } );
 
-                reader.ReadAtOffset( spriteNamesOffset, () =>
-                {
-                    foreach ( var sprite in Sprites )
-                        sprite.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-                } );
+            reader.ReadAtOffset( spriteNamesOffset, () =>
+            {
+                foreach ( var sprite in Sprites )
+                    sprite.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            } );
 
-                reader.ReadAtOffset( spriteUnknownsOffset, () =>
-                {
-                    foreach ( var sprite in Sprites )
-                        sprite.ReadSecondary( reader );
-                } );
-            }
+            reader.ReadAtOffset( spriteUnknownsOffset, () =>
+            {
+                foreach ( var sprite in Sprites )
+                    sprite.ReadSecondary( reader );
+            } );
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            writer.Write( 0 );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream ) );
+            writer.Write( TextureSet.Textures.Count );
+            writer.Write( Sprites.Count );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
             {
-                writer.Write( 0 );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () => TextureSet.Save( destination, true ) );
-                writer.Write( TextureSet.Textures.Count );
-                writer.Write( Sprites.Count );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    foreach ( var sprite in Sprites )
-                        sprite.WriteFirst( writer );
-                } );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                    foreach ( var texture in TextureSet.Textures )
-                        writer.AddStringToStringTable( texture.Name );
-
-                    writer.PopStringTablesReversed();
-                } );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                    foreach ( var sprite in Sprites )
-                        writer.AddStringToStringTable( sprite.Name );
-                } );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    foreach ( var sprite in Sprites )
-                        sprite.WriteSecondary( writer );
-                } );
-                writer.DoEnqueuedOffsetWritesReversed();
-            }
+                foreach ( var sprite in Sprites )
+                    sprite.WriteFirst( writer );
+            } );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var texture in TextureSet.Textures )
+                    writer.AddStringToStringTable( texture.Name );
+            } );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var sprite in Sprites )
+                    writer.AddStringToStringTable( sprite.Name );
+            } );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var sprite in Sprites )
+                    sprite.WriteSecondary( writer );
+            } );
+            writer.PopStringTablesReversed();
+            writer.DoEnqueuedOffsetWritesReversed();
         }
 
         public SpriteSet()

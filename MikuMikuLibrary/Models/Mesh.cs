@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Materials;
 using System.Collections.Generic;
 
@@ -7,20 +8,16 @@ namespace MikuMikuLibrary.Models
     public class Mesh
     {
         public const int ByteSize = 0x50;
-        public const int SkinningByteSize = 0x40;
 
         public List<SubMesh> SubMeshes { get; }
         public List<Material> Materials { get; }
-        public List<Bone> Bones { get; }
-        public MeshExData ExData { get; set; }
+        public MeshSkin Skin { get; set; }
         public string Name { get; set; }
         public int ID { get; set; }
         public BoundingSphere BoundingSphere { get; set; }
 
-        internal void Read( EndianBinaryReader reader )
+        internal void Read( EndianBinaryReader reader, MeshSection section = null )
         {
-            reader.PushBaseOffset();
-
             uint signature = reader.ReadUInt32();
             BoundingSphere = BoundingSphere.FromReader( reader );
             int subMeshCount = reader.ReadInt32();
@@ -34,7 +31,7 @@ namespace MikuMikuLibrary.Models
                 reader.ReadAtOffset( subMeshesOffset + ( i * SubMesh.ByteSize ), () =>
                 {
                     var submesh = new SubMesh();
-                    submesh.Read( reader );
+                    submesh.Read( reader, section );
                     SubMeshes.Add( submesh );
                 } );
             }
@@ -49,20 +46,17 @@ namespace MikuMikuLibrary.Models
                     Materials.Add( material );
                 } );
             }
-
-            reader.PopBaseOffset();
         }
 
-        internal void Write( EndianBinaryWriter writer )
+        internal void Write( EndianBinaryWriter writer, MeshSection section = null )
         {
-            writer.PushBaseOffset();
             writer.Write( 0x10000 );
             BoundingSphere.Write( writer );
             writer.Write( SubMeshes.Count );
             writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var subMesh in SubMeshes )
-                    subMesh.Write( writer );
+                    subMesh.Write( writer, section );
             } );
             writer.Write( Materials.Count );
             writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
@@ -71,14 +65,12 @@ namespace MikuMikuLibrary.Models
                     material.Write( writer );
             } );
             writer.WriteNulls( 0x28 );
-            writer.PopBaseOffset();
         }
 
         public Mesh()
         {
             SubMeshes = new List<SubMesh>();
             Materials = new List<Material>();
-            Bones = new List<Bone>();
         }
     }
 }

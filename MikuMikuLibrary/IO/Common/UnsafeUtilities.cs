@@ -4,7 +4,7 @@
 
 using System;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO.Common
 {
     public static unsafe class UnsafeUtilities
     {

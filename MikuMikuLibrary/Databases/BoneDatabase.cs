@@ -1,9 +1,9 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Numerics;
-using System.Text;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -127,8 +127,14 @@ namespace MikuMikuLibrary.Databases
                 foreach ( var boneEntry in Bones )
                     boneEntry.Write( writer );
 
-                writer.Write( 255 );
-                writer.Write( 255 );
+                writer.Write( ( byte )255 );
+                writer.Write( ( byte )0 );
+                writer.Write( ( byte )0 );
+                writer.Write( ( byte )0 );
+                writer.Write( ( byte )255 );
+                writer.Write( ( byte )0 );
+                writer.Write( ( byte )0 );
+                writer.Write( ( byte )0 );
                 writer.AddStringToStringTable( "End" );
             } );
             writer.Write( Positions.Count );
@@ -170,70 +176,56 @@ namespace MikuMikuLibrary.Databases
 
     public class BoneDatabase : BinaryFile
     {
-        public override bool CanLoad
+        public override BinaryFileFlags Flags
         {
-            get { return true; }
-        }
-
-        public override bool CanSave
-        {
-            get { return true; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat; }
         }
 
         public List<SkeletonEntry> Skeletons { get; }
 
-        protected override void Read( Stream source )
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            uint signature = reader.ReadUInt32();
+            int skeletonCount = reader.ReadInt32();
+            uint skeletonsOffset = reader.ReadUInt32();
+            uint skeletonNamesOffset = reader.ReadUInt32();
+
+            reader.ReadAtOffset( skeletonsOffset, () =>
             {
-                uint signature = reader.ReadUInt32();
-                int skeletonCount = reader.ReadInt32();
-                uint skeletonsOffset = reader.ReadUInt32();
-                uint skeletonNamesOffset = reader.ReadUInt32();
-
-                reader.ReadAtOffset( skeletonsOffset, () =>
+                Skeletons.Capacity = skeletonCount;
+                for ( int i = 0; i < skeletonCount; i++ )
                 {
-                    Skeletons.Capacity = skeletonCount;
-                    for ( int i = 0; i < skeletonCount; i++ )
+                    reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
                     {
-                        reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
-                        {
-                            var skeletonEntry = new SkeletonEntry();
-                            skeletonEntry.Read( reader );
-                            Skeletons.Add( skeletonEntry );
-                        } );
-                    }
-                } );
+                        var skeletonEntry = new SkeletonEntry();
+                        skeletonEntry.Read( reader );
+                        Skeletons.Add( skeletonEntry );
+                    } );
+                }
+            } );
 
-                reader.ReadAtOffset( skeletonNamesOffset, () =>
-                {
-                    foreach ( var skeletonEntry in Skeletons )
-                        skeletonEntry.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-                } );
-            }
+            reader.ReadAtOffset( skeletonNamesOffset, () =>
+            {
+                foreach ( var skeletonEntry in Skeletons )
+                    skeletonEntry.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            } );
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            writer.Write( 0x09102720 );
+            writer.Write( Skeletons.Count );
+            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
             {
-                writer.Write( 0x09102720 );
-                writer.Write( Skeletons.Count );
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
-                {
-                    foreach ( var skeletonEntry in Skeletons )
-                        writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () => skeletonEntry.Write( writer ) );
-                } );
-                writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
-                {
-                    foreach ( var skeletonEntry in Skeletons )
-                        writer.AddStringToStringTable( skeletonEntry.Name );
-                } );
-                writer.WriteNulls( 20 );
-                writer.DoEnqueuedOffsetWrites();
-                writer.PopStringTablesReversed();
-            }
+                foreach ( var skeletonEntry in Skeletons )
+                    writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () => skeletonEntry.Write( writer ) );
+            } );
+            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            {
+                foreach ( var skeletonEntry in Skeletons )
+                    writer.AddStringToStringTable( skeletonEntry.Name );
+            } );
+            writer.WriteNulls( 20 );
         }
 
         public BoneDatabase()

@@ -1,5 +1,6 @@
 ﻿using MikuMikuLibrary.Processing.Textures.DDS;
 using MikuMikuLibrary.Textures;
+using System.Collections.Generic;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -36,9 +37,8 @@ namespace MikuMikuLibrary.Processing.Textures
             }
         }
 
-        public unsafe static Bitmap Decode( Texture texture )
+        public unsafe static Bitmap Decode( SubTexture subTexture )
         {
-            var subTexture = texture[ 0 ];
             var bitmap = new Bitmap( subTexture.Width, subTexture.Height );
             var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );
 
@@ -57,8 +57,42 @@ namespace MikuMikuLibrary.Processing.Textures
 
                 bitmap.UnlockBits( bitmapData );
             }
-            else if ( texture.IsYCbCr )
+            else
             {
+                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
+                var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
+                Marshal.Copy( buffer, 0, bitmapData.Scan0, buffer.Length );
+                bitmap.UnlockBits( bitmapData );
+            }
+
+            return bitmap;
+        }
+
+        private static IEnumerable<int> CubeMapToDDSCubeMap()
+        {
+            yield return 0;
+            yield return 1;
+            yield return 2;
+            yield return 3;
+            yield return 5;
+            yield return 4;
+
+            // Just for you Yukikami
+            //yield return 0;
+            //yield return 4;
+            //yield return 1;
+            //yield return 5;
+            //yield return 3;
+            //yield return 2;
+        }
+
+        public unsafe static Bitmap Decode( Texture texture )
+        {
+            if ( texture.IsYCbCr )
+            {
+                var bitmap = new Bitmap( texture[ 0 ].Width, texture[ 0 ].Height );
+                var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );
+
                 var lumBuffer = DDSCodec.DecompressPixelDataToRGBA(
                     texture[ 0 ].Data, texture[ 0 ].Width, texture[ 0 ].Height, TextureUtilities.GetDDSPixelFormat( texture.Format ) );
 
@@ -76,17 +110,23 @@ namespace MikuMikuLibrary.Processing.Textures
                 }
 
                 bitmap.UnlockBits( bitmapData );
+                return bitmap;
             }
 
-            else
+            else if ( texture.UsesDepth )
             {
-                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
-                var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
-                Marshal.Copy( buffer, 0, bitmapData.Scan0, buffer.Length );
-                bitmap.UnlockBits( bitmapData );
+                var bitmap = new Bitmap( texture.Width * texture.Depth, texture.Height );
+                using ( var gfx = Graphics.FromImage( bitmap ) )
+                {
+                    int currentIndex = 0;
+                    foreach ( var i in CubeMapToDDSCubeMap() )
+                        gfx.DrawImageUnscaled( Decode( texture[ i, 0 ] ), ( currentIndex++ ) * texture.Width, 0 );
+                }
+
+                return bitmap;
             }
 
-            return bitmap;
+            return Decode( texture[ 0 ] );
         }
 
         public static void DecodeToPNG( Texture texture, string fileName )
@@ -119,12 +159,19 @@ namespace MikuMikuLibrary.Processing.Textures
 
             ddsHeader.Save( destination );
 
-            foreach ( var level in texture.EnumerateLevels() )
+            if ( texture.UsesDepth )
             {
-                foreach ( var mipMap in level )
+                foreach ( var i in CubeMapToDDSCubeMap() )
                 {
-                    destination.Write( mipMap.Data, 0, mipMap.Data.Length );
+                    foreach ( var mipMap in texture.EnumerateMipMaps( i ) )
+                        destination.Write( mipMap.Data, 0, mipMap.Data.Length );
                 }
+            }
+
+            else
+            {
+                foreach ( var mipMap in texture.EnumerateMipMaps() )
+                    destination.Write( mipMap.Data, 0, mipMap.Data.Length );
             }
         }
 

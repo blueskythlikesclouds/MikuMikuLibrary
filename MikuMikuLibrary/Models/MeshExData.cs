@@ -1,5 +1,6 @@
-﻿using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO.Common;
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -26,9 +27,55 @@ namespace MikuMikuLibrary.Models
         }
     }
 
+    public class MeshExBlockConstraint : MeshExBlockBase
+    {
+        public override string Kind
+        {
+            get { return "CNS"; }
+        }
+
+        public string Field10 { get; set; }
+        public string Field11 { get; set; }
+        public List<string> Field12 { get; set; }
+
+        internal override void Read( EndianBinaryReader reader )
+        {
+            base.Read( reader );
+
+            Field10 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            Field11 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+
+            int count = reader.ReadInt32();
+            for ( int i = 0; i < count; i++ )
+                Field12.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+        }
+
+        internal override void Write( EndianBinaryWriter writer )
+        {
+            base.Write( writer );
+
+            writer.AddStringToStringTable( Field10 );
+            writer.AddStringToStringTable( Field11 );
+            writer.Write( Field12.Count );
+
+            foreach ( var value in Field12 )
+                writer.AddStringToStringTable( value );
+
+            writer.WriteNulls( ( 11 - Field12.Count ) * 4 );
+        }
+
+        public MeshExBlockConstraint()
+        {
+            Field12 = new List<string>( 11 );
+        }
+    }
+
     public class MeshExBlockMotion : MeshExBlockBase
     {
-        public override string Kind => "MOT";
+        public override string Kind
+        {
+            get { return "MOT"; }
+        }
 
         public string Field10 { get; set; }
         public List<int> Field11 { get; }
@@ -87,7 +134,10 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockExpression : MeshExBlockBase
     {
-        public override string Kind => "EXP";
+        public override string Kind
+        {
+            get { return "EXP"; }
+        }
 
         public string Field10 { get; set; }
         public List<string> Field11 { get; }
@@ -127,7 +177,10 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockOsage : MeshExBlockBase
     {
-        public override string Kind => "OSG";
+        public override string Kind
+        {
+            get { return "OSG"; }
+        }
 
         public int Field10 { get; set; }
         public int Field11 { get; set; }
@@ -286,8 +339,11 @@ namespace MikuMikuLibrary.Models
                             case "MOT":
                                 exBlock = new MeshExBlockMotion();
                                 break;
+                            case "CNS":
+                                exBlock = new MeshExBlockConstraint();
+                                break;
                             default:
-                                Console.WriteLine( "WARNING: Unknown ex-block type {0}", exBlockKind );
+                                Debug.WriteLine( $"WARNING: Unknown ex-block type {exBlockKind}" );
                                 break;
                         }
 

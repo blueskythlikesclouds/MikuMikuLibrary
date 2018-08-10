@@ -1,7 +1,7 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -68,85 +68,69 @@ namespace MikuMikuLibrary.Databases
 
     public class MotionDatabase : BinaryFile
     {
-        public override bool CanLoad
+        public override BinaryFileFlags Flags
         {
-            get { return true; }
-        }
-
-        public override bool CanSave
-        {
-            get { return true; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
         }
 
         public List<MotionSetEntry> MotionSets { get; }
         public List<string> BoneNames { get; }
 
-        protected override void Read( Stream source )
+        internal override void Read( EndianBinaryReader reader, Section section = null )
         {
-            using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            int version = reader.ReadInt32();
+            uint motionSetsOffset = reader.ReadUInt32();
+            uint motionSetIDsOffset = reader.ReadUInt32();
+            int motionSetCount = reader.ReadInt32();
+            uint boneNameOffsetsOffset = reader.ReadUInt32();
+            int boneNameCount = reader.ReadInt32();
+
+            reader.ReadAtOffset( motionSetsOffset, () =>
             {
-                int version = reader.ReadInt32();
-                uint motionSetsOffset = reader.ReadUInt32();
-                uint motionSetIDsOffset = reader.ReadUInt32();
-                int motionSetCount = reader.ReadInt32();
-                uint boneNameOffsetsOffset = reader.ReadUInt32();
-                int boneNameCount = reader.ReadInt32();
-
-                reader.ReadAtOffset( motionSetsOffset, () =>
+                MotionSets.Capacity = motionSetCount;
+                for ( int i = 0; i < motionSetCount; i++ )
                 {
-                    MotionSets.Capacity = motionSetCount;
-                    for ( int i = 0; i < motionSetCount; i++ )
-                    {
-                        var motionSetEntry = new MotionSetEntry();
-                        motionSetEntry.Read( reader );
-                        MotionSets.Add( motionSetEntry );
-                    }
-                } );
+                    var motionSetEntry = new MotionSetEntry();
+                    motionSetEntry.Read( reader );
+                    MotionSets.Add( motionSetEntry );
+                }
+            } );
 
-                reader.ReadAtOffset( motionSetIDsOffset, () =>
-                {
-                    foreach ( var motionSetEntry in MotionSets )
-                        motionSetEntry.ID = reader.ReadInt32();
-                } );
+            reader.ReadAtOffset( motionSetIDsOffset, () =>
+            {
+                foreach ( var motionSetEntry in MotionSets )
+                    motionSetEntry.ID = reader.ReadInt32();
+            } );
 
-                reader.ReadAtOffset( boneNameOffsetsOffset, () =>
-                {
-                    BoneNames.Capacity = boneNameCount;
-                    for ( int i = 0; i < boneNameCount; i++ )
-                        BoneNames.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
-                } );
-            }
+            reader.ReadAtOffset( boneNameOffsetsOffset, () =>
+            {
+                BoneNames.Capacity = boneNameCount;
+                for ( int i = 0; i < boneNameCount; i++ )
+                    BoneNames.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+            } );
         }
 
-        protected override void Write( Stream destination )
+        internal override void Write( EndianBinaryWriter writer, Section section = null )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            writer.Write( 1 );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
             {
-                writer.Write( 1 );
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    foreach ( var motionSetEntry in MotionSets )
-                        motionSetEntry.Write( writer );
-                } );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    foreach ( var motionSetEntry in MotionSets )
-                        writer.Write( motionSetEntry.ID );
-                } );
-                writer.Write( MotionSets.Count );
-                writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
-                {
-                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-
-                    foreach ( var boneName in BoneNames )
-                        writer.AddStringToStringTable( boneName );
-                } );
-                writer.Write( BoneNames.Count );
-                writer.WriteAlignmentPadding( 64 );
-                writer.DoEnqueuedOffsetWrites();
-                writer.PopStringTablesReversed();
-            }
+                foreach ( var motionSetEntry in MotionSets )
+                    motionSetEntry.Write( writer );
+            } );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var motionSetEntry in MotionSets )
+                    writer.Write( motionSetEntry.ID );
+            } );
+            writer.Write( MotionSets.Count );
+            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            {
+                foreach ( var boneName in BoneNames )
+                    writer.AddStringToStringTable( boneName );
+            } );
+            writer.Write( BoneNames.Count );
+            writer.WriteAlignmentPadding( 64 );
         }
 
         public MotionDatabase()

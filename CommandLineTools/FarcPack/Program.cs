@@ -39,24 +39,24 @@ namespace FarcPack
                     farcArchive.Add( Path.GetFileName( filePath ), filePath );
 
                 farcArchive.Save( destinationFileName );
-                farcArchive.Dispose();
             }
 
             else if ( args[ 0 ].EndsWith( ".farc", StringComparison.OrdinalIgnoreCase ) )
             {
                 destinationFileName = Path.ChangeExtension( destinationFileName, null );
 
-                var farcArchive = FarcArchive.Load<FarcArchive>( sourceFileName );
-
-                Directory.CreateDirectory( destinationFileName );
-                foreach ( var fileName in farcArchive )
+                using ( var stream = File.OpenRead( sourceFileName ) )
                 {
-                    using ( var destination = File.Create( Path.Combine( destinationFileName, fileName ) ) )
-                    using ( var source = farcArchive.Open( fileName ) )
-                        source.CopyTo( destination );
-                }
+                    var farcArchive = FarcArchive.Load<FarcArchive>( stream );
 
-                farcArchive.Dispose();
+                    Directory.CreateDirectory( destinationFileName );
+                    foreach ( var fileName in farcArchive )
+                    {
+                        using ( var destination = File.Create( Path.Combine( destinationFileName, fileName ) ) )
+                        using ( var source = farcArchive.Open( fileName ) )
+                            source.CopyTo( destination );
+                    }
+                }
             }
         }
     }

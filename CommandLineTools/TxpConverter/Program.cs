@@ -77,7 +77,6 @@ namespace TxpConverter
                     textureSet.Textures.Add( texture );
 
                 textureSet.Save( destinationFileName );
-                textureSet.Dispose();
             }
 
             else if ( sourceFileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
@@ -96,8 +95,6 @@ namespace TxpConverter
                     else
                         TextureDecoder.DecodeToPNG( texture, Path.Combine( destinationFileName, $"{i}.png" ) );
                 }
-
-                textureSet.Dispose();
             }
         }
     }
