@@ -1,5 +1,4 @@
-﻿using MikuMikuLibrary.IO.Common;
-using System.IO;
+﻿using System.IO;
 
 namespace MikuMikuLibrary.IO.Sections
 {

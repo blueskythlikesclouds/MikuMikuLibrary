@@ -2,7 +2,7 @@
 
 namespace MikuMikuLibrary.Sprites
 {
-    public class Sprite
+    public partial class Sprite
     {
         public string Name { get; set; }
         public int Field00 { get; set; }
@@ -46,13 +46,13 @@ namespace MikuMikuLibrary.Sprites
             writer.Write( Height );
         }
 
-        internal void ReadSecondary( EndianBinaryReader reader )
+        internal void ReadSecond( EndianBinaryReader reader )
         {
             Field00 = reader.ReadInt32();
             Field01 = reader.ReadInt32();
         }
 
-        internal void WriteSecondary( EndianBinaryWriter writer )
+        internal void WriteSecond( EndianBinaryWriter writer )
         {
             writer.Write( Field00 );
             writer.Write( Field01 );

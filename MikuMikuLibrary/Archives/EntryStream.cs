@@ -65,4 +65,10 @@ namespace MikuMikuLibrary.Archives
             this.source = source;
         }
     }
+
+    public enum EntryStreamMode
+    {
+        MemoryStream,
+        OriginalStream,
+    };
 }

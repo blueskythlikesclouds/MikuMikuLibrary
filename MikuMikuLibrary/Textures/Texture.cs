@@ -5,7 +5,7 @@ using System.IO;
 
 namespace MikuMikuLibrary.Textures
 {
-    public class Texture
+    public partial class Texture
     {
         private SubTexture[,] subTextures;
 
@@ -87,6 +87,9 @@ namespace MikuMikuLibrary.Textures
             byte depth = reader.ReadByte();
             short rubbish = reader.ReadInt16();
 
+            if ( depth == 1 && mipMapCount != subTextureCount )
+                mipMapCount = ( byte )subTextureCount;
+
             subTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )
             {
@@ -115,7 +118,7 @@ namespace MikuMikuLibrary.Textures
                 for ( int j = 0; j < MipMapCount; j++ )
                 {
                     var subTexture = subTextures[ i, j ];
-                    writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+                    writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
                     {
                         subTexture.Write( writer );
                     } );

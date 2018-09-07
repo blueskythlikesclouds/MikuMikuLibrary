@@ -37,7 +37,7 @@ namespace MikuMikuLibrary.Databases
 
         public List<AetSetEntry> AetSets { get; }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             int aetSetCount = reader.ReadInt32();
             uint aetSetsOffset = reader.ReadUInt32();
@@ -96,10 +96,10 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( AetSets.Count );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 for ( int i = 0; i < AetSets.Count; i++ )
                 {
@@ -115,7 +115,7 @@ namespace MikuMikuLibrary.Databases
                 }
             } );
             writer.Write( AetSets.Sum( x => x.Aets.Count ) );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 for ( int i = 0; i < AetSets.Count; i++ )
                 {

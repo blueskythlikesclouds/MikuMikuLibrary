@@ -169,7 +169,7 @@ namespace MikuMikuLibrary.Databases
             writer.AddStringToStringTable( CollisionFilePath );
             writer.Write( Field04 );
             writer.Write( Field05 );
-            writer.EnqueueOffsetWriteAlignedIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWriteIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentKind.Left, () =>
             {
                 writer.Write( Field06 );
                 writer.Write( Field07 );
@@ -265,7 +265,7 @@ namespace MikuMikuLibrary.Databases
 
         internal void WriteFourth( EndianBinaryWriter writer )
         {
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var id in Auth3DIDs )
                     writer.Write( id );
@@ -290,7 +290,7 @@ namespace MikuMikuLibrary.Databases
         public List<StageEntry> Stages { get; }
         public bool IsFutureTone { get; set; }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             int count = reader.ReadInt32();
             uint section1Offset = reader.ReadUInt32();
@@ -334,25 +334,25 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( Stages.Count );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
                     stageEntry.WriteFirst( writer, Format );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
                     stageEntry.WriteSecond( writer );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
                     stageEntry.WriteThird( writer );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 for ( int i = 0; i < Stages.Count; i++ )
                 {

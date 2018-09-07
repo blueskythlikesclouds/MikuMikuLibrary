@@ -23,7 +23,7 @@
         F2nd,
 
         /// <summary>
-        /// X, not implemented yet. Don't use this!!
+        /// X
         /// </summary>
         X,
     }

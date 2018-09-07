@@ -21,13 +21,22 @@ namespace MikuMikuLibrary.IO.Common
         Right,
     };
 
+    public enum OffsetKind
+    {
+        Offset,
+        Size,
+        OffsetAndSize,
+        SizeAndOffset,
+    };
+
     public class EndianBinaryWriter : BinaryWriter
     {
         private class OffsetWrite
         {
             public long BaseOffset;
             public long FieldOffset;
-            public Action Body;
+            public Action WriteAction;
+            public OffsetKind OffsetKind;
             public AlignmentKind AlignmentKind;
             public int Alignment;
             public byte AlignmentFillerByte;
@@ -202,54 +211,51 @@ namespace MikuMikuLibrary.IO.Common
             long previousOffset = Position;
 
             SeekBegin( offset );
-            body.Invoke();
-
+            {
+                body.Invoke();
+            }
             SeekBegin( previousOffset );
         }
 
         public void EnqueueOffsetWrite( Action body )
         {
-            offsetWriteQueue.Enqueue( new OffsetWrite
-            {
-                FieldOffset = Position,
-                Body = body,
-                AlignmentKind = AlignmentKind.None,
-                Alignment = 0,
-                AlignmentFillerByte = 0,
-                BaseOffset = baseOffsetStack.Count > 0 ? baseOffsetStack.Peek() : 0,
-            } );
-
-            Write( 0u );
+            EnqueueOffsetWrite( 0, 0, AlignmentKind.None, OffsetKind.Offset, body );
         }
 
-        public void EnqueueOffsetWriteAligned( int alignment, AlignmentKind alignmentKind, Action body )
+        public void EnqueueOffsetWrite( OffsetKind offsetKind, Action body )
+        {
+            EnqueueOffsetWrite( 0, 0, AlignmentKind.None, offsetKind, body );
+        }
+
+        public void EnqueueOffsetWrite( int alignment, AlignmentKind alignmentKind, Action body )
+        {
+            EnqueueOffsetWrite( alignment, 0, alignmentKind, OffsetKind.Offset, body );
+        }
+
+        public void EnqueueOffsetWrite( int alignment, AlignmentKind alignmentKind, OffsetKind offsetKind, Action body )
+        {
+            EnqueueOffsetWrite( alignment, 0, alignmentKind, offsetKind, body );
+        }
+
+        public void EnqueueOffsetWrite( int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, Action body )
+        {
+            EnqueueOffsetWrite( alignment, alignmentFillerByte, alignmentKind, OffsetKind.Offset, body );
+        }
+
+        public void EnqueueOffsetWrite( int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, OffsetKind offsetKind, Action body )
         {
             offsetWriteQueue.Enqueue( new OffsetWrite
             {
                 FieldOffset = Position,
-                Body = body,
-                AlignmentKind = alignmentKind,
-                Alignment = alignment,
-                AlignmentFillerByte = 0,
-                BaseOffset = baseOffsetStack.Count > 0 ? baseOffsetStack.Peek() : 0,
-            } );
-
-            Write( 0u );
-        }
-
-        public void EnqueueOffsetWriteAligned( int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, Action body )
-        {
-            offsetWriteQueue.Enqueue( new OffsetWrite
-            {
-                FieldOffset = Position,
-                Body = body,
-                AlignmentKind = alignmentKind,
                 Alignment = alignment,
                 AlignmentFillerByte = alignmentFillerByte,
-                BaseOffset = baseOffsetStack.Count > 0 ? baseOffsetStack.Peek() : 0,
+                AlignmentKind = alignmentKind,
+                OffsetKind = offsetKind,
+                WriteAction = body,
+                BaseOffset = baseOffsetStack.Any() ? baseOffsetStack.Peek() : 0,
             } );
 
-            Write( 0u );
+            PrepareOffsetWrite( offsetKind );
         }
 
         public void EnqueueOffsetWriteIf( bool condition, Action body )
@@ -257,23 +263,63 @@ namespace MikuMikuLibrary.IO.Common
             if ( condition )
                 EnqueueOffsetWrite( body );
             else
-                Write( 0 );
+                PrepareOffsetWrite( OffsetKind.Offset );
         }
 
-        public void EnqueueOffsetWriteAlignedIf( bool condition, int alignment, AlignmentKind alignmentKind, Action body )
+        public void EnqueueOffsetWriteIf( bool condition, OffsetKind offsetKind, Action body )
         {
             if ( condition )
-                EnqueueOffsetWriteAligned( alignment, alignmentKind, body );
+                EnqueueOffsetWrite( offsetKind, body );
             else
-                Write( 0 );
+                PrepareOffsetWrite( offsetKind );
         }
 
-        public void EnqueueOffsetWriteAlignedIf( bool condition, int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, Action body )
+        public void EnqueueOffsetWriteIf( bool condition, int alignment, AlignmentKind alignmentKind, Action body )
         {
             if ( condition )
-                EnqueueOffsetWriteAligned( alignment, alignmentFillerByte, alignmentKind, body );
+                EnqueueOffsetWrite( alignment, alignmentKind, body );
             else
-                Write( 0 );
+                PrepareOffsetWrite( OffsetKind.Offset );
+        }
+
+        public void EnqueueOffsetWriteIf( bool condition, int alignment, AlignmentKind alignmentKind, OffsetKind offsetKind, Action body )
+        {
+            if ( condition )
+                EnqueueOffsetWrite( alignment, alignmentKind, offsetKind, body );
+            else
+                PrepareOffsetWrite( offsetKind );
+        }
+
+        public void EnqueueOffsetWriteIf( bool condition, int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, Action body )
+        {
+            if ( condition )
+                EnqueueOffsetWrite( alignment, alignmentFillerByte, alignmentKind, body );
+            else
+                PrepareOffsetWrite( OffsetKind.Offset );
+        }
+
+        public void EnqueueOffsetWriteIf( bool condition, int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, OffsetKind offsetKind, Action body )
+        {
+            if ( condition )
+                EnqueueOffsetWrite( alignment, alignmentFillerByte, alignmentKind, offsetKind, body );
+            else
+                PrepareOffsetWrite( offsetKind );
+        }
+
+        private void PrepareOffsetWrite( OffsetKind offsetKind )
+        {
+            switch ( offsetKind )
+            {
+                case OffsetKind.Offset:
+                case OffsetKind.Size:
+                    Write( 0 );
+                    break;
+
+                case OffsetKind.OffsetAndSize:
+                case OffsetKind.SizeAndOffset:
+                    Write( 0L );
+                    break;
+            }
         }
 
         private void DoOffsetWrite( OffsetWrite offsetWrite, long baseOffset )
@@ -287,7 +333,8 @@ namespace MikuMikuLibrary.IO.Common
             }
 
             long offset = Position;
-            offsetWrite.Body.Invoke();
+            offsetWrite.WriteAction.Invoke();
+            long endOffset = Position;
 
             if ( offsetWrite.AlignmentKind == AlignmentKind.Right ||
                 offsetWrite.AlignmentKind == AlignmentKind.Center )
@@ -298,10 +345,28 @@ namespace MikuMikuLibrary.IO.Common
             if ( offsetWrite.BaseOffset != 0 )
                 baseOffset = offsetWrite.BaseOffset;
 
-            long endOffset = Position;
+            long endOffsetAligned = Position;
             SeekBegin( offsetWrite.FieldOffset );
-            Write( ( uint )( offset - baseOffset ) );
-            SeekBegin( endOffset );
+            switch ( offsetWrite.OffsetKind )
+            {
+                case OffsetKind.Offset:
+                    Write( ( uint )( offset - baseOffset ) );
+                    break;
+                case OffsetKind.Size:
+                    Write( ( uint )( endOffset - offset ) );
+                    break;
+                case OffsetKind.OffsetAndSize:
+                    Write( ( uint )( offset - baseOffset ) );
+                    Write( ( uint )( endOffset - offset ) );
+                    break;
+                case OffsetKind.SizeAndOffset:
+                    Write( ( uint )( endOffset - offset ) );
+                    Write( ( uint )( offset - baseOffset ) );
+                    break;
+                default:
+                    throw new ArgumentException( nameof( offsetWrite.OffsetKind ) );
+            }
+            SeekBegin( endOffsetAligned );
 
             // For the relocation table
             offsetPositions.Add( offsetWrite.FieldOffset );
@@ -418,13 +483,16 @@ namespace MikuMikuLibrary.IO.Common
         {
             var stringTable = stringTableStack.Peek();
 
-            if ( stringTable.Strings.ContainsKey( value ) )
-                stringTable.Strings[ value ].Add( Position );
-            else
+            if ( !string.IsNullOrEmpty( value ) )
             {
-                var offsets = new List<long>();
-                offsets.Add( Position );
-                stringTable.Strings.Add( value, offsets );
+                if ( stringTable.Strings.TryGetValue( value, out List<long> positions ) )
+                    positions.Add( Position );
+                else
+                {
+                    var offsets = new List<long>();
+                    offsets.Add( Position );
+                    stringTable.Strings.Add( value, offsets );
+                }
             }
 
             Write( 0 );
@@ -696,6 +764,20 @@ namespace MikuMikuLibrary.IO.Common
             WriteHalf( ( Half )value.G );
             WriteHalf( ( Half )value.B );
             WriteHalf( ( Half )value.A );
+        }
+
+        public void Write( BoundingSphere boundingSphere )
+        {
+            Write( boundingSphere.Center );
+            Write( boundingSphere.Radius );
+        }
+
+        public void Write( BoundingBox boundingBox )
+        {
+            Write( boundingBox.Center );
+            Write( boundingBox.Width );
+            Write( boundingBox.Height );
+            Write( boundingBox.Depth );
         }
 
         protected override void Dispose( bool disposing )

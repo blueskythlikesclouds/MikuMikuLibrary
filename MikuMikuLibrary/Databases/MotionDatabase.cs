@@ -47,13 +47,13 @@ namespace MikuMikuLibrary.Databases
         internal void Write( EndianBinaryWriter writer )
         {
             writer.AddStringToStringTable( Name );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var motionEntry in Motions )
                     writer.AddStringToStringTable( motionEntry.Name );
             } );
             writer.Write( Motions.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var motionEntry in Motions )
                     writer.Write( motionEntry.ID );
@@ -76,7 +76,7 @@ namespace MikuMikuLibrary.Databases
         public List<MotionSetEntry> MotionSets { get; }
         public List<string> BoneNames { get; }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             int version = reader.ReadInt32();
             uint motionSetsOffset = reader.ReadUInt32();
@@ -110,21 +110,21 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( 1 );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var motionSetEntry in MotionSets )
                     motionSetEntry.Write( writer );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var motionSetEntry in MotionSets )
                     writer.Write( motionSetEntry.ID );
             } );
             writer.Write( MotionSets.Count );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var boneName in BoneNames )
                     writer.AddStringToStringTable( boneName );

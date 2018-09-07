@@ -11,6 +11,11 @@ namespace MikuMikuLibrary.IO.Sections
             get { return Endianness.LittleEndian; }
         }
 
+        public override SectionFlags Flags
+        {
+            get { return SectionFlags.None; }
+        }
+
         protected override void Read( EndianBinaryReader reader, long length )
         {
         }

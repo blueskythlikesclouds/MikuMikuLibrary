@@ -36,6 +36,9 @@
       <HintPath>.\AssimpNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NvTriStripDotNet">
+      <HintPath>.\NvTriStripDotNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -62,11 +65,12 @@
     <Compile Include="Databases\StringArray.cs" />
     <Compile Include="IO\BinaryFormat.cs" />
     <Compile Include="IO\BinaryFormatUtilities.cs" />
-    <Compile Include="IO\Common\AddressSpace.cs" />
+    <Compile Include="IO\AddressSpace.cs" />
     <Compile Include="IO\IBinaryFile.cs" />
     <Compile Include="IO\Sections\BinaryFileSection.cs" />
     <Compile Include="IO\Sections\DatabaseSections.cs" />
     <Compile Include="IO\Sections\EndOfFileSection.cs" />
+    <Compile Include="IO\Sections\EnrsSection.cs" />
     <Compile Include="IO\Sections\ModelSections.cs" />
     <Compile Include="IO\Sections\RelocationTableSection.cs" />
     <Compile Include="IO\Sections\Section.cs" />
@@ -79,29 +83,28 @@
     <Compile Include="Misc\HalfUtilities.cs" />
     <Compile Include="Models\BoundingSphere.cs" />
     <Compile Include="Models\MeshSkin.cs" />
-    <Compile Include="Processing\Materials\MaterialCreator.cs" />
-    <Compile Include="Processing\Models\AssimpModelExporter.cs" />
-    <Compile Include="Processing\Models\AssimpModelImporter.cs" />
-    <Compile Include="Processing\Models\AssimpSceneUtilities.cs" />
-    <Compile Include="Processing\Models\NvTriStripUtilities.cs" />
-    <Compile Include="Processing\Sprites\SpriteCropper.cs" />
-    <Compile Include="Processing\Sprites\SpriteOrganizer.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSCodec.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSFormatDetails.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSHeader.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSHeaderCaps.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSHeaderFlags.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSPixelFormat.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSPixelFormatFlags.cs" />
-    <Compile Include="Processing\Textures\DDS\DDSPixelFormatFourCC.cs" />
-    <Compile Include="Processing\Textures\TextureDecoder.cs" />
-    <Compile Include="Processing\Textures\TextureEncoder.cs" />
-    <Compile Include="Processing\Textures\TextureUtilities.cs" />
+    <Compile Include="Materials\MaterialCreator.cs" />
+    <Compile Include="Models\ModelExporter.cs" />
+    <Compile Include="Models\ModelImporter.cs" />
+    <Compile Include="Models\SceneUtilities.cs" />
+    <Compile Include="Sprites\SpriteCropper.cs" />
+    <Compile Include="Sprites\SpriteOrganizer.cs" />
+    <Compile Include="Textures\DDS\DDSCodec.cs" />
+    <Compile Include="Textures\DDS\DDSFormatDetails.cs" />
+    <Compile Include="Textures\DDS\DDSHeader.cs" />
+    <Compile Include="Textures\DDS\DDSHeaderCaps.cs" />
+    <Compile Include="Textures\DDS\DDSHeaderFlags.cs" />
+    <Compile Include="Textures\DDS\DDSPixelFormat.cs" />
+    <Compile Include="Textures\DDS\DDSPixelFormatFlags.cs" />
+    <Compile Include="Textures\DDS\DDSPixelFormatFourCC.cs" />
+    <Compile Include="Textures\TextureDecoder.cs" />
+    <Compile Include="Textures\TextureEncoder.cs" />
+    <Compile Include="Textures\TextureUtilities.cs" />
     <Compile Include="Sprites\Sprite.cs" />
     <Compile Include="Sprites\SpriteSet.cs" />
     <Compile Include="IO\BinaryFile.cs" />
     <Compile Include="Models\BoundingBox.cs" />
-    <Compile Include="Models\Color.cs" />
+    <Compile Include="Misc\Color.cs" />
     <Compile Include="Databases\BoneDatabase.cs" />
     <Compile Include="Databases\TextureDatabase.cs" />
     <Compile Include="Models\Bone.cs" />
@@ -111,8 +114,6 @@
     <Compile Include="Models\MeshExData.cs" />
     <Compile Include="Models\Model.cs" />
     <Compile Include="Models\SubMesh.cs" />
-    <Compile Include="Motions\Motion.cs" />
-    <Compile Include="Motions\MotionSet.cs" />
     <Compile Include="Textures\Texture.cs" />
     <Compile Include="Textures\TextureFormat.cs" />
     <Compile Include="Textures\TextureSet.cs" />
@@ -140,12 +141,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="AssimpLicense.txt" />
-    <Content Include="ManagedNvTriStrip32.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ManagedNvTriStrip64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

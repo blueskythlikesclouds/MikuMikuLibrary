@@ -12,12 +12,12 @@ namespace MikuMikuLibrary.Models
 
         internal void Read( EndianBinaryReader reader )
         {
-            uint boneIDsOffset = reader.ReadUInt32();
-            uint boneMatricesOffset = reader.ReadUInt32();
-            uint boneNamesOffset = reader.ReadUInt32();
-            uint meshExDataOffset = reader.ReadUInt32();
+            long boneIDsOffset = reader.ReadOffset();
+            long boneMatricesOffset = reader.ReadOffset();
+            long boneNamesOffset = reader.ReadOffset();
+            long meshExDataOffset = reader.ReadOffset();
             int boneCount = reader.ReadInt32();
-            uint boneParentIDsOffset = reader.ReadUInt32();
+            long boneParentIDsOffset = reader.ReadOffset();
 
             reader.ReadAtOffset( boneIDsOffset, () =>
             {
@@ -57,29 +57,27 @@ namespace MikuMikuLibrary.Models
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Center, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.Write( bone.ID );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Center, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.Write( bone.Matrix );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Center, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.AddStringToStringTable( bone.Name );
             } );
-            writer.EnqueueOffsetWriteAlignedIf( ExData != null, 16, AlignmentKind.Center, () => ExData.Write( writer ) );
+            writer.EnqueueOffsetWriteIf( ExData != null, 16, AlignmentKind.Center, () => ExData.Write( writer ) );
             writer.Write( Bones.Count );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Center, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.Write( bone.ParentID );
-
-                writer.PopStringTable();
             } );
             writer.WriteNulls( 40 );
         }

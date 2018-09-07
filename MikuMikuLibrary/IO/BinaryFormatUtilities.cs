@@ -37,5 +37,22 @@ namespace MikuMikuLibrary.IO
 
             throw new ArgumentException( nameof( format ) );
         }
+
+        public static AddressSpace GetAddressSpace( BinaryFormat format )
+        {
+            switch ( format )
+            {
+                case BinaryFormat.DT:
+                case BinaryFormat.F:
+                case BinaryFormat.FT:
+                case BinaryFormat.F2nd:
+                    return AddressSpace.Int32;
+
+                case BinaryFormat.X:
+                    return AddressSpace.Int64;
+            }
+
+            throw new ArgumentException( nameof( format ) );
+        }
     }
 }

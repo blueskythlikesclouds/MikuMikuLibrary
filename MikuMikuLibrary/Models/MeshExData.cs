@@ -1,7 +1,6 @@
 ﻿using MikuMikuLibrary.IO.Common;
-using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace MikuMikuLibrary.Models
@@ -85,10 +84,10 @@ namespace MikuMikuLibrary.Models
         {
             base.Read( reader );
 
-            uint field10Offset = reader.ReadUInt32();
+            long field10Offset = reader.ReadOffset();
             int count = reader.ReadInt32();
-            uint field11Offset = reader.ReadUInt32();
-            uint field12Offset = reader.ReadUInt32();
+            long field11Offset = reader.ReadOffset();
+            long field12Offset = reader.ReadOffset();
 
             Field11.Capacity = Field12.Capacity = count;
 
@@ -113,12 +112,12 @@ namespace MikuMikuLibrary.Models
 
             writer.AddStringToStringTable( Field10 );
             writer.Write( Field11.Count );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var value in Field11 )
                     writer.Write( value );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var value in Field12 )
                     writer.Write( value );
@@ -146,7 +145,7 @@ namespace MikuMikuLibrary.Models
         {
             base.Read( reader );
 
-            uint field10Offset = reader.ReadUInt32();
+            long field10Offset = reader.ReadOffset();
             int field11Count = reader.ReadInt32();
 
             Field10 = reader.ReadStringAtOffset( field10Offset, StringBinaryFormat.NullTerminated );
@@ -190,6 +189,9 @@ namespace MikuMikuLibrary.Models
         internal override void Read( EndianBinaryReader reader )
         {
             base.Read( reader );
+
+            if ( reader.AddressSpace == IO.AddressSpace.Int64 )
+                reader.SeekCurrent( 4 );
 
             Field10 = reader.ReadInt32();
             Field11 = reader.ReadInt32();
@@ -289,12 +291,12 @@ namespace MikuMikuLibrary.Models
             int string1Count = reader.ReadInt32();
             int osageCount = reader.ReadInt32();
             reader.SeekCurrent( 4 );
-            uint osageBonesOffset = reader.ReadUInt32();
-            uint string1OffsetsOffset = reader.ReadUInt32();
-            uint exBlocksOffset = reader.ReadUInt32();
+            long osageBonesOffset = reader.ReadOffset();
+            long string1OffsetsOffset = reader.ReadOffset();
+            long exBlocksOffset = reader.ReadOffset();
             int string2Count = reader.ReadInt32();
-            uint string2OffsetsOffset = reader.ReadUInt32();
-            uint exEntriesOffset = reader.ReadUInt32();
+            long string2OffsetsOffset = reader.ReadOffset();
+            long exEntriesOffset = reader.ReadOffset();
 
             reader.ReadAtOffset( osageBonesOffset, () =>
             {
@@ -319,7 +321,7 @@ namespace MikuMikuLibrary.Models
                 while ( true )
                 {
                     string exBlockKind = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-                    uint exBlockDataOffset = reader.ReadUInt32();
+                    long exBlockDataOffset = reader.ReadOffset();
 
                     if ( exBlockDataOffset == 0 )
                         break;
@@ -383,32 +385,32 @@ namespace MikuMikuLibrary.Models
             writer.Write( Strings1.Count );
             writer.Write( Osages.Count );
             writer.WriteNulls( 4 );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var osageBone in Osages )
                     osageBone.Write( writer );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var value in Strings1 )
                     writer.AddStringToStringTable( value );
             } );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var exBlock in ExBlocks )
                 {
                     writer.AddStringToStringTable( exBlock.Kind );
-                    writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () => exBlock.Write( writer ) );
+                    writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => exBlock.Write( writer ) );
                 }
                 writer.WriteNulls( 8 );
             } );
             writer.Write( Strings2.Count );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var value in Strings2 )
                     writer.AddStringToStringTable( value );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var entry in Entries )
                     entry.Write( writer );

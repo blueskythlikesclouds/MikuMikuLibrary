@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Materials;
 using System.Collections.Generic;
@@ -19,16 +20,34 @@ namespace MikuMikuLibrary.Models
         internal void Read( EndianBinaryReader reader, MeshSection section = null )
         {
             uint signature = reader.ReadUInt32();
-            BoundingSphere = BoundingSphere.FromReader( reader );
-            int subMeshCount = reader.ReadInt32();
-            uint subMeshesOffset = reader.ReadUInt32();
-            int materialCount = reader.ReadInt32();
-            uint materialsOffset = reader.ReadUInt32();
+            reader.SeekCurrent( 4 );
+
+            int subMeshCount, materialCount;
+            long subMeshesOffset, materialsOffset;
+
+            // X stores submesh/material count before the bounding sphere
+            if ( section?.Format == BinaryFormat.X )
+            {
+                subMeshCount = reader.ReadInt32();
+                materialCount = reader.ReadInt32();
+                BoundingSphere = reader.ReadBoundingSphere();
+                subMeshesOffset = reader.ReadOffset();
+                materialsOffset = reader.ReadOffset();
+            }
+
+            else
+            {
+                BoundingSphere = reader.ReadBoundingSphere();
+                subMeshCount = reader.ReadInt32();
+                subMeshesOffset = reader.ReadOffset();
+                materialCount = reader.ReadInt32();
+                materialsOffset = reader.ReadOffset();
+            }
 
             SubMeshes.Capacity = subMeshCount;
             for ( int i = 0; i < subMeshCount; i++ )
             {
-                reader.ReadAtOffset( subMeshesOffset + ( i * SubMesh.ByteSize ), () =>
+                reader.ReadAtOffset( subMeshesOffset + ( i * SubMesh.ByteSize( section?.Format ?? BinaryFormat.DT ) ), () =>
                 {
                     var submesh = new SubMesh();
                     submesh.Read( reader, section );
@@ -51,15 +70,16 @@ namespace MikuMikuLibrary.Models
         internal void Write( EndianBinaryWriter writer, MeshSection section = null )
         {
             writer.Write( 0x10000 );
-            BoundingSphere.Write( writer );
+            writer.Write( 0 );
+            writer.Write( BoundingSphere );
             writer.Write( SubMeshes.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var subMesh in SubMeshes )
                     subMesh.Write( writer, section );
             } );
             writer.Write( Materials.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var material in Materials )
                     material.Write( writer );

@@ -1,5 +1,7 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using MikuMikuLibrary.Misc;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -42,7 +44,22 @@ namespace MikuMikuLibrary.Models
             IsModern = 1 << 31,
         };
 
-        public const int ByteSize = 0xD8;
+        public static int ByteSize( BinaryFormat format )
+        {
+            switch ( format )
+            {
+                case BinaryFormat.DT:
+                case BinaryFormat.F:
+                case BinaryFormat.FT:
+                case BinaryFormat.F2nd:
+                    return 0xD8;
+
+                case BinaryFormat.X:
+                    return 0x130;
+            }
+
+            throw new ArgumentException( nameof( format ) );
+        }
 
         public BoundingSphere BoundingSphere { get; set; }
         public List<IndexTable> IndexTables { get; }
@@ -57,19 +74,20 @@ namespace MikuMikuLibrary.Models
 
         internal void Read( EndianBinaryReader reader, MeshSection section = null )
         {
-            BoundingSphere = BoundingSphere.FromReader( reader );
+            reader.SeekCurrent( 4 );
+            BoundingSphere = reader.ReadBoundingSphere();
             int indexTableCount = reader.ReadInt32();
-            uint indexTablesOffset = reader.ReadUInt32();
+            long indexTablesOffset = reader.ReadOffset();
             var vfe = ( VertexFormatElement )reader.ReadUInt32();
             int stride = reader.ReadInt32();
             int vertexCount = reader.ReadInt32();
-            var elemItems = reader.ReadUInt32s( 28 );
+            var elemItems = reader.ReadUInt32s( section?.Format == IO.BinaryFormat.X ? 49 : 28 );
             Name = reader.ReadString( StringBinaryFormat.FixedLength, 64 );
 
             IndexTables.Capacity = indexTableCount;
             for ( int i = 0; i < indexTableCount; i++ )
             {
-                reader.ReadAtOffset( indexTablesOffset + ( i * ( section != null ? IndexTable.ByteSizeModern : IndexTable.ByteSizeClassic ) ), () =>
+                reader.ReadAtOffset( indexTablesOffset + ( i * IndexTable.ByteSize( section?.Format ?? BinaryFormat.DT ) ), () =>
                 {
                     var indexTable = new IndexTable();
                     indexTable.Read( reader, section );
@@ -80,8 +98,8 @@ namespace MikuMikuLibrary.Models
             // Modern Format
             if ( section != null )
             {
-                uint dataOffset = elemItems[ 13 ];
-                uint mode = elemItems[ 21 ];
+                uint dataOffset = elemItems[ section.Format == BinaryFormat.X ? 27 : 13 ];
+                uint mode = elemItems[ section.Format == BinaryFormat.X ? 42 : 21 ];
 
                 if ( mode == 2 || mode == 4 )
                 {
@@ -195,9 +213,10 @@ namespace MikuMikuLibrary.Models
 
         internal void Write( EndianBinaryWriter writer, MeshSection section = null )
         {
-            BoundingSphere.Write( writer );
+            writer.Write( 0 );
+            writer.Write( BoundingSphere );
             writer.Write( IndexTables.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var indexTable in IndexTables )
                     indexTable.Write( writer, section );
@@ -305,7 +324,7 @@ namespace MikuMikuLibrary.Models
                 {
                     var elem = ( VertexFormatElement )( 1 << i );
 
-                    writer.EnqueueOffsetWriteAlignedIf( ( elements & elem ) != 0, 4, AlignmentKind.Left, () =>
+                    writer.EnqueueOffsetWriteIf( ( elements & elem ) != 0, 4, AlignmentKind.Left, () =>
                     {
                         switch ( elem )
                         {

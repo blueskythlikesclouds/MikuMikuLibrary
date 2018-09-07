@@ -18,6 +18,7 @@ namespace MikuMikuLibrary.IO.Common
         private Endianness endianness;
         private bool swap;
         private Encoding encoding;
+        private AddressSpace addressSpace;
         private Stack<long> offsetStack;
         private Stack<long> baseOffsetStack;
 
@@ -40,6 +41,12 @@ namespace MikuMikuLibrary.IO.Common
             get { return swap; }
         }
 
+        public AddressSpace AddressSpace
+        {
+            get { return addressSpace; }
+            set { addressSpace = value; }
+        }
+
         public long Position
         {
             get { return BaseStream.Position; }
@@ -54,25 +61,44 @@ namespace MikuMikuLibrary.IO.Common
         public EndianBinaryReader( Stream input, Endianness endianness )
             : base( input )
         {
-            Init( Encoding.Default, endianness );
+            Init( Encoding.Default, endianness, AddressSpace.Int32 );
+        }
+
+        public EndianBinaryReader( Stream input, Endianness endianness, AddressSpace addressSpace )
+            : base( input )
+        {
+            Init( Encoding.Default, endianness, addressSpace );
         }
 
         public EndianBinaryReader( Stream input, Encoding encoding, Endianness endianness )
             : base( input, encoding )
         {
-            Init( encoding, endianness );
+            Init( encoding, endianness, AddressSpace.Int32 );
+        }
+
+        public EndianBinaryReader( Stream input, Encoding encoding, Endianness endianness, AddressSpace addressSpace )
+            : base( input, encoding )
+        {
+            Init( encoding, endianness, addressSpace );
         }
 
         public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness )
             : base( input, encoding, leaveOpen )
         {
-            Init( encoding, endianness );
+            Init( encoding, endianness, AddressSpace.Int32 );
         }
 
-        private void Init( Encoding encoding, Endianness endianness )
+        public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness, AddressSpace addressSpace )
+            : base( input, encoding, leaveOpen )
+        {
+            Init( encoding, endianness, addressSpace );
+        }
+
+        private void Init( Encoding encoding, Endianness endianness, AddressSpace addressSpace )
         {
             stringBuilder = new StringBuilder();
             this.encoding = encoding;
+            this.addressSpace = addressSpace;
             offsetStack = new Stack<long>();
             baseOffsetStack = new Stack<long>();
             Endianness = endianness;
@@ -144,6 +170,23 @@ namespace MikuMikuLibrary.IO.Common
             SeekCurrent( AlignmentUtilities.GetAlignedDifference( Position, alignment ) );
         }
 
+        public long ReadOffset()
+        {
+            if ( addressSpace == AddressSpace.Int32 )
+            {
+                ReadAlignmentPadding( 4 );
+                return ReadUInt32();
+            }
+
+            else if ( addressSpace == AddressSpace.Int64 )
+            {
+                ReadAlignmentPadding( 8 );
+                return ReadInt64();
+            }
+
+            throw new ArgumentException( nameof( addressSpace ) );
+        }
+
         public void ReadAtOffset( long offset, Action body )
         {
             SeekBegin( ( baseOffsetStack.Count > 0 ?
@@ -206,7 +249,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public string ReadStringPtr( StringBinaryFormat format, int fixedLength = -1 )
         {
-            long offset = ReadUInt32();
+            long offset = ReadOffset();
             if ( offset > 0 )
             {
                 if ( baseOffsetStack.Count > 0 )
@@ -583,6 +626,26 @@ namespace MikuMikuLibrary.IO.Common
         public Color ReadColorHalf()
         {
             return new Color( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
+        }
+
+        public BoundingSphere ReadBoundingSphere()
+        {
+            return new BoundingSphere
+            {
+                Center = ReadVector3(),
+                Radius = ReadSingle(),
+            };
+        }
+
+        public BoundingBox ReadBoundingBox()
+        {
+            return new BoundingBox
+            {
+                Center = ReadVector3(),
+                Width = ReadSingle(),
+                Height = ReadSingle(),
+                Depth = ReadSingle(),
+            };
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,6 +22,16 @@ namespace MikuMikuLibrary.Databases
         public string ArchiveFileName { get; set; }
         public List<MeshEntry> Meshes { get; }
 
+        public MeshEntry GetMesh( string meshName )
+        {
+            return Meshes.FirstOrDefault( x => x.Name.Equals( meshName, StringComparison.OrdinalIgnoreCase ) );
+        }
+
+        public MeshEntry GetMesh( int meshID )
+        {
+            return Meshes.FirstOrDefault( x => x.ID.Equals( meshID ) );
+        }
+
         public ObjectEntry()
         {
             Meshes = new List<MeshEntry>();
@@ -37,7 +48,7 @@ namespace MikuMikuLibrary.Databases
         public List<ObjectEntry> Objects { get; }
         public int Unknown { get; set; }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             int objectCount = reader.ReadInt32();
             Unknown = reader.ReadInt32();
@@ -86,11 +97,11 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( Objects.Count );
             writer.Write( Unknown );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var objectEntry in Objects )
                 {
@@ -102,10 +113,9 @@ namespace MikuMikuLibrary.Databases
                     writer.AddStringToStringTable( objectEntry.ArchiveFileName );
                     writer.WriteNulls( 16 );
                 }
-                writer.PopStringTable();
             } );
             writer.Write( Objects.Sum( x => x.Meshes.Count ) );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var objectEntry in Objects )
                 {
@@ -116,8 +126,32 @@ namespace MikuMikuLibrary.Databases
                         writer.AddStringToStringTable( meshEntry.Name );
                     }
                 }
-                writer.PopStringTablesReversed();
             } );
+        }
+
+        public ObjectEntry GetObject( string objectName )
+        {
+            return Objects.FirstOrDefault( x => x.Name.Equals( objectName, StringComparison.OrdinalIgnoreCase ) );
+        }
+
+        public ObjectEntry GetObject( int objectID )
+        {
+            return Objects.FirstOrDefault( x => x.ID.Equals( objectID ) );
+        }
+
+        public ObjectEntry GetObjectByFileName( string fileName )
+        {
+            return Objects.FirstOrDefault( x => x.FileName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) );
+        }
+
+        public MeshEntry GetMesh( string meshName )
+        {
+            return Objects.SelectMany( x => x.Meshes ).FirstOrDefault( x => x.Name.Equals( meshName, StringComparison.OrdinalIgnoreCase ) );
+        }
+
+        public MeshEntry GetMesh( int meshID )
+        {
+            return Objects.SelectMany( x => x.Meshes ).FirstOrDefault( x => x.ID.Equals( meshID ) );
         }
 
         public ObjectDatabase()

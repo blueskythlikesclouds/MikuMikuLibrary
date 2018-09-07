@@ -8,14 +8,17 @@ namespace MikuMikuLibrary.IO
 {
     public abstract class BinaryFile : IBinaryFile
     {
+        protected Stream stream;
+        protected bool ownsStream;
+
         public abstract BinaryFileFlags Flags { get; }
         public virtual BinaryFormat Format { get; set; }
         public virtual Endianness Endianness { get; set; }
 
-        public static T Load<T>( Stream source ) where T : IBinaryFile
+        public static T Load<T>( Stream source, bool leaveOpen = false ) where T : IBinaryFile
         {
             var instance = Activator.CreateInstance<T>();
-            instance.Load( source );
+            instance.Load( source, leaveOpen );
             return instance;
         }
 
@@ -26,10 +29,27 @@ namespace MikuMikuLibrary.IO
             return instance;
         }
 
-        public void Load( Stream source )
+        public static T LoadIfExist<T>( string filePath ) where T : IBinaryFile
+        {
+            var instance = Activator.CreateInstance<T>();
+
+            if ( string.IsNullOrEmpty( filePath ) || !File.Exists( filePath ) )
+                return instance;
+
+            instance.Load( filePath );
+            return instance;
+        }
+
+        public void Load( Stream source, bool leaveOpen = false )
         {
             if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
                 throw new NotSupportedException( "Binary file is not able to load" );
+
+            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
+            {
+                stream = source;
+                ownsStream = !leaveOpen;
+            }
 
             // Attempt to detect the section format and read with that
             if ( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) )
@@ -43,8 +63,7 @@ namespace MikuMikuLibrary.IO
 
                     if ( Encoding.ASCII.GetString( signatureBytes ) == sectionInfo.Signature )
                     {
-                        Format = BinaryFormat.F2nd;
-                        sectionInfo.Create( source, this );
+                        Format = sectionInfo.Create( source, this ).Format;
                         return;
                     }
                 }
@@ -52,19 +71,38 @@ namespace MikuMikuLibrary.IO
 
             // Or try to read in the old fashioned way
             using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness ) )
-                Read( reader );
+            {
+                reader.PushBaseOffset();
+                {
+                    Read( reader );
+                }
+                reader.PopBaseOffset();
+            }
+
+            if ( !leaveOpen && !Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
+                source.Dispose();
         }
 
-        public void Load( string filePath )
+        public virtual void Load( string filePath )
         {
             if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
                 throw new NotSupportedException( "Binary file is not able to load" );
 
-            using ( var stream = File.OpenRead( filePath ) )
-                Load( stream );
+            Load( File.OpenRead( filePath ), false );
         }
 
-        public void Save( Stream destination )
+        public void LoadIfExist( string filePath )
+        {
+            if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
+                throw new NotSupportedException( "Binary file is not able to load" );
+
+            if ( string.IsNullOrEmpty( filePath ) || !File.Exists( filePath ) )
+                return;
+
+            Load( filePath );
+        }
+
+        public void Save( Stream destination, bool leaveOpen = false )
         {
             if ( !Flags.HasFlag( BinaryFileFlags.Save ) )
                 throw new NotSupportedException( "Binary file is not able to save" );
@@ -82,27 +120,100 @@ namespace MikuMikuLibrary.IO
             // Or try to write in the old fashioned way
             using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness ) )
             {
-                // Push a string table
-                writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
+                writer.PushBaseOffset();
+                {
+                    // Push a string table
+                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
 
-                Write( writer );
+                    Write( writer );
 
-                // Do the enqueued offset writes & string tables
-                writer.DoEnqueuedOffsetWrites();
-                writer.PopStringTablesReversed();
+                    // Do the enqueued offset writes & string tables
+                    writer.DoEnqueuedOffsetWrites();
+                    writer.PopStringTablesReversed();
+                }
+                writer.PopBaseOffset();
+            }
+
+            // Adopt this stream
+            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
+            {
+                if ( ownsStream )
+                    stream.Dispose();
+
+                stream = destination;
+                ownsStream = !leaveOpen;
+
+                stream.Flush();
+            }
+            else if ( !leaveOpen )
+            {
+                destination.Close();
             }
         }
 
-        public void Save( string filePath )
+        public virtual void Save( string filePath )
         {
             if ( !Flags.HasFlag( BinaryFileFlags.Save ) )
                 throw new NotSupportedException( "Binary file is not able to save" );
 
-            using ( var stream = File.Create( filePath ) )
-                Save( stream );
+            // Prevent any kind of conflict.
+            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && stream is FileStream fileStream )
+            {
+                filePath = Path.GetFullPath( filePath );
+                string thisFilePath = Path.GetFullPath( fileStream.Name );
+
+                if ( filePath.Equals( thisFilePath, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    do
+                    {
+                        thisFilePath += "_";
+                    } while ( File.Exists( thisFilePath ) );
+
+                    using ( var destination = File.Create( thisFilePath ) )
+                        Save( destination, false );
+
+                    fileStream.Close();
+
+                    File.Delete( filePath );
+                    File.Move( thisFilePath, filePath );
+
+                    stream = File.OpenRead( filePath );
+                    ownsStream = true;
+
+                    return;
+                }
+            }
+
+            Save( File.Create( filePath ), false );
         }
 
-        internal abstract void Read( EndianBinaryReader reader, Section section = null );
-        internal abstract void Write( EndianBinaryWriter writer, Section section = null );
+        public void Dispose()
+        {
+            Dispose( true );
+            GC.SuppressFinalize( this );
+        }
+
+        /// <summary>
+        /// Cleans up resources used by the object.
+        /// </summary>
+        /// <param name="disposing">Whether or not the managed objects are going to be disposed.</param>
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && ownsStream )
+                {
+                    stream?.Dispose();
+                }
+            }
+        }
+
+        ~BinaryFile()
+        {
+            Dispose( false );
+        }
+
+        public abstract void Read( EndianBinaryReader reader, Section section = null );
+        public abstract void Write( EndianBinaryWriter writer, Section section = null );
     }
 }

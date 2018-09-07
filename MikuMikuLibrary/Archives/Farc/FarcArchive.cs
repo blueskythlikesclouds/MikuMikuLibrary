@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,10 +14,11 @@ namespace MikuMikuLibrary.Archives.Farc
     public class FarcArchive : BinaryFile, IArchive<string>
     {
         private readonly List<InternalEntry> entries;
+        private int alignment;
 
         public override BinaryFileFlags Flags
         {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
+            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.UsesSourceStream; }
         }
 
         public override Endianness Endianness
@@ -34,6 +34,18 @@ namespace MikuMikuLibrary.Archives.Farc
         public bool CanRemove
         {
             get { return true; }
+        }
+
+        public int Alignment
+        {
+            get { return alignment; }
+            set
+            {
+                if ( ( value & ( value - 1 ) ) != 0 )
+                    alignment = AlignmentUtilities.AlignToNextPowerOfTwo( value );
+                else
+                    alignment = value;
+            }
         }
 
         public void Add( string handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
@@ -60,7 +72,12 @@ namespace MikuMikuLibrary.Archives.Farc
 
             else
             {
-                entries.Add( new InternalEntry( handle, source, !leaveOpen ) );
+                entries.Add( new InternalEntry
+                {
+                    Handle = handle,
+                    Stream = source,
+                    OwnsStream = !leaveOpen,
+                } );
             }
         }
 
@@ -81,6 +98,21 @@ namespace MikuMikuLibrary.Archives.Farc
             }
         }
 
+        public EntryStream<string> Open( string handle, EntryStreamMode mode )
+        {
+            var entry = entries.FirstOrDefault( x => x.Handle.Equals( handle, StringComparison.OrdinalIgnoreCase ) );
+            var entryStream = entry.Open( stream );
+
+            if ( mode == EntryStreamMode.MemoryStream )
+            {
+                var temp = entryStream;
+                entryStream = new MemoryStream();
+                temp.CopyTo( entryStream );
+                entryStream.Position = 0;
+            }
+
+            return new EntryStream<string>( entry.Handle, entryStream );
+        }
 
         public void Clear()
         {
@@ -103,12 +135,6 @@ namespace MikuMikuLibrary.Archives.Farc
             return entries.Select( x => x.Handle );
         }
 
-        public EntryStream<string> Open( string handle )
-        {
-            return new EntryStream<string>( handle,
-                entries.First( x => x.Handle.Equals( handle, StringComparison.OrdinalIgnoreCase ) ).Stream );
-        }
-
         public IEnumerator<string> GetEnumerator()
         {
             return EnumerateEntries().GetEnumerator();
@@ -119,206 +145,219 @@ namespace MikuMikuLibrary.Archives.Farc
             return EnumerateEntries().GetEnumerator();
         }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             string signature = reader.ReadString( StringBinaryFormat.FixedLength, 4 );
-            if ( !( signature == "FARC" || signature == "FArC" || signature == "FArc" ) )
+            if ( signature != "FARC" && signature != "FArC" && signature != "FArc" )
                 throw new InvalidDataException( "Invalid signature, excepted FARC/FArC/FArc" );
 
             uint headerSize = reader.ReadUInt32() + 0x08;
+            Stream originalStream = reader.BaseStream;
 
             if ( signature == "FARC" )
             {
                 int flags = reader.ReadInt32();
-                reader.SeekCurrent( 4 );
+                bool isCompressed = ( flags & ( 1 << 1 ) ) != 0;
+                bool isEncrypted = ( flags & ( 1 << 2 ) ) != 0;
+                int padding = reader.ReadInt32();
+                alignment = reader.ReadInt32();
 
-                bool isCompressed = ( flags & 2 ) == 2;
-                bool isEncrypted = ( flags & 4 ) == 4;
+                // Hacky way of checking Future Tone.
+                // There's a very low chance this isn't going
+                // to work, though.
+                Format = isEncrypted && ( alignment & ( alignment - 1 ) ) != 0 ? BinaryFormat.FT : BinaryFormat.DT;
 
-                ICryptoTransform decryptor = null;
-
-                int futureToneCheck = reader.ReadInt32();
-                if ( isEncrypted && ( futureToneCheck & ( futureToneCheck - 1 ) ) != 0 )
+                if ( Format == BinaryFormat.FT )
                 {
-                    isEncrypted = false;
-
-                    reader.SeekBegin( 16 );
-                    var ivBytes = reader.ReadBytes( 16 );
-
-                    decryptor = new AesManaged
-                    {
-                        KeySize = 128,
-                        Key = new byte[]
-                        {
-                            0x13, 0x72, 0xD5, 0x7B, 0x6E, 0x9E, 0x31, 0xEB, 0xA2, 0x39, 0xB8, 0x3C, 0x15, 0x57, 0xC6, 0xBB,
-                        },
-                        BlockSize = 128,
-                        Mode = CipherMode.CBC,
-                        Padding = PaddingMode.Zeros,
-                        IV = ivBytes,
-                    }.CreateDecryptor();
-
-                    var decryptedArchive = new MemoryStream();
-                    decryptedArchive.Write( ivBytes, 0, 16 );
-
-                    using ( var crypto = new CryptoStream(
-                        reader.BaseStream, decryptor, CryptoStreamMode.Read ) )
-                    {
-                        crypto.CopyTo( decryptedArchive );
-                    }
-
-                    reader = new EndianBinaryReader( decryptedArchive, Encoding.UTF8, Endianness.BigEndian );
-                    reader.SeekBegin( 20 );
+                    reader.SeekBegin( 0x10 );
+                    var iv = reader.ReadBytes( 0x10 );
+                    var aesManaged = CreateAesManagedForFT( iv );
+                    var decryptor = aesManaged.CreateDecryptor();
+                    var cryptoStream = new CryptoStream( reader.BaseStream, decryptor, CryptoStreamMode.Read );
+                    reader = new EndianBinaryReader( cryptoStream, Encoding.UTF8, Endianness.BigEndian );
+                    alignment = reader.ReadInt32();
                 }
 
-                else if ( isEncrypted )
-                {
-                    decryptor = new AesManaged
-                    {
-                        KeySize = 128,
-                        Key = new byte[]
-                        {
-                            0x70, 0x72, 0x6F, 0x6A, 0x65, 0x63, 0x74, 0x5F, 0x64, 0x69, 0x76, 0x61, 0x2E, 0x62, 0x69, 0x6E
-                        },
-                        BlockSize = 128,
-                        Mode = CipherMode.ECB,
-                        Padding = PaddingMode.Zeros,
-                        IV = new byte[ 16 ],
-                    }.CreateDecryptor();
-                }
+                // Since the first check worked only if the file was encrypted,
+                // we are going to one extra check here, since not all FARC files
+                // are necessarily encrypted. (see Len's lenitm FARCs from FT)
+                Format = reader.ReadInt32() == 1 ? BinaryFormat.FT : BinaryFormat.DT;
 
-                bool futureToneMode = reader.ReadInt32() == 1;
                 int entryCount = reader.ReadInt32();
-
-                if ( futureToneMode )
-                    reader.SeekCurrent( 4 );
+                if ( Format == BinaryFormat.FT )
+                    padding = reader.ReadInt32(); // No SeekCurrent!! CryptoStream does not support it.
 
                 entries.Capacity = entryCount;
-                while ( reader.Position < headerSize )
+                while ( originalStream.Position < headerSize )
                 {
-                    string entryName = reader.ReadString( StringBinaryFormat.NullTerminated );
-                    uint entryOffset = reader.ReadUInt32();
-                    uint entryCompressedSize = reader.ReadUInt32();
-                    uint entryUncompressedSize = reader.ReadUInt32();
+                    string name = reader.ReadString( StringBinaryFormat.NullTerminated );
+                    uint offset = reader.ReadUInt32();
+                    uint compressedSize = reader.ReadUInt32();
+                    uint uncompressedSize = reader.ReadUInt32();
 
-                    if ( futureToneMode )
-                        reader.SeekCurrent( 4 );
-
-                    reader.ReadAtOffsetAndSeekBack( entryOffset, () =>
+                    if ( Format == BinaryFormat.FT )
                     {
-                        long entrySize = 0;
-                        if ( isEncrypted )
-                        {
-                            if ( isCompressed )
-                                entrySize = AlignmentUtilities.Align( entryCompressedSize, 16 );
-                            else
-                                entrySize = AlignmentUtilities.Align( entryUncompressedSize, 16 );
-                        }
+                        flags = reader.ReadInt32();
+                        isCompressed = ( flags & ( 1 << 1 ) ) != 0;
+                        isEncrypted = ( flags & ( 1 << 2 ) ) != 0;
+                    }
 
-                        else if ( isCompressed )
-                            entrySize = entryCompressedSize;
-
+                    // Time for a shit ton of size fixing!
+                    long fixedSize = 0;
+                    if ( isEncrypted )
+                    {
+                        if ( isCompressed )
+                            fixedSize = AlignmentUtilities.Align( compressedSize, 16 );
                         else
-                            entrySize = entryUncompressedSize;
+                            fixedSize = AlignmentUtilities.Align( uncompressedSize, 16 );
+                    }
 
-                        if ( entryOffset + entrySize > reader.BaseStreamLength )
-                            entrySize = reader.BaseStreamLength - entryOffset;
+                    else if ( isCompressed )
+                        fixedSize = compressedSize;
 
-                        Stream entryStream = reader.BaseStream.CreateSubView( entryOffset, entrySize );
+                    else
+                        fixedSize = uncompressedSize;
 
-                        if ( isEncrypted )
-                        {
-                            entryStream = new CryptoStream( entryStream, decryptor, CryptoStreamMode.Read );
-                            if ( isCompressed && ( entryCompressedSize != entryUncompressedSize ) )
-                            {
-                                entryStream = new GZipStream( entryStream, CompressionMode.Decompress );
-                            }
-                        }
+                    fixedSize = Math.Min( fixedSize, originalStream.Length - offset );
 
-                        else if ( isCompressed && ( entryUncompressedSize != entryCompressedSize ) )
-                        {
-                            entryStream = new GZipStream( entryStream, CompressionMode.Decompress );
-                        }
-
-                        entries.Add( new InternalEntry( entryName, entryStream, true ) );
+                    entries.Add( new InternalEntry
+                    {
+                        Handle = name,
+                        Position = offset,
+                        Length = fixedSize,
+                        IsCompressed = isCompressed,
+                        IsEncrypted = isEncrypted,
+                        IsFutureTone = Format == BinaryFormat.FT,
                     } );
 
-                    if ( futureToneMode && ( --entryCount ) < 1 )
+                    // Some extra padding on some FT FARCs, that causes
+                    // the while loop to fail. So, we're gonna do this
+                    // extra check.
+                    if ( Format == BinaryFormat.FT && ( --entryCount ) == 0 )
                         break;
                 }
             }
 
             else if ( signature == "FArC" )
             {
-                reader.SeekCurrent( 4 );
+                alignment = reader.ReadInt32();
 
                 while ( reader.Position < headerSize )
                 {
-                    string entryName = reader.ReadString( StringBinaryFormat.NullTerminated );
-                    uint entryOffset = reader.ReadUInt32();
-                    uint entryCompressedSize = reader.ReadUInt32();
-                    uint entryUncompressedSize = reader.ReadUInt32();
+                    string name = reader.ReadString( StringBinaryFormat.NullTerminated );
+                    uint offset = reader.ReadUInt32();
+                    uint compressedSize = reader.ReadUInt32();
+                    uint uncompressedSize = reader.ReadUInt32();
 
-                    reader.ReadAtOffsetAndSeekBack( entryOffset, () =>
+                    long fixedSize = Math.Min( compressedSize, reader.BaseStreamLength - offset );
+
+                    entries.Add( new InternalEntry
                     {
-                        long entrySize = entryCompressedSize;
-                        if ( entryOffset + entrySize > reader.BaseStreamLength )
-                            entrySize = reader.BaseStreamLength - entryOffset;
-
-                        Stream entryStream = reader.BaseStream.CreateSubView( entryOffset, entrySize );
-                        if ( entryUncompressedSize != entryCompressedSize )
-                            entryStream = new GZipStream( entryStream, CompressionMode.Decompress );
-
-                        entries.Add( new InternalEntry( entryName, entryStream, true ) );
+                        Handle = name,
+                        Position = offset,
+                        Length = fixedSize,
+                        IsCompressed = compressedSize != uncompressedSize,
                     } );
                 }
             }
 
             else if ( signature == "FArc" )
             {
-                reader.SeekCurrent( 4 );
+                alignment = reader.ReadInt32();
 
                 while ( reader.Position < headerSize )
                 {
-                    string entryName = reader.ReadString( StringBinaryFormat.NullTerminated );
-                    uint entryOffset = reader.ReadUInt32();
-                    uint entrySize = reader.ReadUInt32();
+                    string name = reader.ReadString( StringBinaryFormat.NullTerminated );
+                    uint offset = reader.ReadUInt32();
+                    uint size = reader.ReadUInt32();
 
-                    reader.ReadAtOffsetAndSeekBack( entryOffset, () =>
+                    long fixedSize = Math.Min( size, reader.BaseStreamLength - offset );
+
+                    entries.Add( new InternalEntry
                     {
-                        long entrySizeLong = entrySize;
-                        if ( entryOffset + entrySizeLong > reader.BaseStreamLength )
-                            entrySizeLong = reader.BaseStreamLength - entryOffset;
-
-                        var entryStream = reader.BaseStream.CreateSubView( entryOffset, entrySizeLong );
-                        entries.Add( new InternalEntry( entryName, entryStream, true ) );
+                        Handle = name,
+                        Position = offset,
+                        Length = fixedSize,
                     } );
                 }
             }
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( "FArc", StringBinaryFormat.FixedLength, 4 );
-            writer.PushOffset();
-            writer.Write( 0 );
-            writer.Write( 16 );
-
-            foreach ( var entry in entries )
+            writer.EnqueueOffsetWrite( OffsetKind.Size, () =>
             {
-                writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
-                writer.EnqueueOffsetWriteAligned( 16, 0x78, AlignmentKind.Left, () => entry.Stream.CopyTo( writer.BaseStream ) );
-                writer.Write( ( uint )entry.Stream.Length );
+                writer.Write( alignment );
+
+                foreach ( var entry in entries )
+                {
+                    writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
+                    writer.EnqueueOffsetWrite( alignment, 0x78, AlignmentKind.Center, OffsetKind.OffsetAndSize, () =>
+                    {
+                        long position = writer.Position;
+
+                        var entryStream = entry.Open( stream );
+                        if ( entryStream.CanSeek )
+                            entryStream.Position = 0;
+
+                        entryStream.CopyTo( writer.BaseStream );
+
+                        entry.Position = position;
+                        entry.IsCompressed = entry.IsEncrypted = entry.IsFutureTone = false;
+                    } );
+                }
+            } );
+        }
+
+        protected override void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                foreach ( var entry in entries )
+                    entry.Dispose();
             }
 
-            long headerEnd = writer.Position;
-            writer.WriteAtOffsetAndSeekBack( writer.PeekOffset(), () => writer.Write( ( uint )( headerEnd - writer.PopOffset() - 4 ) ) );
-            writer.DoEnqueuedOffsetWrites();
+            base.Dispose( disposing );
+        }
+
+        public static AesManaged CreateAesManaged()
+        {
+            return new AesManaged
+            {
+                KeySize = 128,
+                Key = new byte[]
+                {
+                    // project_diva.bin
+                    0x70, 0x72, 0x6F, 0x6A, 0x65, 0x63, 0x74, 0x5F, 0x64, 0x69, 0x76, 0x61, 0x2E, 0x62, 0x69, 0x6E
+                },
+                BlockSize = 128,
+                Mode = CipherMode.ECB,
+                Padding = PaddingMode.Zeros,
+                IV = new byte[ 16 ],
+            };
+        }
+
+        public static AesManaged CreateAesManagedForFT( byte[] iv = null )
+        {
+            return new AesManaged
+            {
+                KeySize = 128,
+                Key = new byte[]
+                {
+                    0x13, 0x72, 0xD5, 0x7B, 0x6E, 0x9E, 0x31, 0xEB, 0xA2, 0x39, 0xB8, 0x3C, 0x15, 0x57, 0xC6, 0xBB,
+                },
+                BlockSize = 128,
+                Mode = CipherMode.CBC,
+                Padding = PaddingMode.Zeros,
+                IV = iv ?? new byte[ 16 ],
+            };
         }
 
         public FarcArchive()
         {
             entries = new List<InternalEntry>();
+            alignment = 0x10;
         }
     }
 }

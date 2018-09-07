@@ -122,7 +122,7 @@ namespace MikuMikuLibrary.Databases
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var boneEntry in Bones )
                     boneEntry.Write( writer );
@@ -138,25 +138,25 @@ namespace MikuMikuLibrary.Databases
                 writer.AddStringToStringTable( "End" );
             } );
             writer.Write( Positions.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var position in Positions )
                     writer.Write( position );
             } );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () => writer.Write( Field02 ) );
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () => writer.Write( Field02 ) );
             writer.Write( BoneNames1.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var boneName1 in BoneNames1 )
                     writer.AddStringToStringTable( boneName1 );
             } );
             writer.Write( BoneNames2.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var boneName2 in BoneNames2 )
                     writer.AddStringToStringTable( boneName2 );
             } );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var parentID in ParentIndices )
                     writer.Write( parentID );
@@ -183,7 +183,7 @@ namespace MikuMikuLibrary.Databases
 
         public List<SkeletonEntry> Skeletons { get; }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             uint signature = reader.ReadUInt32();
             int skeletonCount = reader.ReadInt32();
@@ -211,16 +211,16 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( 0x09102720 );
             writer.Write( Skeletons.Count );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var skeletonEntry in Skeletons )
-                    writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () => skeletonEntry.Write( writer ) );
+                    writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => skeletonEntry.Write( writer ) );
             } );
-            writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
                 foreach ( var skeletonEntry in Skeletons )
                     writer.AddStringToStringTable( skeletonEntry.Name );

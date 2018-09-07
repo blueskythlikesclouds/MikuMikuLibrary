@@ -1,5 +1,4 @@
-﻿using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Textures;
+﻿using MikuMikuLibrary.Textures;
 using System.IO;
 
 namespace MikuMikuLibrary.IO.Sections
@@ -7,6 +6,11 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "MTXD", typeof( TextureSet ) )]
     public class TextureSetSection : BinaryFileSection<TextureSet>
     {
+        public override SectionFlags Flags
+        {
+            get { return SectionFlags.EnrsSection; }
+        }
+
         public TextureSetSection( Stream source, TextureSet dataToRead = null ) : base( source, dataToRead )
         {
         }

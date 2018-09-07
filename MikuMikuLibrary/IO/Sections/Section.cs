@@ -13,6 +13,9 @@ namespace MikuMikuLibrary.IO.Sections
         protected readonly List<Section> sections;
         protected Section parent;
         protected Endianness endianness;
+        protected AddressSpace addressSpace;
+
+        public abstract SectionFlags Flags { get; }
 
         public SectionInfo SectionInfo { get; }
 
@@ -31,6 +34,17 @@ namespace MikuMikuLibrary.IO.Sections
         public virtual Endianness Endianness
         {
             get { return endianness; }
+        }
+
+        public virtual AddressSpace AddressSpace
+        {
+            get { return addressSpace; }
+        }
+
+        // Something like helper
+        public BinaryFormat Format
+        {
+            get { return AddressSpace == AddressSpace.Int64 ? BinaryFormat.X : BinaryFormat.F2nd; }
         }
 
         public IEnumerable<Section> EnumerateSections()
@@ -131,22 +145,39 @@ namespace MikuMikuLibrary.IO.Sections
                         if ( subSection is EndOfFileSection )
                             break;
 
-                        else if ( subSection is RelocationTableSection )
+                        else if ( subSection is RelocationTableSectionInt32 )
+                        {
+                            addressSpace = AddressSpace.Int32;
                             continue;
+                        }
+
+                        else if ( subSection is RelocationTableSectionInt64 )
+                        {
+                            addressSpace = AddressSpace.Int64;
+                            continue;
+                        }
 
                         Add( subSection );
                     }
                 } );
 
-
                 reader.ReadAtOffsetIfNotZero( dataOffset, () =>
                 {
+                    // 64-bit address space has offsets
+                    // relative to the start of data
+                    if ( addressSpace == AddressSpace.Int64 )
+                        reader.PushBaseOffset();
+
                     reader.Endianness = endianness;
+                    reader.AddressSpace = addressSpace;
                     Read( reader, dataSize );
+
+                    // Pop the offset we pushed for X
+                    if ( addressSpace == AddressSpace.Int64 )
+                        reader.PopBaseOffset();
                 } );
 
                 reader.SeekBegin( reader.PeekBaseOffset() + dataOffset + sectionSize );
-                reader.PopBaseOffset();
             }
         }
 
@@ -162,6 +193,11 @@ namespace MikuMikuLibrary.IO.Sections
 
                 long dataOffset = writer.Position;
                 {
+                    // 64-bit space has offsets
+                    // relative to the start of data
+                    if ( addressSpace == AddressSpace.Int64 )
+                        writer.PushBaseOffset();
+
                     writer.Endianness = Endianness;
                     writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
                     Write( writer );
@@ -174,11 +210,25 @@ namespace MikuMikuLibrary.IO.Sections
 
                 long sectionsStartOffset = writer.Position;
                 {
-                    // Push a relocation table if there's been offset writes
-                    if ( writer.OffsetPositions.Any() )
-                        Insert( 0, new RelocationTableSection(
-                            writer.OffsetPositions.Select( x => x - writer.PeekBaseOffset() ).Distinct().OrderBy( x => x ).ToList() ) );
+                    // Push enrs section
+                    if ( Flags.HasFlag( SectionFlags.EnrsSection ) )
+                    {
+                        Insert( 0, new EnrsSection( this ) );
+                    }
 
+                    // Push a relocation table if section makes use of them
+                    if ( Flags.HasFlag( SectionFlags.RelocationTableSection ) )
+                    {
+                        var positions = writer.OffsetPositions
+                            .Select( x => x - writer.PeekBaseOffset() ).Distinct().OrderBy( x => x ).ToList();
+
+                        if ( AddressSpace == AddressSpace.Int32 )
+                            Insert( 0, new RelocationTableSectionInt32( positions ) );
+                        else if ( AddressSpace == AddressSpace.Int64 )
+                            Insert( 0, new RelocationTableSectionInt64( positions ) );
+                        else
+                            throw new ArgumentException( nameof( AddressSpace ) );
+                    }
 
                     // Create and push the subsections
                     foreach ( var subSectionInfo in SectionInfo.SubSectionInfos.Values.OrderBy( x => x.Order ) )
@@ -214,8 +264,6 @@ namespace MikuMikuLibrary.IO.Sections
                     writer.Write( Depth );
                     writer.Write( ( uint )( dataEndOffset - dataOffset ) );
                 } );
-
-                writer.PopBaseOffset();
             }
 
             // If we got no parent, we need an end of file section
@@ -228,7 +276,7 @@ namespace MikuMikuLibrary.IO.Sections
             }
 
             // Get rid of the sections we added earlier
-            sections.RemoveAll( x => x is EndOfFileSection || x is RelocationTableSection );
+            sections.RemoveAll( x => x is EndOfFileSection || x is RelocationTableSectionInt32 || x is RelocationTableSectionInt64 || x is EnrsSection );
         }
 
         protected abstract void Read( EndianBinaryReader reader, long length );
@@ -254,4 +302,12 @@ namespace MikuMikuLibrary.IO.Sections
             Data = dataToWrite ?? throw new ArgumentNullException( nameof( dataToWrite ) );
         }
     }
+
+    [Flags]
+    public enum SectionFlags
+    {
+        None = 0,
+        RelocationTableSection = 1,
+        EnrsSection = 2,
+    };
 }

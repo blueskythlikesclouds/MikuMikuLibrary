@@ -16,7 +16,7 @@ namespace MikuMikuLibrary.Sprites
         public List<Sprite> Sprites { get; }
         public TextureSet TextureSet { get; }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             int signature = reader.ReadInt32();
             uint texturesOffset = reader.ReadUInt32();
@@ -55,37 +55,38 @@ namespace MikuMikuLibrary.Sprites
             reader.ReadAtOffset( spriteUnknownsOffset, () =>
             {
                 foreach ( var sprite in Sprites )
-                    sprite.ReadSecondary( reader );
+                    sprite.ReadSecond( reader );
             } );
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( 0 );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream ) );
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream ) );
             writer.Write( TextureSet.Textures.Count );
             writer.Write( Sprites.Count );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var sprite in Sprites )
                     sprite.WriteFirst( writer );
+
+                writer.PopStringTablesReversed();
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var texture in TextureSet.Textures )
                     writer.AddStringToStringTable( texture.Name );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var sprite in Sprites )
                     writer.AddStringToStringTable( sprite.Name );
             } );
-            writer.EnqueueOffsetWriteAligned( 16, AlignmentKind.Left, () =>
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
                 foreach ( var sprite in Sprites )
-                    sprite.WriteSecondary( writer );
+                    sprite.WriteSecond( writer );
             } );
-            writer.PopStringTablesReversed();
             writer.DoEnqueuedOffsetWritesReversed();
         }
 

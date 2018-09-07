@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C79FAC4B-D1DD-4F2D-BC92-A72C00E07931}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>MikuMikuModel</RootNamespace>
+    <AssemblyName>MikuMikuModel</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>2</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>MikuPoke.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AssimpNet, Version=3.3.1.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\MikuMikuLibrary\AssimpNet.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.0.1\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.GLControl.3.0.1\lib\net20\OpenTK.GLControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configurations\Configuration.cs" />
+    <Compile Include="Configurations\ConfigurationList.cs" />
+    <Compile Include="DataNodes\ArchiveNode.cs" />
+    <Compile Include="DataNodes\BinaryFileNode.cs" />
+    <Compile Include="DataNodes\BoneNode.cs" />
+    <Compile Include="DataNodes\DataNode.cs" />
+    <Compile Include="DataNodes\DataNodeFactory.cs" />
+    <Compile Include="DataNodes\DataNodeT.cs" />
+    <Compile Include="DataNodes\FarcArchiveNode.cs" />
+    <Compile Include="DataNodes\IndexTableNode.cs" />
+    <Compile Include="DataNodes\ListNode.cs" />
+    <Compile Include="DataNodes\MaterialNode.cs" />
+    <Compile Include="DataNodes\MaterialTextureNode.cs" />
+    <Compile Include="DataNodes\MeshNode.cs" />
+    <Compile Include="DataNodes\MeshSkinNode.cs" />
+    <Compile Include="DataNodes\ModelNode.cs" />
+    <Compile Include="DataNodes\ReferenceNode.cs" />
+    <Compile Include="DataNodes\SpriteNode.cs" />
+    <Compile Include="DataNodes\SpriteSetNode.cs" />
+    <Compile Include="DataNodes\StreamNode.cs" />
+    <Compile Include="DataNodes\SubMeshNode.cs" />
+    <Compile Include="DataNodes\TextureDatabaseNode.cs" />
+    <Compile Include="DataNodes\TextureNode.cs" />
+    <Compile Include="DataNodes\TextureSetNode.cs" />
+    <Compile Include="DataNodes\Wrappers\DataTreeNode.cs" />
+    <Compile Include="DataNodes\Wrappers\DataTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormatModules\AssimpSceneFormatModule.cs" />
+    <Compile Include="FormatModules\BitmapFormatModule.cs" />
+    <Compile Include="FormatModules\BoneDatabaseFormatModule.cs" />
+    <Compile Include="FormatModules\FarcArchiveFormatModule.cs" />
+    <Compile Include="FormatModules\FormatModuleUtilities.cs" />
+    <Compile Include="FormatModules\ModelFormatModule.cs" />
+    <Compile Include="FormatModules\ObjectDatabaseFormatModule.cs" />
+    <Compile Include="FormatModules\SpriteSetFormatModule.cs" />
+    <Compile Include="FormatModules\StreamFormatModule.cs" />
+    <Compile Include="FormatModules\TextureDatabaseFormatModule.cs" />
+    <Compile Include="FormatModules\TextureFormatModule.cs" />
+    <Compile Include="FormatModules\TextureSetFormatModule.cs" />
+    <Compile Include="GUI\Controls\ModelViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\ModelViewControl.Designer.cs">
+      <DependentUpon>ModelViewControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Controls\ModelView\GLBuffer.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLIndexTable.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLMaterial.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLMesh.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLModel.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLShaderProgram.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLSubMesh.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLTexture.cs" />
+    <Compile Include="GUI\Controls\ModelView\IGLDraw.cs" />
+    <Compile Include="GUI\Controls\TextureViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\TextureViewControl.Designer.cs">
+      <DependentUpon>TextureViewControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Forms\ConfigurationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Forms\ConfigurationForm.Designer.cs">
+      <DependentUpon>ConfigurationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Forms\RenameForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Forms\RenameForm.Designer.cs">
+      <DependentUpon>RenameForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="FormatModules\IFormatModule.cs" />
+    <Compile Include="FormatModules\FormatModule.cs" />
+    <Compile Include="FormatModules\FormatModuleRegistry.cs" />
+    <EmbeddedResource Include="GUI\Controls\TextureViewControl.resx">
+      <DependentUpon>TextureViewControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Forms\ConfigurationForm.resx">
+      <DependentUpon>ConfigurationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Forms\RenameForm.resx">
+      <DependentUpon>RenameForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Shaders\Default.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Shaders\Default.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Shaders\DefaultBasic.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Shaders\DefaultBasic.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Shaders\Line.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Shaders\Line.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MikuMikuLibrary\MikuMikuLibrary.csproj">
+      <Project>{9c7171ca-7379-458f-a9ca-293bbf2c74dc}</Project>
+      <Name>MikuMikuLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MikuPoke.ico" />
+    <None Include="Resources\TextureSet.png" />
+    <None Include="Resources\Texture.png" />
+    <None Include="Resources\MaterialTexture.png" />
+    <None Include="Resources\Material.png" />
+    <None Include="Resources\Model.png" />
+    <None Include="Resources\Mesh.png" />
+    <None Include="Resources\File.png" />
+    <None Include="Resources\Archive.png" />
+    <None Include="Resources\Rename.png" />
+    <None Include="Resources\Remove.png" />
+    <None Include="Resources\Node.png" />
+    <None Include="Resources\MoveUp.png" />
+    <None Include="Resources\MoveDown.png" />
+    <None Include="Resources\Import.png" />
+    <None Include="Resources\Folder.png" />
+    <None Include="Resources\Export.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

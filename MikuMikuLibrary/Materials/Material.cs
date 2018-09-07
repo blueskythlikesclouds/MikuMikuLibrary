@@ -1,4 +1,5 @@
 ﻿using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,23 +21,11 @@ namespace MikuMikuLibrary.Materials
         public MaterialTexture Texture08 { get; }
         public int Field01 { get; set; }
         public int Field02 { get; set; }
-        public float Field03 { get; set; }
-        public float Field04 { get; set; }
-        public float Field05 { get; set; }
-        public float Field06 { get; set; }
-        public float Field07 { get; set; }
-        public float Field08 { get; set; }
-        public float Field09 { get; set; }
-        public float Field10 { get; set; }
-        public float Field11 { get; set; }
-        public float Field12 { get; set; }
-        public float Field13 { get; set; }
-        public float Field14 { get; set; }
-        public float Field15 { get; set; }
-        public float Field16 { get; set; }
-        public float Field17 { get; set; }
-        public float Field18 { get; set; }
-        public float Field19 { get; set; }
+        public Color DiffuseColor { get; set; }
+        public Color AmbientColor { get; set; }
+        public Color SpecularColor { get; set; }
+        public Color EmissionColor { get; set; }
+        public float Shininess { get; set; }
         public float Field20 { get; set; }
         public float Field21 { get; set; }
         public float Field22 { get; set; }
@@ -75,23 +64,11 @@ namespace MikuMikuLibrary.Materials
             Texture08.Read( reader );
             Field01 = reader.ReadInt32();
             Field02 = reader.ReadInt32();
-            Field03 = reader.ReadSingle();
-            Field04 = reader.ReadSingle();
-            Field05 = reader.ReadSingle();
-            Field06 = reader.ReadSingle();
-            Field07 = reader.ReadSingle();
-            Field08 = reader.ReadSingle();
-            Field09 = reader.ReadSingle();
-            Field10 = reader.ReadSingle();
-            Field11 = reader.ReadSingle();
-            Field12 = reader.ReadSingle();
-            Field13 = reader.ReadSingle();
-            Field14 = reader.ReadSingle();
-            Field15 = reader.ReadSingle();
-            Field16 = reader.ReadSingle();
-            Field17 = reader.ReadSingle();
-            Field18 = reader.ReadSingle();
-            Field19 = reader.ReadSingle();
+            DiffuseColor = reader.ReadColor();
+            AmbientColor = reader.ReadColor();
+            SpecularColor = reader.ReadColor();
+            EmissionColor = reader.ReadColor();
+            Shininess = reader.ReadSingle();
             Field20 = reader.ReadSingle();
             Field21 = reader.ReadSingle();
             Field22 = reader.ReadSingle();
@@ -131,23 +108,11 @@ namespace MikuMikuLibrary.Materials
             Texture08.Write( writer );
             writer.Write( Field01 );
             writer.Write( Field02 );
-            writer.Write( Field03 );
-            writer.Write( Field04 );
-            writer.Write( Field05 );
-            writer.Write( Field06 );
-            writer.Write( Field07 );
-            writer.Write( Field08 );
-            writer.Write( Field09 );
-            writer.Write( Field10 );
-            writer.Write( Field11 );
-            writer.Write( Field12 );
-            writer.Write( Field13 );
-            writer.Write( Field14 );
-            writer.Write( Field15 );
-            writer.Write( Field16 );
-            writer.Write( Field17 );
-            writer.Write( Field18 );
-            writer.Write( Field19 );
+            writer.Write( DiffuseColor );
+            writer.Write( AmbientColor );
+            writer.Write( SpecularColor );
+            writer.Write( EmissionColor );
+            writer.Write( Shininess );
             writer.Write( Field20 );
             writer.Write( Field21 );
             writer.Write( Field22 );

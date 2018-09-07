@@ -1,9 +1,20 @@
 image: Visual Studio 2017
 configuration: Release
 
+before_build:
+    - cmd: nuget restore
+
 build:
     project: MikuMikuLibrary.sln
 
 artifacts:
-    - path: Binary/Release
-      name: Miku Miku Library Tools
+    - path: CmdTools/DatabaseConverter/bin/Release
+      name: DatabaseConverter
+    - path: CmdTools/FarcPack/bin/Release
+      name: FarcPack
+    - path: CmdTools/TxpConverter/bin/Release
+      name: TxpConverter
+    - path: MikuMikuLibrary/bin/Release
+      name: MikuMikuLibrary
+    - path: MikuMikuModel/bin/Release
+      name: MikuMikuModel

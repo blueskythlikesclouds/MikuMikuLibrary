@@ -1,6 +1,8 @@
-﻿using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -15,7 +17,7 @@ namespace MikuMikuLibrary.Textures
 
         public List<Texture> Textures { get; }
 
-        internal override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, Section section = null )
         {
             reader.PushBaseOffset();
 
@@ -44,7 +46,7 @@ namespace MikuMikuLibrary.Textures
             reader.PopBaseOffset();
         }
 
-        internal override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.PushBaseOffset();
 
@@ -54,13 +56,68 @@ namespace MikuMikuLibrary.Textures
 
             foreach ( var texture in Textures )
             {
-                writer.EnqueueOffsetWriteAligned( 4, AlignmentKind.Left, () =>
+                writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
                 {
                     texture.Write( writer );
                 } );
             }
 
             writer.PopBaseOffset();
+        }
+
+        public override void Load( string filePath )
+        {
+            base.Load( filePath );
+
+            if ( filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
+            {
+                var textureDatabase = LoadIfExist<TextureDatabase>( Path.ChangeExtension( filePath, "txi" ) );
+                if ( Textures.Count == textureDatabase.Textures.Count )
+                {
+                    for ( int i = 0; i < Textures.Count; i++ )
+                    {
+                        Textures[ i ].ID = textureDatabase.Textures[ i ].ID;
+                        Textures[ i ].Name = textureDatabase.Textures[ i ].Name;
+                    }
+                }
+            }
+        }
+
+        public override void Save( string filePath )
+        {
+            // Assume it's being exported for F2nd PS3
+            if ( BinaryFormatUtilities.IsClassic( Format ) && filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
+            {
+                Format = BinaryFormat.F2nd;
+                Endianness = Endianness.BigEndian;
+            }
+
+            // Or reverse
+            else if ( BinaryFormatUtilities.IsModern( Format ) && filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
+            {
+                Format = BinaryFormat.DT;
+                Endianness = Endianness.LittleEndian;
+            }
+
+            // Save a TXI if we are modern
+            if ( filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
+            {
+                var textureDatabase = new TextureDatabase();
+                foreach ( var texture in Textures )
+                {
+                    textureDatabase.Textures.Add( new TextureEntry
+                    {
+                        ID = texture.ID,
+                        Name = texture.Name ?? $"Texture{texture.ID}",
+                    } );
+                }
+
+                textureDatabase.Format = Format;
+                textureDatabase.Endianness = Endianness;
+                textureDatabase.Save( Path.ChangeExtension( filePath, "txi" ) );
+            }
+
+            base.Save( filePath );
         }
 
         public TextureSet()

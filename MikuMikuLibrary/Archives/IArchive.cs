@@ -15,7 +15,7 @@ namespace MikuMikuLibrary.Archives
         void Remove( THandle handle );
         void Clear();
 
-        EntryStream<THandle> Open( THandle handle );
+        EntryStream<THandle> Open( THandle handle, EntryStreamMode mode );
         IEnumerable<THandle> EnumerateEntries();
     }
 }
