@@ -87,6 +87,7 @@
     <Compile Include="Models\ModelExporter.cs" />
     <Compile Include="Models\ModelImporter.cs" />
     <Compile Include="Models\SceneUtilities.cs" />
+    <Compile Include="Models\TriangleStripUtilities.cs" />
     <Compile Include="Sprites\SpriteCropper.cs" />
     <Compile Include="Sprites\SpriteOrganizer.cs" />
     <Compile Include="Textures\DDS\DDSCodec.cs" />

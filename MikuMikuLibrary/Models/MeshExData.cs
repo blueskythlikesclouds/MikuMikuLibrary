@@ -26,7 +26,7 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public class MeshExBlockConstraint : MeshExBlockBase
+    public class MeshExBlockConstraint : MeshExBlock
     {
         public override string Kind
         {
@@ -35,41 +35,93 @@ namespace MikuMikuLibrary.Models
 
         public string Field10 { get; set; }
         public string Field11 { get; set; }
-        public List<string> Field12 { get; set; }
+        public int Field12 { get; set; }
+        public string Field13 { get; set; }
+        public float Field14 { get; set; }
+        public float Field15 { get; set; }
+        public float Field16 { get; set; }
+        public float Field17 { get; set; }
+        public float Field18 { get; set; }
+        public float Field19 { get; set; }
+        public float Field20 { get; set; }
+        public float Field21 { get; set; }
+        public float Field22 { get; set; }
+        public float Field23 { get; set; }
+        public float Field24 { get; set; }
+        public float Field25 { get; set; }
+        public float Field26 { get; set; }
+        public float Field27 { get; set; }
+        public float Field28 { get; set; }
+        public float Field29 { get; set; }
+        public float Field30 { get; set; }
+        public float Field31 { get; set; }
+        public float Field32 { get; set; }
+        public float Field33 { get; set; }
+        public float Field34 { get; set; }
+        public float Field35 { get; set; }
 
-        internal override void Read( EndianBinaryReader reader )
+        internal override void ReadBody( EndianBinaryReader reader )
         {
-            base.Read( reader );
-
             Field10 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
             Field11 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-
-            int count = reader.ReadInt32();
-            for ( int i = 0; i < count; i++ )
-                Field12.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+            Field12 = reader.ReadInt32();
+            Field13 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            Field14 = reader.ReadSingle();
+            Field15 = reader.ReadSingle();
+            Field16 = reader.ReadSingle();
+            Field17 = reader.ReadSingle();
+            Field18 = reader.ReadSingle();
+            Field19 = reader.ReadSingle();
+            Field20 = reader.ReadSingle();
+            Field21 = reader.ReadSingle();
+            Field22 = reader.ReadSingle();
+            Field23 = reader.ReadSingle();
+            Field24 = reader.ReadSingle();
+            Field25 = reader.ReadSingle();
+            Field26 = reader.ReadSingle();
+            Field27 = reader.ReadSingle();
+            Field28 = reader.ReadSingle();
+            Field29 = reader.ReadSingle();
+            Field30 = reader.ReadSingle();
+            Field31 = reader.ReadSingle();
+            Field32 = reader.ReadSingle();
+            Field33 = reader.ReadSingle();
+            Field34 = reader.ReadSingle();
+            Field35 = reader.ReadSingle();
         }
 
-        internal override void Write( EndianBinaryWriter writer )
+        internal override void WriteBody( EndianBinaryWriter writer )
         {
-            base.Write( writer );
-
             writer.AddStringToStringTable( Field10 );
             writer.AddStringToStringTable( Field11 );
-            writer.Write( Field12.Count );
-
-            foreach ( var value in Field12 )
-                writer.AddStringToStringTable( value );
-
-            writer.WriteNulls( ( 11 - Field12.Count ) * 4 );
-        }
-
-        public MeshExBlockConstraint()
-        {
-            Field12 = new List<string>( 11 );
+            writer.Write( Field12 );
+            writer.AddStringToStringTable( Field13 );
+            writer.Write( Field14 );
+            writer.Write( Field15 );
+            writer.Write( Field16 );
+            writer.Write( Field17 );
+            writer.Write( Field18 );
+            writer.Write( Field19 );
+            writer.Write( Field20 );
+            writer.Write( Field21 );
+            writer.Write( Field22 );
+            writer.Write( Field23 );
+            writer.Write( Field24 );
+            writer.Write( Field25 );
+            writer.Write( Field26 );
+            writer.Write( Field27 );
+            writer.Write( Field28 );
+            writer.Write( Field29 );
+            writer.Write( Field30 );
+            writer.Write( Field31 );
+            writer.Write( Field32 );
+            writer.Write( Field33 );
+            writer.Write( Field34 );
+            writer.Write( Field35 );
         }
     }
 
-    public class MeshExBlockMotion : MeshExBlockBase
+    public class MeshExBlockMotion : MeshExBlock
     {
         public override string Kind
         {
@@ -80,10 +132,8 @@ namespace MikuMikuLibrary.Models
         public List<int> Field11 { get; }
         public List<Matrix4x4> Field12 { get; }
 
-        internal override void Read( EndianBinaryReader reader )
+        internal override void ReadBody( EndianBinaryReader reader )
         {
-            base.Read( reader );
-
             long field10Offset = reader.ReadOffset();
             int count = reader.ReadInt32();
             long field11Offset = reader.ReadOffset();
@@ -106,10 +156,8 @@ namespace MikuMikuLibrary.Models
             } );
         }
 
-        internal override void Write( EndianBinaryWriter writer )
+        internal override void WriteBody( EndianBinaryWriter writer )
         {
-            base.Write( writer );
-
             writer.AddStringToStringTable( Field10 );
             writer.Write( Field11.Count );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
@@ -131,7 +179,7 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public class MeshExBlockExpression : MeshExBlockBase
+    public class MeshExBlockExpression : MeshExBlock
     {
         public override string Kind
         {
@@ -141,10 +189,8 @@ namespace MikuMikuLibrary.Models
         public string Field10 { get; set; }
         public List<string> Field11 { get; }
 
-        internal override void Read( EndianBinaryReader reader )
+        internal override void ReadBody( EndianBinaryReader reader )
         {
-            base.Read( reader );
-
             long field10Offset = reader.ReadOffset();
             int field11Count = reader.ReadInt32();
 
@@ -155,10 +201,8 @@ namespace MikuMikuLibrary.Models
                 Field11.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
         }
 
-        internal override void Write( EndianBinaryWriter writer )
+        internal override void WriteBody( EndianBinaryWriter writer )
         {
-            base.Write( writer );
-
             writer.AddStringToStringTable( Field10 );
             writer.Write( Field11.Count );
 
@@ -174,7 +218,7 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public class MeshExBlockOsage : MeshExBlockBase
+    public class MeshExBlockOsage : MeshExBlock
     {
         public override string Kind
         {
@@ -186,10 +230,8 @@ namespace MikuMikuLibrary.Models
         public int Field12 { get; set; }
         public int Field13 { get; set; }
 
-        internal override void Read( EndianBinaryReader reader )
+        internal override void ReadBody( EndianBinaryReader reader )
         {
-            base.Read( reader );
-
             if ( reader.AddressSpace == IO.AddressSpace.Int64 )
                 reader.SeekCurrent( 4 );
 
@@ -199,10 +241,8 @@ namespace MikuMikuLibrary.Models
             Field13 = reader.ReadInt32();
         }
 
-        internal override void Write( EndianBinaryWriter writer )
+        internal override void WriteBody( EndianBinaryWriter writer )
         {
-            base.Write( writer );
-
             writer.Write( Field10 );
             writer.Write( Field11 );
             writer.Write( Field12 );
@@ -211,7 +251,7 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public abstract class MeshExBlockBase
+    public abstract class MeshExBlock
     {
         public abstract string Kind { get; }
 
@@ -238,6 +278,7 @@ namespace MikuMikuLibrary.Models
             Field07 = reader.ReadSingle();
             Field08 = reader.ReadSingle();
             Field09 = reader.ReadSingle();
+            ReadBody( reader );
         }
 
         internal virtual void Write( EndianBinaryWriter writer )
@@ -252,7 +293,11 @@ namespace MikuMikuLibrary.Models
             writer.Write( Field07 );
             writer.Write( Field08 );
             writer.Write( Field09 );
+            WriteBody( writer );
         }
+
+        internal abstract void ReadBody( EndianBinaryReader reader );
+        internal abstract void WriteBody( EndianBinaryWriter writer );
     }
 
     public class MeshExOsageEntry
@@ -282,7 +327,7 @@ namespace MikuMikuLibrary.Models
 
         public List<MeshExOsageEntry> Osages { get; }
         public List<string> Strings1 { get; }
-        public List<MeshExBlockBase> ExBlocks { get; }
+        public List<MeshExBlock> ExBlocks { get; }
         public List<string> Strings2 { get; }
         public List<MeshExEntry> Entries { get; }
 
@@ -326,7 +371,7 @@ namespace MikuMikuLibrary.Models
                     if ( exBlockDataOffset == 0 )
                         break;
 
-                    MeshExBlockBase exBlock = null;
+                    MeshExBlock exBlock = null;
 
                     reader.ReadAtOffsetAndSeekBack( exBlockDataOffset, () =>
                     {
@@ -422,7 +467,7 @@ namespace MikuMikuLibrary.Models
         public MeshExData()
         {
             Osages = new List<MeshExOsageEntry>();
-            ExBlocks = new List<MeshExBlockBase>();
+            ExBlocks = new List<MeshExBlock>();
             Strings1 = new List<string>();
             Strings2 = new List<string>();
             Entries = new List<MeshExEntry>();

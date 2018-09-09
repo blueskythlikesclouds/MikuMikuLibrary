@@ -70,6 +70,7 @@
     <Compile Include="DataNodes\DataNode.cs" />
     <Compile Include="DataNodes\DataNodeFactory.cs" />
     <Compile Include="DataNodes\DataNodeT.cs" />
+    <Compile Include="DataNodes\MeshExDataNode.cs" />
     <Compile Include="DataNodes\FarcArchiveNode.cs" />
     <Compile Include="DataNodes\IndexTableNode.cs" />
     <Compile Include="DataNodes\ListNode.cs" />

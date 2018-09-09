@@ -48,6 +48,9 @@ namespace MikuMikuModel.DataNodes.Wrappers
                 // afjaşksfşalfklaşwfkwaf)
                 Nodes.Clear();
                 dataNode.InitializeView();
+
+                if ( Nodes.Count >= 1 && string.IsNullOrEmpty( Nodes[ 0 ].Name ) )
+                    Nodes.RemoveAt( 0 );
             }
         }
 

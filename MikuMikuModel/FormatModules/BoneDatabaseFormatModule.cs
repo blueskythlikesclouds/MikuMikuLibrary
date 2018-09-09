@@ -32,12 +32,12 @@ namespace MikuMikuModel.FormatModules
 
         protected override void ExportCore( BoneDatabase obj, Stream destination, string fileName )
         {
-            obj.Save( destination );
+            obj.Save( destination, true );
         }
 
         protected override BoneDatabase ImportCore( Stream source, string fileName )
         {
-            return BinaryFile.Load<BoneDatabase>( source );
+            return BinaryFile.Load<BoneDatabase>( source, true );
         }
     }
 }

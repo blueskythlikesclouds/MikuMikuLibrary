@@ -113,7 +113,7 @@ namespace MikuMikuModel.GUI.Forms
 
         public void Reset()
         {
-            treeView.SelectedDataNode?.Dispose();
+            treeView.TopDataNode?.Dispose();
             treeView.Nodes.Clear();
 
             propertyGrid.SelectedObject = null;
@@ -276,6 +276,11 @@ namespace MikuMikuModel.GUI.Forms
         private void OnAbout( object sender, EventArgs e )
         {
             MessageBox.Show( "MikuMikuModel by Skyth\nThis program is a work in progress." );
+        }
+
+        private void OnPropertyValueChanged( object s, PropertyValueChangedEventArgs e )
+        {
+            treeView.SelectedDataNode?.NotifyPropertyChanged( e.ChangedItem.Label );
         }
     }
 }

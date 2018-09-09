@@ -123,7 +123,7 @@ namespace MikuMikuModel.DataNodes
         public virtual bool HasPendingChanges
         {
             get { return hasPendingChanges; }
-            private set
+            protected set
             {
                 // Don't want node constructions
                 // to affect this flag
@@ -442,7 +442,7 @@ namespace MikuMikuModel.DataNodes
                 nodes.First().Remove();
         }
 
-        protected void NotifyPropertyChanged( [CallerMemberName]string propertyName = null )
+        public void NotifyPropertyChanged( [CallerMemberName]string propertyName = null )
         {
             PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
             HasPendingChanges = true;

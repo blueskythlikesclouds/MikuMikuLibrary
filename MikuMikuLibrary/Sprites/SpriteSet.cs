@@ -27,7 +27,7 @@ namespace MikuMikuLibrary.Sprites
             uint spriteNamesOffset = reader.ReadUInt32();
             uint spriteUnknownsOffset = reader.ReadUInt32();
 
-            reader.ReadAtOffset( texturesOffset, () => TextureSet.Load( reader.BaseStream ) );
+            reader.ReadAtOffset( texturesOffset, () => TextureSet.Load( reader.BaseStream, true ) );
 
             Sprites.Capacity = spriteCount;
             reader.ReadAtOffset( spritesOffset, () =>
@@ -62,7 +62,7 @@ namespace MikuMikuLibrary.Sprites
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( 0 );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream ) );
+            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream, true ) );
             writer.Write( TextureSet.Textures.Count );
             writer.Write( Sprites.Count );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>

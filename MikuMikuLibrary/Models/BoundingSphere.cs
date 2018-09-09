@@ -10,8 +10,8 @@ namespace MikuMikuLibrary.Models
 
         public void Merge( BoundingSphere bSphere )
         {
-            // TODO
-            return;
+            Center = bSphere.Center;
+            Radius = bSphere.Radius;
         }
 
         public override string ToString()

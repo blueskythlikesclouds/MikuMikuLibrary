@@ -304,7 +304,19 @@ namespace MikuMikuLibrary.Archives.Farc
                         entryStream.CopyTo( writer.BaseStream );
 
                         entry.Position = position;
+                        entry.Length = writer.Position - position;
                         entry.IsCompressed = entry.IsEncrypted = entry.IsFutureTone = false;
+
+                        if ( entry.Stream != null )
+                        {
+                            if ( entry.OwnsStream )
+                                entry.Stream.Dispose();
+
+                            entry.Stream = null;
+                            entry.OwnsStream = false;
+                        }
+
+                        entryStream.Close();
                     } );
                 }
             } );

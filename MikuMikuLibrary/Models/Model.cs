@@ -237,15 +237,14 @@ namespace MikuMikuLibrary.Models
                 {
                     foreach ( var skin in Meshes.Where( x => x.Skin != null ).Select( x => x.Skin ) )
                     {
-                        int currentIndex = skeleton.BoneNames1.Count;
-
                         foreach ( var bone in skin.Bones )
                         {
-                            // Skip the ex data bones as they are not in the bone database
-                            if ( ( bone.ID & 0x8000 ) == 0x8000 )
-                                continue;
-
-                            var index = skeleton.BoneNames1.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
+                            int index = skin.ExData?.Strings2?.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
+                            if ( index == -1 )
+                                index = skeleton.BoneNames1.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
+                            else
+                                index = 0x8000 | index;
+  
                             if ( index != -1 )
                             {
                                 // Before we do this, fix the child bones
@@ -254,12 +253,10 @@ namespace MikuMikuLibrary.Models
 
                                 // Now replace the ID
                                 bone.ID = index;
-                                bone.Name = skeleton.BoneNames1[ index ];
                             }
                             else
                             {
-                                Debug.WriteLine( $"Model.Save: Bone wasn't found in bone database: {bone.Name}" );
-                                bone.ID = 0x8000 | ( currentIndex++ );
+                                Debug.WriteLine( $"Model.Save: Bone wasn't found in bone database or ex-data: {bone.Name}" );
                             }
                         }
                     }

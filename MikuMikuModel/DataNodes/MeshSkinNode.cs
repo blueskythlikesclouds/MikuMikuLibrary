@@ -19,13 +19,16 @@ namespace MikuMikuModel.DataNodes
         [Browsable( false )]
         public ListNode<Bone> Bones { get; set; }
 
+        [Browsable( false )]
+        public MeshExDataNode ExData { get; set; }
+
         protected override void InitializeCore()
         {
             RegisterDataUpdateHandler( () =>
             {
                 var data = new MeshSkin();
                 data.Bones.AddRange( Bones.Data );
-                data.ExData = Data.ExData;
+                data.ExData = ExData?.Data;
                 return data;
             } );
         }
@@ -33,6 +36,9 @@ namespace MikuMikuModel.DataNodes
         protected override void InitializeViewCore()
         {
             Add( Bones = new ListNode<Bone>( nameof( Data.Bones ), Data.Bones ) );
+
+            if ( Data.ExData != null )
+                Add( ExData = new MeshExDataNode( "ExData", Data.ExData ) );
         }
 
         public MeshSkinNode( string name, MeshSkin data ) : base( name, data )

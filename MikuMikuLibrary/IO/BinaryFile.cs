@@ -177,14 +177,14 @@ namespace MikuMikuLibrary.IO
                     File.Delete( filePath );
                     File.Move( thisFilePath, filePath );
 
-                    stream = File.OpenRead( filePath );
+                    stream = new FileStream( filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite );
                     ownsStream = true;
 
                     return;
                 }
             }
 
-            Save( File.Create( filePath ), false );
+            Save( new FileStream( filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite ), false );
         }
 
         public void Dispose()

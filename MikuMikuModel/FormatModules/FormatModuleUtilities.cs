@@ -116,6 +116,9 @@ namespace MikuMikuModel.FormatModules
 
         public static Stream ExportToStream( string fileName, object obj )
         {
+            if ( obj is Stream stream )
+                return stream;
+
             var type = obj.GetType();
             if ( !FormatModuleRegistry.ModulesByType.TryGetValue( type, out IFormatModule module ) )
                 throw new ArgumentException( "Could not find suitable format module for object", nameof( obj ) );

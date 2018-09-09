@@ -2,7 +2,6 @@
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Processing.Materials;
 using MikuMikuLibrary.Textures;
-using NvTriStripDotNet;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,10 +15,6 @@ namespace MikuMikuLibrary.Models
     public static class ModelImporter
     {
         private static Random randomIDGenerator = new Random();
-        private static readonly NvStripifier stripifier = new NvStripifier
-        {
-            CacheSize = NvStripifier.CACHESIZE_RSX,
-        };
 
         public static Model ConvertModelFromAiScene( string filePath )
         {
@@ -279,12 +274,11 @@ namespace MikuMikuLibrary.Models
                     indexTable.Indices[ ( i * 3 ) + 2 ] = ( ushort )( vertexOffset + aiMesh.Faces[ i ].Indices[ 2 ] );
                 }
 
-                stripifier.GenerateStrips( indexTable.Indices, out PrimitiveGroup[] primitiveGroups );
-
-                if ( primitiveGroups.Length == 1 && primitiveGroups[ 0 ].Type == PrimitiveType.TriangleStrip )
+                ushort[] triangleStrip = TriangleStripUtilities.GenerateStrips( indexTable.Indices );
+                if ( triangleStrip != null )
                 {
                     indexTable.PrimitiveType = IndexTablePrimitiveType.TriangleStrip;
-                    indexTable.Indices = primitiveGroups[ 0 ].Indices;
+                    indexTable.Indices = triangleStrip;
                 }
 
                 var aiMaterial = aiScene.Materials[ aiMesh.MaterialIndex ];
