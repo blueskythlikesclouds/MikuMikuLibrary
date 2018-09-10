@@ -6,7 +6,7 @@ namespace MikuMikuLibrary.Textures
     {
         RGB = 1,
         RGBA = 2,
-        RGBA5 = 5,
+        RGBA4 = 5,
         DXT1 = 6,
         DXT3 = 7,
         DXT4 = 8,
@@ -25,7 +25,7 @@ namespace MikuMikuLibrary.Textures
                 case TextureFormat.RGBA:
                     return false;
 
-                case TextureFormat.RGBA5:
+                case TextureFormat.RGBA4:
                 case TextureFormat.DXT1:
                 case TextureFormat.DXT3:
                 case TextureFormat.DXT4:
@@ -66,7 +66,7 @@ namespace MikuMikuLibrary.Textures
                 case TextureFormat.RGBA:
                     return width * height * 4;
 
-                case TextureFormat.RGBA5:
+                case TextureFormat.RGBA4:
                     return width * height * 2;
 
                 default:

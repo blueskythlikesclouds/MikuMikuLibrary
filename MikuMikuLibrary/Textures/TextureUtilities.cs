@@ -85,8 +85,8 @@ namespace MikuMikuLibrary.Textures
                 case TextureFormat.RGBA:
                     return DDSPixelFormatFourCC.A8R8G8B8;
 
-                case TextureFormat.RGBA5:
-                    return DDSPixelFormatFourCC.A1R5G5B5;
+                case TextureFormat.RGBA4:
+                    return DDSPixelFormatFourCC.A4R4G4B4;
 
                 case TextureFormat.DXT1:
                     return DDSPixelFormatFourCC.DXT1;
@@ -120,6 +120,9 @@ namespace MikuMikuLibrary.Textures
 
                 case DDSPixelFormatFourCC.A8R8G8B8:
                     return TextureFormat.RGBA;
+
+                case DDSPixelFormatFourCC.A4R4G4B4:
+                    return TextureFormat.RGBA4;
 
                 case DDSPixelFormatFourCC.DXT1:
                     return TextureFormat.DXT1;

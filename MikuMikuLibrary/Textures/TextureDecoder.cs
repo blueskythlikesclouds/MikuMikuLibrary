@@ -1,37 +1,37 @@
 ﻿using MikuMikuLibrary.Textures.DDS;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MikuMikuLibrary.Textures
 {
     public static class TextureDecoder
     {
+        private readonly static Matrix4x4 YCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
+                                                                      0.0f, -0.1873f, 1.8556f, 0.0f,
+                                                                      1.5748f, -0.4681f, 0.0f, 0.0f,
+                                                                      0.0f, 0.0f, 0.0f, 1.0f );
+
         // Thanks to Brolijah for finding this out!!
-        private static unsafe void ConvertYCbCrToRGBA( int* lumIntPtr, int* cbrIntPtr, int* outIntPtr, int width, int height )
+        private static unsafe void ConvertYCbCrToRGBA( int* lumPtr, int* cbrPtr, int* outPtr, int width, int height )
         {
             for ( int y = 0; y < height; y++ )
             {
                 for ( int x = 0; x < width; x++ )
                 {
-                    var positionLum = y * width + x;
-                    var positionCbr = ( y >> 1 ) * ( width >> 1 ) + ( x >> 1 );
+                    int lumOffset = y * width + x;
+                    int cbrOffset = y / 2 * width / 2 + x / 2;
 
-                    var lum = Color.FromArgb( *( lumIntPtr + positionLum ) );
-                    var cbr = Color.FromArgb( *( cbrIntPtr + positionCbr ) );
+                    Color lum = Color.FromArgb( *( lumPtr + lumOffset ) );
+                    Color cbr = Color.FromArgb( *( cbrPtr + cbrOffset ) );
 
-                    float ypn = lum.R / 255.0f;
-                    float cbn = cbr.R / 255.0f - 0.5f;
-                    float crn = cbr.G / 255.0f - 0.5f;
+                    Vector3 rgb = Vector3.Transform( new Vector3( lum.R / 255.0f, cbr.R / 255.0f - 0.5f, cbr.G / 255.0f - 0.5f ), YCbCrToRGB );
+                    rgb = Vector3.Multiply( Vector3.Max( Vector3.Zero, Vector3.Min( Vector3.One, rgb ) ), 255.0f );
 
-                    float r = Math.Min( 1, Math.Max( 0, ypn + 1.5748f * crn ) );
-                    float g = Math.Min( 1, Math.Max( 0, ypn + -0.1873f * cbn + -0.4681f * crn ) );
-                    float b = Math.Min( 1, Math.Max( 0, ypn + 1.8556f * cbn ) );
-
-                    *( outIntPtr + positionLum ) = Color.FromArgb( lum.G, ( int )( r * 255 ), ( int )( g * 255 ), ( int )( b * 255 ) ).ToArgb();
+                    *( outPtr + lumOffset ) = Color.FromArgb( lum.G, ( int )rgb.X, ( int )rgb.Y, ( int )rgb.Z ).ToArgb();
                 }
             }
         }
@@ -59,12 +59,12 @@ namespace MikuMikuLibrary.Textures
 
                 bitmap.UnlockBits( bitmapData );
             }
-            else if ( subTexture.Format == TextureFormat.RGBA5 )
+            else if ( subTexture.Format == TextureFormat.RGBA4 )
             {
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
 
                 fixed ( byte* ptr = subTexture.Data )
-                    RGBA5toRGBA( ptr, ( int* )bitmapData.Scan0, subTexture.Data.Length );
+                    RGBA4toRGBA( ptr, ( int* )bitmapData.Scan0, subTexture.Data.Length );
 
                 bitmap.UnlockBits( bitmapData );
             }
@@ -221,17 +221,17 @@ namespace MikuMikuLibrary.Textures
             }
         }
 
-        private unsafe static void RGBA5toRGBA( byte* source, int* destination, int length )
+        private unsafe static void RGBA4toRGBA( byte* source, int* destination, int length )
         {
             short* start = ( short* )source;
             short* end = ( short* )( source + length );
 
             while ( start < end )
             {
-                int red = ( *start & 0x1F ) << 3;
-                int green = ( ( *start >> 5 ) & 0x1F ) << 3;
-                int blue = ( ( *start >> 10 ) & 0x1F ) << 3;
-                int alpha = ( ( *start >> 15 ) & 1 ) * 255;
+                int red = ( *start & 0xF ) * 255 / 15;
+                int green = ( ( *start >> 4 ) & 0xF ) * 255 / 15;
+                int blue = ( ( *start >> 8 ) & 0xF ) * 255 / 15;
+                int alpha = ( ( *start >> 12 ) & 0xF ) * 255 / 15;
                 start++;
 
                 *destination++ = Color.FromArgb( alpha, red, green, blue ).ToArgb();
