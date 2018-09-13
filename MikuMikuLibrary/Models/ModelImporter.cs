@@ -1,6 +1,5 @@
 ﻿using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Misc;
-using MikuMikuLibrary.Processing.Materials;
 using MikuMikuLibrary.Textures;
 using System;
 using System.Collections.Generic;
@@ -143,23 +142,105 @@ namespace MikuMikuLibrary.Models
             return texture;
         }
 
+        private static Texture ConvertTexture( string textureName, string texturesDirectory, TextureSet textureSet )
+        {
+            return ConvertTexture( Path.Combine( texturesDirectory, textureName ), textureSet );
+        }
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        private static Color GetColorFromAiColor4D( Ai.Color4D color )
+        {
+            return new Color( color.R, color.G, color.B, color.A );
+        }
+
         private static Material ConvertMaterialFromAiMaterial( Ai.Material aiMaterial, string texturesDirectory, TextureSet textureSet )
         {
-            Material material;
+            Material material = new Material();
 
-            // TODO: Make material presets.
-            if ( aiMaterial.HasTextureDiffuse )
-            {
-                var diffuseTextureFilePath = Path.Combine( texturesDirectory, aiMaterial.TextureDiffuse.FilePath );
-                var diffuseTexture = ConvertTexture( diffuseTextureFilePath, textureSet );
-                material = MaterialCreator.CreatePhongMaterialF( diffuseTexture );
-            }
-            else
-            {
-                material = new Material();
-            }
-
+            material.Field00 = 34217;
+            material.Shader = "BLINN";
+            material.Field02 = 2688;
             material.Name = aiMaterial.Name;
+            material.Field25 = 1;
+
+            if ( aiMaterial.HasColorDiffuse )
+                material.DiffuseColor = GetColorFromAiColor4D( aiMaterial.ColorDiffuse );
+            else
+                material.DiffuseColor = new Color( 1, 1, 1, 1 );
+
+            if ( aiMaterial.HasColorAmbient )
+                material.AmbientColor = GetColorFromAiColor4D( aiMaterial.ColorAmbient );
+            else
+                material.AmbientColor = new Color( 1, 1, 1, 1 );
+
+            if ( aiMaterial.HasColorSpecular )
+                material.SpecularColor = GetColorFromAiColor4D( aiMaterial.ColorSpecular );
+            else
+                material.SpecularColor = new Color( 0.5f, 0.5f, 0.5f, 1 );
+
+            if ( aiMaterial.HasColorEmissive )
+                material.EmissionColor = GetColorFromAiColor4D( aiMaterial.ColorEmissive );
+            else
+                material.EmissionColor = new Color( 0, 0, 0, 1 );
+
+            if ( aiMaterial.HasShininess && aiMaterial.ShadingMode == Ai.ShadingMode.Phong )
+                material.Shininess = aiMaterial.Shininess;
+            else
+                material.Shininess = 50f;
+
+            Texture texture;
+            if ( aiMaterial.HasTextureDiffuse && ( texture = ConvertTexture( aiMaterial.TextureDiffuse.FilePath, texturesDirectory, textureSet ) ) != null )
+            {
+                material.Diffuse.TextureID = texture.ID;
+                material.Diffuse.Field02 = 241;
+            }
+
+            if ( aiMaterial.HasTextureAmbient && ( texture = ConvertTexture( aiMaterial.TextureAmbient.FilePath, texturesDirectory, textureSet ) ) != null )
+            {
+                material.Ambient.TextureID = texture.ID;
+                material.Ambient.Field02 = 241;
+            }
+
+            if ( aiMaterial.HasTextureNormal && ( texture = ConvertTexture( aiMaterial.TextureNormal.FilePath, texturesDirectory, textureSet ) ) != null )
+            {
+                material.Normal.TextureID = texture.ID;
+                material.Normal.Field02 = 242;
+            }
+
+            if ( aiMaterial.HasTextureSpecular && ( texture = ConvertTexture( aiMaterial.TextureSpecular.FilePath, texturesDirectory, textureSet ) ) != null )
+            {
+                material.Specular.TextureID = texture.ID;
+                material.Specular.Field02 = 243;
+            }
+
+            if ( aiMaterial.HasTextureReflection && ( texture = ConvertTexture( aiMaterial.TextureReflection.FilePath, texturesDirectory, textureSet ) ) != null )
+            {
+                material.Reflection.TextureID = texture.ID;
+                material.Reflection.Field02 = 1017;
+            }
+
+            if ( aiMaterial.GetMaterialTexture( Ai.TextureType.Shininess, 0, out Ai.TextureSlot shininess ) && ( texture = ConvertTexture( shininess.FilePath, texturesDirectory, textureSet ) ) != null )
+            {
+                material.SpecularPower.TextureID = texture.ID;
+                material.SpecularPower.Field02 = 246;
+            }
+
+            foreach ( var materialTexture in material.EnumerateMaterialTextures() )
+            {
+                if ( materialTexture == material.Diffuse )
+                    materialTexture.Field00 = materialTexture.IsActive ? 82288 : 48;
+
+                materialTexture.Field05 = 1;
+
+                if ( materialTexture.IsActive )
+                {
+                    materialTexture.Field01 = 23331040;
+                    materialTexture.Field06 = 1;
+                    materialTexture.Field11 = 1;
+                    materialTexture.Field16 = 1;
+                    materialTexture.Field21 = 1;
+                }
+            }
 
             return material;
         }

@@ -17,13 +17,55 @@ namespace MikuMikuLibrary.Models
 
     public struct BoneWeight
     {
-        public float Weight1, Weight2, Weight3, Weight4;
-        public int Index1, Index2, Index3, Index4;
-
         public static readonly BoneWeight Empty = new BoneWeight
         {
             Index1 = -1, Index2 = -1, Index3 = -1, Index4 = -1,
         };
+
+        public float Weight1, Weight2, Weight3, Weight4;
+        public int Index1, Index2, Index3, Index4;
+
+        public bool IsValid
+        {
+            get { return ( Weight1 + Weight2 + Weight3 + Weight4 ) == 1.0f; }
+        }
+
+        public void Validate()
+        {
+            if ( Weight1 != 0 )
+            {
+                if ( Weight2 != 0 )
+                {
+                    if ( Weight3 != 0 )
+                    {
+                        if ( Weight4 == 0 )
+                        {
+                            Index4 = -1;
+                            Weight4 = 0;
+                        }
+                    }
+                    else
+                    {
+                        Index3 = -1; Index4 = -1;
+                        Weight3 = 0; Weight4 = 0;
+                    }
+                }
+                else
+                {
+                    Index2 = -1; Index3 = -1; Index4 = -1;
+                    Weight2 = 0; Weight3 = 0; Weight4 = 0;
+                }
+
+                float sum = Weight1 + Weight2 + Weight3 + Weight4;
+                if ( sum != 1f )
+                    Weight1 = Weight1 + ( 1f - sum );
+            }
+            else
+            {
+                Index1 = -1; Index2 = -1; Index3 = -1; Index4 = -1;
+                Weight1 = 0; Weight2 = 0; Weight3 = 0; Weight4 = 0;
+            }
+        }
 
         public void AddWeight( int index, float weight )
         {

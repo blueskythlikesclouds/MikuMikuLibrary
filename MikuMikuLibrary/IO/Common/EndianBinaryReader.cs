@@ -591,6 +591,11 @@ namespace MikuMikuLibrary.IO.Common
             return value;
         }
 
+        public Vector4 ReadVector4Int16()
+        {
+            return new Vector4( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
+        }
+
         public Matrix4x4 ReadMatrix4x4()
         {
             return new Matrix4x4(

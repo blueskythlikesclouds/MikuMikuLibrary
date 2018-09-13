@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Ai = Assimp;
 
 namespace MikuMikuLibrary.Models
@@ -125,9 +126,13 @@ namespace MikuMikuLibrary.Models
             }
         }
 
-        private static unsafe Ai.Matrix4x4 GetAiMatrix4x4FromMatrix4x4( Matrix4x4 m )
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        private static Ai.Matrix4x4 GetAiMatrix4x4FromMatrix4x4( Matrix4x4 m )
         {
-            return *( Ai.Matrix4x4* )&m;
+            return new Ai.Matrix4x4( m.M11, m.M12, m.M13, m.M14,
+                                     m.M21, m.M22, m.M23, m.M24,
+                                     m.M31, m.M32, m.M33, m.M34,
+                                     m.M41, m.M42, m.M43, m.M44 );
         }
 
         private static Ai.Node ConvertAiNodeFromBone( Ai.Node parent, Matrix4x4 inverseParentTransform, Bone bone, bool appendTags = false )
@@ -285,10 +290,24 @@ namespace MikuMikuLibrary.Models
             return default( Ai.TextureSlot );
         }
 
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        private static Ai.Color4D GetAiColor4DFromColor( Color color )
+        {
+            return new Ai.Color4D( color.R, color.G, color.B, color.A );
+        }
+
         private static Ai.Material ConvertAiMaterialFromMaterial( Material material, TextureSet textures )
         {
-            var aiMaterial = new Ai.Material();
-            aiMaterial.Name = material.Name;
+            var aiMaterial = new Ai.Material
+            {
+                Name = material.Name,
+                ColorDiffuse = GetAiColor4DFromColor( material.DiffuseColor ),
+                ColorAmbient = GetAiColor4DFromColor( material.AmbientColor ),
+                ColorSpecular = GetAiColor4DFromColor( material.SpecularColor ),
+                ColorEmissive = GetAiColor4DFromColor( material.EmissionColor ),
+                Shininess = material.Shininess,
+                ShadingMode = Ai.ShadingMode.Phong,
+            };
 
             ConvertMaterialTexture( material.Diffuse, Ai.TextureType.Diffuse );
             ConvertMaterialTexture( material.Ambient, Ai.TextureType.Ambient );

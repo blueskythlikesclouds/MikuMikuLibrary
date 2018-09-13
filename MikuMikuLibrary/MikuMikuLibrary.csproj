@@ -83,7 +83,6 @@
     <Compile Include="Misc\HalfUtilities.cs" />
     <Compile Include="Models\BoundingSphere.cs" />
     <Compile Include="Models\MeshSkin.cs" />
-    <Compile Include="Materials\MaterialCreator.cs" />
     <Compile Include="Models\ModelExporter.cs" />
     <Compile Include="Models\ModelImporter.cs" />
     <Compile Include="Models\SceneUtilities.cs" />

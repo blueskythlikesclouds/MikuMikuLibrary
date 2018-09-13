@@ -371,13 +371,19 @@ namespace MikuMikuModel.DataNodes
                 throw new ArgumentException( "Data does not equal node's data type", nameof( data ) );
 
             var oldData = Data;
-            IsViewInitialized = false;
+
             IsInitialized = false;
+            IsViewInitialized = false;
+            IsUpdatingData = true;
+
             {
                 this.data = data;
                 OnReplace( oldData );
             }
+
             IsInitialized = true;
+            IsViewInitialized = false;
+            IsUpdatingData = false;
             HasPendingChanges = true;
         }
 

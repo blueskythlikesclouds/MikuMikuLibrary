@@ -5,6 +5,7 @@ using MikuMikuLibrary.Misc;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Linq;
 
 namespace MikuMikuLibrary.Models
 {
@@ -105,6 +106,7 @@ namespace MikuMikuLibrary.Models
                 {
                     Vertices = new Vector3[ vertexCount ];
                     Normals = new Vector3[ vertexCount ];
+                    Tangents = new Vector4[ vertexCount ];
                     UVChannel1 = new Vector2[ vertexCount ];
                     UVChannel2 = new Vector2[ vertexCount ];
                     Colors = new Color[ vertexCount ];
@@ -112,29 +114,53 @@ namespace MikuMikuLibrary.Models
                     if ( mode == 4 )
                         BoneWeights = new BoneWeight[ vertexCount ];
 
+                    bool hasTangents = false;
+                    bool hasUVChannel2 = false;
+                    bool hasColors = false;
+
                     var vertexReader = section.VertexData.Reader;
                     for ( int i = 0; i < vertexCount; i++ )
                     {
                         vertexReader.SeekBegin( dataOffset + ( stride * i ) );
                         Vertices[ i ] = vertexReader.ReadVector3();
                         Normals[ i ] = vertexReader.ReadVector3Int16();
-                        vertexReader.SeekCurrent( 10 );
+                        vertexReader.SeekCurrent( 2 );
+                        Tangents[ i ] = vertexReader.ReadVector4Int16();
                         UVChannel1[ i ] = vertexReader.ReadVector2Half();
                         UVChannel2[ i ] = vertexReader.ReadVector2Half();
                         Colors[ i ] = vertexReader.ReadColorHalf();
 
                         if ( mode == 4 )
                         {
-                            BoneWeights[ i ].Weight1 = vertexReader.ReadUInt16() / 32768f;
-                            BoneWeights[ i ].Weight2 = vertexReader.ReadUInt16() / 32768f;
-                            BoneWeights[ i ].Weight3 = vertexReader.ReadUInt16() / 32768f;
-                            BoneWeights[ i ].Weight4 = vertexReader.ReadUInt16() / 32768f;
-                            BoneWeights[ i ].Index1 = vertexReader.ReadByte() / 3;
-                            BoneWeights[ i ].Index2 = vertexReader.ReadByte() / 3;
-                            BoneWeights[ i ].Index3 = vertexReader.ReadByte() / 3;
-                            BoneWeights[ i ].Index4 = vertexReader.ReadByte() / 3;
+                            var boneWeight = new BoneWeight
+                            {
+                                Weight1 = vertexReader.ReadUInt16() / 32768f,
+                                Weight2 = vertexReader.ReadUInt16() / 32768f,
+                                Weight3 = vertexReader.ReadUInt16() / 32768f,
+                                Weight4 = vertexReader.ReadUInt16() / 32768f,
+                                Index1 = vertexReader.ReadByte() / 3,
+                                Index2 = vertexReader.ReadByte() / 3,
+                                Index3 = vertexReader.ReadByte() / 3,
+                                Index4 = vertexReader.ReadByte() / 3,
+                            };
+                            boneWeight.Validate();
+
+                            BoneWeights[ i ] = boneWeight;
                         }
+
+                        // Normalize normal because precision
+                        Normals[ i ] = Vector3.Normalize( Normals[ i ] );
+
+                        // Checks to get rid of useless data after reading
+                        if ( Tangents[ i ] != Vector4.Zero ) hasTangents = true;
+                        if ( UVChannel1[ i ] != UVChannel2[ i ] ) hasUVChannel2 = true;
+                        if ( !Colors[ i ].Equals( Color.One ) ) hasColors = true;
                     }
+
+                    // Always remove tangents for now
+                    if ( !hasTangents || true ) Tangents = null;
+                    if ( !hasUVChannel2 ) UVChannel2 = null;
+                    if ( !hasColors ) Colors = null;
                 }
             }
 
@@ -195,17 +221,27 @@ namespace MikuMikuLibrary.Models
                     BoneWeights = new BoneWeight[ vertexCount ];
                     for ( int i = 0; i < vertexCount; i++ )
                     {
-                        BoneWeights[ i ] = new BoneWeight
+                        // So apparently, FT uses -1 instead of 255 for weights that aren't used,
+                        // and index tables can use bones more than 85 (85*3=255)
+                        // For that reason, weight == 255 check won't and shouldn't be done anymore.
+
+                        Vector4 weight4 = boneWeights[ i ];
+                        Vector4 index4 = Vector4.Divide( boneIndices[ i ], 3 );
+
+                        var boneWeight = new BoneWeight
                         {
-                            Weight1 = boneWeights[ i ].X,
-                            Weight2 = boneWeights[ i ].Y,
-                            Weight3 = boneWeights[ i ].Z,
-                            Weight4 = boneWeights[ i ].W,
-                            Index1 = boneIndices[ i ].X == 255.0f ? -1 : ( int )( boneIndices[ i ].X / 3.0f ),
-                            Index2 = boneIndices[ i ].Y == 255.0f ? -1 : ( int )( boneIndices[ i ].Y / 3.0f ),
-                            Index3 = boneIndices[ i ].Z == 255.0f ? -1 : ( int )( boneIndices[ i ].Z / 3.0f ),
-                            Index4 = boneIndices[ i ].W == 255.0f ? -1 : ( int )( boneIndices[ i ].W / 3.0f ),
+                            Weight1 = weight4.X,
+                            Weight2 = weight4.Y,
+                            Weight3 = weight4.Z,
+                            Weight4 = weight4.W,
+                            Index1 = ( int )index4.X,
+                            Index2 = ( int )index4.Y,
+                            Index3 = ( int )index4.Z,
+                            Index4 = ( int )index4.W,
                         };
+                        boneWeight.Validate();
+
+                        BoneWeights[ i ] = boneWeight;
                     }
                 }
             }
@@ -365,10 +401,10 @@ namespace MikuMikuLibrary.Models
                             case VertexFormatElement.BoneIndex:
                                 foreach ( var weight in BoneWeights )
                                 {
-                                    writer.Write( weight.Index1 < 0 ? 255.0f : weight.Index1 * 3.0f );
-                                    writer.Write( weight.Index2 < 0 ? 255.0f : weight.Index2 * 3.0f );
-                                    writer.Write( weight.Index3 < 0 ? 255.0f : weight.Index3 * 3.0f );
-                                    writer.Write( weight.Index4 < 0 ? 255.0f : weight.Index4 * 3.0f );
+                                    writer.Write( weight.Index1 < 0 ? -1f : weight.Index1 * 3.0f );
+                                    writer.Write( weight.Index2 < 0 ? -1f : weight.Index2 * 3.0f );
+                                    writer.Write( weight.Index3 < 0 ? -1f : weight.Index3 * 3.0f );
+                                    writer.Write( weight.Index4 < 0 ? -1f : weight.Index4 * 3.0f );
                                 }
                                 break;
                         }

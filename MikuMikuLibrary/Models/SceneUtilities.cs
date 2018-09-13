@@ -10,11 +10,13 @@ namespace MikuMikuLibrary.Models
         public static Ai.Scene Import( string fileName )
         {
             var aiContext = new Ai.AssimpContext();
-            aiContext.SetConfig( new Ai.Configs.MeshTriangleLimitConfig( 32768 ) );
-            aiContext.SetConfig( new Ai.Configs.MaxBoneCountConfig( 85 ) );
+            aiContext.SetConfig( new Ai.Configs.MeshVertexLimitConfig( 32768 ) );
+            aiContext.SetConfig( new Ai.Configs.MaxBoneCountConfig( 64 ) );
 
-            return aiContext.ImportFile( fileName, Ai.PostProcessSteps.ImproveCacheLocality | Ai.PostProcessSteps.FindInvalidData | Ai.PostProcessSteps.JoinIdenticalVertices | Ai.PostProcessSteps.SortByPrimitiveType |
-                                                   Ai.PostProcessSteps.LimitBoneWeights | Ai.PostProcessSteps.Triangulate | Ai.PostProcessSteps.GenerateSmoothNormals | Ai.PostProcessSteps.OptimizeMeshes );
+            return aiContext.ImportFile( fileName, Ai.PostProcessSteps.JoinIdenticalVertices | Ai.PostProcessSteps.Triangulate | Ai.PostProcessSteps.GenerateSmoothNormals | 
+                                                   Ai.PostProcessSteps.SplitLargeMeshes | Ai.PostProcessSteps.LimitBoneWeights | Ai.PostProcessSteps.ValidateDataStructure | 
+                                                   Ai.PostProcessSteps.ImproveCacheLocality | Ai.PostProcessSteps.SortByPrimitiveType |  Ai.PostProcessSteps.FindInvalidData | 
+                                                   Ai.PostProcessSteps.OptimizeMeshes | Ai.PostProcessSteps.SplitByBoneCount | Ai.PostProcessSteps.Debone | Ai.PostProcessSteps.RemoveRedundantMaterials );
         }
 
         public static void Export( Ai.Scene aiScene, string fileName, Ai.PostProcessSteps postProcessSteps = Ai.PostProcessSteps.None )

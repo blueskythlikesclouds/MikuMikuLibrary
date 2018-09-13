@@ -33,7 +33,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             foreach ( var indexTable in IndexTables )
                 indexTable.Draw( shaderProgram );
 
-            // Draw tangents
+            //// Draw tangents
             //if ( TangentBuffer != null )
             //{
             //    shaderProgram.SetUniform( "hasNormal", false );
@@ -41,29 +41,27 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             //    shaderProgram.SetUniform( "hasColor", false );
             //    shaderProgram.SetUniform( "hasTangent", false );
             //    shaderProgram.SetUniform( "hasDiffuseTexture", false );
-            //    shaderProgram.SetUniform( "specularColor", new Vector3( 0, 0, 0 ) );
+            //    shaderProgram.SetUniform( "specularColor", new OpenTK.Vector3( 0, 0, 0 ) );
 
             //    for ( int i = 0; i < TangentBuffer.Length; i++ )
             //    {
 
-            //        var p = new Vector3( PositionBuffer.Array[ i ].X,
+            //        var p = new OpenTK.Vector3( PositionBuffer.Array[ i ].X,
             //                             PositionBuffer.Array[ i ].Y,
             //                             PositionBuffer.Array[ i ].Z );
 
-            //        var t = new Vector3( TangentBuffer.Array[ i ].X,
+            //        var t = new OpenTK.Vector3( TangentBuffer.Array[ i ].X,
             //                             TangentBuffer.Array[ i ].Y,
             //                             TangentBuffer.Array[ i ].Z );
 
-            //        var n = new Vector3( NormalBuffer.Array[ i ].X,
+            //        var n = new OpenTK.Vector3( NormalBuffer.Array[ i ].X,
             //                             NormalBuffer.Array[ i ].Y,
             //                             NormalBuffer.Array[ i ].Z );
 
-            //        t = Vector3.Normalize( t - n * Vector3.Dot( n, t ) );
-
-            //        var b = Vector3.Normalize( Vector3.Cross( n, t ) );
+            //        var b = OpenTK.Vector3.Normalize( OpenTK.Vector3.Cross( n, t ) * TangentBuffer.Array[i].W );
 
             //        // Tangent
-            //        shaderProgram.SetUniform( "diffuseColor", new Vector3( 1, 0, 0 ) );
+            //        shaderProgram.SetUniform( "diffuseColor", new OpenTK.Vector3( 1, 0, 0 ) );
 
             //        GL.Begin( PrimitiveType.Lines );
             //        GL.Vertex3( p );
@@ -71,7 +69,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             //        GL.End();
 
             //        // Binormal
-            //        shaderProgram.SetUniform( "diffuseColor", new Vector3( 0, 1, 0 ) );
+            //        shaderProgram.SetUniform( "diffuseColor", new OpenTK.Vector3( 0, 1, 0 ) );
 
             //        GL.Begin( PrimitiveType.Lines );
             //        GL.Vertex3( p );
@@ -79,7 +77,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             //        GL.End();
 
             //        // Normal
-            //        shaderProgram.SetUniform( "diffuseColor", new Vector3( 0, 0, 1 ) );
+            //        shaderProgram.SetUniform( "diffuseColor", new OpenTK.Vector3( 0, 0, 1 ) );
 
             //        GL.Begin( PrimitiveType.Lines );
             //        GL.Vertex3( p );

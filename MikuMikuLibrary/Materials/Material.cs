@@ -49,9 +49,15 @@ namespace MikuMikuLibrary.Materials
         public float Field39 { get; set; }
         public float Field40 { get; set; }
 
+        public bool IsAlphaEnabled
+        {
+            get { return ( Field02 & 1 ) != 0; }
+            set { Field02 = ( Field02 & ~1 ) | ( value ? 1 : 0 ); }
+        }
+
         internal void Read( EndianBinaryReader reader )
         {
-            int usedTextureSlotCount = reader.ReadInt32();
+            int activeTextureCount = reader.ReadInt32();
             Field00 = reader.ReadInt32();
             Shader = reader.ReadString( StringBinaryFormat.FixedLength, 8 );
             Diffuse.Read( reader );
