@@ -157,7 +157,6 @@ namespace MikuMikuLibrary.Models
         {
             Material material = new Material();
 
-            material.Field00 = 34217;
             material.Shader = "BLINN";
             material.Field02 = 2688;
             material.Name = aiMaterial.Name;
@@ -191,6 +190,7 @@ namespace MikuMikuLibrary.Models
             Texture texture;
             if ( aiMaterial.HasTextureDiffuse && ( texture = ConvertTexture( aiMaterial.TextureDiffuse.FilePath, texturesDirectory, textureSet ) ) != null )
             {
+                material.Field00 |= 1;
                 material.Diffuse.TextureID = texture.ID;
                 material.Diffuse.Field02 = 241;
             }
@@ -203,24 +203,28 @@ namespace MikuMikuLibrary.Models
 
             if ( aiMaterial.HasTextureNormal && ( texture = ConvertTexture( aiMaterial.TextureNormal.FilePath, texturesDirectory, textureSet ) ) != null )
             {
+                material.Field00 |= 256;
                 material.Normal.TextureID = texture.ID;
                 material.Normal.Field02 = 242;
             }
 
             if ( aiMaterial.HasTextureSpecular && ( texture = ConvertTexture( aiMaterial.TextureSpecular.FilePath, texturesDirectory, textureSet ) ) != null )
             {
+                material.Field00 |= 128;
                 material.Specular.TextureID = texture.ID;
                 material.Specular.Field02 = 243;
             }
 
             if ( aiMaterial.HasTextureReflection && ( texture = ConvertTexture( aiMaterial.TextureReflection.FilePath, texturesDirectory, textureSet ) ) != null )
             {
+                material.Field00 |= 33832;
                 material.Reflection.TextureID = texture.ID;
                 material.Reflection.Field02 = 1017;
             }
 
             if ( aiMaterial.GetMaterialTexture( Ai.TextureType.Shininess, 0, out Ai.TextureSlot shininess ) && ( texture = ConvertTexture( shininess.FilePath, texturesDirectory, textureSet ) ) != null )
             {
+                material.Field00 |= 8192;
                 material.SpecularPower.TextureID = texture.ID;
                 material.SpecularPower.Field02 = 246;
             }
@@ -284,11 +288,8 @@ namespace MikuMikuLibrary.Models
                     for ( int i = 0; i < aiMesh.Tangents.Count; i++ )
                     {
                         Vector3 tangent = Vector3.TransformNormal( new Vector3( aiMesh.Tangents[ i ].X, aiMesh.Tangents[ i ].Y, aiMesh.Tangents[ i ].Z ), transformation );
-                        Vector3 bitangent = Vector3.TransformNormal( new Vector3( aiMesh.Tangents[ i ].X, aiMesh.Tangents[ i ].Y, aiMesh.Tangents[ i ].Z ), transformation );
-
-                        float direction = 1;
-                        if ( Vector3.Dot( bitangent, Vector3.Cross( subMesh.Normals[ vertexOffset + i ], tangent ) ) <= 0 )
-                            direction = -1;
+                        Vector3 bitangent = Vector3.TransformNormal( new Vector3( aiMesh.BiTangents[ i ].X, aiMesh.BiTangents[ i ].Y, aiMesh.BiTangents[ i ].Z ), transformation );
+                        float direction = Vector3.Dot( bitangent, Vector3.Cross( subMesh.Normals[ vertexOffset + i ], tangent ) ) > 0 ? 1.0f : -1.0f;
 
                         subMesh.Tangents[ vertexOffset + i ] = new Vector4( tangent, direction );
                     }

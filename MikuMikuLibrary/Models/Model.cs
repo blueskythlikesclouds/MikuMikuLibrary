@@ -239,7 +239,7 @@ namespace MikuMikuLibrary.Models
                     {
                         foreach ( var bone in skin.Bones )
                         {
-                            int index = skin.ExData?.Strings2?.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
+                            int index = skin.ExData?.BoneNames?.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
                             if ( index == -1 )
                                 index = skeleton.BoneNames1.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
                             else

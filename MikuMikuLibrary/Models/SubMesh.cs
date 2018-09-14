@@ -157,10 +157,20 @@ namespace MikuMikuLibrary.Models
                         if ( !Colors[ i ].Equals( Color.One ) ) hasColors = true;
                     }
 
-                    // Always remove tangents for now
-                    if ( !hasTangents || true ) Tangents = null;
+                    if ( !hasTangents ) Tangents = null;
                     if ( !hasUVChannel2 ) UVChannel2 = null;
                     if ( !hasColors ) Colors = null;
+                }
+
+                if ( Tangents != null )
+                {
+                    for ( int i = 0; i < Tangents.Length; i++ )
+                    {
+                        float direction = Tangents[ i ].W > 0.0f ? 1.0f : -1.0f;
+                        Vector3 tangent = Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
+
+                        Tangents[ i ] = new Vector4( tangent, direction );
+                    }
                 }
             }
 

@@ -9,6 +9,11 @@ namespace MikuMikuLibrary.Models
         public int ID { get; set; }
         public Matrix4x4 Matrix { get; set; }
 
+        public bool IsEx
+        {
+            get { return ( ID & 0x8000 ) != 0; }
+        }
+
         public Bone()
         {
             ParentID = -1;

@@ -3,10 +3,12 @@ using MikuMikuLibrary.Textures;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Windows.Forms;
 
 namespace MikuMikuModel.DataNodes
@@ -86,7 +88,7 @@ namespace MikuMikuModel.DataNodes
                 data.Endianness = Endianness;
                 data.Meshes.AddRange( Meshes.Data );
                 data.TextureIDs.AddRange( Data.TextureIDs );
-                data.TextureSet = Textures.Data as TextureSet;
+                data.TextureSet = Textures?.Data as TextureSet;
                 return data;
             } );
             RegisterCustomHandler( "Set all shaders to BLINN", () =>
