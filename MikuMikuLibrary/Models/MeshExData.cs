@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
@@ -128,54 +129,54 @@ namespace MikuMikuLibrary.Models
             get { return "MOT"; }
         }
 
-        public string Field10 { get; set; }
-        public List<int> Field11 { get; }
-        public List<Matrix4x4> Field12 { get; }
+        public string Name { get; set; }
+        public List<int> BoneIDs { get; }
+        public List<Matrix4x4> BoneMatrices { get; }
 
         internal override void ReadBody( EndianBinaryReader reader )
         {
-            long field10Offset = reader.ReadOffset();
+            long nameOffset = reader.ReadOffset();
             int count = reader.ReadInt32();
-            long field11Offset = reader.ReadOffset();
-            long field12Offset = reader.ReadOffset();
+            long boneIDsOffset = reader.ReadOffset();
+            long boneMatricesOffset = reader.ReadOffset();
 
-            Field11.Capacity = Field12.Capacity = count;
+            BoneIDs.Capacity = BoneMatrices.Capacity = count;
 
-            Field10 = reader.ReadStringAtOffset( field10Offset, StringBinaryFormat.NullTerminated );
+            Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
-            reader.ReadAtOffset( field11Offset, () =>
+            reader.ReadAtOffset( boneIDsOffset, () =>
             {
                 for ( int i = 0; i < count; i++ )
-                    Field11.Add( reader.ReadInt32() );
+                    BoneIDs.Add( reader.ReadInt32() );
             } );
 
-            reader.ReadAtOffset( field12Offset, () =>
+            reader.ReadAtOffset( boneMatricesOffset, () =>
             {
                 for ( int i = 0; i < count; i++ )
-                    Field12.Add( reader.ReadMatrix4x4() );
+                    BoneMatrices.Add( reader.ReadMatrix4x4() );
             } );
         }
 
         internal override void WriteBody( EndianBinaryWriter writer )
         {
-            writer.AddStringToStringTable( Field10 );
-            writer.Write( Field11.Count );
+            writer.AddStringToStringTable( Name );
+            writer.Write( BoneIDs.Count );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
-                foreach ( var value in Field11 )
+                foreach ( var value in BoneIDs )
                     writer.Write( value );
             } );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
-                foreach ( var value in Field12 )
+                foreach ( var value in BoneMatrices )
                     writer.Write( value );
             } );
         }
 
         public MeshExBlockMotion()
         {
-            Field11 = new List<int>();
-            Field12 = new List<Matrix4x4>();
+            BoneIDs = new List<int>();
+            BoneMatrices = new List<Matrix4x4>();
         }
     }
 
@@ -186,35 +187,35 @@ namespace MikuMikuLibrary.Models
             get { return "EXP"; }
         }
 
-        public string Field10 { get; set; }
-        public List<string> Field11 { get; }
+        public string BoneName { get; set; }
+        public List<string> Expressions { get; }
 
         internal override void ReadBody( EndianBinaryReader reader )
         {
-            long field10Offset = reader.ReadOffset();
-            int field11Count = reader.ReadInt32();
+            long boneNameOffset = reader.ReadOffset();
+            int expressionCount = reader.ReadInt32();
 
-            Field10 = reader.ReadStringAtOffset( field10Offset, StringBinaryFormat.NullTerminated );
+            BoneName = reader.ReadStringAtOffset( boneNameOffset, StringBinaryFormat.NullTerminated );
 
-            Field11.Capacity = field11Count;
-            for ( int i = 0; i < field11Count; i++ )
-                Field11.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+            Expressions.Capacity = expressionCount;
+            for ( int i = 0; i < expressionCount; i++ )
+                Expressions.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
         }
 
         internal override void WriteBody( EndianBinaryWriter writer )
         {
-            writer.AddStringToStringTable( Field10 );
-            writer.Write( Field11.Count );
+            writer.AddStringToStringTable( BoneName );
+            writer.Write( Expressions.Count );
 
-            foreach ( var str in Field11 )
+            foreach ( var str in Expressions )
                 writer.AddStringToStringTable( str );
 
-            writer.WriteNulls( ( 12 - Field11.Count ) * 4 );
+            writer.WriteNulls( ( 12 - Expressions.Count ) * 4 );
         }
 
         public MeshExBlockExpression()
         {
-            Field11 = new List<string>();
+            Expressions = new List<string>();
         }
     }
 
@@ -225,28 +226,28 @@ namespace MikuMikuLibrary.Models
             get { return "OSG"; }
         }
 
-        public int Field10 { get; set; }
-        public int Field11 { get; set; }
-        public int Field12 { get; set; }
-        public int Field13 { get; set; }
+        public int Field00 { get; set; }
+        public int Field01 { get; set; }
+        public int Field02 { get; set; }
+        public int Field03 { get; set; }
 
         internal override void ReadBody( EndianBinaryReader reader )
         {
-            if ( reader.AddressSpace == IO.AddressSpace.Int64 )
+            if ( reader.AddressSpace == AddressSpace.Int64 )
                 reader.SeekCurrent( 4 );
 
-            Field10 = reader.ReadInt32();
-            Field11 = reader.ReadInt32();
-            Field12 = reader.ReadInt32();
-            Field13 = reader.ReadInt32();
+            Field00 = reader.ReadInt32();
+            Field01 = reader.ReadInt32();
+            Field02 = reader.ReadInt32();
+            Field03 = reader.ReadInt32();
         }
 
         internal override void WriteBody( EndianBinaryWriter writer )
         {
-            writer.Write( Field10 );
-            writer.Write( Field11 );
-            writer.Write( Field12 );
-            writer.Write( Field13 );
+            writer.Write( Field00 );
+            writer.Write( Field01 );
+            writer.Write( Field02 );
+            writer.Write( Field03 );
             writer.WriteNulls( 40 );
         }
     }
@@ -255,44 +256,26 @@ namespace MikuMikuLibrary.Models
     {
         public abstract string Kind { get; }
 
-        public string Field00 { get; set; }
-        public float Field01 { get; set; }
-        public float Field02 { get; set; }
-        public float Field03 { get; set; }
-        public float Field04 { get; set; }
-        public float Field05 { get; set; }
-        public float Field06 { get; set; }
-        public float Field07 { get; set; }
-        public float Field08 { get; set; }
-        public float Field09 { get; set; }
+        public string ParentName { get; set; }
+        public Vector3 Position { get; set; }
+        public Vector3 Rotation { get; set; }
+        public Vector3 Scale { get; set; }
 
         internal virtual void Read( EndianBinaryReader reader )
         {
-            Field00 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-            Field01 = reader.ReadSingle();
-            Field02 = reader.ReadSingle();
-            Field03 = reader.ReadSingle();
-            Field04 = reader.ReadSingle();
-            Field05 = reader.ReadSingle();
-            Field06 = reader.ReadSingle();
-            Field07 = reader.ReadSingle();
-            Field08 = reader.ReadSingle();
-            Field09 = reader.ReadSingle();
+            ParentName = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            Position = reader.ReadVector3();
+            Rotation = reader.ReadVector3();
+            Scale = reader.ReadVector3();
             ReadBody( reader );
         }
 
         internal virtual void Write( EndianBinaryWriter writer )
         {
-            writer.AddStringToStringTable( Field00 );
-            writer.Write( Field01 );
-            writer.Write( Field02 );
-            writer.Write( Field03 );
-            writer.Write( Field04 );
-            writer.Write( Field05 );
-            writer.Write( Field06 );
-            writer.Write( Field07 );
-            writer.Write( Field08 );
-            writer.Write( Field09 );
+            writer.AddStringToStringTable( ParentName );
+            writer.Write( Position );
+            writer.Write( Rotation );
+            writer.Write( Scale );
             WriteBody( writer );
         }
 
@@ -300,24 +283,24 @@ namespace MikuMikuLibrary.Models
         internal abstract void WriteBody( EndianBinaryWriter writer );
     }
 
-    public class MeshExOsageEntry
+    public class MeshExOsageBoneEntry
     {
-        public int Field00 { get; set; }
-        public float Field01 { get; set; }
-        public int Field02 { get; set; }
+        public int BoneID { get; set; }
+        public float Field00 { get; set; }
+        public int NameIndex { get; set; }
 
         internal void Read( EndianBinaryReader reader )
         {
-            Field00 = reader.ReadInt32();
-            Field01 = reader.ReadSingle();
-            Field02 = reader.ReadInt32();
+            BoneID = reader.ReadInt32();
+            Field00 = reader.ReadSingle();
+            NameIndex = reader.ReadInt32();
         }
 
         internal void Write( EndianBinaryWriter writer )
         {
+            writer.Write( BoneID );
             writer.Write( Field00 );
-            writer.Write( Field01 );
-            writer.Write( Field02 );
+            writer.Write( NameIndex );
         }
     }
 
@@ -325,40 +308,40 @@ namespace MikuMikuLibrary.Models
     {
         public const int ByteSize = 0x60;
 
-        public List<MeshExOsageEntry> Osages { get; }
-        public List<string> Strings1 { get; }
+        public List<MeshExOsageBoneEntry> OsageBones { get; }
+        public List<string> OsageNames { get; }
         public List<MeshExBlock> ExBlocks { get; }
-        public List<string> Strings2 { get; }
+        public List<string> BoneNames { get; }
         public List<MeshExEntry> Entries { get; }
 
         internal void Read( EndianBinaryReader reader )
         {
-            int string1Count = reader.ReadInt32();
-            int osageCount = reader.ReadInt32();
+            int osageNameCount = reader.ReadInt32();
+            int osageBoneCount = reader.ReadInt32();
             reader.SeekCurrent( 4 );
             long osageBonesOffset = reader.ReadOffset();
-            long string1OffsetsOffset = reader.ReadOffset();
+            long osageNamesOffset = reader.ReadOffset();
             long exBlocksOffset = reader.ReadOffset();
-            int string2Count = reader.ReadInt32();
-            long string2OffsetsOffset = reader.ReadOffset();
+            int boneNameCount = reader.ReadInt32();
+            long boneNamesOffset = reader.ReadOffset();
             long exEntriesOffset = reader.ReadOffset();
 
             reader.ReadAtOffset( osageBonesOffset, () =>
             {
-                Osages.Capacity = osageCount;
-                for ( int i = 0; i < osageCount; i++ )
+                OsageBones.Capacity = osageBoneCount;
+                for ( int i = 0; i < osageBoneCount; i++ )
                 {
-                    var osageBone = new MeshExOsageEntry();
+                    var osageBone = new MeshExOsageBoneEntry();
                     osageBone.Read( reader );
-                    Osages.Add( osageBone );
+                    OsageBones.Add( osageBone );
                 }
             } );
 
-            reader.ReadAtOffset( string1OffsetsOffset, () =>
+            reader.ReadAtOffset( osageNamesOffset, () =>
             {
-                Strings1.Capacity = string1Count;
-                for ( int i = 0; i < string1Count; i++ )
-                    Strings1.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                OsageNames.Capacity = osageNameCount;
+                for ( int i = 0; i < osageNameCount; i++ )
+                    OsageNames.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
             } );
 
             reader.ReadAtOffset( exBlocksOffset, () =>
@@ -403,11 +386,11 @@ namespace MikuMikuLibrary.Models
                 }
             } );
 
-            reader.ReadAtOffset( string2OffsetsOffset, () =>
+            reader.ReadAtOffset( boneNamesOffset, () =>
             {
-                Strings2.Capacity = string2Count;
-                for ( int i = 0; i < string2Count; i++ )
-                    Strings2.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                BoneNames.Capacity = boneNameCount;
+                for ( int i = 0; i < boneNameCount; i++ )
+                    BoneNames.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
             } );
 
             reader.ReadAtOffset( exEntriesOffset, () =>
@@ -427,17 +410,17 @@ namespace MikuMikuLibrary.Models
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.Write( Strings1.Count );
-            writer.Write( Osages.Count );
+            writer.Write( OsageNames.Count );
+            writer.Write( OsageBones.Count );
             writer.WriteNulls( 4 );
             writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
             {
-                foreach ( var osageBone in Osages )
+                foreach ( var osageBone in OsageBones )
                     osageBone.Write( writer );
             } );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
-                foreach ( var value in Strings1 )
+                foreach ( var value in OsageNames )
                     writer.AddStringToStringTable( value );
             } );
             writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
@@ -449,10 +432,10 @@ namespace MikuMikuLibrary.Models
                 }
                 writer.WriteNulls( 8 );
             } );
-            writer.Write( Strings2.Count );
+            writer.Write( BoneNames.Count );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
             {
-                foreach ( var value in Strings2 )
+                foreach ( var value in BoneNames )
                     writer.AddStringToStringTable( value );
             } );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
@@ -466,10 +449,10 @@ namespace MikuMikuLibrary.Models
 
         public MeshExData()
         {
-            Osages = new List<MeshExOsageEntry>();
+            OsageBones = new List<MeshExOsageBoneEntry>();
             ExBlocks = new List<MeshExBlock>();
-            Strings1 = new List<string>();
-            Strings2 = new List<string>();
+            OsageNames = new List<string>();
+            BoneNames = new List<string>();
             Entries = new List<MeshExEntry>();
         }
     }
