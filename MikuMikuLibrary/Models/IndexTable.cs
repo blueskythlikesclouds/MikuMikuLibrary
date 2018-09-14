@@ -148,6 +148,8 @@ namespace MikuMikuLibrary.Models
 
                 if ( PrimitiveType == IndexTablePrimitiveType.Triangles )
                 {
+                    triangles.Capacity = Indices.Length / 3;
+
                     while ( start < end )
                         triangles.Add( new Triangle( *start++, *start++, *start++ ) );
                 }

@@ -544,6 +544,24 @@ namespace MikuMikuLibrary.IO.Common
             return new Vector2( ReadSingle(), ReadSingle() );
         }
 
+        public Vector2 ReadVector2( VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    return new Vector2( ReadSingle(), ReadSingle() );
+
+                case VectorBinaryFormat.Half:
+                    return new Vector2( ReadHalf(), ReadHalf() );
+
+                case VectorBinaryFormat.Int16:
+                    return new Vector2( ReadInt16() / 32768f, ReadInt16() / 32768f );
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
+        }
+
         public Vector2[] ReadVector2s( int count )
         {
             Vector2[] value = new Vector2[ count ];
@@ -553,14 +571,24 @@ namespace MikuMikuLibrary.IO.Common
             return value;
         }
 
-        public Vector2 ReadVector2Half()
-        {
-            return new Vector2( ReadHalf(), ReadHalf() );
-        }
-
         public Vector3 ReadVector3()
         {
             return new Vector3( ReadSingle(), ReadSingle(), ReadSingle() );
+        }
+
+        public Vector3 ReadVector3( VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    return new Vector3( ReadSingle(), ReadSingle(), ReadSingle() );
+
+                case VectorBinaryFormat.Int16:
+                    return new Vector3( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
         }
 
         public Vector3[] ReadVector3s( int count )
@@ -571,15 +599,28 @@ namespace MikuMikuLibrary.IO.Common
 
             return value;
         }
-
-        public Vector3 ReadVector3Int16()
-        {
-            return new Vector3( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
-        }
-
+            
         public Vector4 ReadVector4()
         {
             return new Vector4( ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
+        }
+
+        public Vector4 ReadVector4( VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    return new Vector4( ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
+
+                case VectorBinaryFormat.Half:
+                    return new Vector4( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
+
+                case VectorBinaryFormat.Int16:
+                    return new Vector4( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
         }
 
         public Vector4[] ReadVector4s( int count )
@@ -589,11 +630,6 @@ namespace MikuMikuLibrary.IO.Common
                 value[ i ] = ReadVector4();
 
             return value;
-        }
-
-        public Vector4 ReadVector4Int16()
-        {
-            return new Vector4( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
         }
 
         public Matrix4x4 ReadMatrix4x4()
@@ -619,6 +655,24 @@ namespace MikuMikuLibrary.IO.Common
             return new Color( ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
         }
 
+        public Color ReadColor( VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    return new Color( ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
+
+                case VectorBinaryFormat.Half:
+                    return new Color( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
+
+                case VectorBinaryFormat.Int16:
+                    return new Color( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
+        }
+
         public Color[] ReadColors( int count )
         {
             Color[] value = new Color[ count ];
@@ -626,11 +680,6 @@ namespace MikuMikuLibrary.IO.Common
                 value[ i ] = ReadColor();
 
             return value;
-        }
-
-        public Color ReadColorHalf()
-        {
-            return new Color( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
         }
 
         public BoundingSphere ReadBoundingSphere()

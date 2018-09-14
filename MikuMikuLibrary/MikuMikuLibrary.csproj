@@ -66,6 +66,7 @@
     <Compile Include="IO\BinaryFormat.cs" />
     <Compile Include="IO\BinaryFormatUtilities.cs" />
     <Compile Include="IO\AddressSpace.cs" />
+    <Compile Include="IO\Common\VectorBinaryFormat.cs" />
     <Compile Include="IO\IBinaryFile.cs" />
     <Compile Include="IO\Sections\BinaryFileSection.cs" />
     <Compile Include="IO\Sections\DatabaseSections.cs" />

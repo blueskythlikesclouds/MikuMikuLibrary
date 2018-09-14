@@ -1,8 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-// This class was developed by ladislavlang, and was released into the public domain.
-// https://www.gamedev.net/forums/topic/540570-half-precision-floating-point-in-c/?do=findComment&comment=4487933
-namespace MikuMikuLibrary.Misc
+﻿namespace MikuMikuLibrary.Misc
 {
     /// <summary>
     /// Helper class for Half conversions and some low level operations.
@@ -10,16 +6,16 @@ namespace MikuMikuLibrary.Misc
     /// </summary>
     /// <remarks>
     /// References:
+    ///     - Code retrieved from http://sourceforge.net/p/csharp-half/code/HEAD/tree/ on 2015-12-04
     ///     - Fast Half Float Conversions, Jeroen van der Zijp, link: http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
     /// </remarks>
-    [ComVisible( false )]
     internal static class HalfUtilities
     {
-        private static uint[] mantissaTable = GenerateMantissaTable();
-        private static uint[] exponentTable = GenerateExponentTable();
-        private static ushort[] offsetTable = GenerateOffsetTable();
-        private static ushort[] baseTable = GenerateBaseTable();
-        private static sbyte[] shiftTable = GenerateShiftTable();
+        private static readonly uint[] MantissaTable = GenerateMantissaTable();
+        private static readonly uint[] ExponentTable = GenerateExponentTable();
+        private static readonly ushort[] OffsetTable = GenerateOffsetTable();
+        private static readonly ushort[] BaseTable = GenerateBaseTable();
+        private static readonly sbyte[] ShiftTable = GenerateShiftTable();
 
         // Transforms the subnormal representation to a normalized one. 
         private static uint ConvertMantissa( int i )
@@ -160,41 +156,41 @@ namespace MikuMikuLibrary.Misc
 
         public static unsafe float HalfToSingle( Half half )
         {
-            uint result = mantissaTable[ offsetTable[ half.value >> 10 ] + ( half.value & 0x3ff ) ] + exponentTable[ half.value >> 10 ];
-            return *( ( float* )&result );
+            uint result = MantissaTable[ OffsetTable[ half.Value >> 10 ] + ( half.Value & 0x3ff ) ] + ExponentTable[ half.Value >> 10 ];
+            return *( float* )&result;
         }
         public static unsafe Half SingleToHalf( float single )
         {
-            uint value = *( ( uint* )&single );
+            uint value = *( uint* )&single;
 
-            ushort result = ( ushort )( baseTable[ ( value >> 23 ) & 0x1ff ] + ( ( value & 0x007fffff ) >> shiftTable[ value >> 23 ] ) );
+            ushort result = ( ushort )( BaseTable[ ( value >> 23 ) & 0x1ff ] + ( ( value & 0x007fffff ) >> ShiftTable[ value >> 23 ] ) );
             return Half.ToHalf( result );
         }
 
         public static Half Negate( Half half )
         {
-            return Half.ToHalf( ( ushort )( half.value ^ 0x8000 ) );
+            return Half.ToHalf( ( ushort )( half.Value ^ 0x8000 ) );
         }
         public static Half Abs( Half half )
         {
-            return Half.ToHalf( ( ushort )( half.value & 0x7fff ) );
+            return Half.ToHalf( ( ushort )( half.Value & 0x7fff ) );
         }
 
         public static bool IsNaN( Half half )
         {
-            return ( ( half.value & 0x7fff ) > 0x7c00 );
+            return ( half.Value & 0x7fff ) > 0x7c00;
         }
         public static bool IsInfinity( Half half )
         {
-            return ( ( half.value & 0x7fff ) == 0x7c00 );
+            return ( half.Value & 0x7fff ) == 0x7c00;
         }
         public static bool IsPositiveInfinity( Half half )
         {
-            return ( half.value == 0x7c00 );
+            return half.Value == 0x7c00;
         }
         public static bool IsNegativeInfinity( Half half )
         {
-            return ( half.value == 0xfc00 );
+            return half.Value == 0xfc00;
         }
     }
 }

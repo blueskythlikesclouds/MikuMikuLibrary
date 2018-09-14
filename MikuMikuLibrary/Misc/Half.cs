@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using System.Globalization;
 
-// This class was developed by ladislavlang, and was released into the public domain.
-// https://www.gamedev.net/forums/topic/540570-half-precision-floating-point-in-c/?do=findComment&comment=4487933
 namespace MikuMikuLibrary.Misc
 {
     /// <summary>
@@ -12,7 +10,7 @@ namespace MikuMikuLibrary.Misc
     /// <remarks>
     /// Note:
     ///     Half is not fast enought and precision is also very bad, 
-    ///     so is should not be used for matemathical computation (use Single instead).
+    ///     so is should not be used for mathematical computation (use Single instead).
     ///     The main advantage of Half type is lower memory cost: two bytes per number. 
     ///     Half is typically used in graphical applications.
     ///     
@@ -21,6 +19,7 @@ namespace MikuMikuLibrary.Misc
     ///     are approx. ten times slower than float->double/double->float, i.e. ~3ns on 2GHz CPU.
     ///
     /// References:
+    ///     - Code retrieved from http://sourceforge.net/p/csharp-half/code/HEAD/tree/ on 2015-12-04
     ///     - Fast Half Float Conversions, Jeroen van der Zijp, link: http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
     ///     - IEEE 754 revision, link: http://grouper.ieee.org/groups/754/
     /// </remarks>
@@ -31,33 +30,33 @@ namespace MikuMikuLibrary.Misc
         /// Internal representation of the half-precision floating-point number.
         /// </summary>
         [DebuggerBrowsable( DebuggerBrowsableState.Never )]
-        internal ushort value;
+        internal ushort Value;
 
         #region Constants
         /// <summary>
         /// Represents the smallest positive System.Half value greater than zero. This field is constant.
         /// </summary>
-        public static readonly Half Epsilon = Half.ToHalf( 0x0001 );
+        public static readonly Half Epsilon = ToHalf( 0x0001 );
         /// <summary>
         /// Represents the largest possible value of System.Half. This field is constant.
         /// </summary>
-        public static readonly Half MaxValue = Half.ToHalf( 0x7bff );
+        public static readonly Half MaxValue = ToHalf( 0x7bff );
         /// <summary>
         /// Represents the smallest possible value of System.Half. This field is constant.
         /// </summary>
-        public static readonly Half MinValue = Half.ToHalf( 0xfbff );
+        public static readonly Half MinValue = ToHalf( 0xfbff );
         /// <summary>
         /// Represents not a number (NaN). This field is constant.
         /// </summary>
-        public static readonly Half NaN = Half.ToHalf( 0xfe00 );
+        public static readonly Half NaN = ToHalf( 0xfe00 );
         /// <summary>
         /// Represents negative infinity. This field is constant.
         /// </summary>
-        public static readonly Half NegativeInfinity = Half.ToHalf( 0xfc00 );
+        public static readonly Half NegativeInfinity = ToHalf( 0xfc00 );
         /// <summary>
         /// Represents positive infinity. This field is constant.
         /// </summary>
-        public static readonly Half PositiveInfinity = Half.ToHalf( 0x7c00 );
+        public static readonly Half PositiveInfinity = ToHalf( 0x7c00 );
         #endregion
 
         #region Constructors
@@ -166,56 +165,56 @@ namespace MikuMikuLibrary.Misc
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>The System.Half result of adding half1 and half2.</returns>
-        public static Half operator +( Half half1, Half half2 ) { return ( Half )( ( float )half1 + ( float )half2 ); }
+        public static Half operator +( Half half1, Half half2 ) { return ( Half )( half1 + ( float )half2 ); }
         /// <summary>
         /// Subtracts two specified System.Half values.
         /// </summary>
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>The System.Half result of subtracting half1 and half2.</returns>        
-        public static Half operator -( Half half1, Half half2 ) { return ( Half )( ( float )half1 - ( float )half2 ); }
+        public static Half operator -( Half half1, Half half2 ) { return ( Half )( half1 - ( float )half2 ); }
         /// <summary>
         /// Multiplies two specified System.Half values.
         /// </summary>
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>The System.Half result of multiplying half1 by half2.</returns>
-        public static Half operator *( Half half1, Half half2 ) { return ( Half )( ( float )half1 * ( float )half2 ); }
+        public static Half operator *( Half half1, Half half2 ) { return ( Half )( half1 * ( float )half2 ); }
         /// <summary>
         /// Divides two specified System.Half values.
         /// </summary>
         /// <param name="half1">A System.Half (the dividend).</param>
         /// <param name="half2">A System.Half (the divisor).</param>
         /// <returns>The System.Half result of half1 by half2.</returns>
-        public static Half operator /( Half half1, Half half2 ) { return ( Half )( ( float )half1 / ( float )half2 ); }
+        public static Half operator /( Half half1, Half half2 ) { return ( Half )( half1 / ( float )half2 ); }
         /// <summary>
         /// Returns a value indicating whether two instances of System.Half are equal.
         /// </summary>
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>true if half1 and half2 are equal; otherwise, false.</returns>
-        public static bool operator ==( Half half1, Half half2 ) { return ( !IsNaN( half1 ) && ( half1.value == half2.value ) ); }
+        public static bool operator ==( Half half1, Half half2 ) { return ( !IsNaN( half1 ) && ( half1.Value == half2.Value ) ); }
         /// <summary>
         /// Returns a value indicating whether two instances of System.Half are not equal.
         /// </summary>
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>true if half1 and half2 are not equal; otherwise, false.</returns>
-        public static bool operator !=( Half half1, Half half2 ) { return !( half1.value == half2.value ); }
+        public static bool operator !=( Half half1, Half half2 ) { return half1.Value != half2.Value; }
         /// <summary>
         /// Returns a value indicating whether a specified System.Half is less than another specified System.Half.
         /// </summary>
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>true if half1 is less than half1; otherwise, false.</returns>
-        public static bool operator <( Half half1, Half half2 ) { return ( float )half1 < ( float )half2; }
+        public static bool operator <( Half half1, Half half2 ) { return half1 < ( float )half2; }
         /// <summary>
         /// Returns a value indicating whether a specified System.Half is greater than another specified System.Half.
         /// </summary>
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>true if half1 is greater than half2; otherwise, false.</returns>
-        public static bool operator >( Half half1, Half half2 ) { return ( float )half1 > ( float )half2; }
+        public static bool operator >( Half half1, Half half2 ) { return half1 > ( float )half2; }
         /// <summary>
         /// Returns a value indicating whether a specified System.Half is less than or equal to another specified System.Half.
         /// </summary>
@@ -234,41 +233,11 @@ namespace MikuMikuLibrary.Misc
 
         #region Type casting operators
         /// <summary>
-        /// Converts an 8-bit unsigned integer to a System.Half.
-        /// </summary>
-        /// <param name="value">An 8-bit unsigned integer.</param>
-        /// <returns>A System.Half that represents the converted 8-bit unsigned integer.</returns>
-        public static implicit operator Half( byte value ) { return new Half( ( float )value ); }
-        /// <summary>
-        /// Converts a 16-bit signed integer to a System.Half.
-        /// </summary>
-        /// <param name="value">A 16-bit signed integer.</param>
-        /// <returns>A System.Half that represents the converted 16-bit signed integer.</returns>
-        public static implicit operator Half( short value ) { return new Half( ( float )value ); }
-        /// <summary>
-        /// Converts a Unicode character to a System.Half.
-        /// </summary>
-        /// <param name="value">A Unicode character.</param>
-        /// <returns>A System.Half that represents the converted Unicode character.</returns>
-        public static implicit operator Half( char value ) { return new Half( ( float )value ); }
-        /// <summary>
-        /// Converts a 32-bit signed integer to a System.Half.
-        /// </summary>
-        /// <param name="value">A 32-bit signed integer.</param>
-        /// <returns>A System.Half that represents the converted 32-bit signed integer.</returns>
-        public static implicit operator Half( int value ) { return new Half( ( float )value ); }
-        /// <summary>
-        /// Converts a 64-bit signed integer to a System.Half.
-        /// </summary>
-        /// <param name="value">A 64-bit signed integer.</param>
-        /// <returns>A System.Half that represents the converted 64-bit signed integer.</returns>
-        public static implicit operator Half( long value ) { return new Half( ( float )value ); }
-        /// <summary>
         /// Converts a single-precision floating-point number to a System.Half.
         /// </summary>
         /// <param name="value">A single-precision floating-point number.</param>
         /// <returns>A System.Half that represents the converted single-precision floating point number.</returns>
-        public static explicit operator Half( float value ) { return new Half( ( float )value ); }
+        public static explicit operator Half( float value ) { return new Half( value ); }
         /// <summary>
         /// Converts a double-precision floating-point number to a System.Half.
         /// </summary>
@@ -316,43 +285,19 @@ namespace MikuMikuLibrary.Misc
         /// </summary>
         /// <param name="value">A System.Half to convert.</param>
         /// <returns>A single-precision floating-point number that represents the converted System.Half.</returns>
-        public static implicit operator float( Half value ) { return ( float )HalfUtilities.HalfToSingle( value ); }
+        public static implicit operator float( Half value ) { return HalfUtilities.HalfToSingle( value ); }
         /// <summary>
         /// Converts a System.Half to a double-precision floating-point number.
         /// </summary>
         /// <param name="value">A System.Half to convert.</param>
         /// <returns>A double-precision floating-point number that represents the converted System.Half.</returns>
-        public static implicit operator double( Half value ) { return ( double )( float )value; }
+        public static implicit operator double( Half value ) { return ( float )value; }
         /// <summary>
         /// Converts a System.Half to a decimal number.
         /// </summary>
         /// <param name="value">A System.Half to convert.</param>
         /// <returns>A decimal number that represents the converted System.Half.</returns>
         public static explicit operator decimal( Half value ) { return ( decimal )( float )value; }
-        /// <summary>
-        /// Converts an 8-bit signed integer to a System.Half.
-        /// </summary>
-        /// <param name="value">An 8-bit signed integer.</param>
-        /// <returns>A System.Half that represents the converted 8-bit signed integer.</returns>
-        public static implicit operator Half( sbyte value ) { return new Half( ( float )value ); }
-        /// <summary>
-        /// Converts a 16-bit unsigned integer to a System.Half.
-        /// </summary>
-        /// <param name="value">A 16-bit unsigned integer.</param>
-        /// <returns>A System.Half that represents the converted 16-bit unsigned integer.</returns>
-        public static implicit operator Half( ushort value ) { return new Half( ( float )value ); }
-        /// <summary>
-        /// Converts a 32-bit unsigned integer to a System.Half.
-        /// </summary>
-        /// <param name="value">A 32-bit unsigned integer.</param>
-        /// <returns>A System.Half that represents the converted 32-bit unsigned integer.</returns>
-        public static implicit operator Half( uint value ) { return new Half( ( float )value ); }
-        /// <summary>
-        /// Converts a 64-bit unsigned integer to a System.Half.
-        /// </summary>
-        /// <param name="value">A 64-bit unsigned integer.</param>
-        /// <returns>A System.Half that represents the converted 64-bit unsigned integer.</returns>
-        public static implicit operator Half( ulong value ) { return new Half( ( float )value ); }
         /// <summary>
         /// Converts a System.Half to an 8-bit signed integer.
         /// </summary>
@@ -480,7 +425,7 @@ namespace MikuMikuLibrary.Misc
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return Value.GetHashCode();
         }
         /// <summary>
         /// Returns the System.TypeCode for value type System.Half.
@@ -499,7 +444,7 @@ namespace MikuMikuLibrary.Misc
         /// <returns>An array of bytes with length 2.</returns>
         public static byte[] GetBytes( Half value )
         {
-            return BitConverter.GetBytes( value.value );
+            return BitConverter.GetBytes( value.Value );
         }
         /// <summary>
         /// Converts the value of a specified instance of System.Half to its equivalent binary representation.
@@ -508,7 +453,7 @@ namespace MikuMikuLibrary.Misc
         /// <returns>A 16-bit unsigned integer that contain the binary representation of value.</returns>        
         public static ushort GetBits( Half value )
         {
-            return value.value;
+            return value.Value;
         }
         /// <summary>
         /// Returns a half-precision floating point number converted from two bytes
@@ -525,7 +470,7 @@ namespace MikuMikuLibrary.Misc
         /// <exception cref="System.ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
         public static Half ToHalf( byte[] value, int startIndex )
         {
-            return Half.ToHalf( ( ushort )BitConverter.ToInt16( value, startIndex ) );
+            return ToHalf( ( ushort )BitConverter.ToInt16( value, startIndex ) );
         }
         /// <summary>
         /// Returns a half-precision floating point number converted from its binary representation.
@@ -534,7 +479,7 @@ namespace MikuMikuLibrary.Misc
         /// <returns>A half-precision floating point number formed by its binary representation.</returns>
         public static Half ToHalf( ushort bits )
         {
-            return new Half { value = bits };
+            return new Half { Value = bits };
         }
 
         /// <summary>
@@ -819,7 +764,7 @@ namespace MikuMikuLibrary.Misc
         #region IConvertible Members
         float IConvertible.ToSingle( IFormatProvider provider )
         {
-            return ( float )this;
+            return this;
         }
         TypeCode IConvertible.GetTypeCode()
         {
@@ -827,11 +772,11 @@ namespace MikuMikuLibrary.Misc
         }
         bool IConvertible.ToBoolean( IFormatProvider provider )
         {
-            return Convert.ToBoolean( ( float )this );
+            return Convert.ToBoolean( this );
         }
         byte IConvertible.ToByte( IFormatProvider provider )
         {
-            return Convert.ToByte( ( float )this );
+            return Convert.ToByte( this );
         }
         char IConvertible.ToChar( IFormatProvider provider )
         {
@@ -843,31 +788,31 @@ namespace MikuMikuLibrary.Misc
         }
         decimal IConvertible.ToDecimal( IFormatProvider provider )
         {
-            return Convert.ToDecimal( ( float )this );
+            return Convert.ToDecimal( this );
         }
         double IConvertible.ToDouble( IFormatProvider provider )
         {
-            return Convert.ToDouble( ( float )this );
+            return Convert.ToDouble( this );
         }
         short IConvertible.ToInt16( IFormatProvider provider )
         {
-            return Convert.ToInt16( ( float )this );
+            return Convert.ToInt16( this );
         }
         int IConvertible.ToInt32( IFormatProvider provider )
         {
-            return Convert.ToInt32( ( float )this );
+            return Convert.ToInt32( this );
         }
         long IConvertible.ToInt64( IFormatProvider provider )
         {
-            return Convert.ToInt64( ( float )this );
+            return Convert.ToInt64( this );
         }
         sbyte IConvertible.ToSByte( IFormatProvider provider )
         {
-            return Convert.ToSByte( ( float )this );
+            return Convert.ToSByte( this );
         }
         string IConvertible.ToString( IFormatProvider provider )
         {
-            return Convert.ToString( ( float )this, CultureInfo.InvariantCulture );
+            return Convert.ToString( this, CultureInfo.InvariantCulture );
         }
         object IConvertible.ToType( Type conversionType, IFormatProvider provider )
         {
@@ -875,15 +820,15 @@ namespace MikuMikuLibrary.Misc
         }
         ushort IConvertible.ToUInt16( IFormatProvider provider )
         {
-            return Convert.ToUInt16( ( float )this );
+            return Convert.ToUInt16( this );
         }
         uint IConvertible.ToUInt32( IFormatProvider provider )
         {
-            return Convert.ToUInt32( ( float )this );
+            return Convert.ToUInt32( this );
         }
         ulong IConvertible.ToUInt64( IFormatProvider provider )
         {
-            return Convert.ToUInt64( ( float )this );
+            return Convert.ToUInt64( this );
         }
         #endregion
     }

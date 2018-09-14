@@ -199,7 +199,7 @@ namespace MikuMikuLibrary.IO.Sections
                         writer.PushBaseOffset();
 
                     writer.Endianness = Endianness;
-                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
+                    writer.PushStringTable( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
                     Write( writer );
                     writer.DoEnqueuedOffsetWrites();
                     writer.PopStringTablesReversed();

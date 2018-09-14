@@ -191,13 +191,13 @@ namespace MikuMikuLibrary.IO.Common
                 AlignmentUtilities.GetAlignedDifference( Position, alignment );
 
             while ( difference-- > 0 )
-                Write( filler );
+                base.Write( filler );
         }
 
         public void WriteNulls( int count )
         {
             while ( count-- > 0 )
-                Write( ( byte )0 );
+                base.Write( ( byte )0 );
         }
 
         public void WriteAtOffset( long offset, Action body )
@@ -394,18 +394,10 @@ namespace MikuMikuLibrary.IO.Common
 
         public void PushStringTable( StringBinaryFormat format, int fixedLength = -1 )
         {
-            stringTableStack.Push( new StringTable
-            {
-                BaseOffset = baseOffsetStack.Count > 0 ? baseOffsetStack.Peek() : 0,
-                Strings = new Dictionary<string, List<long>>(),
-                AlignmentKind = AlignmentKind.None,
-                Alignment = 0,
-                Format = format,
-                FixedLength = fixedLength,
-            } );
+            PushStringTable( 0, AlignmentKind.None, format, fixedLength );
         }
 
-        public void PushStringTableAligned( int alignment, AlignmentKind alignmentKind, StringBinaryFormat format, int fixedLength = -1 )
+        public void PushStringTable( int alignment, AlignmentKind alignmentKind, StringBinaryFormat format, int fixedLength = -1 )
         {
             stringTableStack.Push( new StringTable
             {
@@ -470,7 +462,7 @@ namespace MikuMikuLibrary.IO.Common
 
             else
             {
-                var stringTableStack = new Stack<StringTable>();
+                var stringTableStack = new Stack<StringTable>( this.stringTableStack.Count );
                 foreach ( var stringTable in this.stringTableStack )
                     stringTableStack.Push( stringTable );
 
@@ -501,7 +493,7 @@ namespace MikuMikuLibrary.IO.Common
         public void Write( sbyte[] values )
         {
             for ( int i = 0; i < values.Length; i++ )
-                Write( values[ i ] );
+                base.Write( values[ i ] );
         }
 
         public void Write( bool[] values )
@@ -587,12 +579,12 @@ namespace MikuMikuLibrary.IO.Common
                 Write( value );
         }
 
-        public void WriteHalf( Half value )
+        public void Write( Half value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value.value ) : value.value );
+            base.Write( swap ? EndiannessSwapUtilities.Swap( value.Value ) : value.Value );
         }
 
-        public void WriteHalfs( Half[] values )
+        public void Write( Half[] values )
         {
             foreach ( var value in values )
                 Write( value );
@@ -616,7 +608,7 @@ namespace MikuMikuLibrary.IO.Common
                 case StringBinaryFormat.NullTerminated:
                     {
                         Write( encoding.GetBytes( value ) );
-                        Write( ( byte )0 );
+                        base.Write( ( byte )0 );
                     }
                     break;
                 case StringBinaryFormat.FixedLength:
@@ -636,13 +628,13 @@ namespace MikuMikuLibrary.IO.Common
                         fixedLength -= bytes.Length;
 
                         while ( fixedLength-- > 0 )
-                            Write( ( byte )0 );
+                            base.Write( ( byte )0 );
                     }
                     break;
 
                 case StringBinaryFormat.PrefixedLength8:
                     {
-                        Write( ( byte )value.Length );
+                        base.Write( ( byte )value.Length );
                         Write( encoding.GetBytes( value ) );
                     }
                     break;
@@ -672,16 +664,34 @@ namespace MikuMikuLibrary.IO.Common
             Write( value.Y );
         }
 
+        public void Write( Vector2 value, VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    Write( value.X );
+                    Write( value.Y );
+                    break;
+
+                case VectorBinaryFormat.Half:
+                    Write( ( Half )value.X );
+                    Write( ( Half )value.Y );
+                    break;
+
+                case VectorBinaryFormat.Int16:
+                    Write( ( short )( value.X * 32768f ) );
+                    Write( ( short )( value.Y * 32768f ) );
+                    break;
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
+        }
+
         public void Write( Vector2[] values )
         {
             foreach ( var value in values )
                 Write( value );
-        }
-
-        public void WriteVector2Half( Vector2 value )
-        {
-            WriteHalf( ( Half )value.X );
-            WriteHalf( ( Half )value.Y );
         }
 
         public void Write( Vector3 value )
@@ -691,17 +701,37 @@ namespace MikuMikuLibrary.IO.Common
             Write( value.Z );
         }
 
+        public void Write( Vector3 value, VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    Write( value.X );
+                    Write( value.Y );
+                    Write( value.Z );
+                    break;
+
+                case VectorBinaryFormat.Half:
+                    Write( ( Half )value.X );
+                    Write( ( Half )value.Y );
+                    Write( ( Half )value.Z );
+                    break;
+
+                case VectorBinaryFormat.Int16:
+                    Write( ( short )( value.X * 32768f ) );
+                    Write( ( short )( value.Y * 32768f ) );
+                    Write( ( short )( value.Z * 32768f ) );
+                    break;
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
+        }
+
         public void Write( Vector3[] values )
         {
             foreach ( var value in values )
                 Write( value );
-        }
-
-        public void WriteVector3Int16( Vector3 value )
-        {
-            Write( ( short )( value.X * 32768f ) );
-            Write( ( short )( value.Y * 32768f ) );
-            Write( ( short )( value.Z * 32768f ) );
         }
 
         public void Write( Vector4 value )
@@ -710,6 +740,36 @@ namespace MikuMikuLibrary.IO.Common
             Write( value.Y );
             Write( value.Z );
             Write( value.W );
+        }
+
+        public void Write( Vector4 value, VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    Write( value.X );
+                    Write( value.Y );
+                    Write( value.Z );
+                    Write( value.W );
+                    break;
+
+                case VectorBinaryFormat.Half:
+                    Write( ( Half )value.X );
+                    Write( ( Half )value.Y );
+                    Write( ( Half )value.Z );
+                    Write( ( Half )value.W );
+                    break;
+
+                case VectorBinaryFormat.Int16:
+                    Write( ( short )( value.X * 32768f ) );
+                    Write( ( short )( value.Y * 32768f ) );
+                    Write( ( short )( value.Z * 32768f ) );
+                    Write( ( short )( value.W * 32768f ) );
+                    break;
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
         }
 
         public void Write( Vector4[] values )
@@ -752,18 +812,40 @@ namespace MikuMikuLibrary.IO.Common
             Write( value.A );
         }
 
+        public void Write( Color value, VectorBinaryFormat format )
+        {
+            switch ( format )
+            {
+                case VectorBinaryFormat.Single:
+                    Write( value.R );
+                    Write( value.G );
+                    Write( value.B );
+                    Write( value.A );
+                    break;
+
+                case VectorBinaryFormat.Half:
+                    Write( ( Half )value.R );
+                    Write( ( Half )value.G );
+                    Write( ( Half )value.B );
+                    Write( ( Half )value.A );
+                    break;
+
+                case VectorBinaryFormat.Int16:
+                    Write( ( short )( value.R * 32768f ) );
+                    Write( ( short )( value.G * 32768f ) );
+                    Write( ( short )( value.B * 32768f ) );
+                    Write( ( short )( value.A * 32768f ) );
+                    break;
+
+                default:
+                    throw new ArgumentException( nameof( format ) );
+            }
+        }
+
         public void Write( Color[] values )
         {
             foreach ( var value in values )
                 Write( value );
-        }
-
-        public void WriteColorHalf( Color value )
-        {
-            WriteHalf( ( Half )value.R );
-            WriteHalf( ( Half )value.G );
-            WriteHalf( ( Half )value.B );
-            WriteHalf( ( Half )value.A );
         }
 
         public void Write( BoundingSphere boundingSphere )

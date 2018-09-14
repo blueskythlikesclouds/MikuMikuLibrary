@@ -123,7 +123,7 @@ namespace MikuMikuLibrary.IO
                 writer.PushBaseOffset();
                 {
                     // Push a string table
-                    writer.PushStringTableAligned( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
+                    writer.PushStringTable( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
 
                     Write( writer );
 

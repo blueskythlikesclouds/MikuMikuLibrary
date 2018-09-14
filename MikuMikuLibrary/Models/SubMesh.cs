@@ -123,12 +123,12 @@ namespace MikuMikuLibrary.Models
                     {
                         vertexReader.SeekBegin( dataOffset + ( stride * i ) );
                         Vertices[ i ] = vertexReader.ReadVector3();
-                        Normals[ i ] = vertexReader.ReadVector3Int16();
+                        Normals[ i ] = vertexReader.ReadVector3( VectorBinaryFormat.Int16 );
                         vertexReader.SeekCurrent( 2 );
-                        Tangents[ i ] = vertexReader.ReadVector4Int16();
-                        UVChannel1[ i ] = vertexReader.ReadVector2Half();
-                        UVChannel2[ i ] = vertexReader.ReadVector2Half();
-                        Colors[ i ] = vertexReader.ReadColorHalf();
+                        Tangents[ i ] = vertexReader.ReadVector4( VectorBinaryFormat.Int16 );
+                        UVChannel1[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+                        UVChannel2[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+                        Colors[ i ] = vertexReader.ReadColor( VectorBinaryFormat.Half );
 
                         if ( mode == 4 )
                         {
@@ -166,7 +166,7 @@ namespace MikuMikuLibrary.Models
                 {
                     for ( int i = 0; i < Tangents.Length; i++ )
                     {
-                        float direction = Tangents[ i ].W > 0.0f ? 1.0f : -1.0f;
+                        float direction = Tangents[ i ].W < 0.0f ? -1.0f : 1.0f;
                         Vector3 tangent = Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
 
                         Tangents[ i ] = new Vector4( tangent, direction );
@@ -338,11 +338,12 @@ namespace MikuMikuLibrary.Models
                 {
                     // Should I even do it like this? lol
                     vertexWriter.Write( Vertices?[ i ] ?? Vector3.Zero );
-                    vertexWriter.WriteVector3Int16( Normals?[ i ] ?? Vector3.Zero );
-                    vertexWriter.WriteNulls( 10 );
-                    vertexWriter.WriteVector2Half( UVChannel1?[ i ] ?? Vector2.One );
-                    vertexWriter.WriteVector2Half( UVChannel2?[ i ] ?? Vector2.One );
-                    vertexWriter.WriteColorHalf( Colors?[ i ] ?? Color.One );
+                    vertexWriter.Write( Normals?[ i ] ?? Vector3.Zero, VectorBinaryFormat.Int16 );
+                    vertexWriter.WriteNulls( 2 );
+                    vertexWriter.Write( Tangents?[ i ] ?? Vector4.Zero, VectorBinaryFormat.Int16 );
+                    vertexWriter.Write( UVChannel1?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
+                    vertexWriter.Write( UVChannel2?[ i ] ?? UVChannel1?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
+                    vertexWriter.Write( Colors?[ i ] ?? Color.One, VectorBinaryFormat.Half );
 
                     if ( BoneWeights != null )
                     {
