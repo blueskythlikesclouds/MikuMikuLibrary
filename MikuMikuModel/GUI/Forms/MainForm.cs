@@ -8,6 +8,7 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace MikuMikuModel.GUI.Forms
 {
@@ -276,6 +277,11 @@ namespace MikuMikuModel.GUI.Forms
         private void OnAbout( object sender, EventArgs e )
         {
             MessageBox.Show( "MikuMikuModel by Skyth\nThis program is a work in progress." );
+        }
+
+        private void OnHelp(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/blueskythlikesclouds/MikuMikuLibrary/wiki/Miku-Miku-Model");
         }
 
         private void OnPropertyValueChanged( object s, PropertyValueChangedEventArgs e )
