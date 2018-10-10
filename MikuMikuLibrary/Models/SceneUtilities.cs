@@ -11,12 +11,12 @@ namespace MikuMikuLibrary.Models
         {
             var aiContext = new Ai.AssimpContext();
             aiContext.SetConfig( new Ai.Configs.MeshVertexLimitConfig( 32768 ) );
-            aiContext.SetConfig( new Ai.Configs.MaxBoneCountConfig( 64 ) );
+            aiContext.SetConfig( new Ai.Configs.VertexCacheSizeConfig( 63 ) );
+            aiContext.SetConfig( new Ai.Configs.MaxBoneCountConfig( 48 ) );
 
-            return aiContext.ImportFile( fileName, Ai.PostProcessSteps.JoinIdenticalVertices | Ai.PostProcessSteps.Triangulate | Ai.PostProcessSteps.GenerateSmoothNormals | 
-                                                   Ai.PostProcessSteps.SplitLargeMeshes | Ai.PostProcessSteps.LimitBoneWeights | Ai.PostProcessSteps.ValidateDataStructure | 
-                                                   Ai.PostProcessSteps.ImproveCacheLocality | Ai.PostProcessSteps.SortByPrimitiveType |  Ai.PostProcessSteps.FindInvalidData | 
-                                                   Ai.PostProcessSteps.OptimizeMeshes | Ai.PostProcessSteps.SplitByBoneCount | Ai.PostProcessSteps.Debone | Ai.PostProcessSteps.RemoveRedundantMaterials );
+            var postProcessSteps = ( Ai.PostProcessPreset.TargetRealTimeMaximumQuality | Ai.PostProcessSteps.SplitByBoneCount ) & ~( Ai.PostProcessSteps.FindInstances );
+
+            return aiContext.ImportFile( fileName, postProcessSteps );
         }
 
         public static void Export( Ai.Scene aiScene, string fileName, Ai.PostProcessSteps postProcessSteps = Ai.PostProcessSteps.None )

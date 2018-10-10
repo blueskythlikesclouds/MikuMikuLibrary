@@ -1,5 +1,6 @@
 ﻿using MikuMikuLibrary.IO.Common;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MikuMikuLibrary.Models
 {
@@ -74,7 +75,7 @@ namespace MikuMikuLibrary.Models
             } );
             writer.EnqueueOffsetWriteIf( ExData != null, 16, AlignmentKind.Center, () => ExData.Write( writer ) );
             writer.Write( Bones.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.EnqueueOffsetWriteIf( Bones.Any( x => x.ParentID != -1 ), 16, AlignmentKind.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.Write( bone.ParentID );
