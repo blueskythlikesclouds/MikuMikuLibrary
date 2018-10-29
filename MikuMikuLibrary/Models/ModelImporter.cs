@@ -253,9 +253,16 @@ namespace MikuMikuLibrary.Models
         {
             if ( !aiNode.HasMeshes )
                 return null;
+            
+            // Select meshes that have triangles
+            var aiMeshes = aiNode.MeshIndices.Select( x => aiScene.Meshes[ x ] ).Where( x => 
+                x.PrimitiveType == Ai.PrimitiveType.Triangle && x.Faces.Any( y => y.IndexCount == 3 ) ).ToList();
+                
+            if ( aiMeshes.Count == 0 )
+                return null;
 
             var transformation = parentTransformation * GetMatrix4x4FromAiMatrix4x4( aiNode.Transform );
-            int vertexCount = aiNode.MeshIndices.Sum( x => aiScene.Meshes[ x ].VertexCount );
+            int vertexCount = aiMeshes.Sum( x => x.VertexCount );
 
             var subMesh = new SubMesh
             {
@@ -264,10 +271,8 @@ namespace MikuMikuLibrary.Models
             };
 
             int vertexOffset = 0;
-            foreach ( var aiMeshIndex in aiNode.MeshIndices )
+            foreach ( var aiMesh in aiMeshes )
             {
-                var aiMesh = aiScene.Meshes[ aiMeshIndex ];
-
                 for ( int i = 0; i < aiMesh.Vertices.Count; i++ )
                     subMesh.Vertices[ vertexOffset + i ] = Vector3.Transform( new Vector3( aiMesh.Vertices[ i ].X, aiMesh.Vertices[ i ].Y, aiMesh.Vertices[ i ].Z ), transformation );
 
@@ -347,15 +352,9 @@ namespace MikuMikuLibrary.Models
                             subMesh.BoneWeights[ vertexOffset + aiWeight.VertexID ].AddWeight( i, aiWeight.Weight );
                     }
                 }
-
-                indexTable.Indices = new ushort[ aiMesh.FaceCount * 3 ];
-                for ( int i = 0; i < aiMesh.FaceCount; i++ )
-                {
-                    indexTable.Indices[ ( i * 3 ) ] = ( ushort )( vertexOffset + aiMesh.Faces[ i ].Indices[ 0 ] );
-                    indexTable.Indices[ ( i * 3 ) + 1 ] = ( ushort )( vertexOffset + aiMesh.Faces[ i ].Indices[ 1 ] );
-                    indexTable.Indices[ ( i * 3 ) + 2 ] = ( ushort )( vertexOffset + aiMesh.Faces[ i ].Indices[ 2 ] );
-                }
-
+                
+                indexTable.Indices = aiMesh.Faces.Where( x => x.IndexCount == 3 ).SelectMany( x => x.Indices ).Select( x => ( ushort )( vertexOffset + x ) ).ToArray();
+                
                 ushort[] triangleStrip = TriangleStripUtilities.GenerateStrips( indexTable.Indices );
                 if ( triangleStrip != null )
                 {
