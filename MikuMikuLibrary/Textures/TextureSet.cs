@@ -117,7 +117,14 @@ namespace MikuMikuLibrary.Textures
                 textureDatabase.Save( Path.ChangeExtension( filePath, "txi" ) );
             }
 
+            // Here's a little cheat, the files are always little endian, no matter what you want
+            // So we pass the endianness to the TXI, but write in little endian for the set
+            var endianness = Endianness;
+            Endianness = Endianness.LittleEndian;
+
             base.Save( filePath );
+
+            Endianness = endianness;
         }
 
         public TextureSet()
