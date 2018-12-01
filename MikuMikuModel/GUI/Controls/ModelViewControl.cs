@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace MikuMikuModel.GUI.Controls
@@ -44,6 +45,9 @@ namespace MikuMikuModel.GUI.Controls
         private readonly float fieldOfView = MathHelper.DegreesToRadians( 45 );
 
         private bool left, right, up, down;
+
+        private int gridVertexArrayID;
+        private GLBuffer<Vector3> gridVertexBuffer;
 
         public void SetModel( Model model, TextureSet textureSet )
         {
@@ -154,6 +158,9 @@ namespace MikuMikuModel.GUI.Controls
         protected override void OnLoad( EventArgs e )
         {
             Application.Idle += OnApplicationIdle;
+
+            CreateGrid();
+
             base.OnLoad( e );
         }
 
@@ -165,6 +172,38 @@ namespace MikuMikuModel.GUI.Controls
         private Vector3 RotatePoint( Vector3 point, Vector3 origin, Vector3 angles )
         {
             return Quaternion.FromEulerAngles( angles ) * ( point - origin ) + origin;
+        }
+
+        private void CreateGrid()
+        {
+            var vertices = new List<Vector3>();
+
+            for ( int i = -10; i <= 10; i++ )
+            {
+                vertices.Add( new Vector3( i, 0, -10 ) );
+                vertices.Add( new Vector3( i, 0, 10 ) );
+                vertices.Add( new Vector3( -10, 0, i ) );
+                vertices.Add( new Vector3( 10, 0, i ) );
+            }
+
+            gridVertexArrayID = GL.GenVertexArray();
+            GL.BindVertexArray( gridVertexArrayID );
+
+            gridVertexBuffer = new GLBuffer<Vector3>( BufferTarget.ArrayBuffer, vertices.ToArray(), 12, BufferUsageHint.StaticDraw );
+
+            GL.VertexAttribPointer( 0, 3, VertexAttribPointerType.Float, false, gridVertexBuffer.Stride, 0 );
+            GL.EnableVertexAttribArray( 0 );
+        }
+
+        private void DrawGrid( Matrix4 view, Matrix4 projection )
+        {
+            lineShader.Use();
+            lineShader.SetUniform( "view", view );
+            lineShader.SetUniform( "projection", projection );
+            lineShader.SetUniform( "color", new Vector4( 0.15f, 0.15f, 0.15f, 1f ) );
+
+            GL.BindVertexArray( gridVertexArrayID );
+            GL.DrawArrays( PrimitiveType.Lines, 0, gridVertexBuffer.Length );
         }
 
         protected override void OnPaint( PaintEventArgs pe )
@@ -186,22 +225,7 @@ namespace MikuMikuModel.GUI.Controls
                 model.Draw( defaultShader );
 
                 // Draw a grid
-                lineShader.Use();
-                lineShader.SetUniform( "view", view );
-                lineShader.SetUniform( "projection", projection );
-                lineShader.SetUniform( "color", new Vector4( 0.15f, 0.15f, 0.15f, 1f ) );
-
-                GL.Begin( PrimitiveType.Lines );
-                {
-                    for ( int i = -10; i <= 10; i++ )
-                    {
-                        GL.Vertex3( i, 0, -10 );
-                        GL.Vertex3( i, 0, 10 );
-                        GL.Vertex3( -10, 0, i );
-                        GL.Vertex3( 10, 0, i );
-                    }
-                }
-                GL.End();
+                DrawGrid( view, projection );
 
                 SwapBuffers();
             }
@@ -319,10 +343,12 @@ namespace MikuMikuModel.GUI.Controls
                 defaultShader?.Dispose();
                 lineShader?.Dispose();
                 model?.Dispose();
+                gridVertexBuffer?.Dispose();
 
                 Application.Idle -= OnApplicationIdle;
             }
 
+            GL.DeleteVertexArray( gridVertexArrayID );
             base.Dispose( disposing );
         }
 

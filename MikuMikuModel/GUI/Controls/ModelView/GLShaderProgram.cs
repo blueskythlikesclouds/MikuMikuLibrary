@@ -40,7 +40,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             for ( int i = 0; i < count; i++ )
             {
                 GL.GetActiveUniform( ID, i, 32, out _, out _, out _, out string name );
-                uniforms[ name ] = i;
+                uniforms[ name ] = GL.GetUniformLocation( ID, name );
                 Debug.WriteLine( $"RegisterUniforms: {name}" );
             }
         }

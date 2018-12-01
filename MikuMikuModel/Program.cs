@@ -1,5 +1,6 @@
 ﻿using MikuMikuModel.GUI.Forms;
 using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace MikuMikuModel
@@ -17,10 +18,10 @@ namespace MikuMikuModel
 
             using ( var form = new MainForm() )
             {
-                Application.Run( form );
-
-                if ( args.Length > 0 )
+                if ( args.Length > 0 && File.Exists( args[ 0 ] ) )
                     form.OpenFile( args[ 0 ] );
+
+                Application.Run( form );
             }
         }
     }
