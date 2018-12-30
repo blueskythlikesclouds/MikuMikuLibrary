@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
+using MikuMikuModel.GUI.Forms;
 
 namespace MikuMikuModel.DataNodes
 {
@@ -91,10 +92,16 @@ namespace MikuMikuModel.DataNodes
                 data.TextureSet = Textures?.Data as TextureSet;
                 return data;
             } );
-            RegisterCustomHandler( "Set all shaders to BLINN", () =>
+            RegisterCustomHandler( "Rename all shaders to...", () =>
             {
-                foreach ( var material in Data.Meshes.SelectMany( x => x.Materials ) )
-                    material.Shader = "BLINN";
+                using ( var renameForm = new RenameForm( "BLINN" ) )
+                {
+                    if ( renameForm.ShowDialog() == DialogResult.OK )
+                    {
+                        foreach ( var material in Data.Meshes.SelectMany( x => x.Materials ) )
+                            material.Shader = renameForm.TextBoxText;
+                    }
+                }
 
                 HasPendingChanges = true;
             } );

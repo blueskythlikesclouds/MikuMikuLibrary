@@ -13,8 +13,8 @@ namespace MikuMikuLibrary.Archives.Farc
 {
     public class FarcArchive : BinaryFile, IArchive<string>
     {
-        private readonly List<InternalEntry> entries;
-        private int alignment;
+        private readonly Dictionary<string, InternalEntry> mEntries;
+        private int mAlignment;
 
         public override BinaryFileFlags Flags
         {
@@ -38,21 +38,19 @@ namespace MikuMikuLibrary.Archives.Farc
 
         public int Alignment
         {
-            get { return alignment; }
+            get { return mAlignment; }
             set
             {
                 if ( ( value & ( value - 1 ) ) != 0 )
-                    alignment = AlignmentUtilities.AlignToNextPowerOfTwo( value );
+                    mAlignment = AlignmentUtilities.AlignToNextPowerOfTwo( value );
                 else
-                    alignment = value;
+                    mAlignment = value;
             }
         }
 
         public void Add( string handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
         {
-            var entry = entries.FirstOrDefault( x => x.Handle.Equals( handle, StringComparison.OrdinalIgnoreCase ) );
-
-            if ( entry != null )
+            if ( mEntries.TryGetValue( handle, out var entry ) )
             {
                 switch ( conflictPolicy )
                 {
@@ -72,7 +70,7 @@ namespace MikuMikuLibrary.Archives.Farc
 
             else
             {
-                entries.Add( new InternalEntry
+                mEntries.Add( handle, new InternalEntry
                 {
                     Handle = handle,
                     Stream = source,
@@ -88,19 +86,16 @@ namespace MikuMikuLibrary.Archives.Farc
 
         public void Remove( string handle )
         {
-            var entry = entries.FirstOrDefault( x => x.Handle.Equals(
-                handle, StringComparison.OrdinalIgnoreCase ) );
-
-            if ( entry != null )
+            if ( mEntries.TryGetValue( handle, out var entry ) )
             {
                 entry.Dispose();
-                entries.Remove( entry );
+                mEntries.Remove( handle );
             }
         }
 
         public EntryStream<string> Open( string handle, EntryStreamMode mode )
         {
-            var entry = entries.FirstOrDefault( x => x.Handle.Equals( handle, StringComparison.OrdinalIgnoreCase ) );
+            var entry = mEntries[ handle ];
             var entryStream = entry.Open( stream );
 
             if ( mode == EntryStreamMode.MemoryStream )
@@ -116,33 +111,30 @@ namespace MikuMikuLibrary.Archives.Farc
 
         public void Clear()
         {
-            while ( entries.Count != 0 )
-            {
-                var entry = entries[ 0 ];
+            foreach ( var entry in mEntries.Values )
                 entry.Dispose();
-                entries.Remove( entry );
-            }
+
+            mEntries.Clear();
         }
 
         public bool Contains( string handle )
         {
-            return entries.Any( x => x.Handle.Equals(
-                handle, StringComparison.OrdinalIgnoreCase ) );
+            return mEntries.ContainsKey( handle );
         }
 
         public IEnumerable<string> EnumerateEntries()
         {
-            return entries.Select( x => x.Handle );
+            return mEntries.Keys;
         }
 
         public IEnumerator<string> GetEnumerator()
         {
-            return EnumerateEntries().GetEnumerator();
+            return mEntries.Keys.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return EnumerateEntries().GetEnumerator();
+            return mEntries.Keys.GetEnumerator();
         }
 
         public override void Read( EndianBinaryReader reader, Section section = null )
@@ -160,12 +152,12 @@ namespace MikuMikuLibrary.Archives.Farc
                 bool isCompressed = ( flags & ( 1 << 1 ) ) != 0;
                 bool isEncrypted = ( flags & ( 1 << 2 ) ) != 0;
                 int padding = reader.ReadInt32();
-                alignment = reader.ReadInt32();
+                mAlignment = reader.ReadInt32();
 
                 // Hacky way of checking Future Tone.
                 // There's a very low chance this isn't going
                 // to work, though.
-                Format = isEncrypted && ( alignment & ( alignment - 1 ) ) != 0 ? BinaryFormat.FT : BinaryFormat.DT;
+                Format = isEncrypted && ( mAlignment & ( mAlignment - 1 ) ) != 0 ? BinaryFormat.FT : BinaryFormat.DT;
 
                 if ( Format == BinaryFormat.FT )
                 {
@@ -175,7 +167,7 @@ namespace MikuMikuLibrary.Archives.Farc
                     var decryptor = aesManaged.CreateDecryptor();
                     var cryptoStream = new CryptoStream( reader.BaseStream, decryptor, CryptoStreamMode.Read );
                     reader = new EndianBinaryReader( cryptoStream, Encoding.UTF8, Endianness.BigEndian );
-                    alignment = reader.ReadInt32();
+                    mAlignment = reader.ReadInt32();
                 }
 
                 // Since the first check worked only if the file was encrypted,
@@ -187,7 +179,6 @@ namespace MikuMikuLibrary.Archives.Farc
                 if ( Format == BinaryFormat.FT )
                     padding = reader.ReadInt32(); // No SeekCurrent!! CryptoStream does not support it.
 
-                entries.Capacity = entryCount;
                 while ( originalStream.Position < headerSize )
                 {
                     string name = reader.ReadString( StringBinaryFormat.NullTerminated );
@@ -202,7 +193,6 @@ namespace MikuMikuLibrary.Archives.Farc
                         isEncrypted = ( flags & ( 1 << 2 ) ) != 0;
                     }
 
-                    // Time for a shit ton of size fixing!
                     long fixedSize = 0;
                     if ( isEncrypted )
                     {
@@ -220,19 +210,18 @@ namespace MikuMikuLibrary.Archives.Farc
 
                     fixedSize = Math.Min( fixedSize, originalStream.Length - offset );
 
-                    entries.Add( new InternalEntry
+                    mEntries.Add( name, new InternalEntry
                     {
                         Handle = name,
                         Position = offset,
                         Length = fixedSize,
-                        IsCompressed = isCompressed,
+                        IsCompressed = isCompressed && ( compressedSize != uncompressedSize ),
                         IsEncrypted = isEncrypted,
                         IsFutureTone = Format == BinaryFormat.FT,
                     } );
 
-                    // Some extra padding on some FT FARCs, that causes
-                    // the while loop to fail. So, we're gonna do this
-                    // extra check.
+                    // There's sometimes extra padding on some FARC files which
+                    // causes this loop to throw an exception. This check fixes it.
                     if ( Format == BinaryFormat.FT && ( --entryCount ) == 0 )
                         break;
                 }
@@ -240,7 +229,7 @@ namespace MikuMikuLibrary.Archives.Farc
 
             else if ( signature == "FArC" )
             {
-                alignment = reader.ReadInt32();
+                mAlignment = reader.ReadInt32();
 
                 while ( reader.Position < headerSize )
                 {
@@ -249,9 +238,9 @@ namespace MikuMikuLibrary.Archives.Farc
                     uint compressedSize = reader.ReadUInt32();
                     uint uncompressedSize = reader.ReadUInt32();
 
-                    long fixedSize = Math.Min( compressedSize, reader.BaseStreamLength - offset );
+                    long fixedSize = Math.Min( compressedSize, reader.Length - offset );
 
-                    entries.Add( new InternalEntry
+                    mEntries.Add( name, new InternalEntry
                     {
                         Handle = name,
                         Position = offset,
@@ -263,7 +252,7 @@ namespace MikuMikuLibrary.Archives.Farc
 
             else if ( signature == "FArc" )
             {
-                alignment = reader.ReadInt32();
+                mAlignment = reader.ReadInt32();
 
                 while ( reader.Position < headerSize )
                 {
@@ -271,9 +260,9 @@ namespace MikuMikuLibrary.Archives.Farc
                     uint offset = reader.ReadUInt32();
                     uint size = reader.ReadUInt32();
 
-                    long fixedSize = Math.Min( size, reader.BaseStreamLength - offset );
+                    long fixedSize = Math.Min( size, reader.Length - offset );
 
-                    entries.Add( new InternalEntry
+                    mEntries.Add( name, new InternalEntry
                     {
                         Handle = name,
                         Position = offset,
@@ -288,12 +277,12 @@ namespace MikuMikuLibrary.Archives.Farc
             writer.Write( "FArc", StringBinaryFormat.FixedLength, 4 );
             writer.EnqueueOffsetWrite( OffsetKind.Size, () =>
             {
-                writer.Write( alignment );
+                writer.Write( mAlignment );
 
-                foreach ( var entry in entries )
+                foreach ( var entry in mEntries.Values )
                 {
                     writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
-                    writer.EnqueueOffsetWrite( alignment, 0x78, AlignmentKind.Center, OffsetKind.OffsetAndSize, () =>
+                    writer.EnqueueOffsetWrite( mAlignment, 0x78, AlignmentKind.Center, OffsetKind.OffsetAndSize, () =>
                     {
                         long position = writer.Position;
 
@@ -326,7 +315,7 @@ namespace MikuMikuLibrary.Archives.Farc
         {
             if ( disposing )
             {
-                foreach ( var entry in entries )
+                foreach ( var entry in mEntries.Values )
                     entry.Dispose();
             }
 
@@ -368,8 +357,8 @@ namespace MikuMikuLibrary.Archives.Farc
 
         public FarcArchive()
         {
-            entries = new List<InternalEntry>();
-            alignment = 0x10;
+            mEntries = new Dictionary<string, InternalEntry>( StringComparer.OrdinalIgnoreCase );
+            mAlignment = 0x10;
         }
     }
 }

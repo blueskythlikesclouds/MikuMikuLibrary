@@ -13,6 +13,7 @@ namespace MikuMikuLibrary.IO.Sections
         public Type SectionType { get; }
         public Type DataType { get; }
         public string Signature { get; }
+        public bool IsBinaryFile { get; }
 
         /// <summary>
         /// Sub sections by section signature
@@ -29,6 +30,15 @@ namespace MikuMikuLibrary.IO.Sections
             return ( Section )Activator.CreateInstance( SectionType, dataToWrite, endianness );
         }
 
+        public Section Read( Stream source, object dataToRead = null ) => Create( source, dataToRead );
+
+        public Section Write( Stream destination, object dataToWrite, Endianness endianness )
+        {
+            var section = Create( dataToWrite, endianness );
+            section.Write( destination );
+            return section;
+        }
+
         public static bool IsSection( Type type )
         {
             return typeof( Section ).IsAssignableFrom( type ) && type.GetCustomAttribute<SectionAttribute>() != null;
@@ -43,6 +53,7 @@ namespace MikuMikuLibrary.IO.Sections
             SectionType = sectionType;
             DataType = sectionAttribute.DataType;
             Signature = sectionAttribute.Signature;
+            IsBinaryFile = typeof( IBinaryFile ).IsAssignableFrom( DataType );
 
             SubSectionInfos = new Dictionary<string, SubSectionInfo>();
 

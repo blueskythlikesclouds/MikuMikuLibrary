@@ -1,5 +1,6 @@
 ﻿using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Misc;
+using System.ComponentModel;
 
 namespace MikuMikuModel.DataNodes
 {
@@ -40,21 +41,25 @@ namespace MikuMikuModel.DataNodes
             get { return GetProperty<int>(); }
             set { SetProperty( value ); }
         }
+        [DisplayName( "Diffuse color" )]
         public Color DiffuseColor
         {
             get { return GetProperty<Color>(); }
             set { SetProperty( value ); }
         }
+        [DisplayName( "Ambient color" )]
         public Color AmbientColor
         {
             get { return GetProperty<Color>(); }
             set { SetProperty( value ); }
         }
+        [DisplayName( "Specular color" )]
         public Color SpecularColor
         {
             get { return GetProperty<Color>(); }
             set { SetProperty( value ); }
         }
+        [DisplayName( "Emission color" )]
         public Color EmissionColor
         {
             get { return GetProperty<Color>(); }
@@ -177,14 +182,14 @@ namespace MikuMikuModel.DataNodes
 
         protected override void InitializeViewCore()
         {
-            Add( new MaterialTextureNode( nameof( Data.Diffuse ), Data.Diffuse ) );
-            Add( new MaterialTextureNode( nameof( Data.Ambient ), Data.Ambient ) );
-            Add( new MaterialTextureNode( nameof( Data.Normal ), Data.Normal ) );
-            Add( new MaterialTextureNode( nameof( Data.Specular ), Data.Specular ) );
-            Add( new MaterialTextureNode( nameof( Data.ToonCurve ), Data.ToonCurve ) );
-            Add( new MaterialTextureNode( nameof( Data.Reflection ), Data.Reflection ) );
-            Add( new MaterialTextureNode( nameof( Data.SpecularPower ), Data.SpecularPower ) );
-            Add( new MaterialTextureNode( nameof( Data.Texture08 ), Data.Texture08 ) );
+            Add( new MaterialTextureNode( "Diffuse", Data.Diffuse ) );
+            Add( new MaterialTextureNode( "Ambient", Data.Ambient ) );
+            Add( new MaterialTextureNode( "Normal", Data.Normal ) );
+            Add( new MaterialTextureNode( "Specular", Data.Specular ) );
+            Add( new MaterialTextureNode( "Toon curve", Data.ToonCurve ) );
+            Add( new MaterialTextureNode( "Reflection", Data.Reflection ) );
+            Add( new MaterialTextureNode( "Specular power", Data.SpecularPower ) );
+            Add( new MaterialTextureNode( "Unknown slot", Data.Texture08 ) );
         }
 
         protected override void OnRename( string oldName )

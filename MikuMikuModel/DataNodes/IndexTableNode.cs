@@ -16,7 +16,7 @@ namespace MikuMikuModel.DataNodes
             get { return DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename; }
         }
 
-        [DisplayName( "Bounding Sphere" )]
+        [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
         {
             get { return GetProperty<BoundingSphere>(); }
@@ -27,7 +27,7 @@ namespace MikuMikuModel.DataNodes
             get { return GetProperty<ushort[]>(); }
             set { SetProperty( value ); }
         }
-        [DisplayName( "Bone Indices" )]
+        [DisplayName( "Bone indices" )]
         public ushort[] BoneIndices
         {
             get { return GetProperty<ushort[]>(); }
@@ -38,13 +38,13 @@ namespace MikuMikuModel.DataNodes
             get { return GetProperty<int>(); }
             set { SetProperty( value ); }
         }
-        [DisplayName( "Primitive Type" )]
+        [DisplayName( "Primitive type" )]
         public IndexTablePrimitiveType PrimitiveType
         {
             get { return GetProperty<IndexTablePrimitiveType>(); }
             set { SetProperty( value ); }
         }
-        [DisplayName( "Bounding Box" )]
+        [DisplayName( "Bounding box" )]
         public BoundingBox BoundingBox
         {
             get { return GetProperty<BoundingBox>(); }

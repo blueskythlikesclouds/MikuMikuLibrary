@@ -63,10 +63,10 @@ namespace MikuMikuLibrary.Models
 
         internal override void ReadBody( EndianBinaryReader reader )
         {
-            Field10 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-            Field11 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            Field10 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Field11 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Field12 = reader.ReadInt32();
-            Field13 = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            Field13 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Field14 = reader.ReadSingle();
             Field15 = reader.ReadSingle();
             Field16 = reader.ReadSingle();
@@ -199,7 +199,7 @@ namespace MikuMikuLibrary.Models
 
             Expressions.Capacity = expressionCount;
             for ( int i = 0; i < expressionCount; i++ )
-                Expressions.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                Expressions.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
         }
 
         internal override void WriteBody( EndianBinaryWriter writer )
@@ -263,7 +263,7 @@ namespace MikuMikuLibrary.Models
 
         internal virtual void Read( EndianBinaryReader reader )
         {
-            ParentName = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            ParentName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Position = reader.ReadVector3();
             Rotation = reader.ReadVector3();
             Scale = reader.ReadVector3();
@@ -341,14 +341,14 @@ namespace MikuMikuLibrary.Models
             {
                 OsageNames.Capacity = osageNameCount;
                 for ( int i = 0; i < osageNameCount; i++ )
-                    OsageNames.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                    OsageNames.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
 
             reader.ReadAtOffset( exBlocksOffset, () =>
             {
                 while ( true )
                 {
-                    string exBlockKind = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    string exBlockKind = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     long exBlockDataOffset = reader.ReadOffset();
 
                     if ( exBlockDataOffset == 0 )
@@ -356,7 +356,7 @@ namespace MikuMikuLibrary.Models
 
                     MeshExBlock exBlock = null;
 
-                    reader.ReadAtOffsetAndSeekBack( exBlockDataOffset, () =>
+                    reader.ReadAtOffset( exBlockDataOffset, () =>
                     {
                         switch ( exBlockKind )
                         {
@@ -390,7 +390,7 @@ namespace MikuMikuLibrary.Models
             {
                 BoneNames.Capacity = boneNameCount;
                 for ( int i = 0; i < boneNameCount; i++ )
-                    BoneNames.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                    BoneNames.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
 
             reader.ReadAtOffset( exEntriesOffset, () =>

@@ -38,7 +38,7 @@ namespace MikuMikuModel.DataNodes
             Add( Bones = new ListNode<Bone>( nameof( Data.Bones ), Data.Bones ) );
 
             if ( Data.ExData != null )
-                Add( ExData = new MeshExDataNode( "ExData", Data.ExData ) );
+                Add( ExData = new MeshExDataNode( "Ex data", Data.ExData ) );
         }
 
         public MeshSkinNode( string name, MeshSkin data ) : base( name, data )

@@ -34,7 +34,7 @@ namespace MikuMikuLibrary.Databases
             PairNameIndex = reader.ReadByte();
             Field02 = reader.ReadByte();
             reader.SeekCurrent( 2 );
-            Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+            Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
         }
 
         internal void Write( EndianBinaryWriter writer )
@@ -102,14 +102,14 @@ namespace MikuMikuLibrary.Databases
             {
                 BoneNames1.Capacity = boneName1Count;
                 for ( int i = 0; i < boneName1Count; i++ )
-                    BoneNames1.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                    BoneNames1.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
 
             reader.ReadAtOffset( boneNames2Offset, () =>
             {
                 BoneNames2.Capacity = boneName2Count;
                 for ( int i = 0; i < boneName2Count; i++ )
-                    BoneNames2.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                    BoneNames2.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
 
             reader.ReadAtOffset( parentIndicesOffset, () =>
@@ -195,7 +195,7 @@ namespace MikuMikuLibrary.Databases
                 Skeletons.Capacity = skeletonCount;
                 for ( int i = 0; i < skeletonCount; i++ )
                 {
-                    reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
+                    reader.ReadAtOffset( reader.ReadUInt32(), () =>
                     {
                         var skeletonEntry = new SkeletonEntry();
                         skeletonEntry.Read( reader );
@@ -207,7 +207,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( skeletonNamesOffset, () =>
             {
                 foreach ( var skeletonEntry in Skeletons )
-                    skeletonEntry.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    skeletonEntry.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
         }
 

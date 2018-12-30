@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace MikuMikuModel.DataNodes
 {
     // Only string archives for now
-    public abstract class ArchiveNode<TArchive> : DataNode<TArchive> where TArchive : IArchive<string>
+    public abstract class ArchiveNode<TArchive> : DataNode<TArchive> where TArchive : IArchive<string>, new()
     {
         private DataNodeActionFlags flags;
         private Dictionary<DataNode, object> valueMap;

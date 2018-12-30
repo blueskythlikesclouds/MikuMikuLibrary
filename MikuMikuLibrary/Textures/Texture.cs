@@ -95,7 +95,7 @@ namespace MikuMikuLibrary.Textures
             {
                 for ( int j = 0; j < mipMapCount; j++ )
                 {
-                    reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
+                    reader.ReadAtOffset( reader.ReadUInt32(), () =>
                     {
                         subTextures[ i, j ] = new SubTexture( reader );
                     } );

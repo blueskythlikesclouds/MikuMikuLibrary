@@ -23,6 +23,8 @@ namespace MikuMikuLibrary.Archives.Farc
                 return Stream;
 
             Stream stream = sourceStream.CreateSubView( Position, Length );
+            if ( Length == 0 )
+                return stream;
 
             if ( IsEncrypted )
             {

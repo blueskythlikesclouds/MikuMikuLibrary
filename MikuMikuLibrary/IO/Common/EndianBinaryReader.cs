@@ -2,11 +2,13 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
+using MikuMikuLibrary.Exceptions;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -14,37 +16,33 @@ namespace MikuMikuLibrary.IO.Common
 {
     public class EndianBinaryReader : BinaryReader
     {
-        private StringBuilder stringBuilder;
-        private Endianness endianness;
-        private bool swap;
-        private Encoding encoding;
-        private AddressSpace addressSpace;
-        private Stack<long> offsetStack;
-        private Stack<long> baseOffsetStack;
+        private StringBuilder mStringBuilder;
+        private Endianness mEndianness;
+        private bool mSwap;
+        private Encoding mEncoding;
+        private AddressSpace mAddressSpace;
+        private Stack<long> mOffsets;
+        private Stack<long> mBaseOffsets;
 
         public Endianness Endianness
         {
-            get { return endianness; }
+            get { return mEndianness; }
             set
             {
-                if ( value != EndiannessSwapUtilities.SystemEndianness )
-                    swap = true;
-                else
-                    swap = false;
-
-                endianness = value;
+                mSwap = value != EndiannessSwapUtilities.SystemEndianness;
+                mEndianness = value;
             }
         }
 
-        public bool EndiannessNeedsSwapping
+        public bool SwapBytes
         {
-            get { return swap; }
+            get { return mSwap; }
         }
 
         public AddressSpace AddressSpace
         {
-            get { return addressSpace; }
-            set { addressSpace = value; }
+            get { return mAddressSpace; }
+            set { mAddressSpace = value; }
         }
 
         public long Position
@@ -53,215 +51,220 @@ namespace MikuMikuLibrary.IO.Common
             set { BaseStream.Position = value; }
         }
 
-        public long BaseStreamLength
+        public long Length
         {
             get { return BaseStream.Length; }
         }
 
-        public EndianBinaryReader( Stream input, Endianness endianness )
-            : base( input )
+        public long BaseOffset
         {
-            Init( Encoding.Default, endianness, AddressSpace.Int32 );
+            get { return mBaseOffsets.Count > 0 ? mBaseOffsets.Peek() : 0; }
+            set
+            {
+                if ( ( mBaseOffsets.Count > 0 && mBaseOffsets.Peek() != value ) || mBaseOffsets.Count == 0 )
+                    mBaseOffsets.Push( value );
+            }
         }
 
-        public EndianBinaryReader( Stream input, Endianness endianness, AddressSpace addressSpace )
-            : base( input )
-        {
-            Init( Encoding.Default, endianness, addressSpace );
-        }
+        public void Seek( long offset, SeekOrigin origin ) => BaseStream.Seek( offset, origin );
+        public void SeekBegin( long offset ) => BaseStream.Seek( offset, SeekOrigin.Begin );
+        public void SeekCurrent( long offset ) => BaseStream.Seek( offset, SeekOrigin.Current );
+        public void SeekEnd( long offset ) => BaseStream.Seek( offset, SeekOrigin.End );
 
-        public EndianBinaryReader( Stream input, Encoding encoding, Endianness endianness )
-            : base( input, encoding )
-        {
-            Init( encoding, endianness, AddressSpace.Int32 );
-        }
+        public void PushOffset( long offset ) => mOffsets.Push( offset );
+        public void PushOffset() => mOffsets.Push( Position );
+        public long PeekOffset() => mOffsets.Peek();
+        public long PopOffset() => mOffsets.Pop();
+        public long SeekBeginToPoppedOffset() => BaseStream.Seek( mOffsets.Pop(), SeekOrigin.Begin );
 
-        public EndianBinaryReader( Stream input, Encoding encoding, Endianness endianness, AddressSpace addressSpace )
-            : base( input, encoding )
-        {
-            Init( encoding, endianness, addressSpace );
-        }
+        public void PushBaseOffset( long offset ) => mBaseOffsets.Push( offset );
+        public void PushBaseOffset() => mBaseOffsets.Push( Position );
+        public long PeekBaseOffset() => mBaseOffsets.Peek();
+        public long PopBaseOffset() => mBaseOffsets.Pop();
 
-        public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness )
-            : base( input, encoding, leaveOpen )
-        {
-            Init( encoding, endianness, AddressSpace.Int32 );
-        }
-
-        public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness, AddressSpace addressSpace )
-            : base( input, encoding, leaveOpen )
-        {
-            Init( encoding, endianness, addressSpace );
-        }
-
-        private void Init( Encoding encoding, Endianness endianness, AddressSpace addressSpace )
-        {
-            stringBuilder = new StringBuilder();
-            this.encoding = encoding;
-            this.addressSpace = addressSpace;
-            offsetStack = new Stack<long>();
-            baseOffsetStack = new Stack<long>();
-            Endianness = endianness;
-        }
-
-        public void Seek( long offset, SeekOrigin origin )
-        {
-            BaseStream.Seek( offset, origin );
-        }
-
-        public void SeekBegin( long offset )
-        {
-            BaseStream.Seek( offset, SeekOrigin.Begin );
-        }
-
-        public void SeekCurrent( long offset )
-        {
-            BaseStream.Seek( offset, SeekOrigin.Current );
-        }
-
-        public void SeekEnd( long offset )
-        {
-            BaseStream.Seek( offset, SeekOrigin.End );
-        }
-
-        public void PushOffset()
-        {
-            offsetStack.Push( Position );
-        }
-
-        public long PeekOffset()
-        {
-            return offsetStack.Peek();
-        }
-
-        public long PopOffset()
-        {
-            return offsetStack.Pop();
-        }
-
-        public void PushOffsetAndSeekBegin( long offset )
-        {
-            PushOffset();
-            SeekBegin( offset );
-        }
-
-        public void SeekBeginToPoppedOffset()
-        {
-            SeekBegin( PopOffset() );
-        }
-
-        public void PushBaseOffset()
-        {
-            baseOffsetStack.Push( Position );
-        }
-
-        public long PeekBaseOffset()
-        {
-            return baseOffsetStack.Peek();
-        }
-
-        public long PopBaseOffset()
-        {
-            return baseOffsetStack.Pop();
-        }
-
-        public void ReadAlignmentPadding( int alignment )
-        {
-            SeekCurrent( AlignmentUtilities.GetAlignedDifference( Position, alignment ) );
-        }
+        public void Align( int alignment ) => SeekCurrent( AlignmentUtilities.GetAlignedDifference( Position, alignment ) );
 
         public long ReadOffset()
         {
-            if ( addressSpace == AddressSpace.Int32 )
+            long offset;
+
+            if ( mAddressSpace == AddressSpace.Int32 )
+                offset = ReadUInt32();
+
+            else if ( mAddressSpace == AddressSpace.Int64 )
             {
-                ReadAlignmentPadding( 4 );
-                return ReadUInt32();
+                Align( 8 );
+                offset = ReadInt64();
             }
 
-            else if ( addressSpace == AddressSpace.Int64 )
+            else
+                throw new ArgumentException( nameof( mAddressSpace ) );
+
+            return offset;
+        }
+
+        public long[] ReadOffsets( int count )
+        {
+            if ( mAddressSpace == AddressSpace.Int64 )
+                Align( 8 );
+
+            var offsets = new long[ count ];
+            for ( int i = 0; i < count; i++ )
             {
-                ReadAlignmentPadding( 8 );
-                return ReadInt64();
+                long offset;
+                if ( mAddressSpace == AddressSpace.Int32 )
+                    offset = ReadUInt32();
+                else if ( mAddressSpace == AddressSpace.Int64 )
+                    offset = ReadInt64();
+                else
+                    throw new ArgumentException( nameof( mAddressSpace ) );
+
+                offsets[ i ] = offset;
             }
 
-            throw new ArgumentException( nameof( addressSpace ) );
+            return offsets;
         }
 
-        public void ReadAtOffset( long offset, Action body )
-        {
-            SeekBegin( ( baseOffsetStack.Count > 0 ?
-                baseOffsetStack.Peek() : 0 ) + offset );
-
-            body.Invoke();
-        }
-
-        public void ReadAtOffsetIf( bool condition, long offset, Action body )
-        {
-            if ( condition )
-                ReadAtOffset( offset, body );
-        }
-
-        public void ReadAtOffsetIfNotZero( long offset, Action body )
-        {
-            if ( offset > 0 )
-                ReadAtOffset( offset, body );
-        }
-
-        public void ReadAtOffsetAndSeekBack( long offset, Action body )
-        {
-            long positionTemp = Position;
-
-            SeekBegin( ( baseOffsetStack.Count > 0 ?
-                baseOffsetStack.Peek() : 0 ) + offset );
-
-            body.Invoke();
-
-            SeekBegin( positionTemp );
-        }
-
-        public void ReadAtOffsetAndSeekBackIf( bool condition, long offset, Action body )
-        {
-            if ( condition )
-                ReadAtOffsetAndSeekBack( offset, body );
-        }
-
-        public void ReadAtOffsetAndSeekBackIfNotZero( long offset, Action body )
-        {
-            if ( offset > 0 )
-                ReadAtOffsetAndSeekBack( offset, body );
-        }
-
-        public string ReadStringAtOffset( long offset, StringBinaryFormat format, int fixedLength = -1 )
-        {
-            if ( offset > 0 )
-            {
-                if ( baseOffsetStack.Count > 0 )
-                    offset += baseOffsetStack.Peek();
-
-                long previousOffset = Position;
-                SeekBegin( offset );
-                string value = ReadString( format, fixedLength );
-                SeekBegin( previousOffset );
-                return value;
-            }
-            return null;
-        }
-
-        public string ReadStringPtr( StringBinaryFormat format, int fixedLength = -1 )
+        public void ReadOffset( Action<EndianBinaryReader> action )
         {
             long offset = ReadOffset();
-            if ( offset > 0 )
+            if ( offset != 0 )
             {
-                if ( baseOffsetStack.Count > 0 )
-                    offset += baseOffsetStack.Peek();
-
-                long previousOffset = Position;
-                SeekBegin( offset );
-                string value = ReadString( format, fixedLength );
-                SeekBegin( previousOffset );
-                return value;
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action( this );
+                SeekBegin( current );
             }
-            return null;
+        }
+
+        public void ReadOffset( int count, Action<EndianBinaryReader, int> action )
+        {
+            long offset = ReadOffset();
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                for ( int i = 0; i < count; i++ )
+                    action( this, i );
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadOffsetIf( bool condition, Action<EndianBinaryReader> action )
+        {
+            long offset = ReadOffset();
+            if ( offset != 0 && condition )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action( this );
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadOffset( Action action )
+        {
+            long offset = ReadOffset();
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action();
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadOffset( int count, Action<int> action )
+        {
+            long offset = ReadOffset();
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                for ( int i = 0; i < count; i++ )
+                    action( i );
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadOffsetIf( bool condition, Action action )
+        {
+            long offset = ReadOffset();
+            if ( offset != 0 && condition )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action();
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadAtOffset( long offset, Action<EndianBinaryReader> action )
+        {
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action( this );
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadAtOffset( long offset, int count, Action<EndianBinaryReader, int> action )
+        {
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                for ( int i = 0; i < count; i++ )
+                    action( this, i );
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadAtOffsetIf( bool condition, long offset, Action<EndianBinaryReader> action )
+        {
+            if ( offset != 0 && condition )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action( this );
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadAtOffset( long offset, Action action )
+        {
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action();
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadAtOffset( long offset, int count, Action<int> action )
+        {
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                for ( int i = 0; i < count; i++ )
+                    action( i );
+                SeekBegin( current );
+            }
+        }
+
+        public void ReadAtOffsetIf( bool condition, long offset, Action action )
+        {
+            if ( offset != 0 && condition )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                action();
+                SeekBegin( current );
+            }
         }
 
         public sbyte[] ReadSBytes( int count )
@@ -284,7 +287,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override short ReadInt16()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadInt16() );
             else
                 return base.ReadInt16();
@@ -303,7 +306,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override ushort ReadUInt16()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadUInt16() );
             else
                 return base.ReadUInt16();
@@ -322,7 +325,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override decimal ReadDecimal()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadDecimal() );
             else
                 return base.ReadDecimal();
@@ -341,7 +344,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override double ReadDouble()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadDouble() );
             else
                 return base.ReadDouble();
@@ -360,7 +363,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override int ReadInt32()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadInt32() );
             else
                 return base.ReadInt32();
@@ -379,7 +382,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override long ReadInt64()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadInt64() );
             else
                 return base.ReadInt64();
@@ -398,7 +401,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public Half ReadHalf()
         {
-            if ( swap )
+            if ( mSwap )
                 return Half.ToHalf( EndiannessSwapUtilities.Swap( base.ReadUInt16() ) );
             else
                 return Half.ToHalf( base.ReadUInt16() );
@@ -415,7 +418,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override float ReadSingle()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadSingle() );
             else
                 return base.ReadSingle();
@@ -434,7 +437,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override uint ReadUInt32()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadUInt32() );
             else
                 return base.ReadUInt32();
@@ -453,7 +456,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override ulong ReadUInt64()
         {
-            if ( swap )
+            if ( mSwap )
                 return EndiannessSwapUtilities.Swap( base.ReadUInt64() );
             else
                 return base.ReadUInt64();
@@ -472,7 +475,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public string ReadString( StringBinaryFormat format, int fixedLength = -1 )
         {
-            stringBuilder.Clear();
+            mStringBuilder.Clear();
 
             switch ( format )
             {
@@ -480,7 +483,7 @@ namespace MikuMikuLibrary.IO.Common
                     {
                         char b;
                         while ( ( b = ReadChar() ) != 0 )
-                            stringBuilder.Append( b );
+                            mStringBuilder.Append( b );
                     }
                     break;
 
@@ -494,7 +497,7 @@ namespace MikuMikuLibrary.IO.Common
                         {
                             b = ReadChar();
                             if ( b != 0 )
-                                stringBuilder.Append( b );
+                                mStringBuilder.Append( b );
                         }
                     }
                     break;
@@ -503,7 +506,7 @@ namespace MikuMikuLibrary.IO.Common
                     {
                         byte length = ReadByte();
                         for ( int i = 0; i < length; i++ )
-                            stringBuilder.Append( ReadChar() );
+                            mStringBuilder.Append( ReadChar() );
                     }
                     break;
 
@@ -511,7 +514,7 @@ namespace MikuMikuLibrary.IO.Common
                     {
                         ushort length = ReadUInt16();
                         for ( int i = 0; i < length; i++ )
-                            stringBuilder.Append( ReadChar() );
+                            mStringBuilder.Append( ReadChar() );
                     }
                     break;
 
@@ -519,7 +522,7 @@ namespace MikuMikuLibrary.IO.Common
                     {
                         uint length = ReadUInt32();
                         for ( int i = 0; i < length; i++ )
-                            stringBuilder.Append( ReadChar() );
+                            mStringBuilder.Append( ReadChar() );
                     }
                     break;
 
@@ -527,7 +530,7 @@ namespace MikuMikuLibrary.IO.Common
                     throw new ArgumentException( "Unknown string format", nameof( format ) );
             }
 
-            return stringBuilder.ToString();
+            return mStringBuilder.ToString();
         }
 
         public string[] ReadStrings( int count, StringBinaryFormat format, int fixedLength = -1 )
@@ -537,6 +540,35 @@ namespace MikuMikuLibrary.IO.Common
                 value[ i ] = ReadString( format, fixedLength );
 
             return value;
+        }
+
+        public string ReadStringOffset( StringBinaryFormat format, int fixedLength = -1 )
+        {
+            long offset = ReadOffset();
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                string value = ReadString( format, fixedLength );
+                SeekBegin( current );
+                return value;
+            }
+
+            return null;
+        }
+
+        public string ReadStringAtOffset( long offset, StringBinaryFormat format, int fixedLength = -1 )
+        {
+            if ( offset != 0 )
+            {
+                long current = Position;
+                SeekBegin( BaseOffset + offset );
+                string value = ReadString( format, fixedLength );
+                SeekBegin( current );
+                return value;
+            }
+
+            return null;
         }
 
         public Vector2 ReadVector2()
@@ -599,7 +631,7 @@ namespace MikuMikuLibrary.IO.Common
 
             return value;
         }
-            
+
         public Vector4 ReadVector4()
         {
             return new Vector4( ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
@@ -700,6 +732,106 @@ namespace MikuMikuLibrary.IO.Common
                 Height = ReadSingle(),
                 Depth = ReadSingle(),
             };
+        }
+
+        public int ReadSignature( int expectedSignature )
+        {
+            int signature = ReadInt32();
+            if ( signature != expectedSignature )
+                throw new InvalidSignatureException( signature, expectedSignature );
+
+            return signature;
+        }
+
+        public int ReadSignature( params int[] expectedSignatures )
+        {
+            int signature = ReadInt32();
+            if ( !expectedSignatures.Contains( signature ) )
+                throw new InvalidSignatureException( signature, expectedSignatures );
+
+            return signature;
+        }
+
+        public int ReadSignature( IEnumerable<int> expectedSignatures )
+        {
+            int signature = ReadInt32();
+            if ( !expectedSignatures.Contains( signature ) )
+                throw new InvalidSignatureException( signature, expectedSignatures );
+
+            return signature;
+        }
+
+        public string ReadSignature( int length, string expectedSignature )
+        {
+            string signature = ReadString( StringBinaryFormat.FixedLength, length );
+            if ( signature != expectedSignature )
+                throw new InvalidSignatureException( signature, expectedSignature );
+
+            return signature;
+        }
+
+        public string ReadSignature( int length, params string[] expectedSignatures )
+        {
+            string signature = ReadString( StringBinaryFormat.FixedLength, length );
+            if ( !expectedSignatures.Contains( signature ) )
+                throw new InvalidSignatureException( signature, expectedSignatures );
+
+            return signature;
+        }
+
+        public string ReadSignature( int length, IEnumerable<string> expectedSignatures )
+        {
+            string signature = ReadString( StringBinaryFormat.FixedLength, length );
+            if ( !expectedSignatures.Contains( signature ) )
+                throw new InvalidSignatureException( signature, expectedSignatures );
+
+            return signature;
+        }
+
+        private void Init( Encoding encoding, Endianness endianness, AddressSpace addressSpace )
+        {
+            mStringBuilder = new StringBuilder();
+            mEncoding = encoding;
+            mAddressSpace = addressSpace;
+            mOffsets = new Stack<long>();
+            mBaseOffsets = new Stack<long>();
+            Endianness = endianness;
+        }
+
+        public EndianBinaryReader( Stream input, Endianness endianness )
+            : base( input )
+        {
+            Init( Encoding.Default, endianness, AddressSpace.Int32 );
+        }
+
+        public EndianBinaryReader( Stream input, Endianness endianness, AddressSpace addressSpace )
+            : base( input )
+        {
+            Init( Encoding.Default, endianness, addressSpace );
+        }
+
+        public EndianBinaryReader( Stream input, Encoding encoding, Endianness endianness )
+            : base( input, encoding )
+        {
+            Init( encoding, endianness, AddressSpace.Int32 );
+        }
+
+        public EndianBinaryReader( Stream input, Encoding encoding, Endianness endianness, AddressSpace addressSpace )
+            : base( input, encoding )
+        {
+            Init( encoding, endianness, addressSpace );
+        }
+
+        public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness )
+            : base( input, encoding, leaveOpen )
+        {
+            Init( encoding, endianness, AddressSpace.Int32 );
+        }
+
+        public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness, AddressSpace addressSpace )
+            : base( input, encoding, leaveOpen )
+        {
+            Init( encoding, endianness, addressSpace );
         }
     }
 }

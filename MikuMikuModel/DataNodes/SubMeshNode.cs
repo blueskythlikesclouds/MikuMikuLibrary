@@ -29,7 +29,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        [DisplayName( "Bounding Sphere" )]
+        [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
         {
             get { return GetProperty<BoundingSphere>(); }
@@ -54,14 +54,14 @@ namespace MikuMikuModel.DataNodes
             set { SetProperty( value ); }
         }
 
-        [DisplayName( "UV Channel 1" )]
+        [DisplayName( "UV channel 1" )]
         public Vector2[] UVChannel1
         {
             get { return GetProperty<Vector2[]>(); }
             set { SetProperty( value ); }
         }
 
-        [DisplayName( "UV Channel 2" )]
+        [DisplayName( "UV channel 2" )]
         public Vector2[] UVChannel2
         {
             get { return GetProperty<Vector2[]>(); }
@@ -74,7 +74,7 @@ namespace MikuMikuModel.DataNodes
             set { SetProperty( value ); }
         }
 
-        [DisplayName( "Bone Weights" )]
+        [DisplayName( "Bone weights" )]
         public BoneWeight[] BoneWeights
         {
             get { return GetProperty<BoneWeight[]>(); }
@@ -105,7 +105,7 @@ namespace MikuMikuModel.DataNodes
 
         protected override void InitializeViewCore()
         {
-            Add( IndexTables = new ListNode<IndexTable>( "Index Tables", Data.IndexTables ) );
+            Add( IndexTables = new ListNode<IndexTable>( "Index tables", Data.IndexTables ) );
         }
 
         protected override void OnRename( string oldName )

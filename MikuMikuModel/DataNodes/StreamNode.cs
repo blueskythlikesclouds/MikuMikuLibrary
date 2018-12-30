@@ -26,7 +26,7 @@ namespace MikuMikuModel.DataNodes
             get { return Properties.Resources.File; }
         }
 
-        [DisplayName( "File Path" )]
+        [DisplayName( "File path" )]
         public string FilePath
         {
             get { return ( Data as FileStream )?.Name; }

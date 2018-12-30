@@ -8,6 +8,7 @@ namespace MikuMikuModel.DataNodes
     public class ListNode<T> : DataNode<List<T>> where T : class
     {
         private Type type;
+        private Func<T, string> nameGetter;
 
         public override DataNodeFlags Flags
         {
@@ -24,6 +25,8 @@ namespace MikuMikuModel.DataNodes
             get { return Properties.Resources.Folder; }
         }
 
+        public int Count => GetProperty<int>();
+
         protected override void InitializeCore()
         {
             if ( !DataNodeFactory.DataNodeTypes.TryGetValue( typeof( T ), out type ) )
@@ -36,13 +39,18 @@ namespace MikuMikuModel.DataNodes
         {
             for ( int i = 0; i < Data.Count; i++ )
             {
-                var name = $"{DataNodeFactory.GetSpecialName( type )} #{i}";
+                var name = nameGetter != null ? nameGetter( Data[ i ] ) : $"{DataNodeFactory.GetSpecialName( type )} #{i}";
                 Add( DataNodeFactory.Create<T>( name, Data[ i ] ) );
             }
         }
 
         public ListNode( string name, List<T> data ) : base( name, data )
         {
+        }
+
+        public ListNode( string name, List<T> data, Func<T, string> nameGetterFunc ) : base( name, data )
+        {
+            nameGetter = nameGetterFunc;
         }
     }
 }

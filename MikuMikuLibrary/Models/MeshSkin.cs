@@ -40,16 +40,16 @@ namespace MikuMikuLibrary.Models
             reader.ReadAtOffset( boneNamesOffset, () =>
             {
                 foreach ( var bone in Bones )
-                    bone.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    bone.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
-            reader.ReadAtOffsetIfNotZero( meshExDataOffset, () =>
+            reader.ReadAtOffset( meshExDataOffset, () =>
             {
                 ExData = new MeshExData();
                 ExData.Read( reader );
             } );
 
-            reader.ReadAtOffsetIfNotZero( boneParentIDsOffset, () =>
+            reader.ReadAtOffset( boneParentIDsOffset, () =>
             {
                 foreach ( var bone in Bones )
                     bone.ParentID = reader.ReadInt32();

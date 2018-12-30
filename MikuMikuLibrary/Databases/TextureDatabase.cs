@@ -35,7 +35,7 @@ namespace MikuMikuLibrary.Databases
                 {
                     var textureEntry = new TextureEntry();
                     textureEntry.ID = reader.ReadInt32();
-                    textureEntry.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    textureEntry.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     Textures.Add( textureEntry );
                 }
             } );

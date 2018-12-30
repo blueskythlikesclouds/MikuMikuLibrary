@@ -91,6 +91,52 @@ namespace MikuMikuLibrary.IO.Sections
             }
         }
 
+        private void ReadSubSections( EndianBinaryReader reader, long endPosition )
+        {
+            while ( reader.Position < endPosition )
+            {
+                reader.PushOffset();
+
+                Section subSection;
+                var subSectionSignature = reader.ReadString( StringBinaryFormat.FixedLength, 4 );
+
+                // Skip the section if it couldn't be detected.
+                if ( !SectionManager.SectionInfosBySignature.ContainsKey( subSectionSignature ) )
+                {
+                    Debug.WriteLine( $"WARNING: Unknown section signature {subSectionSignature}" );
+
+                    uint subSectionSize = reader.ReadUInt32();
+                    uint subSectionDataOffset = reader.ReadUInt32();
+
+                    reader.SeekBegin( reader.PopOffset() + subSectionDataOffset + subSectionSize );
+                    continue;
+                }
+
+                reader.SeekBeginToPoppedOffset();
+                if ( SectionInfo.SubSectionInfos.TryGetValue( subSectionSignature, out SubSectionInfo subSectionInfo ) )
+                    subSection = subSectionInfo.SetFromSection( this, reader.BaseStream );
+
+                else
+                {
+                    // Found no suitable property, simply parse it
+                    subSection = SectionManager.CreateSection(
+                        SectionManager.SectionInfosBySignature[ subSectionSignature ].SectionType, reader.BaseStream );
+                }
+
+                if ( subSection is EndOfFileSection )
+                    break;
+
+                else if ( subSection is RelocationTableSectionInt32 )
+                    addressSpace = AddressSpace.Int32;
+
+                else if ( subSection is RelocationTableSectionInt64 )
+                    addressSpace = AddressSpace.Int64;
+
+                else
+                    Add( subSection );
+            }
+        }
+
         public void Read( Stream source )
         {
             using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness.LittleEndian ) )
@@ -108,60 +154,24 @@ namespace MikuMikuLibrary.IO.Sections
                 int depth = reader.ReadInt32();
                 uint dataSize = reader.ReadUInt32();
 
+                long endOffset = reader.BaseOffset + dataOffset + sectionSize;
+
                 // Read the sections first because if the Read methods want to access child sections
                 // this will let them do so
                 reader.ReadAtOffsetIf( ( sectionSize - dataSize ) != 0, dataOffset + dataSize, () =>
                 {
-                    while ( reader.Position < ( reader.PeekBaseOffset() + dataOffset + sectionSize ) )
-                    {
-                        reader.PushOffset();
-
-                        Section subSection;
-                        var subSectionSignature = reader.ReadString( StringBinaryFormat.FixedLength, 4 );
-
-                        // Skip the section if it couldn't be detected.
-                        if ( !SectionManager.SectionInfosBySignature.ContainsKey( subSectionSignature ) )
-                        {
-                            Debug.WriteLine( $"WARNING: Unknown section signature {subSectionSignature}" );
-
-                            uint subSectionSize = reader.ReadUInt32();
-                            uint subSectionDataOffset = reader.ReadUInt32();
-
-                            reader.SeekBegin( reader.PopOffset() + subSectionDataOffset + subSectionSize );
-                            continue;
-                        }
-
-                        reader.SeekBeginToPoppedOffset();
-                        if ( SectionInfo.SubSectionInfos.TryGetValue( subSectionSignature, out SubSectionInfo subSectionInfo ) )
-                            subSection = subSectionInfo.SetFromSection( this, source );
-
-                        else
-                        {
-                            // Found no suitable property, simply parse it
-                            subSection = SectionManager.CreateSection(
-                                SectionManager.SectionInfosBySignature[ subSectionSignature ].SectionType, source );
-                        }
-
-                        if ( subSection is EndOfFileSection )
-                            break;
-
-                        else if ( subSection is RelocationTableSectionInt32 )
-                        {
-                            addressSpace = AddressSpace.Int32;
-                            continue;
-                        }
-
-                        else if ( subSection is RelocationTableSectionInt64 )
-                        {
-                            addressSpace = AddressSpace.Int64;
-                            continue;
-                        }
-
-                        Add( subSection );
-                    }
+                    ReadSubSections( reader, endOffset );
                 } );
 
-                reader.ReadAtOffsetIfNotZero( dataOffset, () =>
+                // Read the sibling sections
+                // This is an ugly hack, I'll implement this better
+                // when I get to reconstruct the classes.
+                reader.ReadAtOffsetIf( depth == 0, endOffset, () =>
+                {
+                    ReadSubSections( reader, reader.Length );
+                } );
+
+                reader.ReadAtOffset( dataOffset, () =>
                 {
                     // 64-bit address space has offsets
                     // relative to the start of data
@@ -177,11 +187,11 @@ namespace MikuMikuLibrary.IO.Sections
                         reader.PopBaseOffset();
                 } );
 
-                reader.SeekBegin( reader.PeekBaseOffset() + dataOffset + sectionSize );
+                reader.SeekBegin( endOffset );
             }
         }
 
-        public void Write( Stream destination )
+        protected void Write( Stream destination, bool putEndOfFileSection )
         {
             using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
             {
@@ -212,9 +222,7 @@ namespace MikuMikuLibrary.IO.Sections
                 {
                     // Push enrs section
                     if ( Flags.HasFlag( SectionFlags.EnrsSection ) )
-                    {
                         Insert( 0, new EnrsSection( this ) );
-                    }
 
                     // Push a relocation table if section makes use of them
                     if ( Flags.HasFlag( SectionFlags.RelocationTableSection ) )
@@ -248,9 +256,12 @@ namespace MikuMikuLibrary.IO.Sections
                     if ( sections.Any() )
                         Add( new EndOfFileSection( this ) );
 
-                    // Write the sections
+                    // Write the sections with an ugly hack
                     foreach ( var section in sections )
-                        section.Write( destination );
+                    {
+                        if ( !section.SectionInfo.IsBinaryFile )
+                            section.Write( destination );
+                    }
                 }
                 long sectionEndOffset = writer.Position;
 
@@ -266,18 +277,32 @@ namespace MikuMikuLibrary.IO.Sections
                 } );
             }
 
-            // If we got no parent, we need an end of file section
-            // at the end of our data
-            // Also check if we are not end of file section, we don't want stack overflow
+            // Write the siblings
+            // This is a pretty ugly hack, but I'll reconstruct it at another time
             if ( Parent == null && !( this is EndOfFileSection ) )
             {
-                var endOfFileSection = new EndOfFileSection( this );
-                endOfFileSection.Write( destination );
+                foreach ( var section in sections )
+                {
+                    if ( section.SectionInfo.IsBinaryFile )
+                    {
+                        section.parent = null;
+                        section.Write( destination, false );
+                        section.parent = this;
+                    }
+                }
+
+                if ( putEndOfFileSection )
+                {
+                    var endOfFileSection = new EndOfFileSection( this );
+                    endOfFileSection.Write( destination );
+                }
             }
 
             // Get rid of the sections we added earlier
             sections.RemoveAll( x => x is EndOfFileSection || x is RelocationTableSectionInt32 || x is RelocationTableSectionInt64 || x is EnrsSection );
         }
+
+        public void Write( Stream destination ) => Write( destination, true );
 
         protected abstract void Read( EndianBinaryReader reader, long length );
 

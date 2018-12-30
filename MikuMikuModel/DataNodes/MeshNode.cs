@@ -44,7 +44,7 @@ namespace MikuMikuModel.DataNodes
             set { SetProperty( value ); }
         }
 
-        [DisplayName( "Bounding Sphere" )]
+        [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
         {
             get { return GetProperty<BoundingSphere>(); }

@@ -25,7 +25,7 @@ namespace MikuMikuModel.DataNodes
             get { return GetProperty<int>(); }
             set { SetProperty( value ); }
         }
-        [DisplayName( "Texture Index" )]
+        [DisplayName( "Texture index" )]
         public int TextureIndex
         {
             get { return GetProperty<int>(); }

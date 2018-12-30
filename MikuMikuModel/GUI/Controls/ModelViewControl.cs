@@ -178,7 +178,7 @@ namespace MikuMikuModel.GUI.Controls
         {
             var vertices = new List<Vector3>();
 
-            for ( int i = -10; i <= 10; i++ )
+            for ( float i = -10; i <= 10; i += 0.5f )
             {
                 vertices.Add( new Vector3( i, 0, -10 ) );
                 vertices.Add( new Vector3( i, 0, 10 ) );

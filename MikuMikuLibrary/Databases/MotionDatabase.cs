@@ -27,17 +27,17 @@ namespace MikuMikuLibrary.Databases
             Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
             Motions.Capacity = motionCount;
-            reader.ReadAtOffsetAndSeekBack( motionNameOffsetsOffset, () =>
+            reader.ReadAtOffset( motionNameOffsetsOffset, () =>
             {
                 for ( int i = 0; i < motionCount; i++ )
                 {
                     var motionEntry = new MotionEntry();
-                    motionEntry.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    motionEntry.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     Motions.Add( motionEntry );
                 }
             } );
 
-            reader.ReadAtOffsetAndSeekBack( motionIDsOffset, () =>
+            reader.ReadAtOffset( motionIDsOffset, () =>
             {
                 foreach ( var motionEntry in Motions )
                     motionEntry.ID = reader.ReadInt32();
@@ -106,7 +106,7 @@ namespace MikuMikuLibrary.Databases
             {
                 BoneNames.Capacity = boneNameCount;
                 for ( int i = 0; i < boneNameCount; i++ )
-                    BoneNames.Add( reader.ReadStringPtr( StringBinaryFormat.NullTerminated ) );
+                    BoneNames.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
         }
 

@@ -22,12 +22,12 @@ namespace MikuMikuLibrary.Sprites
             uint texturesOffset = reader.ReadUInt32();
             int textureCount = reader.ReadInt32();
             int spriteCount = reader.ReadInt32();
-            uint spritesOffset = reader.ReadUInt32();
-            uint textureNamesOffset = reader.ReadUInt32();
-            uint spriteNamesOffset = reader.ReadUInt32();
-            uint spriteUnknownsOffset = reader.ReadUInt32();
+            long spritesOffset = reader.ReadOffset();
+            long textureNamesOffset = reader.ReadOffset();
+            long spriteNamesOffset = reader.ReadOffset();
+            long spriteUnknownsOffset = reader.ReadOffset();
 
-            reader.ReadAtOffset( texturesOffset, () => TextureSet.Load( reader.BaseStream, true ) );
+            reader.ReadAtOffsetIf( section == null, texturesOffset, () => TextureSet.Load( reader.BaseStream, true ) );
 
             Sprites.Capacity = spriteCount;
             reader.ReadAtOffset( spritesOffset, () =>
@@ -43,13 +43,13 @@ namespace MikuMikuLibrary.Sprites
             reader.ReadAtOffset( textureNamesOffset, () =>
             {
                 foreach ( var texture in TextureSet.Textures )
-                    texture.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    texture.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
             reader.ReadAtOffset( spriteNamesOffset, () =>
             {
                 foreach ( var sprite in Sprites )
-                    sprite.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    sprite.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
             reader.ReadAtOffset( spriteUnknownsOffset, () =>
@@ -62,7 +62,7 @@ namespace MikuMikuLibrary.Sprites
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( 0 );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream, true ) );
+            writer.EnqueueOffsetWriteIf( section == null, 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream, true ) );
             writer.Write( TextureSet.Textures.Count );
             writer.Write( Sprites.Count );
             writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>

@@ -20,7 +20,7 @@ namespace MikuMikuLibrary.Databases
 
             // Try to determine endianness (apparently DT uses big endian string arrays)
             uint stringOffset = reader.ReadUInt32();
-            if ( stringOffset >= reader.BaseStreamLength )
+            if ( stringOffset >= reader.Length )
             {
                 reader.Endianness = Endianness.BigEndian;
                 stringOffset = EndiannessSwapUtilities.Swap( stringOffset );

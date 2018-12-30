@@ -38,8 +38,10 @@ namespace MikuMikuModel.GUI.Forms
 
         private void OnAfterSelect( object sender, TreeViewEventArgs e )
         {
-            // Set the property grid's selected object to the tag, which is a IDataNode
-            propertyGrid.SelectedObject = treeView.SelectedDataNode.Data;
+            if ( treeView.SelectedDataNode is ReferenceNode referenceNode )
+                propertyGrid.SelectedObject = referenceNode.Reference;
+            else
+                propertyGrid.SelectedObject = treeView.SelectedDataNode;
 
             // Set the control on the left to the node's control
             mainSplitContainer.Panel1.Controls.Clear();

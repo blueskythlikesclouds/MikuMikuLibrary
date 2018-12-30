@@ -68,7 +68,7 @@ namespace MikuMikuLibrary.Models
                 Meshes.Capacity = meshCount;
                 for ( int i = 0; i < meshCount; i++ )
                 {
-                    reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
+                    reader.ReadAtOffset( reader.ReadUInt32(), () =>
                     {
                         reader.PushBaseOffset();
                         {
@@ -85,7 +85,7 @@ namespace MikuMikuLibrary.Models
             {
                 foreach ( var mesh in Meshes )
                 {
-                    reader.ReadAtOffsetAndSeekBackIfNotZero( reader.ReadUInt32(), () =>
+                    reader.ReadAtOffset( reader.ReadUInt32(), () =>
                     {
                         mesh.Skin = new MeshSkin();
                         mesh.Skin.Read( reader );
@@ -96,7 +96,7 @@ namespace MikuMikuLibrary.Models
             reader.ReadAtOffset( meshNamesOffset, () =>
             {
                 foreach ( var mesh in Meshes )
-                    mesh.Name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    mesh.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
             reader.ReadAtOffset( meshIDsOffset, () =>

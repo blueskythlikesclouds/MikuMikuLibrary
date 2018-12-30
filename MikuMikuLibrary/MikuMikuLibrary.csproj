@@ -64,6 +64,7 @@
     <Compile Include="Databases\SpriteDatabase.cs" />
     <Compile Include="Databases\StageDatabase.cs" />
     <Compile Include="Databases\StringArray.cs" />
+    <Compile Include="Exceptions\InvalidSignatureException.cs" />
     <Compile Include="IO\BinaryFormat.cs" />
     <Compile Include="IO\BinaryFormatUtilities.cs" />
     <Compile Include="IO\AddressSpace.cs" />
@@ -79,7 +80,8 @@
     <Compile Include="IO\Sections\SectionInfo.cs" />
     <Compile Include="IO\Sections\SectionManager.cs" />
     <Compile Include="IO\Sections\SectionT.cs" />
-    <Compile Include="IO\Sections\TextureSetSections.cs" />
+    <Compile Include="IO\Sections\SpriteSetSections.cs" />
+    <Compile Include="IO\Sections\TextureSetSection.cs" />
     <Compile Include="Materials\MaterialTexture.cs" />
     <Compile Include="Misc\Half.cs" />
     <Compile Include="Misc\HalfUtilities.cs" />

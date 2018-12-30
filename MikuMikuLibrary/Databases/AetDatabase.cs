@@ -52,8 +52,8 @@ namespace MikuMikuLibrary.Databases
                     ushort id = reader.ReadUInt16();
                     reader.SeekCurrent( 2 );
 
-                    string name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
-                    string fileName = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    string name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+                    string fileName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
                     ushort index = reader.ReadUInt16();
                     reader.SeekCurrent( 2 );
@@ -79,7 +79,7 @@ namespace MikuMikuLibrary.Databases
                     ushort id = reader.ReadUInt16();
                     reader.SeekCurrent( 2 );
 
-                    string name = reader.ReadStringPtr( StringBinaryFormat.NullTerminated );
+                    string name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
                     ushort index = reader.ReadUInt16();
                     ushort setIndex = reader.ReadUInt16();

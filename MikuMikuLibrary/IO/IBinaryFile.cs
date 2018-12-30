@@ -21,13 +21,6 @@ namespace MikuMikuLibrary.IO
         Load = 1,
         Save = 2,
         HasSectionFormat = 4,
-
-        /// <summary>
-        /// Whether or not the object holds onto the given source stream
-        /// and keeps it till the object is disposed.
-        /// If this flag does not exist, the source stream is used only
-        /// once, simply for reading data.
-        /// </summary>
         UsesSourceStream = 8,
     }
 }

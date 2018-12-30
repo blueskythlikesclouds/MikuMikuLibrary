@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace MikuMikuModel.DataNodes
 {
@@ -35,6 +36,7 @@ namespace MikuMikuModel.DataNodes
         protected string name;
         protected DataNode parent;
         private bool hasPendingChanges;
+        private PropertyInfo nameProp;
 
         //
         // Event Handlers
@@ -91,7 +93,13 @@ namespace MikuMikuModel.DataNodes
 
         public virtual string Name
         {
-            get { return name; }
+            get
+            {
+                if ( nameProp != null )
+                    return ( string )nameProp.GetValue( data );
+                else
+                    return name;
+            }
             protected set { Rename( value ); }
         }
 
@@ -427,8 +435,12 @@ namespace MikuMikuModel.DataNodes
 
         public virtual void Rename( string name )
         {
-            string oldName = this.name;
-            this.name = name;
+            string oldName = Name;
+            if ( nameProp != null )
+                nameProp.SetValue( data, name );
+            else
+                this.name = name;
+
             OnRename( oldName );
             HasPendingChanges = true;
         }
@@ -445,7 +457,7 @@ namespace MikuMikuModel.DataNodes
         public virtual void Clear()
         {
             while ( nodes.Any() )
-                nodes.First().Remove();
+                nodes[ 0 ].Remove();
         }
 
         public void NotifyPropertyChanged( [CallerMemberName]string propertyName = null )
@@ -691,7 +703,11 @@ namespace MikuMikuModel.DataNodes
         public DataNode( string name, object data )
         {
             this.data = data;
-            Rename( name );
+
+            nameProp = DataType.GetProperty( "Name", typeof( string ) );
+            if ( !string.IsNullOrEmpty( name ) )
+                Rename( name );
+
             nodes = new List<DataNode>();
             importHandlers = new Dictionary<Type, DataNodeImportHandler>();
             exportHandlers = new Dictionary<Type, DataNodeExportHandler>();

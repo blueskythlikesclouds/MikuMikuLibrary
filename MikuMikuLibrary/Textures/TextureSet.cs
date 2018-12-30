@@ -37,7 +37,7 @@ namespace MikuMikuLibrary.Textures
             Textures.Capacity = textureCount;
             for ( int i = 0; i < textureCount; i++ )
             {
-                reader.ReadAtOffsetAndSeekBack( reader.ReadUInt32(), () =>
+                reader.ReadAtOffset( reader.ReadUInt32(), () =>
                 {
                     Textures.Add( new Texture( reader ) );
                 } );
@@ -64,6 +64,8 @@ namespace MikuMikuLibrary.Textures
 
             writer.PopBaseOffset();
         }
+
+        protected override Section GetSectionInstanceForWriting() => new TextureSetSection( this, Endianness.LittleEndian );
 
         public override void Load( string filePath )
         {

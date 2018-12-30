@@ -43,13 +43,6 @@ namespace MikuMikuModel.DataNodes
         {
         }
 
-        protected override void OnRename( string oldName )
-        {
-            SetProperty( Name, nameof( Name ) );
-
-            base.OnRename( oldName );
-        }
-
         public BoneNode( string name, Bone data ) :
             base( string.IsNullOrEmpty( data.Name ) ? name : data.Name, data )
         {
