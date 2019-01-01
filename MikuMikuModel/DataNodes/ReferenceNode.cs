@@ -15,7 +15,7 @@ namespace MikuMikuModel.DataNodes
         public override ContextMenuStrip ContextMenuStrip => Reference.ContextMenuStrip;
         public override Control Control => Reference.Control;
         public override Bitmap Icon => Reference.Icon;
-        
+
         private void OnNodeAdded( object sender, DataNodeNodeEventArgs e ) =>
             Add( new ReferenceNode( e.ChildNode.Name, e.ChildNode ) );
 

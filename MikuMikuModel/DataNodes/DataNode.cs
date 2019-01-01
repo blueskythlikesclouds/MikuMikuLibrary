@@ -9,9 +9,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using System.Reflection;
 
 namespace MikuMikuModel.DataNodes
 {
@@ -36,7 +36,6 @@ namespace MikuMikuModel.DataNodes
         protected string name;
         protected DataNode parent;
         private bool hasPendingChanges;
-        private PropertyInfo nameProp;
 
         //
         // Event Handlers
@@ -57,7 +56,7 @@ namespace MikuMikuModel.DataNodes
         {
             get
             {
-                if ( HasPendingChanges && !IsUpdatingData )
+                if ( HasPendingChanges && !IsUpdatingData && IsViewInitialized )
                 {
                     IsUpdatingData = true;
 
@@ -90,19 +89,13 @@ namespace MikuMikuModel.DataNodes
 
         public virtual string Name
         {
-            get
-            {
-                if ( nameProp != null )
-                    return ( string )nameProp.GetValue( data );
-                else
-                    return name;
-            }
+            get => name;
             protected set => Rename( value );
         }
 
         [Browsable( false )]
         public virtual DataNode Parent => parent;
-        
+
         [Browsable( false )]
         public abstract DataNodeFlags Flags { get; }
 
@@ -146,7 +139,7 @@ namespace MikuMikuModel.DataNodes
 
         [Browsable( false )]
         public virtual IEnumerable<DataNode> Nodes => nodes;
-        
+
         [Browsable( false )]
         public virtual Bitmap Icon => Properties.Resources.Node;
 
@@ -365,6 +358,7 @@ namespace MikuMikuModel.DataNodes
 
             var oldData = Data;
 
+            HasPendingChanges = false;
             IsInitialized = false;
             IsViewInitialized = false;
             IsUpdatingData = true;
@@ -421,10 +415,7 @@ namespace MikuMikuModel.DataNodes
         public virtual void Rename( string name )
         {
             string oldName = Name;
-            if ( nameProp != null )
-                nameProp.SetValue( data, name );
-            else
-                this.name = name;
+            this.name = name;
 
             OnRename( oldName );
             HasPendingChanges = true;
@@ -621,7 +612,7 @@ namespace MikuMikuModel.DataNodes
 
         protected virtual void OnRename( string oldName ) =>
             NameChanged?.Invoke( this, new DataNodeNameChangedEventArgs( this, oldName ) );
-        
+
         protected virtual void OnReplace( object oldData ) =>
             DataReplaced?.Invoke( this, new DataNodeDataReplacedEventArgs( this, oldData ) );
 
@@ -659,10 +650,7 @@ namespace MikuMikuModel.DataNodes
         public DataNode( string name, object data )
         {
             this.data = data;
-
-            nameProp = DataType.GetProperty( "Name", typeof( string ) );
-            if ( !string.IsNullOrEmpty( name ) )
-                Rename( name );
+            Rename( name );
 
             nodes = new List<DataNode>();
             importHandlers = new Dictionary<Type, DataNodeImportHandler>();

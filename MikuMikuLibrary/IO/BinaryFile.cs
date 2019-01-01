@@ -64,7 +64,11 @@ namespace MikuMikuLibrary.IO
                 var signature = Encoding.ASCII.GetString( signatureBytes );
                 if ( SectionManager.SectionInfosBySignature.TryGetValue( signature, out SectionInfo sectionInfo ) )
                 {
-                    sectionInfo.Read( source, this );
+                    var section = sectionInfo.Read( source, this );
+
+                    Format = section.Format;
+                    Endianness = section.Endianness;
+
                     readAsSection = true;
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using MikuMikuLibrary.Models;
 using MikuMikuLibrary.Textures;
+using MikuMikuLibrary.IO;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using System;
@@ -225,6 +226,8 @@ namespace MikuMikuModel.DataNodes
             {
                 textureSet.Format = Data.Format;
                 textureSet.Endianness = Data.Endianness;
+
+                Textures.InitializeView();
             }
         }
 
@@ -255,12 +258,31 @@ namespace MikuMikuModel.DataNodes
                 }
             }
 
-            // Replace the texture set
-            Textures?.Replace( Data.TextureSet );
-
             // Pass the format/endianness
             Data.Format = oldDataT.Format;
             Data.Endianness = oldDataT.Endianness;
+            
+            // Randomize texture IDs if we are modern
+            if ( BinaryFormatUtilities.IsModern( Data.Format ) && Data.TextureSet != null )
+            {
+                var newIDs = new List<int>( Data.TextureSet.Textures.Count );
+                
+                var random = new Random();
+                for ( int i = 0; i < Data.TextureSet.Textures.Count; i++ )
+                {
+                    int currentID;
+                    do
+                    {
+                        currentID = random.Next( int.MinValue, int.MaxValue );
+                    } while ( newIDs.Contains( currentID ) );
+                    
+                    newIDs.Add( currentID );
+                }
+                
+                Texture.ReAssignTextureIDs( Data, newIDs );
+            }
+            
+            Textures?.Replace( Data.TextureSet );
 
             base.OnReplace( oldData );
         }

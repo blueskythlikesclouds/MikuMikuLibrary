@@ -29,6 +29,9 @@ namespace MikuMikuModel.DataNodes
         [Browsable( false )]
         public ListNode<Texture> Textures { get; set; }
 
+        [Browsable( false )]
+        public TextureDatabaseNode TextureDatabaseNode { get; set; }
+
         protected override void InitializeCore()
         {
             RegisterReplaceHandler<TextureSet>( BinaryFile.Load<TextureSet> );
@@ -38,7 +41,7 @@ namespace MikuMikuModel.DataNodes
                 if ( BinaryFormatUtilities.IsClassic( Data.Format ) && path.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
                 {
                     Data.Format = BinaryFormat.F2nd;
-                    Data.Endianness = Endianness.LittleEndian;
+                    Data.Endianness = Endianness.BigEndian;
                 }
 
                 // Or reverse
@@ -46,23 +49,6 @@ namespace MikuMikuModel.DataNodes
                 {
                     Data.Format = BinaryFormat.DT;
                     Data.Endianness = Endianness.LittleEndian;
-                }
-
-                // Save a TXI if we are modern
-                if ( BinaryFormatUtilities.IsModern( Data.Format ) )
-                {
-                    var textureDatabase = new TextureDatabase();
-                    textureDatabase.Format = Data.Format;
-                    textureDatabase.Endianness = Endianness.BigEndian;
-
-                    foreach ( var texture in Data.Textures )
-                        textureDatabase.Textures.Add( new TextureEntry
-                        {
-                            ID = texture.ID,
-                            Name = texture.Name,
-                        } );
-
-                    textureDatabase.Save( Path.ChangeExtension( path, "txi" ) );
                 }
 
                 Data.Save( path );
@@ -116,11 +102,11 @@ namespace MikuMikuModel.DataNodes
             if ( Parent != null && BinaryFormatUtilities.IsModern( Format ) )
             {
                 var fileName = Path.ChangeExtension( Name, "txi" );
-                var textureDatabaseNode = Parent.FindNode<TextureDatabase>( fileName, StringComparison.OrdinalIgnoreCase );
+                TextureDatabaseNode = ( TextureDatabaseNode )Parent.FindNode<TextureDatabase>( fileName, StringComparison.OrdinalIgnoreCase );
 
-                if ( textureDatabaseNode != null )
+                if ( TextureDatabaseNode != null )
                 {
-                    var textureDatabase = textureDatabaseNode.Data;
+                    var textureDatabase = TextureDatabaseNode.Data;
 
                     // Pass the IDs and the names to the set
                     for ( int i = 0; i < Math.Min( textureDatabase.Textures.Count, Data.Textures.Count ); i++ )
@@ -141,6 +127,24 @@ namespace MikuMikuModel.DataNodes
             // Pass the format/endianness
             Data.Format = oldDataT.Format;
             Data.Endianness = oldDataT.Endianness;
+
+            // Pass new texture database to the node we adopted
+            if ( TextureDatabaseNode != null )
+            {
+                var textureDatabase = new TextureDatabase();
+
+                textureDatabase.Textures.Capacity = Data.Textures.Count;
+                foreach ( var texture in Data.Textures )
+                {
+                    textureDatabase.Textures.Add( new TextureEntry
+                    {
+                        Name = texture.Name,
+                        ID = texture.ID,
+                    } );
+                }
+
+                TextureDatabaseNode.Replace( textureDatabase );
+            }
 
             base.OnReplace( oldData );
         }

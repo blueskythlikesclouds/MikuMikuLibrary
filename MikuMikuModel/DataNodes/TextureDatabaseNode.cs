@@ -57,6 +57,15 @@ namespace MikuMikuModel.DataNodes
         {
             Add( Textures = new ListNode<TextureEntry>( "Textures", Data.Textures ) );
         }
+        
+        protected override void OnReplace( object oldData )
+        {
+            TextureDatabase oldDataT = ( TextureDatabase )oldData;
+
+            // Pass the format/endianness
+            Data.Format = oldDataT.Format;
+            Data.Endianness = oldDataT.Endianness;
+        }
 
         public TextureDatabaseNode( string name, TextureDatabase data ) : base( name, data )
         {

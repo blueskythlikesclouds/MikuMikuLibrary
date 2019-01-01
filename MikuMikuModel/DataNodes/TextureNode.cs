@@ -17,6 +17,7 @@ namespace MikuMikuModel.DataNodes
 
         public override Bitmap Icon => Properties.Resources.Texture;
 
+        public int ID => GetProperty<int>();
         public int Width => GetProperty<int>();
         public int Height => GetProperty<int>();
         public TextureFormat Format => GetProperty<TextureFormat>();
