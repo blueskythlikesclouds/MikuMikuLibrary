@@ -18,10 +18,8 @@ namespace MikuMikuModel.GUI.Forms
             configurationList = ( ConfigurationList )ConfigurationList.Instance.Clone();
         }
 
-        public Configuration SelectedConfiguration
-        {
-            get { return listBox.SelectedIndex < 0 ? null : configurationList.Configurations[ listBox.SelectedIndex ]; }
-        }
+        public Configuration SelectedConfiguration => 
+            listBox.SelectedIndex < 0 ? null : configurationList.Configurations[ listBox.SelectedIndex ];
 
         private void SetConfiguration( Configuration configuration )
         {

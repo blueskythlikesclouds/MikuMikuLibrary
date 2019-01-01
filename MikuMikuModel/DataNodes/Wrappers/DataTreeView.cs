@@ -7,29 +7,14 @@ namespace MikuMikuModel.DataNodes.Wrappers
     {
         public new DataTreeNode SelectedNode
         {
-            get { return ( base.SelectedNode as DataTreeNode ); }
-            set { base.SelectedNode = value; }
+            get => ( base.SelectedNode as DataTreeNode );
+            set => base.SelectedNode = value;
         }
 
-        public new DataTreeNode TopNode
-        {
-            get { return Nodes.Count != 0 ? ( DataTreeNode )Nodes[ 0 ] : null; }
-        }
-
-        public DataNode TopDataNode
-        {
-            get { return TopNode?.DataNode; }
-        }
-
-        public DataNode SelectedDataNode
-        {
-            get { return SelectedNode?.DataNode; }
-        }
-
-        public Control ControlOfSelectedDataNode
-        {
-            get { return SelectedDataNode?.Control; }
-        }
+        public new DataTreeNode TopNode => Nodes.Count != 0 ? ( DataTreeNode )Nodes[ 0 ] : null;
+        public DataNode TopDataNode => TopNode?.DataNode;
+        public DataNode SelectedDataNode => SelectedNode?.DataNode;
+        public Control ControlOfSelectedDataNode => SelectedDataNode?.Control;
 
         private void InitializeNodeView( DataTreeNode treeNode )
         {

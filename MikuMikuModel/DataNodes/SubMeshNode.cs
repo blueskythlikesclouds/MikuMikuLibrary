@@ -10,15 +10,10 @@ namespace MikuMikuModel.DataNodes
     [DataNodeSpecialName( "Submesh" )]
     public class SubMeshNode : DataNode<SubMesh>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch;
 
-        public override DataNodeActionFlags ActionFlags
-        {
-            get { return DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename; }
-        }
+        public override DataNodeActionFlags ActionFlags => 
+            DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename;
 
         public override Control Control
         {
@@ -32,53 +27,53 @@ namespace MikuMikuModel.DataNodes
         [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
         {
-            get { return GetProperty<BoundingSphere>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<BoundingSphere>();
+            set => SetProperty( value );
         }
 
         public Vector3[] Vertices
         {
-            get { return GetProperty<Vector3[]>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Vector3[]>();
+            set => SetProperty( value );
         }
 
         public Vector3[] Normals
         {
-            get { return GetProperty<Vector3[]>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Vector3[]>();
+            set => SetProperty( value );
         }
 
         public Vector4[] Tangents
         {
-            get { return GetProperty<Vector4[]>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Vector4[]>();
+            set => SetProperty( value );
         }
 
         [DisplayName( "UV channel 1" )]
         public Vector2[] UVChannel1
         {
-            get { return GetProperty<Vector2[]>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Vector2[]>();
+            set => SetProperty( value );
         }
 
         [DisplayName( "UV channel 2" )]
         public Vector2[] UVChannel2
         {
-            get { return GetProperty<Vector2[]>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Vector2[]>();
+            set => SetProperty( value );
         }
 
         public Color[] Colors
         {
-            get { return GetProperty<Color[]>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Color[]>();
+            set => SetProperty( value );
         }
 
         [DisplayName( "Bone weights" )]
         public BoneWeight[] BoneWeights
         {
-            get { return GetProperty<BoneWeight[]>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<BoneWeight[]>();
+            set => SetProperty( value );
         }
 
         [Browsable( false )]

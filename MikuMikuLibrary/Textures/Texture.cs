@@ -12,55 +12,21 @@ namespace MikuMikuLibrary.Textures
         public int ID { get; set; }
         public string Name { get; set; }
 
-        public int Width
-        {
-            get { return subTextures[ 0, 0 ].Width; }
-        }
+        public int Width => subTextures[ 0, 0 ].Width;
+        public int Height => subTextures[ 0, 0 ].Height;
+        public TextureFormat Format => subTextures[ 0, 0 ].Format;
 
-        public int Height
-        {
-            get { return subTextures[ 0, 0 ].Height; }
-        }
+        public bool IsYCbCr => 
+            Format == TextureFormat.ATI2 && Depth == 1 && MipMapCount == 2;
 
-        public TextureFormat Format
-        {
-            get { return subTextures[ 0, 0 ].Format; }
-        }
+        public int Depth => subTextures.GetLength( 0 );
+        public int MipMapCount => subTextures.GetLength( 1 );
 
-        public bool IsYCbCr
-        {
-            get { return Format == TextureFormat.ATI2 && Depth == 1 && MipMapCount == 2; }
-        }
+        public bool UsesDepth => Depth > 1;
+        public bool UsesMipMaps => MipMapCount > 1;
 
-        public int Depth
-        {
-            get { return subTextures.GetLength( 0 ); }
-        }
-
-        public int MipMapCount
-        {
-            get { return subTextures.GetLength( 1 ); }
-        }
-
-        public bool UsesDepth
-        {
-            get { return Depth > 1; }
-        }
-
-        public bool UsesMipMaps
-        {
-            get { return MipMapCount > 1; }
-        }
-
-        public SubTexture this[ int level, int mipMapIndex ]
-        {
-            get { return subTextures[ level, mipMapIndex ]; }
-        }
-
-        public SubTexture this[ int mipMapIndex ]
-        {
-            get { return subTextures[ 0, mipMapIndex ]; }
-        }
+        public SubTexture this[ int level, int mipMapIndex ] => subTextures[ level, mipMapIndex ]; 
+        public SubTexture this[ int mipMapIndex ] => subTextures[ 0, mipMapIndex ];
 
         public IEnumerable<SubTexture> EnumerateMipMaps( int level = 0 )
         {

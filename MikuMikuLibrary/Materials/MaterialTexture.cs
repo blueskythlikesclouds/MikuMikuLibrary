@@ -35,10 +35,7 @@ namespace MikuMikuLibrary.Materials
         public float Field27 { get; set; }
         public float Field28 { get; set; }
 
-        public bool IsActive
-        {
-            get { return Field02 != 240; }
-        }
+        public bool IsActive => Field02 != 240;
 
         internal void Read( EndianBinaryReader reader )
         {

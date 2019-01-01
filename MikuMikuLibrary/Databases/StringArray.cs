@@ -7,10 +7,7 @@ namespace MikuMikuLibrary.Databases
 {
     public class StringArray : BinaryFile
     {
-        public override BinaryFileFlags Flags
-        {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
-        }
+        public override BinaryFileFlags Flags => BinaryFileFlags.Load | BinaryFileFlags.Save;
 
         public List<string> Strings { get; }
 

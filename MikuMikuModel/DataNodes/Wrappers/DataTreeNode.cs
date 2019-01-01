@@ -6,35 +6,24 @@ namespace MikuMikuModel.DataNodes.Wrappers
     public class DataTreeNode : TreeNode
     {
         private static readonly ImageList imageList = new ImageList();
-
-        public static ImageList ImageList
-        {
-            get { return imageList; }
-        }
-
         private DataNode dataNode;
 
-        public DataNode DataNode
-        {
-            get { return dataNode; }
-        }
+        public static ImageList ImageList => imageList;
+        public DataNode DataNode => dataNode;
 
         public new string Name
         {
-            get { return dataNode.Name; }
-            set { dataNode.Rename( value ); }
+            get => dataNode.Name;
+            set => dataNode.Rename( value );
         }
 
         public new string Text
         {
-            get { return dataNode.Name; }
-            set { dataNode.Rename( value ); }
+            get => dataNode.Name;
+            set => dataNode.Rename( value );
         }
 
-        public override ContextMenuStrip ContextMenuStrip
-        {
-            get { return dataNode.ContextMenuStrip; }
-        }
+        public override ContextMenuStrip ContextMenuStrip => dataNode.ContextMenuStrip;
 
         public void InitializeView()
         {

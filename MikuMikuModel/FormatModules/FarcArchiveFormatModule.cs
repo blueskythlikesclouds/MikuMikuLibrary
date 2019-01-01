@@ -6,20 +6,11 @@ namespace MikuMikuModel.FormatModules
 {
     public class FarcArchiveFormatModule : FormatModule<FarcArchive>
     {
-        public override FormatModuleFlags Flags
-        {
-            get { return FormatModuleFlags.Import | FormatModuleFlags.Export; }
-        }
+        public override FormatModuleFlags Flags => 
+            FormatModuleFlags.Import | FormatModuleFlags.Export;
 
-        public override string Name
-        {
-            get { return "FARC Archive"; }
-        }
-
-        public override string[] Extensions
-        {
-            get { return new[] { "farc" }; }
-        }
+        public override string Name => "FARC Archive";
+        public override string[] Extensions => new[] { "farc" };
 
         public override FarcArchive Import( string filePath )
         {

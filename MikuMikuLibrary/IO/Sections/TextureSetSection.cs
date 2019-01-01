@@ -6,10 +6,7 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "MTXD", typeof( TextureSet ) )]
     public class TextureSetSection : BinaryFileSection<TextureSet>
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.EnrsSection; }
-        }
+        public override SectionFlags Flags => SectionFlags.None;
 
         public TextureSetSection( Stream source, TextureSet dataToRead = null ) : base( source, dataToRead )
         {

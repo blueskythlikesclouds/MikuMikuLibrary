@@ -6,8 +6,8 @@ namespace MikuMikuModel.GUI.Forms
     {
         public string TextBoxText
         {
-            get { return textBox.Text; }
-            set { textBox.Text = value; }
+            get => textBox.Text;
+            set => textBox.Text = value;
         }
 
         public RenameForm( string textBoxText )

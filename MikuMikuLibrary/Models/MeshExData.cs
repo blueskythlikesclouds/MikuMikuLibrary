@@ -29,10 +29,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockConstraint : MeshExBlock
     {
-        public override string Kind
-        {
-            get { return "CNS"; }
-        }
+        public override string Kind => "CNS";
 
         public string Field10 { get; set; }
         public string Field11 { get; set; }
@@ -124,10 +121,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockMotion : MeshExBlock
     {
-        public override string Kind
-        {
-            get { return "MOT"; }
-        }
+        public override string Kind => "MOT";
 
         public string Name { get; set; }
         public List<int> BoneIDs { get; }
@@ -182,10 +176,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockExpression : MeshExBlock
     {
-        public override string Kind
-        {
-            get { return "EXP"; }
-        }
+        public override string Kind => "EXP";
 
         public string BoneName { get; set; }
         public List<string> Expressions { get; }
@@ -221,10 +212,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockOsage : MeshExBlock
     {
-        public override string Kind
-        {
-            get { return "OSG"; }
-        }
+        public override string Kind => "OSG";
 
         public int Field00 { get; set; }
         public int Field01 { get; set; }

@@ -6,10 +6,7 @@ namespace MikuMikuModel.DataNodes
 {
     public class StreamNode : DataNode<Stream>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Leaf; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Leaf;
 
         public override DataNodeActionFlags ActionFlags
         {
@@ -21,16 +18,10 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.File; }
-        }
+        public override Bitmap Icon => Properties.Resources.File;
 
         [DisplayName( "File path" )]
-        public string FilePath
-        {
-            get { return ( Data as FileStream )?.Name; }
-        }
+        public string FilePath => ( Data as FileStream )?.Name;
 
         protected override void InitializeCore()
         {

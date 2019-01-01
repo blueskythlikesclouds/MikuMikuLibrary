@@ -9,10 +9,7 @@ namespace MikuMikuModel.DataNodes
 {
     public class MeshNode : DataNode<Mesh>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch;
 
         public override DataNodeActionFlags ActionFlags
         {
@@ -33,22 +30,19 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.Mesh; }
-        }
+        public override Bitmap Icon => Properties.Resources.Mesh;
 
         public int ID
         {
-            get { return GetProperty<int>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<int>();
+            set => SetProperty( value );
         }
 
         [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
         {
-            get { return GetProperty<BoundingSphere>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<BoundingSphere>();
+            set => SetProperty( value );
         }
 
         [Browsable( false )]

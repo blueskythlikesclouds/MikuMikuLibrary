@@ -10,35 +10,16 @@ namespace MikuMikuModel.DataNodes
     {
         public static TextureSet GlobalTextureSet { get; } = new TextureSet();
 
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Leaf; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Leaf;
 
-        public override DataNodeActionFlags ActionFlags
-        {
-            get { return DataNodeActionFlags.Export | DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Replace; }
-        }
+        public override DataNodeActionFlags ActionFlags => 
+            DataNodeActionFlags.Export | DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Replace;
 
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.Texture; }
-        }
+        public override Bitmap Icon => Properties.Resources.Texture;
 
-        public int Width
-        {
-            get { return GetProperty<int>(); }
-        }
-
-        public int Height
-        {
-            get { return GetProperty<int>(); }
-        }
-
-        public TextureFormat Format
-        {
-            get { return GetProperty<TextureFormat>(); }
-        }
+        public int Width => GetProperty<int>();
+        public int Height => GetProperty<int>();
+        public TextureFormat Format => GetProperty<TextureFormat>();
 
         public override Control Control
         {

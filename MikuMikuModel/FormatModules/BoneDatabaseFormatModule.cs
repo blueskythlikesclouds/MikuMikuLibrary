@@ -7,20 +7,11 @@ namespace MikuMikuModel.FormatModules
 {
     public class BoneDatabaseFormatModule : FormatModule<BoneDatabase>
     {
-        public override FormatModuleFlags Flags
-        {
-            get { return FormatModuleFlags.Import | FormatModuleFlags.Export; }
-        }
+        public override FormatModuleFlags Flags => 
+            FormatModuleFlags.Import | FormatModuleFlags.Export;
 
-        public override string Name
-        {
-            get { return "Bone Database"; }
-        }
-
-        public override string[] Extensions
-        {
-            get { return new[] { "bin", "bon" }; }
-        }
+        public override string Name => "Bone Database";
+        public override string[] Extensions => new[] { "bin", "bon" };
 
         protected override bool CanImportCore( Stream source, string fileName )
         {

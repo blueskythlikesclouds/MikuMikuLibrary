@@ -51,13 +51,31 @@ namespace MikuMikuLibrary.Materials
 
         public bool IsAlphaEnabled
         {
-            get { return ( Field02 & 1 ) != 0; }
+            get => ( Field02 & 1 ) != 0;
             set
             {
                 Field00 = ( Field00 & ~2 ) | ( ( value ? 1 : 0 ) << 1 );
                 Field02 = ( Field02 & ~1 ) | ( value ? 1 : 0 );
             }
         }
+        
+        public IEnumerable<MaterialTexture> MaterialTextures
+        {
+            get
+            {
+                yield return Diffuse;
+                yield return Ambient;
+                yield return Normal;
+                yield return Specular;
+                yield return ToonCurve;
+                yield return Reflection;
+                yield return SpecularPower;
+                yield return Texture08;
+            }
+        }
+
+        public IEnumerable<MaterialTexture> ActiveMaterialTextures => 
+            MaterialTextures.Where( x => x.IsActive );
 
         internal void Read( EndianBinaryReader reader )
         {
@@ -105,7 +123,7 @@ namespace MikuMikuLibrary.Materials
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.Write( EnumerateActiveMaterialTextures().Count() );
+            writer.Write( ActiveMaterialTextures.Count() );
             writer.Write( Field00 );
             writer.Write( Shader, StringBinaryFormat.FixedLength, 8 );
             Diffuse.Write( writer );
@@ -145,23 +163,6 @@ namespace MikuMikuLibrary.Materials
             writer.Write( Field38 );
             writer.Write( Field39 );
             writer.Write( Field40 );
-        }
-
-        public IEnumerable<MaterialTexture> EnumerateMaterialTextures()
-        {
-            yield return Diffuse;
-            yield return Ambient;
-            yield return Normal;
-            yield return Specular;
-            yield return ToonCurve;
-            yield return Reflection;
-            yield return SpecularPower;
-            yield return Texture08;
-        }
-
-        public IEnumerable<MaterialTexture> EnumerateActiveMaterialTextures()
-        {
-            return EnumerateMaterialTextures().Where( x => x.IsActive );
         }
 
         public Material()

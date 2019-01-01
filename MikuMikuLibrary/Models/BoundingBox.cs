@@ -12,7 +12,7 @@ namespace MikuMikuLibrary.Models
         public float Depth;
 
         public override string ToString()
-        {
+        { 
             return $"[{Center}, <{Width}, {Height}, {Depth}>]";
         }
 

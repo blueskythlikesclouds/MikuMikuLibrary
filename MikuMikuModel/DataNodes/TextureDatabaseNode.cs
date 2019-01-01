@@ -7,10 +7,7 @@ namespace MikuMikuModel.DataNodes
 {
     public class TextureDatabaseNode : BinaryFileNode<TextureDatabase>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch;
 
         public override DataNodeActionFlags ActionFlags
         {
@@ -68,20 +65,15 @@ namespace MikuMikuModel.DataNodes
 
     public class TextureEntryNode : DataNode<TextureEntry>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Leaf; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Leaf;
 
-        public override DataNodeActionFlags ActionFlags
-        {
-            get { return DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename; }
-        }
+        public override DataNodeActionFlags ActionFlags => 
+            DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename;
 
         public int ID
         {
-            get { return GetProperty<int>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<int>();
+            set => SetProperty( value );
         }
 
         protected override void InitializeCore()

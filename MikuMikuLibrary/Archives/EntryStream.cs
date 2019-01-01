@@ -8,31 +8,17 @@ namespace MikuMikuLibrary.Archives
 
         public THandle Handle { get; }
 
-        public override bool CanRead
-        {
-            get { return source.CanRead; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return source.CanWrite; }
-        }
-
-        public override bool CanSeek
-        {
-            get { return source.CanSeek; }
-        }
+        public override bool CanRead => source.CanRead;
+        public override bool CanWrite => source.CanWrite;
+        public override bool CanSeek => source.CanSeek;
 
         public override long Position
         {
-            get { return source.Position; }
-            set { source.Position = value; }
+            get => source.Position;
+            set => source.Position = value;
         }
 
-        public override long Length
-        {
-            get { return source.Length; }
-        }
+        public override long Length => source.Length;
 
         public override void Flush()
         {

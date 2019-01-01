@@ -8,6 +8,8 @@ namespace MikuMikuLibrary.Archives
     {
         bool CanAdd { get; }
         bool CanRemove { get; }
+        
+        IEnumerable<THandle> Entries { get; }
 
         bool Contains( THandle handle );
         void Add( THandle handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy );
@@ -16,6 +18,5 @@ namespace MikuMikuLibrary.Archives
         void Clear();
 
         EntryStream<THandle> Open( THandle handle, EntryStreamMode mode );
-        IEnumerable<THandle> EnumerateEntries();
     }
 }

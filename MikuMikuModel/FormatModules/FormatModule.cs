@@ -10,10 +10,7 @@ namespace MikuMikuModel.FormatModules
         public abstract string Name { get; }
         public abstract string[] Extensions { get; }
 
-        public Type ModelType
-        {
-            get { return typeof( T ); }
-        }
+        public Type ModelType => typeof( T );
 
         public bool CanImport( Stream source, string fileName = null )
         {

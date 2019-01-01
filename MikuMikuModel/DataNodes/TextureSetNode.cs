@@ -12,10 +12,7 @@ namespace MikuMikuModel.DataNodes
     [DataNodeSpecialName( "Texture Set" )]
     public class TextureSetNode : BinaryFileNode<TextureSet>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch;
 
         public override DataNodeActionFlags ActionFlags
         {
@@ -27,10 +24,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.TextureSet; }
-        }
+        public override Bitmap Icon => Properties.Resources.TextureSet;
 
         [Browsable( false )]
         public ListNode<Texture> Textures { get; set; }

@@ -10,15 +10,8 @@ namespace MikuMikuModel.DataNodes
 {
     public class MeshExDataNode : DataNode<MeshExData>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Leaf; }
-        }
-
-        public override DataNodeActionFlags ActionFlags
-        {
-            get { return DataNodeActionFlags.None; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Leaf;
+        public override DataNodeActionFlags ActionFlags => DataNodeActionFlags.None;
 
         [DisplayName( "Osage bones" )]
         public List<MeshExOsageBoneEntry> OsageBones => GetProperty<List<MeshExOsageBoneEntry>>();

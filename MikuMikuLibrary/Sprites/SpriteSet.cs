@@ -8,10 +8,8 @@ namespace MikuMikuLibrary.Sprites
 {
     public class SpriteSet : BinaryFile
     {
-        public override BinaryFileFlags Flags
-        {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat; }
-        }
+        public override BinaryFileFlags Flags =>
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
         public List<Sprite> Sprites { get; }
         public TextureSet TextureSet { get; }

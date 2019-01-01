@@ -6,33 +6,28 @@ namespace MikuMikuModel.DataNodes
 {
     public class BoneNode : DataNode<Bone>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Leaf; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Leaf;
 
-        public override DataNodeActionFlags ActionFlags
-        {
-            get { return DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename; }
-        }
+        public override DataNodeActionFlags ActionFlags =>
+            DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename;
 
         [DisplayName( "Parent ID" )]
         public int ParentID
         {
-            get { return GetProperty<int>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<int>();
+            set => SetProperty( value );
         }
 
         public int ID
         {
-            get { return GetProperty<int>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<int>();
+            set => SetProperty( value );
         }
 
         public Matrix4x4 Matrix
         {
-            get { return GetProperty<Matrix4x4>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Matrix4x4>();
+            set => SetProperty( value );
         }
 
         protected override void InitializeCore()

@@ -282,10 +282,7 @@ namespace MikuMikuLibrary.Databases
 
     public class StageDatabase : BinaryFile
     {
-        public override BinaryFileFlags Flags
-        {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
-        }
+        public override BinaryFileFlags Flags => BinaryFileFlags.Load | BinaryFileFlags.Save;
 
         public List<StageEntry> Stages { get; }
         public bool IsFutureTone { get; set; }

@@ -9,20 +9,10 @@ namespace MikuMikuModel.FormatModules
     {
         private static readonly Dictionary<Type, IFormatModule> modules = new Dictionary<Type, IFormatModule>();
 
-        public static IReadOnlyDictionary<Type, IFormatModule> ModulesByType
-        {
-            get { return modules; }
-        }
+        public static IReadOnlyDictionary<Type, IFormatModule> ModulesByType => modules;
 
-        public static IEnumerable<Type> ModelTypes
-        {
-            get { return modules.Keys; }
-        }
-
-        public static IEnumerable<IFormatModule> Modules
-        {
-            get { return modules.Values; }
-        }
+        public static IEnumerable<Type> ModelTypes => modules.Keys;
+        public static IEnumerable<IFormatModule> Modules => modules.Values;
 
         public static void Register( IFormatModule module )
         {

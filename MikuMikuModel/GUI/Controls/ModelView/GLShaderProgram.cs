@@ -15,10 +15,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public static string ShaderDirectoryPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Shaders" );
 
-        public static IReadOnlyDictionary<string, GLShaderProgram> ShaderPrograms
-        {
-            get { return shaderPrograms; }
-        }
+        public static IReadOnlyDictionary<string, GLShaderProgram> ShaderPrograms => shaderPrograms;
 
         public string Name { get; }
         public int ID { get; }

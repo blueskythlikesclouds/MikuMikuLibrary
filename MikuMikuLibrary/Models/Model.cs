@@ -13,10 +13,8 @@ namespace MikuMikuLibrary.Models
 {
     public class Model : BinaryFile
     {
-        public override BinaryFileFlags Flags
-        {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat; }
-        }
+        public override BinaryFileFlags Flags =>
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
         public override Endianness Endianness
         {
@@ -39,10 +37,7 @@ namespace MikuMikuLibrary.Models
         public List<int> TextureIDs { get; }
         public TextureSet TextureSet { get; set; }
 
-        public int BoneCount
-        {
-            get { return Meshes.Count != 0 ? 0x39393939 : -1; }
-        }
+        public int BoneCount => Meshes.Count != 0 ? 0x39393939 : -1;
 
         public override void Read( EndianBinaryReader reader, Section section = null )
         {
@@ -285,9 +280,7 @@ namespace MikuMikuLibrary.Models
                 }
 
                 if ( !newIDs.SequenceEqual( TextureIDs ) )
-                {
                     Texture.ReAssignTextureIDs( this, newIDs );
-                }
             }
 
             Save( destination, leaveOpen );

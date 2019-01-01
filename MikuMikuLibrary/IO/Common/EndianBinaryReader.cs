@@ -26,7 +26,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public Endianness Endianness
         {
-            get { return mEndianness; }
+            get => mEndianness;
             set
             {
                 mSwap = value != EndiannessSwapUtilities.SystemEndianness;
@@ -34,31 +34,25 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
-        public bool SwapBytes
-        {
-            get { return mSwap; }
-        }
+        public bool SwapBytes => mSwap;
 
         public AddressSpace AddressSpace
         {
-            get { return mAddressSpace; }
-            set { mAddressSpace = value; }
+            get => mAddressSpace;
+            set => mAddressSpace = value;
         }
 
         public long Position
         {
-            get { return BaseStream.Position; }
-            set { BaseStream.Position = value; }
+            get => BaseStream.Position;
+            set => BaseStream.Position = value;
         }
 
-        public long Length
-        {
-            get { return BaseStream.Length; }
-        }
+        public long Length => BaseStream.Length;
 
         public long BaseOffset
         {
-            get { return mBaseOffsets.Count > 0 ? mBaseOffsets.Peek() : 0; }
+            get => mBaseOffsets.Count > 0 ? mBaseOffsets.Peek() : 0;
             set
             {
                 if ( ( mBaseOffsets.Count > 0 && mBaseOffsets.Peek() != value ) || mBaseOffsets.Count == 0 )

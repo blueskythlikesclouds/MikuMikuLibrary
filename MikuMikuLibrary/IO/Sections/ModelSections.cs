@@ -9,16 +9,10 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "MOSD", typeof( Model ) )]
     public class ModelSection : BinaryFileSection<Model>
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.RelocationTableSection; }
-        }
+        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
 
         [SubSection( typeof( MeshSection ) )]
-        public List<Mesh> Meshes
-        {
-            get { return Data.Meshes; }
-        }
+        public List<Mesh> Meshes => Data.Meshes;
 
         public ModelSection( Stream source, Model dataToRead = null ) : base( source, dataToRead )
         {
@@ -32,16 +26,13 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "OMDL", typeof( Mesh ) )]
     public class MeshSection : Section<Mesh>
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.RelocationTableSection; }
-        }
+        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
 
         [SubSection( typeof( MeshSkinSection ) )]
         public MeshSkin Skin
         {
-            get { return Data.Skin; }
-            set { Data.Skin = value; }
+            get => Data.Skin;
+            set => Data.Skin = value;
         }
 
         [SubSection]
@@ -74,10 +65,7 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "OSKN", typeof( MeshSkin ) )]
     public class MeshSkinSection : Section<MeshSkin>
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.RelocationTableSection; }
-        }
+        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
 
         protected override void Read( EndianBinaryReader reader, long length )
         {
@@ -143,10 +131,7 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "OVTX", typeof( MemoryStream ) )]
     public class MeshVertexDataSection : MemoryStreamSection
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.None; }
-        }
+        public override SectionFlags Flags => SectionFlags.None;
 
         public MeshVertexDataSection( Stream source, MemoryStream dataToRead = null ) : base( source, dataToRead )
         {
@@ -160,10 +145,7 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "OIDX", typeof( MemoryStream ) )]
     public class MeshIndexDataSection : MemoryStreamSection
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.None; }
-        }
+        public override SectionFlags Flags => SectionFlags.None;
 
         public MeshIndexDataSection( Stream source, MemoryStream dataToRead = null ) : base( source, dataToRead )
         {

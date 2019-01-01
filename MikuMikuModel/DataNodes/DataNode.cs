@@ -86,10 +86,7 @@ namespace MikuMikuModel.DataNodes
         public abstract Type DataType { get; }
 
         [Browsable( false )]
-        public virtual string SpecialName
-        {
-            get { return DataNodeFactory.GetSpecialName( GetType() ); }
-        }
+        public virtual string SpecialName => DataNodeFactory.GetSpecialName( GetType() );
 
         public virtual string Name
         {
@@ -100,15 +97,12 @@ namespace MikuMikuModel.DataNodes
                 else
                     return name;
             }
-            protected set { Rename( value ); }
+            protected set => Rename( value );
         }
 
         [Browsable( false )]
-        public virtual DataNode Parent
-        {
-            get { return parent; }
-        }
-
+        public virtual DataNode Parent => parent;
+        
         [Browsable( false )]
         public abstract DataNodeFlags Flags { get; }
 
@@ -130,7 +124,7 @@ namespace MikuMikuModel.DataNodes
         [Browsable( false )]
         public virtual bool HasPendingChanges
         {
-            get { return hasPendingChanges; }
+            get => hasPendingChanges;
             protected set
             {
                 // Don't want node constructions
@@ -151,16 +145,10 @@ namespace MikuMikuModel.DataNodes
         public virtual bool IsViewInitialized { get; private set; }
 
         [Browsable( false )]
-        public virtual IEnumerable<DataNode> Nodes
-        {
-            get { return nodes; }
-        }
-
+        public virtual IEnumerable<DataNode> Nodes => nodes;
+        
         [Browsable( false )]
-        public virtual Bitmap Icon
-        {
-            get { return Properties.Resources.Node; }
-        }
+        public virtual Bitmap Icon => Properties.Resources.Node;
 
         //
         // Methods
@@ -180,10 +168,7 @@ namespace MikuMikuModel.DataNodes
             HasPendingChanges = true;
         }
 
-        public virtual IEnumerable<DataNode> EnumerateNodes()
-        {
-            return nodes;
-        }
+        public virtual IEnumerable<DataNode> EnumerateNodes() => nodes;
 
         public virtual IEnumerable<DataNode> EnumerateNodes( Type dataType, bool searchChildren )
         {
@@ -456,7 +441,7 @@ namespace MikuMikuModel.DataNodes
 
         public virtual void Clear()
         {
-            while ( nodes.Any() )
+            while ( nodes.Count > 0 )
                 nodes[ 0 ].Remove();
         }
 
@@ -507,30 +492,20 @@ namespace MikuMikuModel.DataNodes
             Debug.WriteLine( $"Could not find property: {propertyName}" );
         }
 
-        protected void RegisterImportHandler<T>( DataNodeImportHandler handler )
-        {
+        protected void RegisterImportHandler<T>( DataNodeImportHandler handler ) =>
             importHandlers[ typeof( T ) ] = handler;
-        }
 
-        protected void RegisterExportHandler<T>( DataNodeExportHandler handler )
-        {
+        protected void RegisterExportHandler<T>( DataNodeExportHandler handler ) =>
             exportHandlers[ typeof( T ) ] = handler;
-        }
 
-        protected void RegisterReplaceHandler<T>( DataNodeReplaceHandler handler )
-        {
+        protected void RegisterReplaceHandler<T>( DataNodeReplaceHandler handler ) =>
             replaceHandlers[ typeof( T ) ] = handler;
-        }
 
-        protected void RegisterCustomHandler( string name, Action action, Keys shortcutKeys = Keys.None )
-        {
+        protected void RegisterCustomHandler( string name, Action action, Keys shortcutKeys = Keys.None ) =>
             customHandlers.Add( new ToolStripMenuItem( name, null, CreateEventHandler( action ), shortcutKeys ) );
-        }
 
-        protected void RegisterDataUpdateHandler( DataNodeDataUpdateHandler handler )
-        {
+        protected void RegisterDataUpdateHandler( DataNodeDataUpdateHandler handler ) =>
             dataUpdateHandler = handler;
-        }
 
         public void InitializeContextMenuStrip()
         {
@@ -594,10 +569,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        protected EventHandler CreateEventHandler( Action action )
-        {
-            return ( s, e ) => action();
-        }
+        protected EventHandler CreateEventHandler( Action action ) => ( s, e ) => action();
 
         public void InitializeView( bool force = false )
         {
@@ -631,49 +603,33 @@ namespace MikuMikuModel.DataNodes
         protected abstract void InitializeCore();
         protected abstract void InitializeViewCore();
 
-        protected virtual void OnPropertyChanged( string propertyName )
-        {
+        protected virtual void OnPropertyChanged( string propertyName ) =>
             NotifyPropertyChanged( propertyName );
-        }
 
-        protected virtual void OnAdd( DataNode addedNode )
-        {
+        protected virtual void OnAdd( DataNode addedNode ) =>
             NodeAdded?.Invoke( this, new DataNodeNodeEventArgs( this, addedNode ) );
-        }
 
         protected virtual void OnExport() { }
 
         protected virtual void OnImport( DataNode importedNode ) { }
 
-        protected virtual void OnMove( int oldIndex, int newIndex, DataNode movedNode )
-        {
+        protected virtual void OnMove( int oldIndex, int newIndex, DataNode movedNode ) =>
             NodeMoved?.Invoke( this, new DataNodeNodeMovedEventArgs( this, movedNode, oldIndex, newIndex ) );
-        }
 
-        protected virtual void OnRemove( DataNode removedNode )
-        {
+        protected virtual void OnRemove( DataNode removedNode ) =>
             NodeRemoved?.Invoke( this, new DataNodeNodeEventArgs( this, removedNode ) );
-        }
 
-        protected virtual void OnRename( string oldName )
-        {
+        protected virtual void OnRename( string oldName ) =>
             NameChanged?.Invoke( this, new DataNodeNameChangedEventArgs( this, oldName ) );
-        }
-
-        protected virtual void OnReplace( object oldData )
-        {
+        
+        protected virtual void OnReplace( object oldData ) =>
             DataReplaced?.Invoke( this, new DataNodeDataReplacedEventArgs( this, oldData ) );
-        }
 
-        public IEnumerator<DataNode> GetEnumerator()
-        {
-            return ( ( IEnumerable<DataNode> )nodes ).GetEnumerator();
-        }
+        public IEnumerator<DataNode> GetEnumerator() =>
+            ( ( IEnumerable<DataNode> )nodes ).GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ( ( IEnumerable<DataNode> )nodes ).GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() =>
+            ( ( IEnumerable<DataNode> )nodes ).GetEnumerator();
 
         public void Dispose()
         {

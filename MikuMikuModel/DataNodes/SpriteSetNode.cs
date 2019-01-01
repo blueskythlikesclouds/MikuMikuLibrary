@@ -9,10 +9,7 @@ namespace MikuMikuModel.DataNodes
     [DataNodeSpecialName( "Sprite Set" )]
     public class SpriteSetNode : BinaryFileNode<SpriteSet>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch;
 
         public override DataNodeActionFlags ActionFlags
         {

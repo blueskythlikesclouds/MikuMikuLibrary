@@ -10,20 +10,10 @@ namespace MikuMikuModel.DataNodes
         private Type type;
         private Func<T, string> nameGetter;
 
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch; 
+        public override DataNodeActionFlags ActionFlags => DataNodeActionFlags.None;
 
-        public override DataNodeActionFlags ActionFlags
-        {
-            get { return DataNodeActionFlags.None; }
-        }
-
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.Folder; }
-        }
+        public override Bitmap Icon => Properties.Resources.Folder;
 
         public int Count => GetProperty<int>();
 

@@ -68,10 +68,7 @@ namespace MikuMikuLibrary.Databases
 
     public class MotionDatabase : BinaryFile
     {
-        public override BinaryFileFlags Flags
-        {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save; }
-        }
+        public override BinaryFileFlags Flags => BinaryFileFlags.Load | BinaryFileFlags.Save;
 
         public List<MotionSetEntry> MotionSets { get; }
         public List<string> BoneNames { get; }

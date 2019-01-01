@@ -11,10 +11,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public BufferUsageHint UsageHint { get; }
         public int Stride { get; }
 
-        public int Length
-        {
-            get { return Array.Length; }
-        }
+        public int Length => Array.Length;
 
         public void Bind()
         {

@@ -10,10 +10,8 @@ namespace MikuMikuLibrary.Textures
 {
     public class TextureSet : BinaryFile
     {
-        public override BinaryFileFlags Flags
-        {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat; }
-        }
+        public override BinaryFileFlags Flags =>
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
         public List<Texture> Textures { get; }
 
@@ -65,7 +63,7 @@ namespace MikuMikuLibrary.Textures
             writer.PopBaseOffset();
         }
 
-        protected override Section GetSectionInstanceForWriting() => new TextureSetSection( this, Endianness.LittleEndian );
+        protected override Section GetSectionInstanceForWriting() => new TextureSetSection( this, Endianness );
 
         public override void Load( string filePath )
         {

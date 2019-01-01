@@ -6,20 +6,11 @@ namespace MikuMikuModel.FormatModules
 {
     public class TextureSetFormatModule : FormatModule<TextureSet>
     {
-        public override FormatModuleFlags Flags
-        {
-            get { return FormatModuleFlags.Import | FormatModuleFlags.Export; }
-        }
+        public override FormatModuleFlags Flags => 
+            FormatModuleFlags.Import | FormatModuleFlags.Export;
 
-        public override string Name
-        {
-            get { return "Texture Container"; }
-        }
-
-        public override string[] Extensions
-        {
-            get { return new[] { "bin", "txd" }; }
-        }
+        public override string Name => "Texture Set";
+        public override string[] Extensions => new[] { "bin", "txd" };
 
         protected override bool CanImportCore( Stream source, string fileName )
         {

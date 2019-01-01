@@ -229,7 +229,7 @@ namespace MikuMikuLibrary.Models
                 material.SpecularPower.Field02 = 246;
             }
 
-            foreach ( var materialTexture in material.EnumerateMaterialTextures() )
+            foreach ( var materialTexture in material.MaterialTextures )
             {
                 if ( materialTexture == material.Diffuse )
                     materialTexture.Field00 = materialTexture.IsActive ? 82288 : 48;

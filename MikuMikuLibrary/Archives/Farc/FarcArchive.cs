@@ -15,30 +15,20 @@ namespace MikuMikuLibrary.Archives.Farc
     {
         private readonly Dictionary<string, InternalEntry> mEntries;
         private int mAlignment;
+        
+        public override BinaryFileFlags Flags => 
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.UsesSourceStream;
+            
+        public override Endianness Endianness => Endianness.BigEndian;
 
-        public override BinaryFileFlags Flags
-        {
-            get { return BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.UsesSourceStream; }
-        }
-
-        public override Endianness Endianness
-        {
-            get { return Endianness.BigEndian; }
-        }
-
-        public bool CanAdd
-        {
-            get { return true; }
-        }
-
-        public bool CanRemove
-        {
-            get { return true; }
-        }
+        public bool CanAdd => true;
+        public bool CanRemove => true;
+        
+        public IEnumerable<string> Entries => mEntries.Keys;
 
         public int Alignment
         {
-            get { return mAlignment; }
+            get => mAlignment;
             set
             {
                 if ( ( value & ( value - 1 ) ) != 0 )
@@ -120,11 +110,6 @@ namespace MikuMikuLibrary.Archives.Farc
         public bool Contains( string handle )
         {
             return mEntries.ContainsKey( handle );
-        }
-
-        public IEnumerable<string> EnumerateEntries()
-        {
-            return mEntries.Keys;
         }
 
         public IEnumerator<string> GetEnumerator()

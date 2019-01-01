@@ -7,20 +7,11 @@ namespace MikuMikuModel.FormatModules
 {
     public class BitmapFormatModule : FormatModule<Bitmap>
     {
-        public override FormatModuleFlags Flags
-        {
-            get { return FormatModuleFlags.Import | FormatModuleFlags.Export; }
-        }
+        public override FormatModuleFlags Flags => 
+            FormatModuleFlags.Import | FormatModuleFlags.Export;
 
-        public override string Name
-        {
-            get { return "Bitmap"; }
-        }
-
-        public override string[] Extensions
-        {
-            get { return new[] { "png", "jpg", "jpeg", "gif", "bmp" }; }
-        }
+        public override string Name => "Bitmap";
+        public override string[] Extensions => new[] { "png", "jpg", "jpeg", "gif", "bmp" };
 
         protected override bool CanImportCore( Stream source, string fileName )
         {

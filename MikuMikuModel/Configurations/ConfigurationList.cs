@@ -34,15 +34,8 @@ namespace MikuMikuModel.Configurations
             }
         }
 
-        public static string FilePath
-        {
-            get { return Path.ChangeExtension( Application.ExecutablePath, "xml" ); }
-        }
-
-        public static string BackupFilePath
-        {
-            get { return Path.ChangeExtension( Path.ChangeExtension( Application.ExecutablePath, null ) + "-Backup", "xml" ); }
-        }
+        public static string FilePath => Path.ChangeExtension( Application.ExecutablePath, "xml" );
+        public static string BackupFilePath => Path.ChangeExtension( Path.ChangeExtension( Application.ExecutablePath, null ) + "-Backup", "xml" );
 
         private Configuration currentConfiguration;
 
@@ -51,7 +44,7 @@ namespace MikuMikuModel.Configurations
         [XmlIgnore]
         public Configuration CurrentConfiguration
         {
-            get { return currentConfiguration; }
+            get => currentConfiguration;
             set
             {
                 currentConfiguration = value;
@@ -82,9 +75,7 @@ namespace MikuMikuModel.Configurations
         public void Save()
         {
             if ( File.Exists( FilePath ) )
-            {
                 File.Copy( FilePath, BackupFilePath, true );
-            }
 
             using ( var stream = File.Create( FilePath ) )
                 serializer.Serialize( stream, this );

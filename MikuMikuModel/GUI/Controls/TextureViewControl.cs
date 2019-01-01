@@ -33,7 +33,7 @@ namespace MikuMikuModel.GUI.Controls
 
         public int CurrentMipMapIndex
         {
-            get { return mipMapIndex; }
+            get => mipMapIndex;
             set
             {
                 if ( texture.IsYCbCr )
@@ -51,7 +51,7 @@ namespace MikuMikuModel.GUI.Controls
 
         public int CurrentLevelIndex
         {
-            get { return levelIndex; }
+            get => levelIndex;
             set
             {
                 if ( texture.IsYCbCr )

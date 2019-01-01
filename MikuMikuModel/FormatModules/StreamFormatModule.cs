@@ -4,20 +4,11 @@ namespace MikuMikuModel.FormatModules
 {
     public class StreamFormatModule : FormatModule<Stream>
     {
-        public override FormatModuleFlags Flags
-        {
-            get { return FormatModuleFlags.Import | FormatModuleFlags.Export; }
-        }
+        public override FormatModuleFlags Flags => 
+            FormatModuleFlags.Import | FormatModuleFlags.Export;
 
-        public override string Name
-        {
-            get { return "Stream"; }
-        }
-
-        public override string[] Extensions
-        {
-            get { return new[] { "*" }; }
-        }
+        public override string Name => "Stream";
+        public override string[] Extensions => new[] { "*" };
 
         // Override the importer so it doesn't close the file stream
         public override Stream Import( string fileName )

@@ -6,15 +6,9 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "EOFC", typeof( object ) )]
     public class EndOfFileSection : Section
     {
-        public override Endianness Endianness
-        {
-            get { return Endianness.LittleEndian; }
-        }
+        public override Endianness Endianness => Endianness.LittleEndian;
 
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.None; }
-        }
+        public override SectionFlags Flags => SectionFlags.None;
 
         protected override void Read( EndianBinaryReader reader, long length )
         {

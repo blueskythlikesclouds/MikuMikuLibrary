@@ -33,7 +33,7 @@ namespace MikuMikuModel.Configurations
 
                 return objectDatabase;
             }
-            set { objectDatabase = value; }
+            set => objectDatabase = value;
         }
 
         public TextureDatabase TextureDatabase
@@ -48,7 +48,7 @@ namespace MikuMikuModel.Configurations
 
                 return textureDatabase;
             }
-            set { textureDatabase = value; }
+            set => textureDatabase = value;
         }
 
         public BoneDatabase BoneDatabase
@@ -63,7 +63,7 @@ namespace MikuMikuModel.Configurations
 
                 return boneDatabase;
             }
-            set { boneDatabase = value; }
+            set => boneDatabase = value;
         }
 
         public object Clone()

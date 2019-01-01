@@ -5,21 +5,18 @@ namespace MikuMikuModel.DataNodes
 {
     public abstract class BinaryFileNode<T> : DataNode<T> where T : IBinaryFile
     {
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.File; }
-        }
+        public override Bitmap Icon => Properties.Resources.File;
 
         public BinaryFormat Format
         {
-            get { return GetProperty<BinaryFormat>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<BinaryFormat>();
+            set => SetProperty( value );
         }
 
         public Endianness Endianness
         {
-            get { return GetProperty<Endianness>(); }
-            set { SetProperty( value ); }
+            get => GetProperty<Endianness>();
+            set => SetProperty( value );
         }
 
         public BinaryFileNode( string name, T data ) : base( name, data )

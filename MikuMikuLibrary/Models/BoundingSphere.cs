@@ -14,7 +14,7 @@ namespace MikuMikuLibrary.Models
             Radius = bSphere.Radius;
         }
 
-        public override string ToString()
+        public override string ToString() 
         {
             return $"[{Center}, {Radius}]";
         }

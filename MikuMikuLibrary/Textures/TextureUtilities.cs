@@ -66,7 +66,7 @@ namespace MikuMikuLibrary.Textures
                 model.TextureSet.Textures[ i ].ID = newTextureIDs[ i ];
             }
 
-            foreach ( var materialTexture in model.Meshes.SelectMany( x => x.Materials ).SelectMany( x => x.EnumerateMaterialTextures() ) )
+            foreach ( var materialTexture in model.Meshes.SelectMany( x => x.Materials ).SelectMany( x => x.MaterialTextures ) )
             {
                 if ( dictionary.TryGetValue( materialTexture.TextureID, out int id ) )
                     materialTexture.TextureID = id;

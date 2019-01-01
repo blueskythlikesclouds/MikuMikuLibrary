@@ -16,10 +16,7 @@ namespace MikuMikuModel.DataNodes
 {
     public class ModelNode : BinaryFileNode<Model>
     {
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch;
 
         public override DataNodeActionFlags ActionFlags
         {
@@ -40,10 +37,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.Model; }
-        }
+        public override Bitmap Icon => Properties.Resources.Model;
 
         [Browsable( false )]
         public ListNode<Mesh> Meshes { get; set; }
@@ -225,6 +219,12 @@ namespace MikuMikuModel.DataNodes
                     Textures = new TextureSetNode( "Texture Set", Data.TextureSet );
 
                 Add( Textures );
+            }
+            
+            if ( Textures != null && Textures.Data is TextureSet textureSet )
+            {
+                textureSet.Format = Data.Format;
+                textureSet.Endianness = Data.Endianness;
             }
         }
 

@@ -6,20 +6,11 @@ namespace MikuMikuModel.FormatModules
 {
     public class ModelFormatModule : FormatModule<Model>
     {
-        public override FormatModuleFlags Flags
-        {
-            get { return FormatModuleFlags.Import | FormatModuleFlags.Export; }
-        }
+        public override FormatModuleFlags Flags => 
+            FormatModuleFlags.Import | FormatModuleFlags.Export;
 
-        public override string Name
-        {
-            get { return "Model"; }
-        }
-
-        public override string[] Extensions
-        {
-            get { return new[] { "bin", "osd" }; }
-        }
+        public override string Name => "Model";
+        public override string[] Extensions => new[] { "bin", "osd" };
 
         protected override bool CanImportCore( Stream source, string fileName )
         {

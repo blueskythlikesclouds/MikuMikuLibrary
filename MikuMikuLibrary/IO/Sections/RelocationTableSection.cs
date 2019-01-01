@@ -8,15 +8,9 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "POF0", typeof( List<long> ) )]
     public class RelocationTableSectionInt32 : Section<List<long>>
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.None; }
-        }
+        public override Endianness Endianness => Endianness.LittleEndian;
 
-        public override Endianness Endianness
-        {
-            get { return Endianness.LittleEndian; }
-        }
+        public override SectionFlags Flags => SectionFlags.None;
 
         protected override void Read( EndianBinaryReader reader, long length )
         {
@@ -106,15 +100,9 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "POF1", typeof( List<long> ) )]
     public class RelocationTableSectionInt64 : Section<List<long>>
     {
-        public override SectionFlags Flags
-        {
-            get { return SectionFlags.None; }
-        }
+        public override Endianness Endianness => Endianness.LittleEndian;
 
-        public override Endianness Endianness
-        {
-            get { return Endianness.LittleEndian; }
-        }
+        public override SectionFlags Flags => SectionFlags.None;
 
         protected override void Read( EndianBinaryReader reader, long length )
         {

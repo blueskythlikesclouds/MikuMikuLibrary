@@ -14,20 +14,11 @@ namespace MikuMikuLibrary.IO.Sections
         private static readonly Dictionary<string, SectionInfo> sectionInfosBySignature = new Dictionary<string, SectionInfo>();
         private static readonly Dictionary<Type, SectionInfo> singleSectionInfosByDataType = new Dictionary<Type, SectionInfo>();
 
-        public static IReadOnlyDictionary<Type, SectionInfo> SectionInfos
-        {
-            get { return sectionInfos; }
-        }
+        public static IReadOnlyDictionary<Type, SectionInfo> SectionInfos => sectionInfos;
 
-        public static IReadOnlyDictionary<string, SectionInfo> SectionInfosBySignature
-        {
-            get { return sectionInfosBySignature; }
-        }
-
-        public static IReadOnlyDictionary<Type, SectionInfo> SingleSectionInfosByDataType
-        {
-            get { return singleSectionInfosByDataType; }
-        }
+        public static IReadOnlyDictionary<string, SectionInfo> SectionInfosBySignature => sectionInfosBySignature;
+        
+        public static IReadOnlyDictionary<Type, SectionInfo> SingleSectionInfosByDataType => singleSectionInfosByDataType;
 
         public static SectionInfo Register( Type sectionType )
         {

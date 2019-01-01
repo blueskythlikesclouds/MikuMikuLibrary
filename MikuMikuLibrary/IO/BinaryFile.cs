@@ -207,13 +207,8 @@ namespace MikuMikuLibrary.IO
         /// <param name="disposing">Whether or not the managed objects are going to be disposed.</param>
         protected virtual void Dispose( bool disposing )
         {
-            if ( disposing )
-            {
-                if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && ownsStream )
-                {
-                    stream?.Dispose();
-                }
-            }
+            if ( disposing && Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && ownsStream )
+                stream?.Dispose();
         }
 
         ~BinaryFile()

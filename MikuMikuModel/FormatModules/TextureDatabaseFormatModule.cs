@@ -7,20 +7,11 @@ namespace MikuMikuModel.FormatModules
 {
     public class TextureDatabaseFormatModule : FormatModule<TextureDatabase>
     {
-        public override FormatModuleFlags Flags
-        {
-            get { return FormatModuleFlags.Import | FormatModuleFlags.Export; }
-        }
+        public override FormatModuleFlags Flags => 
+            FormatModuleFlags.Import | FormatModuleFlags.Export;
 
-        public override string Name
-        {
-            get { return "Texture Database"; }
-        }
-
-        public override string[] Extensions
-        {
-            get { return new[] { "bin", "txi" }; }
-        }
+        public override string Name => "Texture Database";
+        public override string[] Extensions => new[] { "bin", "txi" };
 
         protected override bool CanImportCore( Stream source, string fileName )
         {
