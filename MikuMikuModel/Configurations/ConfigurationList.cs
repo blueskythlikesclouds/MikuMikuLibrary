@@ -64,7 +64,15 @@ namespace MikuMikuModel.Configurations
             var directoryPath = Path.GetFullPath( Path.GetDirectoryName( referenceFilePath ) ) + Path.DirectorySeparatorChar;
             foreach ( var configuration in Configurations )
             {
-                var directoryPath2 = Path.GetFullPath( Path.GetDirectoryName( configuration.ObjectDatabaseFilePath ) ) + Path.DirectorySeparatorChar;
+                string pathToUse = configuration.ObjectDatabaseFilePath;
+                if ( string.IsNullOrEmpty( pathToUse ) )
+                    pathToUse = configuration.TextureDatabaseFilePath;
+                if ( string.IsNullOrEmpty( pathToUse ) )
+                    pathToUse = configuration.BoneDatabaseFilePath;
+                if ( string.IsNullOrEmpty( pathToUse ) )
+                    continue;
+            
+                var directoryPath2 = Path.GetFullPath( Path.GetDirectoryName( pathToUse ) ) + Path.DirectorySeparatorChar;
                 if ( directoryPath.StartsWith( directoryPath2, StringComparison.OrdinalIgnoreCase ) )
                     return configuration;
             }
