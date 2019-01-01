@@ -35,7 +35,7 @@ namespace MikuMikuLibrary.Textures
             Textures.Capacity = textureCount;
             for ( int i = 0; i < textureCount; i++ )
             {
-                reader.ReadAtOffset( reader.ReadUInt32(), () =>
+                reader.ReadOffset( () =>
                 {
                     Textures.Add( new Texture( reader ) );
                 } );

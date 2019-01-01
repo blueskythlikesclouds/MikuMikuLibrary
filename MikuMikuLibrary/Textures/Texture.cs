@@ -49,9 +49,10 @@ namespace MikuMikuLibrary.Textures
                 throw new InvalidDataException( "Invalid signature (expected TXP with type 4 or 5)" );
 
             int subTextureCount = reader.ReadInt32();
-            byte mipMapCount = reader.ReadByte();
-            byte depth = reader.ReadByte();
-            short rubbish = reader.ReadInt16();
+            int info = reader.ReadInt32();
+            
+            int mipMapCount = info & 0xFF;
+            int depth = ( info >> 8 ) & 0xFF;
 
             if ( depth == 1 && mipMapCount != subTextureCount )
                 mipMapCount = ( byte )subTextureCount;
@@ -61,7 +62,7 @@ namespace MikuMikuLibrary.Textures
             {
                 for ( int j = 0; j < mipMapCount; j++ )
                 {
-                    reader.ReadAtOffset( reader.ReadUInt32(), () =>
+                    reader.ReadOffset( () =>
                     {
                         mSubTextures[ i, j ] = new SubTexture( reader );
                     } );
@@ -76,9 +77,8 @@ namespace MikuMikuLibrary.Textures
             writer.PushBaseOffset();
             writer.Write( UsesDepth ? 0x05505854 : 0x04505854 );
             writer.Write( MipMapCount * Depth );
-            writer.Write( ( byte )MipMapCount );
-            writer.Write( ( byte )Depth );
-            writer.Write( ( ushort )( 0x0101 ) );
+            writer.Write( MipMapCount | ( Depth << 8 ) | 0x01010000 );
+            
             for ( int i = 0; i < Depth; i++ )
             {
                 for ( int j = 0; j < MipMapCount; j++ )
