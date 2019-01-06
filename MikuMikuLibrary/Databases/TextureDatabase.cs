@@ -42,7 +42,7 @@ namespace MikuMikuLibrary.Databases
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( Textures.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 int i = Textures.Max( x => x.ID ) + 1;
                 foreach ( var textureEntry in Textures )

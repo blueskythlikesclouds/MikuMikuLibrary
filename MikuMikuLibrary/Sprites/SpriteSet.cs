@@ -60,32 +60,32 @@ namespace MikuMikuLibrary.Sprites
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( 0 );
-            writer.EnqueueOffsetWriteIf( section == null, 16, AlignmentKind.Left, () => TextureSet.Save( writer.BaseStream, true ) );
+            writer.ScheduleWriteOffsetIf( section == null, 16, AlignmentMode.Left, () => TextureSet.Save( writer.BaseStream, true ) );
             writer.Write( TextureSet.Textures.Count );
             writer.Write( Sprites.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var sprite in Sprites )
                     sprite.WriteFirst( writer );
 
                 writer.PopStringTablesReversed();
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var texture in TextureSet.Textures )
                     writer.AddStringToStringTable( texture.Name );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var sprite in Sprites )
                     writer.AddStringToStringTable( sprite.Name );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var sprite in Sprites )
                     sprite.WriteSecond( writer );
             } );
-            writer.DoEnqueuedOffsetWritesReversed();
+            writer.DoScheduledWriteOffsetsReversed();
         }
 
         public SpriteSet()

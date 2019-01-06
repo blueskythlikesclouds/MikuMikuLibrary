@@ -63,7 +63,7 @@ namespace MikuMikuLibrary.Models
                 Meshes.Capacity = meshCount;
                 for ( int i = 0; i < meshCount; i++ )
                 {
-                    reader.ReadAtOffset( reader.ReadUInt32(), () =>
+                    reader.ReadOffset( () =>
                     {
                         reader.PushBaseOffset();
                         {
@@ -80,7 +80,7 @@ namespace MikuMikuLibrary.Models
             {
                 foreach ( var mesh in Meshes )
                 {
-                    reader.ReadAtOffset( reader.ReadUInt32(), () =>
+                    reader.ReadOffset( () =>
                     {
                         mesh.Skin = new MeshSkin();
                         mesh.Skin.Read( reader );
@@ -118,11 +118,11 @@ namespace MikuMikuLibrary.Models
             // Section writers will already write the meshes,
             // so we only write for the classic formats in this method.
 
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var mesh in Meshes )
                 {
-                    writer.EnqueueOffsetWriteIf( section == null, 4, AlignmentKind.Center, () =>
+                    writer.ScheduleWriteOffsetIf( section == null, 4, AlignmentMode.Center, () =>
                     {
                         writer.PushBaseOffset();
                         mesh.Write( writer );
@@ -130,27 +130,27 @@ namespace MikuMikuLibrary.Models
                     } );
                 }
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var mesh in Meshes )
                 {
-                    writer.EnqueueOffsetWriteIf( mesh.Skin != null && section == null, 16, AlignmentKind.Left, () =>
+                    writer.ScheduleWriteOffsetIf( mesh.Skin != null && section == null, 16, AlignmentMode.Left, () =>
                     {
                         mesh.Skin.Write( writer );
                     } );
                 }
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var mesh in Meshes )
-                    writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => writer.Write( mesh.Name, StringBinaryFormat.NullTerminated ) );
+                    writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () => writer.Write( mesh.Name, StringBinaryFormat.NullTerminated ) );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var mesh in Meshes )
                     writer.Write( mesh.ID );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var textureID in TextureIDs )
                     writer.Write( textureID );

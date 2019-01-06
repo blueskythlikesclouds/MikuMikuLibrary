@@ -58,24 +58,24 @@ namespace MikuMikuLibrary.Models
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.Write( bone.ID );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.Write( bone.Matrix );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.AddStringToStringTable( bone.Name );
             } );
-            writer.EnqueueOffsetWriteIf( ExData != null, 16, AlignmentKind.Center, () => ExData.Write( writer ) );
+            writer.ScheduleWriteOffsetIf( ExData != null, 16, AlignmentMode.Center, () => ExData.Write( writer ) );
             writer.Write( Bones.Count );
-            writer.EnqueueOffsetWriteIf( Bones.Any( x => x.ParentID != -1 ), 16, AlignmentKind.Center, () =>
+            writer.ScheduleWriteOffsetIf( Bones.Any( x => x.ParentID != -1 ), 16, AlignmentMode.Center, () =>
             {
                 foreach ( var bone in Bones )
                     writer.Write( bone.ParentID );

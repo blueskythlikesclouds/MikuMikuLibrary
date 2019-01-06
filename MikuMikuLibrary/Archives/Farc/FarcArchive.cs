@@ -259,14 +259,14 @@ namespace MikuMikuLibrary.Archives.Farc
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( "FArc", StringBinaryFormat.FixedLength, 4 );
-            writer.EnqueueOffsetWrite( OffsetKind.Size, () =>
+            writer.ScheduleWriteOffset( OffsetMode.Size, () =>
             {
                 writer.Write( mAlignment );
 
                 foreach ( var entry in mEntries.Values )
                 {
                     writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
-                    writer.EnqueueOffsetWrite( mAlignment, 0x78, AlignmentKind.Center, OffsetKind.OffsetAndSize, () =>
+                    writer.ScheduleWriteOffset( mAlignment, 0x78, AlignmentMode.Center, OffsetMode.OffsetAndSize, () =>
                     {
                         long position = writer.Position;
 

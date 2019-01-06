@@ -54,7 +54,7 @@ namespace MikuMikuLibrary.Textures
 
             foreach ( var texture in Textures )
             {
-                writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
                 {
                     texture.Write( writer );
                 } );

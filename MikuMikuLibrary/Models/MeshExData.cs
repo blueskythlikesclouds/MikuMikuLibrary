@@ -155,12 +155,12 @@ namespace MikuMikuLibrary.Models
         {
             writer.AddStringToStringTable( Name );
             writer.Write( BoneIDs.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var value in BoneIDs )
                     writer.Write( value );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var value in BoneMatrices )
                     writer.Write( value );
@@ -401,32 +401,32 @@ namespace MikuMikuLibrary.Models
             writer.Write( OsageNames.Count );
             writer.Write( OsageBones.Count );
             writer.WriteNulls( 4 );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var osageBone in OsageBones )
                     osageBone.Write( writer );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var value in OsageNames )
                     writer.AddStringToStringTable( value );
             } );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var exBlock in ExBlocks )
                 {
                     writer.AddStringToStringTable( exBlock.Signature );
-                    writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => exBlock.Write( writer ) );
+                    writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () => exBlock.Write( writer ) );
                 }
                 writer.WriteNulls( 8 );
             } );
             writer.Write( BoneNames.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var value in BoneNames )
                     writer.AddStringToStringTable( value );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var entry in Entries )
                     entry.Write( writer );

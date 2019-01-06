@@ -73,13 +73,13 @@ namespace MikuMikuLibrary.Models
             writer.Write( 0 );
             writer.Write( BoundingSphere );
             writer.Write( SubMeshes.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var subMesh in SubMeshes )
                     subMesh.Write( writer, section );
             } );
             writer.Write( Materials.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var material in Materials )
                     material.Write( writer );

@@ -110,7 +110,7 @@ namespace MikuMikuLibrary.Databases
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( SpriteSets.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 for ( int i = 0; i < SpriteSets.Count; i++ )
                 {
@@ -123,7 +123,7 @@ namespace MikuMikuLibrary.Databases
                 }
             } );
             writer.Write( SpriteSets.Sum( x => x.Sprites.Count + x.Textures.Count ) );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 for ( int i = 0; i < SpriteSets.Count; i++ )
                 {

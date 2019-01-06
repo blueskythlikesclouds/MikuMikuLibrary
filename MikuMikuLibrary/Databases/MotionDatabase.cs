@@ -47,13 +47,13 @@ namespace MikuMikuLibrary.Databases
         internal void Write( EndianBinaryWriter writer )
         {
             writer.AddStringToStringTable( Name );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var motionEntry in Motions )
                     writer.AddStringToStringTable( motionEntry.Name );
             } );
             writer.Write( Motions.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var motionEntry in Motions )
                     writer.Write( motionEntry.ID );
@@ -110,18 +110,18 @@ namespace MikuMikuLibrary.Databases
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( 1 );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var motionSetEntry in MotionSets )
                     motionSetEntry.Write( writer );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var motionSetEntry in MotionSets )
                     writer.Write( motionSetEntry.ID );
             } );
             writer.Write( MotionSets.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var boneName in BoneNames )
                     writer.AddStringToStringTable( boneName );

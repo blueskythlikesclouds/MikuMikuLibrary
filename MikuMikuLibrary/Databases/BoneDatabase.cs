@@ -122,7 +122,7 @@ namespace MikuMikuLibrary.Databases
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var boneEntry in Bones )
                     boneEntry.Write( writer );
@@ -138,25 +138,25 @@ namespace MikuMikuLibrary.Databases
                 writer.AddStringToStringTable( "End" );
             } );
             writer.Write( Positions.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var position in Positions )
                     writer.Write( position );
             } );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () => writer.Write( Field02 ) );
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => writer.Write( Field02 ) );
             writer.Write( BoneNames1.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var boneName1 in BoneNames1 )
                     writer.AddStringToStringTable( boneName1 );
             } );
             writer.Write( BoneNames2.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var boneName2 in BoneNames2 )
                     writer.AddStringToStringTable( boneName2 );
             } );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var parentID in ParentIndices )
                     writer.Write( parentID );
@@ -213,12 +213,12 @@ namespace MikuMikuLibrary.Databases
         {
             writer.Write( 0x09102720 );
             writer.Write( Skeletons.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var skeletonEntry in Skeletons )
-                    writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => skeletonEntry.Write( writer ) );
+                    writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () => skeletonEntry.Write( writer ) );
             } );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var skeletonEntry in Skeletons )
                     writer.AddStringToStringTable( skeletonEntry.Name );

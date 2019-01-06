@@ -100,7 +100,7 @@ namespace MikuMikuLibrary.Models
             writer.Write( MaterialIndex );
             writer.WriteNulls( 8 );
             writer.Write( BoneIndices != null ? BoneIndices.Length : 0 );
-            writer.EnqueueOffsetWriteIf( BoneIndices != null, 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffsetIf( BoneIndices != null, 4, AlignmentMode.Left, () =>
             {
                 writer.Write( BoneIndices );
             } );
@@ -126,7 +126,7 @@ namespace MikuMikuLibrary.Models
 
             else
             {
-                writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
                 {
                     writer.Write( Indices );
                 } );

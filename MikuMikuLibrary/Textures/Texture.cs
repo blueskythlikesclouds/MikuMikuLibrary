@@ -84,7 +84,7 @@ namespace MikuMikuLibrary.Textures
                 for ( int j = 0; j < MipMapCount; j++ )
                 {
                     var subTexture = mSubTextures[ i, j ];
-                    writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+                    writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
                     {
                         subTexture.Write( writer );
                     } );

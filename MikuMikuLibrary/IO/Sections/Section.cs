@@ -179,11 +179,11 @@ namespace MikuMikuLibrary.IO.Sections
 
                     writer.Endianness = Endianness;
                     {
-                        writer.PushStringTable( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
+                        writer.PushStringTable( 16, AlignmentMode.Center, StringBinaryFormat.NullTerminated );
 
                         Write( writer );
 
-                        writer.DoEnqueuedOffsetWrites();
+                        writer.DoScheduledWriteOffsets();
                         writer.PopStringTablesReversed();
                         writer.WriteAlignmentPadding( 16 );
                     }
@@ -240,7 +240,7 @@ namespace MikuMikuLibrary.IO.Sections
                 long sectionEndOffset = writer.Position;
 
                 // Now we can fill the header
-                writer.WriteAtOffsetAndSeekBack( headerOffset, () =>
+                writer.WriteAtOffset( headerOffset, () =>
                 {
                     writer.Write( SectionInfo.Signature, StringBinaryFormat.FixedLength, 4 );
                     writer.Write( ( uint )( sectionEndOffset - dataOffset ) );

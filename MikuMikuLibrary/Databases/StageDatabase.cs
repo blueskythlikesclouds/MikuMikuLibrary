@@ -169,7 +169,7 @@ namespace MikuMikuLibrary.Databases
             writer.AddStringToStringTable( CollisionFilePath );
             writer.Write( Field04 );
             writer.Write( Field05 );
-            writer.EnqueueOffsetWriteIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffsetIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentMode.Left, () =>
             {
                 writer.Write( Field06 );
                 writer.Write( Field07 );
@@ -265,7 +265,7 @@ namespace MikuMikuLibrary.Databases
 
         internal void WriteFourth( EndianBinaryWriter writer )
         {
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var id in Auth3DIDs )
                     writer.Write( id );
@@ -334,22 +334,22 @@ namespace MikuMikuLibrary.Databases
         public override void Write( EndianBinaryWriter writer, Section section = null )
         {
             writer.Write( Stages.Count );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
                     stageEntry.WriteFirst( writer, Format );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
                     stageEntry.WriteSecond( writer );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
                     stageEntry.WriteThird( writer );
             } );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 for ( int i = 0; i < Stages.Count; i++ )
                 {

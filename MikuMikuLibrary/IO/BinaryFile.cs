@@ -126,12 +126,12 @@ namespace MikuMikuLibrary.IO
                     writer.PushBaseOffset();
                     {
                         // Push a string table
-                        writer.PushStringTable( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
+                        writer.PushStringTable( 16, AlignmentMode.Center, StringBinaryFormat.NullTerminated );
                         {
                             Write( writer );
                         }
                         // Do the enqueued offset writes & string tables
-                        writer.DoEnqueuedOffsetWrites();
+                        writer.DoScheduledWriteOffsets();
                         writer.PopStringTablesReversed();
                     }
                     writer.PopBaseOffset();

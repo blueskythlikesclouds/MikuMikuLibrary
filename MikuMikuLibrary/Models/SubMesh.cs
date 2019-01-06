@@ -246,7 +246,7 @@ namespace MikuMikuLibrary.Models
             writer.Write( 0 );
             writer.Write( BoundingSphere );
             writer.Write( IndexTables.Count );
-            writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var indexTable in IndexTables )
                     indexTable.Write( writer, section );
@@ -326,7 +326,7 @@ namespace MikuMikuLibrary.Models
                 {
                     var attribute = ( VertexFormatAttribute )( 1 << i );
 
-                    writer.EnqueueOffsetWriteIf( ( attributes & attribute ) != 0, 4, AlignmentKind.Left, () =>
+                    writer.ScheduleWriteOffsetIf( ( attributes & attribute ) != 0, 4, AlignmentMode.Left, () =>
                     {
                         switch ( attribute )
                         {

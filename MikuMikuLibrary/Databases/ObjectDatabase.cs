@@ -99,7 +99,7 @@ namespace MikuMikuLibrary.Databases
         {
             writer.Write( Objects.Count );
             writer.Write( Unknown );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var objectEntry in Objects )
                 {
@@ -113,7 +113,7 @@ namespace MikuMikuLibrary.Databases
                 }
             } );
             writer.Write( Objects.Sum( x => x.Meshes.Count ) );
-            writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var objectEntry in Objects )
                 {
