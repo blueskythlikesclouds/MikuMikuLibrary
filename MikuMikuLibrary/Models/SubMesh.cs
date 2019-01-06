@@ -62,7 +62,7 @@ namespace MikuMikuLibrary.Models
             var attributes = ( VertexFormatAttribute )reader.ReadUInt32();
             int stride = reader.ReadInt32();
             int vertexCount = reader.ReadInt32();
-            var elemItems = reader.ReadUInt32s( section?.Format == IO.BinaryFormat.X ? 49 : 28 );
+            var elemItems = reader.ReadUInt32s( section?.Format == BinaryFormat.X ? 49 : 28 );
             Name = reader.ReadString( StringBinaryFormat.FixedLength, 64 );
 
             IndexTables.Capacity = indexTableCount;
@@ -408,9 +408,9 @@ namespace MikuMikuLibrary.Models
                     }
                 }
 
-                writer.WriteNulls( 0x34 );
+                writer.WriteNulls( section.Format == BinaryFormat.X ? 0x6C : 0x34 );
                 writer.Write( ( uint )vertexPosition );
-                writer.WriteNulls( 0x1C );
+                writer.WriteNulls( section.Format == BinaryFormat.X ? 0x38 : 0x1C );
                 writer.Write( BoneWeights != null ? 4 : 2 );
                 writer.WriteNulls( 0x18 );
             }

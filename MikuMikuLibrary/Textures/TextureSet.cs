@@ -63,7 +63,7 @@ namespace MikuMikuLibrary.Textures
             writer.PopBaseOffset();
         }
 
-        protected override Section GetSectionInstanceForWriting() => new TextureSetSection( this, Endianness );
+        protected override Section GetSectionInstanceForWriting() => new TextureSetSection( this, Endianness, AddressSpace.Int32 );
 
         public override void Load( string filePath )
         {

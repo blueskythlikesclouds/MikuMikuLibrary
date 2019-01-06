@@ -18,7 +18,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public ModelSection( Model dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public ModelSection( Model dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -55,10 +55,10 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public MeshSection( Mesh dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public MeshSection( Mesh dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
-            IndexData = new MeshIndexDataSection( new MemoryStream(), endianness );
-            VertexData = new MeshVertexDataSection( new MemoryStream(), endianness );
+            IndexData = new MeshIndexDataSection( new MemoryStream(), endianness, addressSpace );
+            VertexData = new MeshVertexDataSection( new MemoryStream(), endianness, addressSpace );
         }
     }
 
@@ -81,7 +81,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public MeshSkinSection( MeshSkin dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public MeshSkinSection( MeshSkin dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -122,7 +122,7 @@ namespace MikuMikuLibrary.IO.Sections
             Reader = new EndianBinaryReader( Data, Encoding.UTF8, true, Endianness );
         }
 
-        public MemoryStreamSection( MemoryStream dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public MemoryStreamSection( MemoryStream dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
             Writer = new EndianBinaryWriter( Data, Encoding.UTF8, true, endianness );
         }
@@ -137,7 +137,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public MeshVertexDataSection( MemoryStream dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public MeshVertexDataSection( MemoryStream dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -151,7 +151,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public MeshIndexDataSection( MemoryStream dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public MeshIndexDataSection( MemoryStream dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }

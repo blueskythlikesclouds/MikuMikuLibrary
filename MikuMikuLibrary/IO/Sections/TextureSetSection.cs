@@ -7,12 +7,13 @@ namespace MikuMikuLibrary.IO.Sections
     public class TextureSetSection : BinaryFileSection<TextureSet>
     {
         public override SectionFlags Flags => SectionFlags.None;
+        public override AddressSpace AddressSpace => AddressSpace.Int32;
 
         public TextureSetSection( Stream source, TextureSet dataToRead = null ) : base( source, dataToRead )
         {
         }
 
-        public TextureSetSection( TextureSet dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public TextureSetSection( TextureSet dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, AddressSpace.Int32 )
         {
         }
     }

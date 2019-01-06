@@ -10,7 +10,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public Section( T dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public Section( T dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }

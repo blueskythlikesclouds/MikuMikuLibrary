@@ -121,7 +121,7 @@ namespace MikuMikuLibrary.Models
                 // Write the indices to the index data
                 section.IndexData.Writer.Write( Indices );
 
-                writer.WriteNulls( 20 );
+                writer.WriteNulls( section.Format == BinaryFormat.X ? 24 : 20 );
                 writer.Write( BoundingBox );
                 writer.Write( Field00 );
                 writer.Write( 0 );

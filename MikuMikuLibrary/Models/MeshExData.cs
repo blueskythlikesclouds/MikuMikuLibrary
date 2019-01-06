@@ -232,6 +232,9 @@ namespace MikuMikuLibrary.Models
 
         internal override void WriteBody( EndianBinaryWriter writer )
         {
+            if ( writer.AddressSpace == AddressSpace.Int64 )
+                writer.WriteNulls( 4 );
+
             writer.Write( Field00 );
             writer.Write( Field01 );
             writer.Write( Field02 );
@@ -432,7 +435,7 @@ namespace MikuMikuLibrary.Models
                     entry.Write( writer );
                 writer.WriteNulls( 12 );
             } );
-            writer.WriteNulls( 28 );
+            writer.WriteNulls( writer.AddressSpace == AddressSpace.Int64 ? 32 : 28 );
         }
 
         public MeshExData()

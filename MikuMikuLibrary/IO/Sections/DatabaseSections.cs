@@ -12,7 +12,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public AetDatabaseSection( AetDatabase dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public AetDatabaseSection( AetDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -26,7 +26,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public BoneDatabaseSection( BoneDatabase dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public BoneDatabaseSection( BoneDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -40,7 +40,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public ObjectDatabaseSection( ObjectDatabase dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public ObjectDatabaseSection( ObjectDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -54,7 +54,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public SpriteDatabaseSection( SpriteDatabase dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public SpriteDatabaseSection( SpriteDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -68,7 +68,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public TextureDatabaseSection( TextureDatabase dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public TextureDatabaseSection( TextureDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }

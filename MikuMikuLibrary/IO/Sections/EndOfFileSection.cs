@@ -7,6 +7,7 @@ namespace MikuMikuLibrary.IO.Sections
     public class EndOfFileSection : Section
     {
         public override Endianness Endianness => Endianness.LittleEndian;
+        public override AddressSpace AddressSpace => AddressSpace.Int32;
 
         public override SectionFlags Flags => SectionFlags.None;
 
@@ -22,7 +23,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public EndOfFileSection( object dataToWrite ) : base( dataToWrite, Endianness.LittleEndian )
+        public EndOfFileSection( object dataToWrite ) : base( dataToWrite, Endianness.LittleEndian, AddressSpace.Int32 )
         {
         }
 

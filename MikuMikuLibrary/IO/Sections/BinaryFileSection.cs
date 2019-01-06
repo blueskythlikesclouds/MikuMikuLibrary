@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public BinaryFileSection( T dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public BinaryFileSection( T dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }

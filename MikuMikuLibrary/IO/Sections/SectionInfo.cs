@@ -25,16 +25,16 @@ namespace MikuMikuLibrary.IO.Sections
             return ( Section )Activator.CreateInstance( SectionType, source, dataToRead ?? Activator.CreateInstance( DataType ) );
         }
 
-        public Section Create( object dataToWrite, Endianness endianness )
+        public Section Create( object dataToWrite, Endianness endianness, AddressSpace addressSpace )
         {
-            return ( Section )Activator.CreateInstance( SectionType, dataToWrite, endianness );
+            return ( Section )Activator.CreateInstance( SectionType, dataToWrite, endianness, addressSpace );
         }
 
         public Section Read( Stream source, object dataToRead = null ) => Create( source, dataToRead );
 
-        public Section Write( Stream destination, object dataToWrite, Endianness endianness )
+        public Section Write( Stream destination, object dataToWrite, Endianness endianness, AddressSpace addressSpace )
         {
-            var section = Create( dataToWrite, endianness );
+            var section = Create( dataToWrite, endianness, addressSpace );
             section.Write( destination );
             return section;
         }
@@ -112,7 +112,7 @@ namespace MikuMikuLibrary.IO.Sections
             return section;
         }
 
-        public Section GetSection( object obj, Endianness endianness )
+        public Section GetSection( object obj, Endianness endianness, AddressSpace addressSpace )
         {
             if ( IsList )
                 throw new InvalidOperationException( "Attempted to call GetSection on a list subsection" );
@@ -120,10 +120,10 @@ namespace MikuMikuLibrary.IO.Sections
             if ( IsSectionByDefault )
                 return PropertyInfo.GetValue( obj ) as Section;
             else
-                return SectionInfo.Create( PropertyInfo.GetValue( obj ), endianness );
+                return SectionInfo.Create( PropertyInfo.GetValue( obj ), endianness, addressSpace );
         }
 
-        public IEnumerable<Section> GetSections( object obj, Endianness endianness )
+        public IEnumerable<Section> GetSections( object obj, Endianness endianness, AddressSpace addressSpace )
         {
             if ( !IsList )
                 throw new InvalidOperationException( "Attempted to call GetSections on a non-list subsection" );
@@ -144,7 +144,7 @@ namespace MikuMikuLibrary.IO.Sections
             else
             {
                 foreach ( var item in list )
-                    yield return SectionInfo.Create( item, endianness );
+                    yield return SectionInfo.Create( item, endianness, addressSpace );
             }
         }
 

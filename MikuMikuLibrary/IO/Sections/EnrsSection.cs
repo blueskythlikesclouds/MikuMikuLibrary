@@ -8,6 +8,7 @@ namespace MikuMikuLibrary.IO.Sections
     public class EnrsSection : Section
     {
         public override Endianness Endianness => Endianness.LittleEndian;
+        public override AddressSpace AddressSpace => AddressSpace.Int32;
 
         public override SectionFlags Flags => SectionFlags.None;
 
@@ -23,7 +24,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public EnrsSection( object dataToWrite ) : base( dataToWrite, Endianness.LittleEndian )
+        public EnrsSection( object dataToWrite ) : base( dataToWrite, Endianness.LittleEndian, AddressSpace.Int32 )
         {
         }
     }

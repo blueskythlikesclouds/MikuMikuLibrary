@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -80,7 +81,7 @@ namespace MikuMikuLibrary.Models
                 foreach ( var bone in Bones )
                     writer.Write( bone.ParentID );
             } );
-            writer.WriteNulls( 40 );
+            writer.WriteNulls( writer.AddressSpace == AddressSpace.Int64 ? 32 : 40 );
         }
 
         public MeshSkin()

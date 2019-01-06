@@ -9,46 +9,47 @@ namespace MikuMikuLibrary.IO.Sections
     public class RelocationTableSectionInt32 : Section<List<long>>
     {
         public override Endianness Endianness => Endianness.LittleEndian;
+        public override AddressSpace AddressSpace => AddressSpace.Int32;
 
         public override SectionFlags Flags => SectionFlags.None;
 
         protected override void Read( EndianBinaryReader reader, long length )
         {
-            long startOffset = reader.Position;
-            uint tableSize = reader.ReadUInt32();
+            //long startOffset = reader.Position;
+            //uint tableSize = reader.ReadUInt32();
 
-            long currentOffset = 0;
+            //long currentOffset = 0;
 
-            while ( reader.Position < ( startOffset + tableSize ) )
-            {
-                byte currentByte = reader.ReadByte();
+            //while ( reader.Position < ( startOffset + tableSize ) )
+            //{
+            //    byte currentByte = reader.ReadByte();
 
-                long unpackedDistance = 0;
-                switch ( ( currentByte >> 6 ) & 3 )
-                {
-                    case 0:
-                        break;
+            //    long unpackedDistance = 0;
+            //    switch ( ( currentByte >> 6 ) & 3 )
+            //    {
+            //        case 0:
+            //            break;
 
-                    case 1:
-                        unpackedDistance = currentByte & 0x3F;
-                        break;
+            //        case 1:
+            //            unpackedDistance = currentByte & 0x3F;
+            //            break;
 
-                    case 2:
-                        unpackedDistance = ( ( currentByte << 8 ) & 0x3F ) | reader.ReadByte();
-                        break;
+            //        case 2:
+            //            unpackedDistance = ( ( currentByte << 8 ) & 0x3F ) | reader.ReadByte();
+            //            break;
 
-                    case 3:
-                        unpackedDistance = ( ( currentByte << 24 ) & 0x3F ) | reader.ReadByte() << 16 | reader.ReadByte() << 8 | reader.ReadByte();
-                        break;
+            //        case 3:
+            //            unpackedDistance = ( ( currentByte << 24 ) & 0x3F ) | reader.ReadByte() << 16 | reader.ReadByte() << 8 | reader.ReadByte();
+            //            break;
 
-                    default:
-                        throw new Exception( "初音ミクの消失" );
-                }
+            //        default:
+            //            throw new Exception( "初音ミクの消失" );
+            //    }
 
-                unpackedDistance <<= 2;
+            //    unpackedDistance <<= 2;
 
-                Data.Add( currentOffset += unpackedDistance );
-            }
+            //    Data.Add( currentOffset += unpackedDistance );
+            //}
         }
 
         protected override void Write( EndianBinaryWriter writer )
@@ -72,7 +73,7 @@ namespace MikuMikuLibrary.IO.Sections
                     bytes.Add( ( byte )( 0x80 | ( distance >> 8 ) ) );
                     bytes.Add( ( byte )( distance ) );
                 }
-                else
+                else if ( distance > 0 )
                 {
                     bytes.Add( ( byte )( 0x40 | distance ) );
                 }
@@ -92,7 +93,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public RelocationTableSectionInt32( List<long> dataToWrite ) : base( dataToWrite, Endianness.LittleEndian )
+        public RelocationTableSectionInt32( List<long> dataToWrite ) : base( dataToWrite, Endianness.LittleEndian, AddressSpace.Int32 )
         {
         }
     }
@@ -106,42 +107,42 @@ namespace MikuMikuLibrary.IO.Sections
 
         protected override void Read( EndianBinaryReader reader, long length )
         {
-            long startOffset = reader.Position;
-            uint tableSize = reader.ReadUInt32();
+            //long startOffset = reader.Position;
+            //uint tableSize = reader.ReadUInt32();
 
-            long currentOffset = 0;
+            //long currentOffset = 0;
 
-            while ( reader.Position < ( startOffset + tableSize ) )
-            {
-                byte currentByte = reader.ReadByte();
+            //while ( reader.Position < ( startOffset + tableSize ) )
+            //{
+            //    byte currentByte = reader.ReadByte();
 
-                long unpackedDistance = 0;
-                switch ( ( currentByte >> 6 ) & 3 )
-                {
-                    case 0:
-                        break;
+            //    long unpackedDistance = 0;
+            //    switch ( ( currentByte >> 6 ) & 3 )
+            //    {
+            //        case 0:
+            //            break;
 
-                    case 1:
-                        unpackedDistance = currentByte & 0x3F;
-                        break;
+            //        case 1:
+            //            unpackedDistance = currentByte & 0x3F;
+            //            break;
 
-                    case 2:
-                        unpackedDistance = ( ( currentByte << 8 ) & 0x3F ) | reader.ReadByte();
-                        break;
+            //        case 2:
+            //            unpackedDistance = ( ( currentByte << 8 ) & 0x3F ) | reader.ReadByte();
+            //            break;
 
-                    case 3:
-                        unpackedDistance = ( ( currentByte << 24 ) & 0x3F ) | reader.ReadByte() << 16 | reader.ReadByte() << 8 | reader.ReadByte();
-                        break;
+            //        case 3:
+            //            unpackedDistance = ( ( currentByte << 24 ) & 0x3F ) | reader.ReadByte() << 16 | reader.ReadByte() << 8 | reader.ReadByte();
+            //            break;
 
-                    default:
-                        throw new Exception( "初音ミクの消失" );
-                }
+            //        default:
+            //            throw new Exception( "初音ミクの消失" );
+            //    }
 
-                // Literally the only difference
-                unpackedDistance <<= 3;
+            //    // Literally the only difference
+            //    unpackedDistance <<= 3;
 
-                Data.Add( currentOffset += unpackedDistance );
-            }
+            //    Data.Add( currentOffset += unpackedDistance );
+            //}
         }
 
         protected override void Write( EndianBinaryWriter writer )
@@ -165,7 +166,7 @@ namespace MikuMikuLibrary.IO.Sections
                     bytes.Add( ( byte )( 0x80 | ( distance >> 8 ) ) );
                     bytes.Add( ( byte )( distance ) );
                 }
-                else
+                else if ( distance > 0 )
                 {
                     bytes.Add( ( byte )( 0x40 | distance ) );
                 }
@@ -185,8 +186,9 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public RelocationTableSectionInt64( List<long> dataToWrite ) : base( dataToWrite, Endianness.LittleEndian )
+        public RelocationTableSectionInt64( List<long> dataToWrite ) : base( dataToWrite, Endianness.LittleEndian, AddressSpace.Int32 )
         {
+            dataToWrite.Sort();
         }
     }
 }

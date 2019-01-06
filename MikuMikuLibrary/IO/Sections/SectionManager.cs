@@ -77,9 +77,9 @@ namespace MikuMikuLibrary.IO.Sections
             return sSectionInfos[ sectionType ].Create( source, dataToRead );
         }
 
-        public static Section CreateSection( Type sectionType, object dataToWrite, Endianness endianness )
+        public static Section CreateSection( Type sectionType, object dataToWrite, Endianness endianness, AddressSpace addressSpace )
         {
-            return sSectionInfos[ sectionType ].Create( dataToWrite, endianness );
+            return sSectionInfos[ sectionType ].Create( dataToWrite, endianness, addressSpace );
         }
 
 #if DEBUG

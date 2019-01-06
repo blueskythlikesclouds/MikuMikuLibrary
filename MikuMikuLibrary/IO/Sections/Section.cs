@@ -164,7 +164,7 @@ namespace MikuMikuLibrary.IO.Sections
 
         protected void Write( Stream destination, bool putEndOfFileSection )
         {
-            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian ) )
+            using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness.LittleEndian, AddressSpace ) )
             {
                 writer.PushBaseOffset();
 
@@ -174,15 +174,15 @@ namespace MikuMikuLibrary.IO.Sections
 
                 long dataOffset = writer.Position;
                 {
-                    if ( AddressSpace == AddressSpace.Int64 )
-                        writer.PushBaseOffset();
-
                     writer.Endianness = Endianness;
                     {
+                        if ( AddressSpace == AddressSpace.Int64 )
+                            writer.PushBaseOffset();
+
                         writer.PushStringTable( 16, AlignmentMode.Center, StringBinaryFormat.NullTerminated );
-
-                        Write( writer );
-
+                        {
+                            Write( writer );
+                        }
                         writer.DoScheduledWriteOffsets();
                         writer.PopStringTablesReversed();
                         writer.WriteAlignmentPadding( 16 );
@@ -202,7 +202,7 @@ namespace MikuMikuLibrary.IO.Sections
                     if ( Flags.HasFlag( SectionFlags.RelocationTableSection ) )
                     {
                         var positions = writer.OffsetPositions
-                            .Select( x => x - writer.PeekBaseOffset() ).Distinct().OrderBy( x => x ).ToList();
+                            .Select( x => x - writer.BaseOffset ).ToList();
 
                         if ( AddressSpace == AddressSpace.Int32 )
                             Insert( 0, new RelocationTableSectionInt32( positions ) );
@@ -217,12 +217,12 @@ namespace MikuMikuLibrary.IO.Sections
                     {
                         if ( subSectionInfo.IsList )
                         {
-                            foreach ( var section in subSectionInfo.GetSections( this, Endianness ) )
+                            foreach ( var section in subSectionInfo.GetSections( this, Endianness, AddressSpace ) )
                                 Add( section );
                         }
                         else
                         {
-                            Add( subSectionInfo.GetSection( this, Endianness ) );
+                            Add( subSectionInfo.GetSection( this, Endianness, AddressSpace ) );
                         }
                     }
 
@@ -238,6 +238,9 @@ namespace MikuMikuLibrary.IO.Sections
                     }
                 }
                 long sectionEndOffset = writer.Position;
+
+                if ( AddressSpace == AddressSpace.Int64 )
+                    writer.PopBaseOffset();
 
                 // Now we can fill the header
                 writer.WriteAtOffset( headerOffset, () =>
@@ -287,10 +290,11 @@ namespace MikuMikuLibrary.IO.Sections
             Read( source );
         }
 
-        public Section( object dataToWrite, Endianness endianness )
+        public Section( object dataToWrite, Endianness endianness, AddressSpace addressSpace )
         {
             SectionInfo = SectionManager.GetOrRegister( GetType() );
             Endianness = endianness;
+            AddressSpace = addressSpace;
             Data = dataToWrite ?? throw new ArgumentNullException( nameof( dataToWrite ) );
         }
     }

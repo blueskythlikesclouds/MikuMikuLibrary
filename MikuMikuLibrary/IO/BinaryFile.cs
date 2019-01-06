@@ -194,7 +194,7 @@ namespace MikuMikuLibrary.IO
         protected virtual Section GetSectionInstanceForWriting()
         {
             if ( SectionManager.SingleSectionInfosByDataType.TryGetValue( GetType(), out SectionInfo sectionInfo ) )
-                return sectionInfo.Create( this, Endianness );
+                return sectionInfo.Create( this, Endianness, BinaryFormatUtilities.GetAddressSpace( Format ) );
             else
                 throw new NotImplementedException( "Section writing is not yet implemented" );
         }

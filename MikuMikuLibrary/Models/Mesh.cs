@@ -4,6 +4,7 @@ using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Maths;
 using System.Collections.Generic;
+using System;
 
 namespace MikuMikuLibrary.Models
 {
@@ -72,20 +73,37 @@ namespace MikuMikuLibrary.Models
         {
             writer.Write( 0x10000 );
             writer.Write( 0 );
-            writer.Write( BoundingSphere );
-            writer.Write( SubMeshes.Count );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+
+            if ( section?.Format == BinaryFormat.X )
+            {
+                writer.Write( SubMeshes.Count );
+                writer.Write( Materials.Count );
+                writer.Write( BoundingSphere );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteSubMeshes );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMaterials );
+            }
+            else
+            {
+                writer.Write( BoundingSphere );
+                writer.Write( SubMeshes.Count );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteSubMeshes );
+                writer.Write( Materials.Count );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMaterials );
+            }
+
+            writer.WriteNulls( section?.Format == BinaryFormat.X ? 0x40 : 0x28 );
+
+            void WriteSubMeshes()
             {
                 foreach ( var subMesh in SubMeshes )
                     subMesh.Write( writer, section );
-            } );
-            writer.Write( Materials.Count );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            }
+
+            void WriteMaterials()
             {
                 foreach ( var material in Materials )
                     material.Write( writer );
-            } );
-            writer.WriteNulls( 0x28 );
+            }
         }
 
         public Mesh()

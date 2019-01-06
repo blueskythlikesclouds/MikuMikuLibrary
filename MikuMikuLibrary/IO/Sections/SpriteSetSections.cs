@@ -16,7 +16,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public SpriteSetSection( SpriteSet dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public SpriteSetSection( SpriteSet dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }
@@ -30,7 +30,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public SpriteTextureSetSection( TextureSet dataToWrite, Endianness endianness ) : base( dataToWrite, endianness )
+        public SpriteTextureSetSection( TextureSet dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
         {
         }
     }

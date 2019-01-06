@@ -76,6 +76,8 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
+        public AddressSpace AddressSpace { get; set; }
+
         public bool SwapBytes => mSwap;
 
         public long Position
@@ -136,6 +138,18 @@ namespace MikuMikuLibrary.IO.Common
                 Write( ( byte )0 );
         }
 
+        public void WriteOffset( long offset )
+        {
+            if ( AddressSpace == AddressSpace.Int32 )
+                Write( ( uint )offset );
+
+            if ( AddressSpace == AddressSpace.Int64 )
+            {
+                WriteAlignmentPadding( 8 );
+                Write( offset );
+            }
+        }
+
         public void WriteAtOffset( long offset, Action action )
         {
             long current = Position;
@@ -166,7 +180,7 @@ namespace MikuMikuLibrary.IO.Common
         {
             mScheduledWriteOffsets.AddLast( new ScheduledWriteOffset
             {
-                FieldOffset = Position,
+                FieldOffset = PrepareWriteOffset( offsetMode ),
                 Alignment = alignment,
                 AlignmentFillerByte = alignmentFillerByte,
                 AlignmentMode = alignmentMode,
@@ -174,8 +188,6 @@ namespace MikuMikuLibrary.IO.Common
                 Action = action,
                 BaseOffset = BaseOffset,
             } );
-
-            PrepareWriteOffset( offsetMode );
         }
 
         public void ScheduleWriteOffsetIf( bool condition, Action action )
@@ -226,20 +238,32 @@ namespace MikuMikuLibrary.IO.Common
                 PrepareWriteOffset( offsetMode );
         }
 
-        private void PrepareWriteOffset( OffsetMode offsetMode )
+        private long PrepareWriteOffset( OffsetMode offsetMode )
         {
-            switch ( offsetMode )
-            {
-                case OffsetMode.Offset:
-                case OffsetMode.Size:
-                    Write( 0 );
-                    break;
+            long offset;
 
-                case OffsetMode.OffsetAndSize:
-                case OffsetMode.SizeAndOffset:
-                    Write( 0L );
-                    break;
+            if ( AddressSpace == AddressSpace.Int64 )
+            {
+                WriteAlignmentPadding( 8 );
+                offset = Position;
+                Write( 0L );
             }
+            else
+            {
+                offset = Position;
+                Write( 0 );
+            }
+
+
+            if ( offsetMode == OffsetMode.OffsetAndSize || offsetMode == OffsetMode.SizeAndOffset )
+            {
+                if ( AddressSpace == AddressSpace.Int64 )
+                    Write( 0L );
+                else
+                    Write( 0 );
+            }
+
+            return offset;
         }
 
         private void DoScheduledWriteOffset( LinkedListNode<ScheduledWriteOffset> scheduledWriteOffsetNode, long baseOffset )
@@ -275,18 +299,18 @@ namespace MikuMikuLibrary.IO.Common
                 switch ( scheduledWriteOffset.OffsetMode )
                 {
                     case OffsetMode.Offset:
-                        Write( ( uint )( startOffset - baseOffset ) );
+                        WriteOffset( startOffset - baseOffset );
                         break;
                     case OffsetMode.Size:
-                        Write( ( uint )( endOffset - startOffset ) );
+                        WriteOffset( endOffset - startOffset );
                         break;
                     case OffsetMode.OffsetAndSize:
-                        Write( ( uint )( startOffset - baseOffset ) );
-                        Write( ( uint )( endOffset - startOffset ) );
+                        WriteOffset( startOffset - baseOffset );
+                        WriteOffset( endOffset - startOffset );
                         break;
                     case OffsetMode.SizeAndOffset:
-                        Write( ( uint )( endOffset - startOffset ) );
-                        Write( ( uint )( startOffset - baseOffset ) );
+                        WriteOffset( endOffset - startOffset );
+                        WriteOffset( startOffset - baseOffset );
                         break;
                     default:
                         throw new ArgumentException( nameof( scheduledWriteOffset.OffsetMode ) );
@@ -321,7 +345,7 @@ namespace MikuMikuLibrary.IO.Common
         {
             mStringTables.Push( new StringTable
             {
-                BaseOffset = mBaseOffsets.Count > 0 ? mBaseOffsets.Peek() : 0,
+                BaseOffset = BaseOffset,
                 Strings = new Dictionary<string, List<long>>(),
                 AlignmentMode = alignmentMode,
                 Alignment = alignment,
@@ -352,7 +376,7 @@ namespace MikuMikuLibrary.IO.Common
                 foreach ( var offset in keyValuePair.Value )
                 {
                     SeekBegin( offset );
-                    Write( ( uint )( stringOffset - stringTable.BaseOffset ) );
+                    WriteOffset( stringOffset - stringTable.BaseOffset );
                     mOffsetPositions.Add( offset );
                 }
 
@@ -395,19 +419,19 @@ namespace MikuMikuLibrary.IO.Common
         {
             var stringTable = mStringTables.Peek();
 
+            var position = PrepareWriteOffset( OffsetMode.Offset );
+
             if ( !string.IsNullOrEmpty( value ) )
             {
                 if ( stringTable.Strings.TryGetValue( value, out List<long> positions ) )
-                    positions.Add( Position );
+                    positions.Add( position );
                 else
                 {
                     var offsets = new List<long>();
-                    offsets.Add( Position );
+                    offsets.Add( position );
                     stringTable.Strings.Add( value, offsets );
                 }
             }
-
-            Write( 0 );
         }
 
         public void Write( sbyte[] values )
@@ -792,24 +816,43 @@ namespace MikuMikuLibrary.IO.Common
         public EndianBinaryWriter( Stream input, Endianness endianness )
             : base( input )
         {
-            Init( Encoding.Default, endianness );
+            Init( Encoding.Default, endianness, AddressSpace.Int32 );
+        }
+
+        public EndianBinaryWriter( Stream input, Endianness endianness, AddressSpace addressSpace )
+            : base( input )
+        {
+            Init( Encoding.Default, endianness, addressSpace );
         }
 
         public EndianBinaryWriter( Stream input, Encoding encoding, Endianness endianness )
             : base( input, encoding )
         {
-            Init( encoding, endianness );
+            Init( encoding, endianness, AddressSpace.Int32 );
+        }
+
+        public EndianBinaryWriter( Stream input, Encoding encoding, Endianness endianness, AddressSpace addressSpace )
+            : base( input, encoding )
+        {
+            Init( encoding, endianness, addressSpace );
         }
 
         public EndianBinaryWriter( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness )
             : base( input, encoding, leaveOpen )
         {
-            Init( encoding, endianness );
+            Init( encoding, endianness, AddressSpace.Int32 );
         }
 
-        private void Init( Encoding encoding, Endianness endianness )
+        public EndianBinaryWriter( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness, AddressSpace addressSpace )
+            : base( input, encoding, leaveOpen )
+        {
+            Init( encoding, endianness, addressSpace );
+        }
+
+        private void Init( Encoding encoding, Endianness endianness, AddressSpace addressSpace )
         {
             Endianness = endianness;
+            AddressSpace = addressSpace;
             mEncoding = encoding;
             mOffsets = new Stack<long>();
             mBaseOffsets = new Stack<long>();
