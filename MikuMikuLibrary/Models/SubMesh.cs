@@ -1,6 +1,7 @@
 ﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Misc;
 using System;
 using System.Collections.Generic;

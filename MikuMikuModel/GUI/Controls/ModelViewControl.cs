@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.Models;
+﻿using MikuMikuLibrary.Maths;
+using MikuMikuLibrary.Models;
 using MikuMikuLibrary.Textures;
 using MikuMikuModel.GUI.Controls.ModelView;
 using OpenTK;

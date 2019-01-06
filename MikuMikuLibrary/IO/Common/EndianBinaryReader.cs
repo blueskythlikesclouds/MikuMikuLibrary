@@ -3,8 +3,8 @@
 //===============================================================//
 
 using MikuMikuLibrary.Exceptions;
+using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Misc;
-using MikuMikuLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -2,6 +2,7 @@
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Materials;
+using MikuMikuLibrary.Maths;
 using System.Collections.Generic;
 
 namespace MikuMikuLibrary.Models

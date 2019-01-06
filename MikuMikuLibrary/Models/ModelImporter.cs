@@ -1,4 +1,5 @@
 ﻿using MikuMikuLibrary.Materials;
+using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Textures;
 using System;
@@ -372,14 +373,17 @@ namespace MikuMikuLibrary.Models
 
                 indexTable.MaterialIndex = materialIndex;
 
-                indexTable.BoundingSphere = new BoundingSphere( new AxisAlignedBoundingBox( subMesh.Vertices.Skip( vertexOffset ).Take( aiMesh.Vertices.Count ) ) );
+                var axisAlignedBoundingBox = new AxisAlignedBoundingBox( subMesh.Vertices.Skip( vertexOffset ).Take( aiMesh.Vertices.Count ) );
+
+                indexTable.BoundingSphere = axisAlignedBoundingBox.ToBoundingSphere();
+                indexTable.BoundingBox = axisAlignedBoundingBox.ToBoundingBox();
 
                 subMesh.IndexTables.Add( indexTable );
 
                 vertexOffset += aiMesh.VertexCount;
             }
 
-            subMesh.BoundingSphere = new BoundingSphere( new AxisAlignedBoundingBox( subMesh.Vertices ) );
+            subMesh.BoundingSphere = new AxisAlignedBoundingBox( subMesh.Vertices ).ToBoundingSphere();
 
             return subMesh;
         }
@@ -411,7 +415,7 @@ namespace MikuMikuLibrary.Models
             if ( mesh.Skin.Bones.Count == 0 )
                 mesh.Skin = null;
 
-            mesh.BoundingSphere = new BoundingSphere( new AxisAlignedBoundingBox( mesh.SubMeshes.SelectMany( x => x.Vertices ) ) );
+            mesh.BoundingSphere = new AxisAlignedBoundingBox( mesh.SubMeshes.SelectMany( x => x.Vertices ) ).ToBoundingSphere();
 
             return mesh.SubMeshes.Count != 0 ? mesh : null;
         }

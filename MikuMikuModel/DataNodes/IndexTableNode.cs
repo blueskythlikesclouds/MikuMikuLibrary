@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.Models;
+﻿using MikuMikuLibrary.Maths;
+using MikuMikuLibrary.Models;
 using System.ComponentModel;
 
 namespace MikuMikuModel.DataNodes

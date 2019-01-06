@@ -82,9 +82,10 @@
     <Compile Include="IO\Sections\SpriteSetSections.cs" />
     <Compile Include="IO\Sections\TextureSetSection.cs" />
     <Compile Include="Materials\MaterialTexture.cs" />
+    <Compile Include="Maths\AxisAlignedBoundingBox.cs" />
     <Compile Include="Misc\Half.cs" />
     <Compile Include="Misc\HalfUtilities.cs" />
-    <Compile Include="Models\BoundingSphere.cs" />
+    <Compile Include="Maths\BoundingSphere.cs" />
     <Compile Include="Models\MeshSkin.cs" />
     <Compile Include="Models\ModelExporter.cs" />
     <Compile Include="Models\ModelImporter.cs" />
@@ -106,7 +107,7 @@
     <Compile Include="Sprites\Sprite.cs" />
     <Compile Include="Sprites\SpriteSet.cs" />
     <Compile Include="IO\BinaryFile.cs" />
-    <Compile Include="Models\BoundingBox.cs" />
+    <Compile Include="Maths\BoundingBox.cs" />
     <Compile Include="Misc\Color.cs" />
     <Compile Include="Databases\BoneDatabase.cs" />
     <Compile Include="Databases\TextureDatabase.cs" />

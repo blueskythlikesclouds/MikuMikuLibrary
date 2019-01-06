@@ -1,4 +1,5 @@
 ﻿using MikuMikuLibrary.Materials;
+using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Models;
 using MikuMikuModel.GUI.Controls;
 using System.ComponentModel;

@@ -1,6 +1,7 @@
 ﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using MikuMikuLibrary.Maths;
 using System;
 using System.Collections.Generic;
 
@@ -73,6 +74,8 @@ namespace MikuMikuLibrary.Models
                 BoundingBox = reader.ReadBoundingBox();
                 Field00 = reader.ReadInt32();
             }
+            else
+                BoundingBox = BoundingSphere.ToBoundingBox();
 
             reader.ReadAtOffsetIf( field00 == 4, boneIndicesOffset, () =>
             {

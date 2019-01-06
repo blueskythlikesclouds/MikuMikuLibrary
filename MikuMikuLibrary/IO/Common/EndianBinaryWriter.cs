@@ -2,8 +2,8 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
+using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Misc;
-using MikuMikuLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -268,6 +268,8 @@ namespace MikuMikuLibrary.IO.Common
             for ( LinkedListNode<ScheduledWriteOffset> current = first.Next; current != null && current != last.Next; current = current.Next )
                 DoScheduledWriteOffset( current, baseOffset );
 
+            mOffsetPositions.Add( scheduledWriteOffset.FieldOffset );
+
             WriteAtOffset( scheduledWriteOffset.FieldOffset, () =>
             {
                 switch ( scheduledWriteOffset.OffsetMode )
@@ -312,7 +314,7 @@ namespace MikuMikuLibrary.IO.Common
             DoScheduledWriteOffsets();
         }
 
-        public void PushStringTable( StringBinaryFormat format, int fixedLength = -1 ) => 
+        public void PushStringTable( StringBinaryFormat format, int fixedLength = -1 ) =>
             PushStringTable( 0, AlignmentMode.None, format, fixedLength );
 
         public void PushStringTable( int alignment, AlignmentMode alignmentMode, StringBinaryFormat format, int fixedLength = -1 )

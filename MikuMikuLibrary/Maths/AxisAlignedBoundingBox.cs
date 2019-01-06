@@ -2,29 +2,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace MikuMikuLibrary.Models
+namespace MikuMikuLibrary.Maths
 {
-    public struct BoundingBox
-    {
-        public Vector3 Center;
-        public float Width;
-        public float Height;
-        public float Depth;
-
-        public override string ToString()
-        {
-            return $"[{Center}, <{Width}, {Height}, {Depth}>]";
-        }
-
-        public BoundingBox( AxisAlignedBoundingBox aabb )
-        {
-            Center = aabb.Center;
-            Width = aabb.SizeX;
-            Height = aabb.SizeY;
-            Depth = aabb.SizeZ;
-        }
-    }
-
     public class AxisAlignedBoundingBox
     {
         public Vector3 Min, Max;
@@ -46,6 +25,26 @@ namespace MikuMikuLibrary.Models
         {
             Min = Vector3.Min( Min, aabb.Min );
             Max = Vector3.Max( Max, aabb.Max );
+        }
+
+        public BoundingSphere ToBoundingSphere()
+        {
+            return new BoundingSphere
+            {
+                Center = Center,
+                Radius = SizeMax / 2,
+            };
+        }
+
+        public BoundingBox ToBoundingBox()
+        {
+            return new BoundingBox
+            {
+                Center = Center,
+                Width = SizeX,
+                Height = SizeY,
+                Depth = SizeZ,
+            };
         }
 
         public AxisAlignedBoundingBox()
