@@ -6,7 +6,7 @@ namespace MikuMikuLibrary.Models
 {
     public class MeshSkin
     {
-        public const int ByteSize = 0x40;
+        public const int BYTE_SIZE = 0x40;
 
         public List<Bone> Bones { get; }
         public MeshExData ExData { get; set; }

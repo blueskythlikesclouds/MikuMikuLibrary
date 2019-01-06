@@ -5,47 +5,41 @@ namespace MikuMikuModel.DataNodes.Wrappers
 {
     public class DataTreeNode : TreeNode
     {
-        private static readonly ImageList imageList = new ImageList();
-        private DataNode dataNode;
+        private static readonly ImageList sImageList = new ImageList();
+        private DataNode mDataNode;
 
-        public static ImageList ImageList => imageList;
-        public DataNode DataNode => dataNode;
+        public static ImageList ImageList => sImageList;
+        public DataNode DataNode => mDataNode;
 
         public new string Name
         {
-            get => dataNode.Name;
-            set => dataNode.Rename( value );
+            get => mDataNode.Name;
+            set => mDataNode.Rename( value );
         }
 
         public new string Text
         {
-            get => dataNode.Name;
-            set => dataNode.Rename( value );
+            get => mDataNode.Name;
+            set => mDataNode.Rename( value );
         }
 
-        public override ContextMenuStrip ContextMenuStrip => dataNode.ContextMenuStrip;
+        public override ContextMenuStrip ContextMenuStrip => mDataNode.ContextMenuStrip;
 
         public void InitializeView()
         {
-            if ( !dataNode.IsViewInitialized )
+            if ( !mDataNode.IsViewInitialized )
             {
-                // We simply need to clear the nodes here,
-                // since the events we passed over will already
-                // add the nodes to this node, hence why we don't need
-                // to add them again. (commenting because I did
-                // this mistake and I was like why is it so slow
-                // afjaşksfşalfklaşwfkwaf)
                 Nodes.Clear();
-                dataNode.InitializeView();
-
-                if ( Nodes.Count >= 1 && string.IsNullOrEmpty( Nodes[ 0 ].Name ) )
-                    Nodes.RemoveAt( 0 );
+                mDataNode.InitializeView();
             }
+
+            if ( Nodes.Count >= 1 && string.IsNullOrEmpty( Nodes[ 0 ].Name ) )
+                Nodes.RemoveAt( 0 );
         }
 
         private void OnNameChanged( object sender, DataNodeNameChangedEventArgs e )
         {
-            base.Name = base.Text = dataNode.Name;
+            base.Name = base.Text = mDataNode.Name;
             //TreeView.SelectedNode = this;
         }
 
@@ -58,7 +52,7 @@ namespace MikuMikuModel.DataNodes.Wrappers
 
         private void OnNodeRemoved( object sender, DataNodeNodeEventArgs e )
         {
-            var child = Nodes.OfType<DataTreeNode>().FirstOrDefault( x => x.dataNode == e.ChildNode );
+            var child = Nodes.OfType<DataTreeNode>().FirstOrDefault( x => x.mDataNode == e.ChildNode );
 
             if ( child != null )
                 Nodes.Remove( child );
@@ -83,8 +77,8 @@ namespace MikuMikuModel.DataNodes.Wrappers
             base.Text = dataNode.Name;
 
             var imageKey = $"{dataNode.Icon.GetHashCode()}";
-            if ( !imageList.Images.ContainsKey( imageKey ) )
-                imageList.Images.Add( imageKey, dataNode.Icon );
+            if ( !sImageList.Images.ContainsKey( imageKey ) )
+                sImageList.Images.Add( imageKey, dataNode.Icon );
 
             ImageKey = imageKey;
             SelectedImageKey = imageKey;
@@ -98,12 +92,12 @@ namespace MikuMikuModel.DataNodes.Wrappers
                 dataNode.DataReplaced += OnDataReplaced;
             }
 
-            this.dataNode = dataNode;
+            mDataNode = dataNode;
 
             // Make it look like we have a child node
             // if we are branch
             if ( dataNode.Flags.HasFlag( DataNodeFlags.Branch ) )
-                Nodes.Add( new TreeNode() );
+                Nodes.Add( new TreeNode( string.Empty ) );
         }
     }
 }

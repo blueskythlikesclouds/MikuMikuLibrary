@@ -8,14 +8,11 @@ namespace MikuMikuModel.DataNodes
         [Browsable( false )]
         public virtual new T Data
         {
-            get { return ( T )base.Data; }
-            protected set { base.Data = value; }
+            get => ( T )base.Data;
+            protected set => base.Data = value;
         }
 
-        public override Type DataType
-        {
-            get { return typeof( T ); }
-        }
+        public override Type DataType => typeof( T );
 
         public DataNode( string name, T data ) : base( name, data )
         {

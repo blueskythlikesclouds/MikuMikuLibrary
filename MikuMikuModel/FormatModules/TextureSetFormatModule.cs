@@ -6,7 +6,7 @@ namespace MikuMikuModel.FormatModules
 {
     public class TextureSetFormatModule : FormatModule<TextureSet>
     {
-        public override FormatModuleFlags Flags => 
+        public override FormatModuleFlags Flags =>
             FormatModuleFlags.Import | FormatModuleFlags.Export;
 
         public override string Name => "Texture Set";

@@ -10,7 +10,7 @@ namespace MikuMikuLibrary.IO.Sections
 {
     public abstract class Section
     {
-        protected readonly List<Section> sections = new List<Section>();
+        protected readonly List<Section> mSections = new List<Section>();
 
         public SectionInfo SectionInfo { get; }
 
@@ -20,40 +20,40 @@ namespace MikuMikuLibrary.IO.Sections
 
         public virtual Endianness Endianness { get; protected set; }
         public virtual AddressSpace AddressSpace { get; protected set; }
-        
+
         public BinaryFormat Format => AddressSpace == AddressSpace.Int64 ? BinaryFormat.X : BinaryFormat.F2nd;
 
         public Section Parent { get; protected set; }
-        
+
         public int Depth => ( Parent != null ) ? ( Parent.Depth + 1 ) : 0;
 
         public IEnumerable<Section> EnumerateSections()
         {
-            return sections;
+            return mSections;
         }
 
         public IEnumerable<Section> EnumerateSections( string sig )
         {
-            return sections.Where( x => x.SectionInfo.Signature == sig );
+            return mSections.Where( x => x.SectionInfo.Signature == sig );
         }
 
         public IEnumerable<T> EnumerateSections<T>() where T : Section
         {
-            return sections.Where( x => x is T ).Cast<T>();
+            return mSections.Where( x => x is T ).Cast<T>();
         }
 
         public void Add( Section section )
         {
             section.Remove();
             section.Parent = this;
-            sections.Add( section );
+            mSections.Add( section );
         }
 
         public void Insert( int index, Section section )
         {
             section.Remove();
             section.Parent = this;
-            sections.Insert( index, section );
+            mSections.Insert( index, section );
         }
 
         public void Remove()
@@ -64,10 +64,10 @@ namespace MikuMikuLibrary.IO.Sections
 
         public void Remove( Section section )
         {
-            if ( sections.Contains( section ) )
+            if ( mSections.Contains( section ) )
             {
                 section.Parent = null;
-                sections.Remove( section );
+                mSections.Remove( section );
             }
         }
 
@@ -93,13 +93,13 @@ namespace MikuMikuLibrary.IO.Sections
                 }
 
                 reader.SeekBeginToPoppedOffset();
-                
+
                 if ( SectionInfo.SubSectionInfos.TryGetValue( subSectionSignature, out SubSectionInfo subSectionInfo ) )
                     subSection = subSectionInfo.SetFromSection( this, reader.BaseStream );
 
                 else
                     subSection = sectionInfo.Read( reader.BaseStream );
-                
+
                 Add( subSection );
 
                 if ( subSection is EndOfFileSection )
@@ -151,10 +151,10 @@ namespace MikuMikuLibrary.IO.Sections
                 {
                     reader.Endianness = Endianness;
                     reader.AddressSpace = AddressSpace;
-                    
+
                     if ( AddressSpace == AddressSpace.Int64 )
                         reader.PushBaseOffset();
-                    
+
                     Read( reader, dataSize );
                 } );
 
@@ -180,9 +180,9 @@ namespace MikuMikuLibrary.IO.Sections
                     writer.Endianness = Endianness;
                     {
                         writer.PushStringTable( 16, AlignmentKind.Center, StringBinaryFormat.NullTerminated );
-                        
+
                         Write( writer );
-                    
+
                         writer.DoEnqueuedOffsetWrites();
                         writer.PopStringTablesReversed();
                         writer.WriteAlignmentPadding( 16 );
@@ -192,8 +192,8 @@ namespace MikuMikuLibrary.IO.Sections
 
                 long sectionsStartOffset = writer.Position;
                 {
-                    sections.Clear();
-                
+                    mSections.Clear();
+
                     // Push enrs section
                     if ( Flags.HasFlag( SectionFlags.EnrsSection ) )
                         Insert( 0, new EnrsSection( this ) );
@@ -227,11 +227,11 @@ namespace MikuMikuLibrary.IO.Sections
                     }
 
                     // Push an end of file section if there are any sections
-                    if ( sections.Count > 0 )
+                    if ( mSections.Count > 0 )
                         Add( new EndOfFileSection( this ) );
 
                     // Write the sections with an ugly hack
-                    foreach ( var section in sections )
+                    foreach ( var section in mSections )
                     {
                         if ( !section.SectionInfo.IsBinaryFile )
                             section.Write( destination );
@@ -255,7 +255,7 @@ namespace MikuMikuLibrary.IO.Sections
             // This is a pretty ugly hack, but I'll reconstruct it at another time
             if ( Parent == null && !( this is EndOfFileSection ) )
             {
-                foreach ( var section in sections )
+                foreach ( var section in mSections )
                 {
                     if ( section.SectionInfo.IsBinaryFile )
                     {

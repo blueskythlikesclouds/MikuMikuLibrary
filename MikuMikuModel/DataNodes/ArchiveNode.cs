@@ -11,46 +11,35 @@ namespace MikuMikuModel.DataNodes
     // Only string archives for now
     public abstract class ArchiveNode<TArchive> : DataNode<TArchive> where TArchive : IArchive<string>, new()
     {
-        private DataNodeActionFlags flags;
-        private Dictionary<DataNode, object> valueMap;
+        private DataNodeActionFlags mFlags;
+        private Dictionary<DataNode, object> mValueMap;
 
-        public override DataNodeFlags Flags
-        {
-            get { return DataNodeFlags.Branch; }
-        }
-
-        public override DataNodeActionFlags ActionFlags
-        {
-            get { return flags; }
-        }
-
-        public override Bitmap Icon
-        {
-            get { return Properties.Resources.Archive; }
-        }
+        public override DataNodeFlags Flags => DataNodeFlags.Branch;
+        public override DataNodeActionFlags ActionFlags => mFlags;
+        public override Bitmap Icon => Properties.Resources.Archive;
 
         protected override void InitializeCore()
         {
-            valueMap = new Dictionary<DataNode, object>();
+            mValueMap = new Dictionary<DataNode, object>();
 
             if ( Data.Flags.HasFlag( BinaryFileFlags.Load ) )
             {
-                flags |= DataNodeActionFlags.Replace;
+                mFlags |= DataNodeActionFlags.Replace;
                 RegisterReplaceHandler<TArchive>( ( path ) => BinaryFile.Load<TArchive>( path ) );
             }
             if ( Data.Flags.HasFlag( BinaryFileFlags.Save ) )
             {
-                flags |= DataNodeActionFlags.Export;
+                mFlags |= DataNodeActionFlags.Export;
                 RegisterExportHandler<TArchive>( ( path ) => Data.Save( path ) );
             }
             if ( Data.CanAdd )
             {
-                flags |= DataNodeActionFlags.Import | DataNodeActionFlags.Move;
+                mFlags |= DataNodeActionFlags.Import | DataNodeActionFlags.Move;
                 RegisterImportHandler<Stream>( ( path ) => DataNodeFactory.Create( path ) );
             }
             if ( Data.CanRemove )
             {
-                flags |= DataNodeActionFlags.Remove;
+                mFlags |= DataNodeActionFlags.Remove;
             }
 
             RegisterCustomHandler( "Export All", () =>
@@ -76,13 +65,13 @@ namespace MikuMikuModel.DataNodes
                     Stream stream = null;
 
                     bool exists;
-                    if ( ( exists = valueMap.TryGetValue( node, out object value ) && !value.Equals( node.Data ) ) || !exists )
+                    if ( ( exists = mValueMap.TryGetValue( node, out object value ) && !value.Equals( node.Data ) ) || !exists )
                         stream = new FormatModuleStream( node.Data, node.Name );
 
                     if ( stream != null )
                     {
                         Data.Add( node.Name, stream, false, ConflictPolicy.Replace );
-                        valueMap[ node ] = node.Data;
+                        mValueMap[ node ] = node.Data;
                     }
                 }
 
@@ -95,7 +84,7 @@ namespace MikuMikuModel.DataNodes
             foreach ( var handle in Data )
             {
                 var node = DataNodeFactory.Create( Data.Open( handle, EntryStreamMode.MemoryStream ), handle );
-                valueMap[ node ] = node.Data;
+                mValueMap[ node ] = node.Data;
                 Add( node );
             }
         }
@@ -107,17 +96,17 @@ namespace MikuMikuModel.DataNodes
         // A simple format module class that wraps around a format module's stream
         private class FormatModuleStream : Stream
         {
-            private readonly object obj;
-            private readonly string name;
+            private readonly object mObject;
+            private readonly string mName;
 
-            private Stream stream;
+            private Stream mStream;
 
             public override bool CanRead
             {
                 get
                 {
                     EnsureNotNull();
-                    return stream.CanRead;
+                    return mStream.CanRead;
                 }
             }
 
@@ -126,7 +115,7 @@ namespace MikuMikuModel.DataNodes
                 get
                 {
                     EnsureNotNull();
-                    return stream.CanSeek;
+                    return mStream.CanSeek;
                 }
             }
 
@@ -135,7 +124,7 @@ namespace MikuMikuModel.DataNodes
                 get
                 {
                     EnsureNotNull();
-                    return stream.CanWrite;
+                    return mStream.CanWrite;
                 }
             }
 
@@ -144,7 +133,7 @@ namespace MikuMikuModel.DataNodes
                 get
                 {
                     EnsureNotNull();
-                    return stream.Length;
+                    return mStream.Length;
                 }
             }
 
@@ -153,60 +142,60 @@ namespace MikuMikuModel.DataNodes
                 get
                 {
                     EnsureNotNull();
-                    return stream.Position;
+                    return mStream.Position;
                 }
 
                 set
                 {
                     EnsureNotNull();
-                    stream.Position = value;
+                    mStream.Position = value;
                 }
             }
 
             public void EnsureNotNull()
             {
-                if ( stream == null )
+                if ( mStream == null )
                 {
-                    stream = FormatModuleUtilities.ExportToStream( name, obj );
-                    stream.Position = 0;
+                    mStream = FormatModuleUtilities.ExportToStream( mName, mObject );
+                    mStream.Position = 0;
                 }
             }
 
             public override void Flush()
             {
                 EnsureNotNull();
-                stream.Flush();
+                mStream.Flush();
             }
 
             public override int Read( byte[] buffer, int offset, int count )
             {
                 EnsureNotNull();
-                return stream.Read( buffer, 0, count );
+                return mStream.Read( buffer, 0, count );
             }
 
             public override long Seek( long offset, SeekOrigin origin )
             {
                 EnsureNotNull();
-                return stream.Seek( offset, origin );
+                return mStream.Seek( offset, origin );
             }
 
             public override void SetLength( long value )
             {
                 EnsureNotNull();
-                stream.SetLength( value );
+                mStream.SetLength( value );
             }
 
             public override void Write( byte[] buffer, int offset, int count )
             {
                 EnsureNotNull();
-                stream.Write( buffer, 0, count );
+                mStream.Write( buffer, 0, count );
             }
 
             protected override void Dispose( bool disposing )
             {
                 if ( disposing )
                 {
-                    stream?.Dispose();
+                    mStream?.Dispose();
                 }
 
                 base.Dispose( disposing );
@@ -214,8 +203,8 @@ namespace MikuMikuModel.DataNodes
 
             public FormatModuleStream( object obj, string name )
             {
-                this.obj = obj;
-                this.name = name;
+                mObject = obj;
+                mName = name;
             }
         }
     }

@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.Textures
             if ( ddsHeader.Flags.HasFlag( DDSHeaderFlags.MipMapCount ) )
                 mipMapCount = ddsHeader.MipMapCount;
 
-            var format = Texture.GetTextureFormat( ddsHeader.PixelFormat );
+            var format = TextureUtilities.GetTextureFormat( ddsHeader.PixelFormat );
 
             var texture = new Texture( ddsHeader.Width, ddsHeader.Height, format, depth, mipMapCount );
             foreach ( var level in texture.EnumerateLevels() )
@@ -92,7 +92,7 @@ namespace MikuMikuLibrary.Textures
             }
             else
             {
-                var compressedPixels = DDSCodec.CompressPixelData( bitmap, Texture.GetDDSPixelFormat( subTexture.Format ) );
+                var compressedPixels = DDSCodec.CompressPixelData( bitmap, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
                 Array.Copy( compressedPixels, subTexture.Data, subTexture.Data.Length );
             }
 

@@ -58,7 +58,6 @@
     <Compile Include="Archives\IArchive.cs" />
     <Compile Include="Archives\EntryStream.cs" />
     <Compile Include="Databases\AetDatabase.cs" />
-    <Compile Include="Databases\EditDatabase.cs" />
     <Compile Include="Databases\MotionDatabase.cs" />
     <Compile Include="Databases\ObjectDatabase.cs" />
     <Compile Include="Databases\SpriteDatabase.cs" />

@@ -1,8 +1,9 @@
-﻿using MikuMikuLibrary.Models;
+﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.Models;
 using MikuMikuLibrary.Textures;
-using MikuMikuLibrary.IO;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
+using MikuMikuModel.GUI.Forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
-using MikuMikuModel.GUI.Forms;
 
 namespace MikuMikuModel.DataNodes
 {
@@ -221,7 +221,7 @@ namespace MikuMikuModel.DataNodes
 
                 Add( Textures );
             }
-            
+
             if ( Textures != null && Textures.Data is TextureSet textureSet )
             {
                 textureSet.Format = Data.Format;
@@ -261,12 +261,12 @@ namespace MikuMikuModel.DataNodes
             // Pass the format/endianness
             Data.Format = oldDataT.Format;
             Data.Endianness = oldDataT.Endianness;
-            
+
             // Randomize texture IDs if we are modern
             if ( BinaryFormatUtilities.IsModern( Data.Format ) && Data.TextureSet != null )
             {
                 var newIDs = new List<int>( Data.TextureSet.Textures.Count );
-                
+
                 var random = new Random();
                 for ( int i = 0; i < Data.TextureSet.Textures.Count; i++ )
                 {
@@ -275,13 +275,13 @@ namespace MikuMikuModel.DataNodes
                     {
                         currentID = random.Next( int.MinValue, int.MaxValue );
                     } while ( newIDs.Contains( currentID ) );
-                    
+
                     newIDs.Add( currentID );
                 }
-                
-                Texture.ReAssignTextureIDs( Data, newIDs );
+
+                TextureUtilities.ReAssignTextureIDs( Data, newIDs );
             }
-            
+
             Textures?.Replace( Data.TextureSet );
 
             base.OnReplace( oldData );

@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SN = System.Numerics;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
@@ -11,11 +12,11 @@ namespace MikuMikuModel.GUI.Controls.ModelView
     {
         public int VertexArrayID { get; }
 
-        public GLBuffer<System.Numerics.Vector3> PositionBuffer { get; }
-        public GLBuffer<System.Numerics.Vector3> NormalBuffer { get; }
-        public GLBuffer<System.Numerics.Vector4> TangentBuffer { get; }
-        public GLBuffer<System.Numerics.Vector2> TexCoordBuffer { get; }
-        public GLBuffer<System.Numerics.Vector2> TexCoord2Buffer { get; }
+        public GLBuffer<SN.Vector3> PositionBuffer { get; }
+        public GLBuffer<SN.Vector3> NormalBuffer { get; }
+        public GLBuffer<SN.Vector4> TangentBuffer { get; }
+        public GLBuffer<SN.Vector2> TexCoordBuffer { get; }
+        public GLBuffer<SN.Vector2> TexCoord2Buffer { get; }
         public GLBuffer<Color> ColorBuffer { get; }
 
         public List<GLIndexTable> IndexTables { get; }
@@ -32,59 +33,6 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
             foreach ( var indexTable in IndexTables )
                 indexTable.Draw( shaderProgram );
-
-            //// Draw tangents
-            //if ( TangentBuffer != null )
-            //{
-            //    shaderProgram.SetUniform( "hasNormal", false );
-            //    shaderProgram.SetUniform( "hasTexCoord", false );
-            //    shaderProgram.SetUniform( "hasColor", false );
-            //    shaderProgram.SetUniform( "hasTangent", false );
-            //    shaderProgram.SetUniform( "hasDiffuseTexture", false );
-            //    shaderProgram.SetUniform( "specularColor", new OpenTK.Vector3( 0, 0, 0 ) );
-
-            //    for ( int i = 0; i < TangentBuffer.Length; i++ )
-            //    {
-
-            //        var p = new OpenTK.Vector3( PositionBuffer.Array[ i ].X,
-            //                             PositionBuffer.Array[ i ].Y,
-            //                             PositionBuffer.Array[ i ].Z );
-
-            //        var t = new OpenTK.Vector3( TangentBuffer.Array[ i ].X,
-            //                             TangentBuffer.Array[ i ].Y,
-            //                             TangentBuffer.Array[ i ].Z );
-
-            //        var n = new OpenTK.Vector3( NormalBuffer.Array[ i ].X,
-            //                             NormalBuffer.Array[ i ].Y,
-            //                             NormalBuffer.Array[ i ].Z );
-
-            //        var b = OpenTK.Vector3.Normalize( OpenTK.Vector3.Cross( n, t ) * TangentBuffer.Array[i].W );
-
-            //        // Tangent
-            //        shaderProgram.SetUniform( "diffuseColor", new OpenTK.Vector3( 1, 0, 0 ) );
-
-            //        GL.Begin( PrimitiveType.Lines );
-            //        GL.Vertex3( p );
-            //        GL.Vertex3( p + t * 0.01f );
-            //        GL.End();
-
-            //        // Binormal
-            //        shaderProgram.SetUniform( "diffuseColor", new OpenTK.Vector3( 0, 1, 0 ) );
-
-            //        GL.Begin( PrimitiveType.Lines );
-            //        GL.Vertex3( p );
-            //        GL.Vertex3( p + b * 0.01f );
-            //        GL.End();
-
-            //        // Normal
-            //        shaderProgram.SetUniform( "diffuseColor", new OpenTK.Vector3( 0, 0, 1 ) );
-
-            //        GL.Begin( PrimitiveType.Lines );
-            //        GL.Vertex3( p );
-            //        GL.Vertex3( p + n * 0.01f );
-            //        GL.End();
-            //    }
-            //}
         }
 
         private GLBuffer<T> GenerateVertexAttribute<T>( int index, T[] array, int count ) where T : struct

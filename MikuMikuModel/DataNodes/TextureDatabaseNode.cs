@@ -57,7 +57,7 @@ namespace MikuMikuModel.DataNodes
         {
             Add( Textures = new ListNode<TextureEntry>( "Textures", Data.Textures ) );
         }
-        
+
         protected override void OnReplace( object oldData )
         {
             TextureDatabase oldDataT = ( TextureDatabase )oldData;
@@ -76,7 +76,7 @@ namespace MikuMikuModel.DataNodes
     {
         public override DataNodeFlags Flags => DataNodeFlags.Leaf;
 
-        public override DataNodeActionFlags ActionFlags => 
+        public override DataNodeActionFlags ActionFlags =>
             DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename;
 
         public int ID

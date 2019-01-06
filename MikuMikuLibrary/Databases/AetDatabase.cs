@@ -30,8 +30,8 @@ namespace MikuMikuLibrary.Databases
 
     public class AetDatabase : BinaryFile
     {
-        public override BinaryFileFlags Flags => 
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
+        public override BinaryFileFlags Flags =>
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
 
         public List<AetSetEntry> AetSets { get; }
 

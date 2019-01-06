@@ -25,17 +25,17 @@ namespace MikuMikuModel.DataNodes
         //
         // Fields
         //
-        protected readonly List<DataNode> nodes;
-        private readonly Dictionary<Type, DataNodeImportHandler> importHandlers;
-        private readonly Dictionary<Type, DataNodeExportHandler> exportHandlers;
-        private readonly Dictionary<Type, DataNodeReplaceHandler> replaceHandlers;
-        private readonly List<ToolStripItem> customHandlers;
-        private DataNodeDataUpdateHandler dataUpdateHandler;
+        protected readonly List<DataNode> mNodes;
+        private readonly Dictionary<Type, DataNodeImportHandler> mImportHandlers;
+        private readonly Dictionary<Type, DataNodeExportHandler> mExportHandlers;
+        private readonly Dictionary<Type, DataNodeReplaceHandler> mReplaceHandlers;
+        private readonly List<ToolStripItem> mCustomHandlers;
+        private DataNodeDataUpdateHandler mDataUpdateHandler;
 
-        private object data;
-        protected string name;
-        protected DataNode parent;
-        private bool hasPendingChanges;
+        private object mData;
+        protected string mName;
+        protected DataNode mParent;
+        private bool mHasPendingChanges;
 
         //
         // Event Handlers
@@ -60,24 +60,24 @@ namespace MikuMikuModel.DataNodes
                 {
                     IsUpdatingData = true;
 
-                    if ( dataUpdateHandler != null )
+                    if ( mDataUpdateHandler != null )
                     {
-                        var newData = dataUpdateHandler();
-                        data = newData;
+                        var newData = mDataUpdateHandler();
+                        mData = newData;
                     }
 
                     HasPendingChanges = false;
                     IsUpdatingData = false;
                 }
 
-                return data;
+                return mData;
             }
             protected set
             {
                 if ( IsInitialized )
                     HasPendingChanges = true;
 
-                data = value;
+                mData = value;
             }
         }
 
@@ -89,12 +89,12 @@ namespace MikuMikuModel.DataNodes
 
         public virtual string Name
         {
-            get => name;
+            get => mName;
             protected set => Rename( value );
         }
 
         [Browsable( false )]
-        public virtual DataNode Parent => parent;
+        public virtual DataNode Parent => mParent;
 
         [Browsable( false )]
         public abstract DataNodeFlags Flags { get; }
@@ -117,16 +117,16 @@ namespace MikuMikuModel.DataNodes
         [Browsable( false )]
         public virtual bool HasPendingChanges
         {
-            get => hasPendingChanges;
+            get => mHasPendingChanges;
             protected set
             {
                 // Don't want node constructions
                 // to affect this flag
                 if ( IsInitialized )
                 {
-                    hasPendingChanges = value;
-                    if ( parent != null )
-                        parent.HasPendingChanges = true;
+                    mHasPendingChanges = value;
+                    if ( mParent != null )
+                        mParent.HasPendingChanges = true;
                 }
             }
         }
@@ -138,7 +138,7 @@ namespace MikuMikuModel.DataNodes
         public virtual bool IsViewInitialized { get; private set; }
 
         [Browsable( false )]
-        public virtual IEnumerable<DataNode> Nodes => nodes;
+        public virtual IEnumerable<DataNode> Nodes => mNodes;
 
         [Browsable( false )]
         public virtual Bitmap Icon => Properties.Resources.Node;
@@ -155,23 +155,23 @@ namespace MikuMikuModel.DataNodes
             if ( node.Parent != null )
                 node.Remove();
 
-            node.parent = this;
-            nodes.Add( node );
+            node.mParent = this;
+            mNodes.Add( node );
             OnAdd( node );
             HasPendingChanges = true;
         }
 
-        public virtual IEnumerable<DataNode> EnumerateNodes() => nodes;
+        public virtual IEnumerable<DataNode> EnumerateNodes() => mNodes;
 
         public virtual IEnumerable<DataNode> EnumerateNodes( Type dataType, bool searchChildren )
         {
             if ( searchChildren )
             {
-                var nodesRoot = nodes.Where( x => x.DataType == dataType );
+                var nodesRoot = mNodes.Where( x => x.DataType == dataType );
                 return nodesRoot.Concat( nodesRoot.SelectMany( x => x.EnumerateNodes( dataType, true ) ) );
             }
 
-            return nodes.Where( x => x.DataType == dataType );
+            return mNodes.Where( x => x.DataType == dataType );
         }
 
         public virtual IEnumerable<DataNode> EnumerateNodes<T>( bool searchChildren )
@@ -183,21 +183,21 @@ namespace MikuMikuModel.DataNodes
         {
             if ( searchChildren )
             {
-                var nodesRoot = nodes.Where( x => x.Name.Equals( name, comparison ) );
+                var nodesRoot = mNodes.Where( x => x.Name.Equals( name, comparison ) );
                 return nodesRoot.Concat( nodesRoot.SelectMany( x => x.EnumerateNodes( name, comparison, true ) ) );
             }
 
-            return nodes.Where( x => x.Name == Name );
+            return mNodes.Where( x => x.Name == Name );
         }
 
         public virtual DataNode FindNode( string name, StringComparison comparison )
         {
-            return nodes.FirstOrDefault( x => x.Name.Equals( name, comparison ) );
+            return mNodes.FirstOrDefault( x => x.Name.Equals( name, comparison ) );
         }
 
         public virtual DataNode FindNode( Type dataType, string name, StringComparison comparison )
         {
-            return nodes.FirstOrDefault( x => x.Name.Equals( name, comparison ) && x.DataType.Equals( dataType ) );
+            return mNodes.FirstOrDefault( x => x.Name.Equals( name, comparison ) && x.DataType.Equals( dataType ) );
         }
 
         public virtual DataNode<T> FindNode<T>( string name, StringComparison comparison )
@@ -207,7 +207,7 @@ namespace MikuMikuModel.DataNodes
 
         public virtual DataNode FindParent( Type dataType )
         {
-            if ( dataType.IsInstanceOfType( Parent?.data ) )
+            if ( dataType.IsInstanceOfType( Parent?.mData ) )
                 return Parent;
 
             return Parent?.FindParent( dataType );
@@ -223,11 +223,11 @@ namespace MikuMikuModel.DataNodes
             if ( !ActionFlags.HasFlag( DataNodeActionFlags.Export ) )
                 return;
 
-            var module = FormatModuleUtilities.GetModuleForExport( Path.GetFileName( filePath ), exportHandlers.Keys );
+            var module = FormatModuleUtilities.GetModuleForExport( Path.GetFileName( filePath ), mExportHandlers.Keys );
             if ( module != null )
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
-                exportHandlers[ module.ModelType ].Invoke( filePath );
+                mExportHandlers[ module.ModelType ].Invoke( filePath );
             }
             else
             {
@@ -245,7 +245,7 @@ namespace MikuMikuModel.DataNodes
                 dialog.AutoUpgradeEnabled = true;
                 dialog.CheckPathExists = true;
                 dialog.FileName = Name;
-                dialog.Filter = FormatModuleUtilities.GetFilter( exportHandlers.Keys, FormatModuleFlags.Export );
+                dialog.Filter = FormatModuleUtilities.GetFilter( mExportHandlers.Keys, FormatModuleFlags.Export );
                 dialog.OverwritePrompt = true;
                 dialog.Title = "Select a file to export to.";
                 dialog.ValidateNames = true;
@@ -266,11 +266,11 @@ namespace MikuMikuModel.DataNodes
             if ( !ActionFlags.HasFlag( DataNodeActionFlags.Import ) )
                 return;
 
-            var module = FormatModuleUtilities.GetModuleForImport( filePath, importHandlers.Keys );
+            var module = FormatModuleUtilities.GetModuleForImport( filePath, mImportHandlers.Keys );
             if ( module != null )
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
-                importHandlers[ module.ModelType ].Invoke( filePath );
+                mImportHandlers[ module.ModelType ].Invoke( filePath );
             }
             else
             {
@@ -288,7 +288,7 @@ namespace MikuMikuModel.DataNodes
                 dialog.AutoUpgradeEnabled = true;
                 dialog.CheckPathExists = true;
                 dialog.FileName = Name;
-                dialog.Filter = FormatModuleUtilities.GetFilter( importHandlers.Keys, FormatModuleFlags.Import );
+                dialog.Filter = FormatModuleUtilities.GetFilter( mImportHandlers.Keys, FormatModuleFlags.Import );
                 dialog.Title = "Select file(s) to import from.";
                 dialog.ValidateNames = true;
                 dialog.AddExtension = true;
@@ -304,14 +304,14 @@ namespace MikuMikuModel.DataNodes
 
         public virtual void MoveDown()
         {
-            if ( parent != null )
+            if ( mParent != null )
             {
-                var index = parent.nodes.IndexOf( this );
-                if ( index < parent.nodes.Count - 1 )
+                var index = mParent.mNodes.IndexOf( this );
+                if ( index < mParent.mNodes.Count - 1 )
                 {
-                    parent.nodes.RemoveAt( index );
-                    parent.nodes.Insert( index + 1, this );
-                    parent.OnMove( index, index + 1, this );
+                    mParent.mNodes.RemoveAt( index );
+                    mParent.mNodes.Insert( index + 1, this );
+                    mParent.OnMove( index, index + 1, this );
                     HasPendingChanges = true;
                 }
             }
@@ -319,14 +319,14 @@ namespace MikuMikuModel.DataNodes
 
         public virtual void MoveUp()
         {
-            if ( parent != null )
+            if ( mParent != null )
             {
-                var index = parent.nodes.IndexOf( this );
+                var index = mParent.mNodes.IndexOf( this );
                 if ( index > 0 )
                 {
-                    parent.nodes.RemoveAt( index );
-                    parent.nodes.Insert( index - 1, this );
-                    parent.OnMove( index, index - 1, this );
+                    mParent.mNodes.RemoveAt( index );
+                    mParent.mNodes.Insert( index - 1, this );
+                    mParent.OnMove( index, index - 1, this );
                     HasPendingChanges = true;
                 }
             }
@@ -334,15 +334,15 @@ namespace MikuMikuModel.DataNodes
 
         public virtual void Remove()
         {
-            parent?.Remove( this );
+            mParent?.Remove( this );
         }
 
         public virtual void Remove( DataNode node )
         {
-            if ( nodes.Contains( node ) )
+            if ( mNodes.Contains( node ) )
             {
-                node.parent = null;
-                nodes.Remove( node );
+                node.mParent = null;
+                mNodes.Remove( node );
                 OnRemove( node );
                 HasPendingChanges = true;
             }
@@ -364,7 +364,7 @@ namespace MikuMikuModel.DataNodes
             IsUpdatingData = true;
 
             {
-                this.data = data;
+                mData = data;
                 OnReplace( oldData );
             }
 
@@ -379,11 +379,11 @@ namespace MikuMikuModel.DataNodes
             if ( !ActionFlags.HasFlag( DataNodeActionFlags.Replace ) )
                 return;
 
-            var module = FormatModuleUtilities.GetModuleForImport( filePath, replaceHandlers.Keys );
+            var module = FormatModuleUtilities.GetModuleForImport( filePath, mReplaceHandlers.Keys );
             if ( module != null )
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
-                Replace( replaceHandlers[ module.ModelType ].Invoke( filePath ) );
+                Replace( mReplaceHandlers[ module.ModelType ].Invoke( filePath ) );
             }
             else
             {
@@ -402,7 +402,7 @@ namespace MikuMikuModel.DataNodes
                 dialog.CheckPathExists = true;
                 dialog.CheckFileExists = true;
                 dialog.FileName = Name;
-                dialog.Filter = FormatModuleUtilities.GetFilter( replaceHandlers.Keys, FormatModuleFlags.Import );
+                dialog.Filter = FormatModuleUtilities.GetFilter( mReplaceHandlers.Keys, FormatModuleFlags.Import );
                 dialog.Title = "Select a file to replace with.";
                 dialog.ValidateNames = true;
                 dialog.AddExtension = true;
@@ -415,7 +415,7 @@ namespace MikuMikuModel.DataNodes
         public virtual void Rename( string name )
         {
             string oldName = Name;
-            this.name = name;
+            mName = name;
 
             OnRename( oldName );
             HasPendingChanges = true;
@@ -432,8 +432,8 @@ namespace MikuMikuModel.DataNodes
 
         public virtual void Clear()
         {
-            while ( nodes.Count > 0 )
-                nodes[ 0 ].Remove();
+            while ( mNodes.Count > 0 )
+                mNodes[ 0 ].Remove();
         }
 
         public void NotifyPropertyChanged( [CallerMemberName]string propertyName = null )
@@ -484,19 +484,19 @@ namespace MikuMikuModel.DataNodes
         }
 
         protected void RegisterImportHandler<T>( DataNodeImportHandler handler ) =>
-            importHandlers[ typeof( T ) ] = handler;
+            mImportHandlers[ typeof( T ) ] = handler;
 
         protected void RegisterExportHandler<T>( DataNodeExportHandler handler ) =>
-            exportHandlers[ typeof( T ) ] = handler;
+            mExportHandlers[ typeof( T ) ] = handler;
 
         protected void RegisterReplaceHandler<T>( DataNodeReplaceHandler handler ) =>
-            replaceHandlers[ typeof( T ) ] = handler;
+            mReplaceHandlers[ typeof( T ) ] = handler;
 
         protected void RegisterCustomHandler( string name, Action action, Keys shortcutKeys = Keys.None ) =>
-            customHandlers.Add( new ToolStripMenuItem( name, null, CreateEventHandler( action ), shortcutKeys ) );
+            mCustomHandlers.Add( new ToolStripMenuItem( name, null, CreateEventHandler( action ), shortcutKeys ) );
 
         protected void RegisterDataUpdateHandler( DataNodeDataUpdateHandler handler ) =>
-            dataUpdateHandler = handler;
+            mDataUpdateHandler = handler;
 
         public void InitializeContextMenuStrip()
         {
@@ -505,26 +505,26 @@ namespace MikuMikuModel.DataNodes
 
             ContextMenuStrip = new ContextMenuStrip();
 
-            if ( customHandlers.Any() )
+            if ( mCustomHandlers.Any() )
             {
-                foreach ( var toolStripItem in customHandlers )
+                foreach ( var toolStripItem in mCustomHandlers )
                     ContextMenuStrip.Items.Add( toolStripItem );
 
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
             }
 
-            if ( ActionFlags.HasFlag( DataNodeActionFlags.Import ) && importHandlers.Any() )
+            if ( ActionFlags.HasFlag( DataNodeActionFlags.Import ) && mImportHandlers.Any() )
             {
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
                 ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Import", null, CreateEventHandler( Import ), Keys.Control | Keys.I ) );
             }
 
-            if ( ActionFlags.HasFlag( DataNodeActionFlags.Export ) && exportHandlers.Any() )
+            if ( ActionFlags.HasFlag( DataNodeActionFlags.Export ) && mExportHandlers.Any() )
             {
                 ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Export", null, CreateEventHandler( () => Export() ), Keys.Control | Keys.E ) );
             }
 
-            if ( ActionFlags.HasFlag( DataNodeActionFlags.Replace ) && replaceHandlers.Any() )
+            if ( ActionFlags.HasFlag( DataNodeActionFlags.Replace ) && mReplaceHandlers.Any() )
             {
                 ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Replace", null, CreateEventHandler( Replace ), Keys.Control | Keys.R ) );
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
@@ -617,10 +617,10 @@ namespace MikuMikuModel.DataNodes
             DataReplaced?.Invoke( this, new DataNodeDataReplacedEventArgs( this, oldData ) );
 
         public IEnumerator<DataNode> GetEnumerator() =>
-            ( ( IEnumerable<DataNode> )nodes ).GetEnumerator();
+            ( ( IEnumerable<DataNode> )mNodes ).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() =>
-            ( ( IEnumerable<DataNode> )nodes ).GetEnumerator();
+            ( ( IEnumerable<DataNode> )mNodes ).GetEnumerator();
 
         public void Dispose()
         {
@@ -637,7 +637,7 @@ namespace MikuMikuModel.DataNodes
                     disposable.Dispose();
 
                 // Do the same for children
-                foreach ( var node in nodes )
+                foreach ( var node in mNodes )
                     node.Dispose();
             }
         }
@@ -649,14 +649,14 @@ namespace MikuMikuModel.DataNodes
 
         public DataNode( string name, object data )
         {
-            this.data = data;
+            mData = data;
             Rename( name );
 
-            nodes = new List<DataNode>();
-            importHandlers = new Dictionary<Type, DataNodeImportHandler>();
-            exportHandlers = new Dictionary<Type, DataNodeExportHandler>();
-            replaceHandlers = new Dictionary<Type, DataNodeReplaceHandler>();
-            customHandlers = new List<ToolStripItem>();
+            mNodes = new List<DataNode>();
+            mImportHandlers = new Dictionary<Type, DataNodeImportHandler>();
+            mExportHandlers = new Dictionary<Type, DataNodeExportHandler>();
+            mReplaceHandlers = new Dictionary<Type, DataNodeReplaceHandler>();
+            mCustomHandlers = new List<ToolStripItem>();
 
             Initialize();
         }

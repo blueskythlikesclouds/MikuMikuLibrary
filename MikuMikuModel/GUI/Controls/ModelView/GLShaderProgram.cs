@@ -10,12 +10,12 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 {
     public class GLShaderProgram : IDisposable
     {
-        private static readonly Dictionary<string, GLShaderProgram> shaderPrograms;
-        private readonly Dictionary<string, int> uniforms;
+        private static readonly Dictionary<string, GLShaderProgram> sShaderPrograms;
+        private readonly Dictionary<string, int> mUniforms;
 
         public static string ShaderDirectoryPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Shaders" );
 
-        public static IReadOnlyDictionary<string, GLShaderProgram> ShaderPrograms => shaderPrograms;
+        public static IReadOnlyDictionary<string, GLShaderProgram> ShaderPrograms => sShaderPrograms;
 
         public string Name { get; }
         public int ID { get; }
@@ -28,7 +28,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public void RegisterUniform( string name )
         {
             Debug.WriteLine( $"RegisterUniform: {name}" );
-            uniforms[ name ] = GL.GetUniformLocation( ID, name );
+            mUniforms[ name ] = GL.GetUniformLocation( ID, name );
         }
 
         public void RegisterUniforms()
@@ -37,7 +37,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             for ( int i = 0; i < count; i++ )
             {
                 GL.GetActiveUniform( ID, i, 32, out _, out _, out _, out string name );
-                uniforms[ name ] = GL.GetUniformLocation( ID, name );
+                mUniforms[ name ] = GL.GetUniformLocation( ID, name );
                 Debug.WriteLine( $"RegisterUniforms: {name}" );
             }
         }
@@ -79,14 +79,14 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public int GetUniformLocation( string name )
         {
-            if ( uniforms.TryGetValue( name, out int location ) )
+            if ( mUniforms.TryGetValue( name, out int location ) )
                 return location;
             else
             {
                 Debug.WriteLine( $"GetUniformLocation: {name}" );
 
                 location = GL.GetUniformLocation( ID, name );
-                uniforms.Add( name, location );
+                mUniforms.Add( name, location );
                 return location;
             }
         }
@@ -106,7 +106,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public static GLShaderProgram Create( string shaderName )
         {
-            if ( shaderPrograms.TryGetValue( shaderName, out GLShaderProgram shaderProgram ) )
+            if ( sShaderPrograms.TryGetValue( shaderName, out GLShaderProgram shaderProgram ) )
                 return shaderProgram;
 
             var fragmentShaderFilePath = Path.Combine( ShaderDirectoryPath, shaderName + ".frag" );
@@ -132,7 +132,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             GL.DeleteShader( vertexShader );
 
             shaderProgram = new GLShaderProgram( shaderName, shaderProgramID );
-            shaderPrograms.Add( shaderName, shaderProgram );
+            sShaderPrograms.Add( shaderName, shaderProgram );
             return shaderProgram;
         }
 
@@ -160,7 +160,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         private GLShaderProgram( string name, int shaderProgram )
         {
-            uniforms = new Dictionary<string, int>( StringComparer.OrdinalIgnoreCase );
+            mUniforms = new Dictionary<string, int>( StringComparer.OrdinalIgnoreCase );
 
             Name = name;
             ID = shaderProgram;
@@ -169,7 +169,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         static GLShaderProgram()
         {
-            shaderPrograms = new Dictionary<string, GLShaderProgram>( StringComparer.OrdinalIgnoreCase );
+            sShaderPrograms = new Dictionary<string, GLShaderProgram>( StringComparer.OrdinalIgnoreCase );
         }
     }
 }

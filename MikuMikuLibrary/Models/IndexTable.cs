@@ -24,7 +24,7 @@ namespace MikuMikuLibrary.Models
 
     public class IndexTable
     {
-        public static int ByteSize( BinaryFormat format )
+        public static int GetByteSize( BinaryFormat format )
         {
             switch ( format )
             {

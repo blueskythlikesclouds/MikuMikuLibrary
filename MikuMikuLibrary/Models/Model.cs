@@ -14,7 +14,7 @@ namespace MikuMikuLibrary.Models
     public class Model : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
 
         public override Endianness Endianness
         {
@@ -239,7 +239,7 @@ namespace MikuMikuLibrary.Models
                                 index = skeleton.BoneNames1.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
                             else
                                 index = 0x8000 | index;
-  
+
                             if ( index != -1 )
                             {
                                 // Before we do this, fix the child bones
@@ -280,7 +280,7 @@ namespace MikuMikuLibrary.Models
                 }
 
                 if ( !newIDs.SequenceEqual( TextureIDs ) )
-                    Texture.ReAssignTextureIDs( this, newIDs );
+                    TextureUtilities.ReAssignTextureIDs( this, newIDs );
             }
 
             Save( destination, leaveOpen );

@@ -176,8 +176,8 @@ namespace MikuMikuLibrary.Databases
 
     public class BoneDatabase : BinaryFile
     {
-        public override BinaryFileFlags Flags => 
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
+        public override BinaryFileFlags Flags =>
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
 
         public List<SkeletonEntry> Skeletons { get; }
 

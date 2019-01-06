@@ -57,32 +57,32 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
-        private Endianness endianness;
-        private bool swap;
-        private Encoding encoding;
-        private Stack<long> offsetStack;
-        private Stack<long> baseOffsetStack;
-        private Queue<OffsetWrite> offsetWriteQueue;
-        private Stack<StringTable> stringTableStack;
-        private List<long> offsetPositions;
+        private Endianness mEndianness;
+        private bool mSwap;
+        private Encoding mEncoding;
+        private Stack<long> mOffsetStack;
+        private Stack<long> mBaseOffsetStack;
+        private Queue<OffsetWrite> mOffsetWriteQueue;
+        private Stack<StringTable> mStringTableStack;
+        private List<long> mOffsetPositions;
 
         public Endianness Endianness
         {
-            get { return endianness; }
+            get { return mEndianness; }
             set
             {
                 if ( value != EndiannessSwapUtilities.SystemEndianness )
-                    swap = true;
+                    mSwap = true;
                 else
-                    swap = false;
+                    mSwap = false;
 
-                endianness = value;
+                mEndianness = value;
             }
         }
 
         public bool EndiannessNeedsSwapping
         {
-            get { return swap; }
+            get { return mSwap; }
         }
 
         public long Position
@@ -98,7 +98,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public List<long> OffsetPositions
         {
-            get { return offsetPositions; }
+            get { return mOffsetPositions; }
         }
 
         public EndianBinaryWriter( Stream input, Endianness endianness )
@@ -122,12 +122,12 @@ namespace MikuMikuLibrary.IO.Common
         private void Init( Encoding encoding, Endianness endianness )
         {
             Endianness = endianness;
-            this.encoding = encoding;
-            offsetStack = new Stack<long>();
-            baseOffsetStack = new Stack<long>();
-            offsetWriteQueue = new Queue<OffsetWrite>();
-            stringTableStack = new Stack<StringTable>();
-            offsetPositions = new List<long>();
+            mEncoding = encoding;
+            mOffsetStack = new Stack<long>();
+            mBaseOffsetStack = new Stack<long>();
+            mOffsetWriteQueue = new Queue<OffsetWrite>();
+            mStringTableStack = new Stack<StringTable>();
+            mOffsetPositions = new List<long>();
         }
 
         public void Seek( long offset, SeekOrigin origin )
@@ -152,17 +152,17 @@ namespace MikuMikuLibrary.IO.Common
 
         public void PushOffset()
         {
-            offsetStack.Push( Position );
+            mOffsetStack.Push( Position );
         }
 
         public long PeekOffset()
         {
-            return offsetStack.Peek();
+            return mOffsetStack.Peek();
         }
 
         public long PopOffset()
         {
-            return offsetStack.Pop();
+            return mOffsetStack.Pop();
         }
 
         public void SeekBeginToPoppedOffset()
@@ -172,17 +172,17 @@ namespace MikuMikuLibrary.IO.Common
 
         public void PushBaseOffset()
         {
-            baseOffsetStack.Push( Position );
+            mBaseOffsetStack.Push( Position );
         }
 
         public long PeekBaseOffset()
         {
-            return baseOffsetStack.Peek();
+            return mBaseOffsetStack.Peek();
         }
 
         public long PopBaseOffset()
         {
-            return baseOffsetStack.Pop();
+            return mBaseOffsetStack.Pop();
         }
 
         public void WriteAlignmentPadding( int alignment, byte filler = 0 )
@@ -244,7 +244,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public void EnqueueOffsetWrite( int alignment, byte alignmentFillerByte, AlignmentKind alignmentKind, OffsetKind offsetKind, Action body )
         {
-            offsetWriteQueue.Enqueue( new OffsetWrite
+            mOffsetWriteQueue.Enqueue( new OffsetWrite
             {
                 FieldOffset = Position,
                 Alignment = alignment,
@@ -252,7 +252,7 @@ namespace MikuMikuLibrary.IO.Common
                 AlignmentKind = alignmentKind,
                 OffsetKind = offsetKind,
                 WriteAction = body,
-                BaseOffset = baseOffsetStack.Any() ? baseOffsetStack.Peek() : 0,
+                BaseOffset = mBaseOffsetStack.Any() ? mBaseOffsetStack.Peek() : 0,
             } );
 
             PrepareOffsetWrite( offsetKind );
@@ -324,7 +324,7 @@ namespace MikuMikuLibrary.IO.Common
 
         private void DoOffsetWrite( OffsetWrite offsetWrite, long baseOffset )
         {
-            offsetWriteQueue = new Queue<OffsetWrite>();
+            mOffsetWriteQueue = new Queue<OffsetWrite>();
 
             if ( offsetWrite.AlignmentKind == AlignmentKind.Left ||
                 offsetWrite.AlignmentKind == AlignmentKind.Center )
@@ -369,26 +369,26 @@ namespace MikuMikuLibrary.IO.Common
             SeekBegin( endOffsetAligned );
 
             // For the relocation table
-            offsetPositions.Add( offsetWrite.FieldOffset );
+            mOffsetPositions.Add( offsetWrite.FieldOffset );
 
-            var offsetWriteQueueForThisOffsetWrite = offsetWriteQueue;
+            var offsetWriteQueueForThisOffsetWrite = mOffsetWriteQueue;
             while ( offsetWriteQueueForThisOffsetWrite.Count > 0 )
                 DoOffsetWrite( offsetWriteQueueForThisOffsetWrite.Dequeue(), baseOffset );
         }
 
         public void DoEnqueuedOffsetWrites()
         {
-            var offsetWriteQueue = this.offsetWriteQueue;
+            var offsetWriteQueue = mOffsetWriteQueue;
 
             while ( offsetWriteQueue.Count > 0 )
                 DoOffsetWrite( offsetWriteQueue.Dequeue(), 0 );
 
-            this.offsetWriteQueue.Clear();
+            mOffsetWriteQueue.Clear();
         }
 
         public void DoEnqueuedOffsetWritesReversed()
         {
-            offsetWriteQueue = new Queue<OffsetWrite>( offsetWriteQueue.Reverse() );
+            mOffsetWriteQueue = new Queue<OffsetWrite>( mOffsetWriteQueue.Reverse() );
             DoEnqueuedOffsetWrites();
         }
 
@@ -399,9 +399,9 @@ namespace MikuMikuLibrary.IO.Common
 
         public void PushStringTable( int alignment, AlignmentKind alignmentKind, StringBinaryFormat format, int fixedLength = -1 )
         {
-            stringTableStack.Push( new StringTable
+            mStringTableStack.Push( new StringTable
             {
-                BaseOffset = baseOffsetStack.Count > 0 ? baseOffsetStack.Peek() : 0,
+                BaseOffset = mBaseOffsetStack.Count > 0 ? mBaseOffsetStack.Peek() : 0,
                 Strings = new Dictionary<string, List<long>>(),
                 AlignmentKind = alignmentKind,
                 Alignment = alignment,
@@ -412,7 +412,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public void PopStringTable()
         {
-            var stringTable = stringTableStack.Pop();
+            var stringTable = mStringTableStack.Pop();
 
             if ( stringTable.Strings.Count == 0 )
                 return;
@@ -433,7 +433,7 @@ namespace MikuMikuLibrary.IO.Common
                 {
                     SeekBegin( offset );
                     Write( ( uint )( stringOffset - stringTable.BaseOffset ) );
-                    offsetPositions.Add( offset );
+                    mOffsetPositions.Add( offset );
                 }
 
                 SeekBegin( endOffset );
@@ -448,32 +448,32 @@ namespace MikuMikuLibrary.IO.Common
 
         public void PopStringTables()
         {
-            while ( stringTableStack.Count > 0 )
+            while ( mStringTableStack.Count > 0 )
                 PopStringTable();
         }
 
         public void PopStringTablesReversed()
         {
-            if ( stringTableStack.Count == 0 )
+            if ( mStringTableStack.Count == 0 )
                 return;
 
-            else if ( stringTableStack.Count == 1 )
+            else if ( mStringTableStack.Count == 1 )
                 PopStringTable();
 
             else
             {
-                var stringTableStack = new Stack<StringTable>( this.stringTableStack.Count );
-                foreach ( var stringTable in this.stringTableStack )
+                var stringTableStack = new Stack<StringTable>( mStringTableStack.Count );
+                foreach ( var stringTable in mStringTableStack )
                     stringTableStack.Push( stringTable );
 
-                this.stringTableStack = stringTableStack;
+                mStringTableStack = stringTableStack;
                 PopStringTables();
             }
         }
 
         public void AddStringToStringTable( string value )
         {
-            var stringTable = stringTableStack.Peek();
+            var stringTable = mStringTableStack.Peek();
 
             if ( !string.IsNullOrEmpty( value ) )
             {
@@ -504,7 +504,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( short value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( short[] values )
@@ -515,7 +515,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( ushort value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( ushort[] values )
@@ -526,7 +526,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( int value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( int[] values )
@@ -537,7 +537,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( uint value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( uint[] values )
@@ -548,7 +548,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( long value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( long[] values )
@@ -559,7 +559,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( ulong value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( ulong[] values )
@@ -570,7 +570,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( float value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( float[] values )
@@ -581,7 +581,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public void Write( Half value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value.Value ) : value.Value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value.Value ) : value.Value );
         }
 
         public void Write( Half[] values )
@@ -592,7 +592,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( decimal value )
         {
-            base.Write( swap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( decimal[] values )
@@ -607,7 +607,7 @@ namespace MikuMikuLibrary.IO.Common
             {
                 case StringBinaryFormat.NullTerminated:
                     {
-                        Write( encoding.GetBytes( value ) );
+                        Write( mEncoding.GetBytes( value ) );
                         base.Write( ( byte )0 );
                     }
                     break;
@@ -618,7 +618,7 @@ namespace MikuMikuLibrary.IO.Common
                             throw new ArgumentException( "Fixed length must be provided if format is set to fixed length", nameof( fixedLength ) );
                         }
 
-                        var bytes = encoding.GetBytes( value );
+                        var bytes = mEncoding.GetBytes( value );
                         if ( bytes.Length > fixedLength )
                         {
                             throw new ArgumentException( "Provided string is longer than fixed length", nameof( value ) );
@@ -635,21 +635,21 @@ namespace MikuMikuLibrary.IO.Common
                 case StringBinaryFormat.PrefixedLength8:
                     {
                         base.Write( ( byte )value.Length );
-                        Write( encoding.GetBytes( value ) );
+                        Write( mEncoding.GetBytes( value ) );
                     }
                     break;
 
                 case StringBinaryFormat.PrefixedLength16:
                     {
                         Write( ( ushort )value.Length );
-                        Write( encoding.GetBytes( value ) );
+                        Write( mEncoding.GetBytes( value ) );
                     }
                     break;
 
                 case StringBinaryFormat.PrefixedLength32:
                     {
                         Write( ( uint )value.Length );
-                        Write( encoding.GetBytes( value ) );
+                        Write( mEncoding.GetBytes( value ) );
                     }
                     break;
 

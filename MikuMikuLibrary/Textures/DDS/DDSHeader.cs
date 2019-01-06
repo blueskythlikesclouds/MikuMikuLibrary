@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Textures.DDS
 {
     public class DDSHeader
     {
-        public const int Magic = 0x20534444; // 'DDS '
+        public const int MAGIC = 0x20534444; // 'DDS '
 
         public int Size { get; set; }
 
@@ -86,7 +86,7 @@ namespace MikuMikuLibrary.Textures.DDS
         internal void Read( BinaryReader reader )
         {
             var magic = reader.ReadInt32();
-            if ( magic != Magic )
+            if ( magic != MAGIC )
                 throw new InvalidDataException( "Header magic value did not match the expected value" );
 
             Size = reader.ReadInt32();
@@ -112,7 +112,7 @@ namespace MikuMikuLibrary.Textures.DDS
 
         internal void Write( BinaryWriter writer )
         {
-            writer.Write( Magic );
+            writer.Write( MAGIC );
             writer.Write( Size );
             writer.Write( ( int )Flags );
             writer.Write( Height );

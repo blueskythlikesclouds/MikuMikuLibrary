@@ -12,7 +12,7 @@ namespace MikuMikuModel.DataNodes
 
         public override DataNodeFlags Flags => DataNodeFlags.Leaf;
 
-        public override DataNodeActionFlags ActionFlags => 
+        public override DataNodeActionFlags ActionFlags =>
             DataNodeActionFlags.Export | DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Replace;
 
         public override Bitmap Icon => Properties.Resources.Texture;

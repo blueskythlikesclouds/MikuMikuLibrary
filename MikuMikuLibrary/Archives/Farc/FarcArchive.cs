@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -15,15 +14,15 @@ namespace MikuMikuLibrary.Archives.Farc
     {
         private readonly Dictionary<string, InternalEntry> mEntries;
         private int mAlignment;
-        
-        public override BinaryFileFlags Flags => 
+
+        public override BinaryFileFlags Flags =>
             BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.UsesSourceStream;
-            
+
         public override Endianness Endianness => Endianness.BigEndian;
 
         public bool CanAdd => true;
         public bool CanRemove => true;
-        
+
         public IEnumerable<string> Entries => mEntries.Keys;
 
         public int Alignment
@@ -86,7 +85,7 @@ namespace MikuMikuLibrary.Archives.Farc
         public EntryStream<string> Open( string handle, EntryStreamMode mode )
         {
             var entry = mEntries[ handle ];
-            var entryStream = entry.Open( stream );
+            var entryStream = entry.Open( mStream );
 
             if ( mode == EntryStreamMode.MemoryStream )
             {
@@ -271,7 +270,7 @@ namespace MikuMikuLibrary.Archives.Farc
                     {
                         long position = writer.Position;
 
-                        var entryStream = entry.Open( stream );
+                        var entryStream = entry.Open( mStream );
                         if ( entryStream.CanSeek )
                             entryStream.Position = 0;
 

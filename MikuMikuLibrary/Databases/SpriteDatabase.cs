@@ -39,7 +39,7 @@ namespace MikuMikuLibrary.Databases
     public class SpriteDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
 
         public List<SpriteSetEntry> SpriteSets { get; }
 

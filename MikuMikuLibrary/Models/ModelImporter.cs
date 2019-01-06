@@ -13,7 +13,7 @@ namespace MikuMikuLibrary.Models
 {
     public static class ModelImporter
     {
-        private static Random randomIDGenerator = new Random();
+        private static Random sRandom = new Random();
 
         public static Model ConvertModelFromAiScene( string filePath )
         {
@@ -136,7 +136,7 @@ namespace MikuMikuLibrary.Models
 
             texture = TextureEncoder.Encode( textureFilePath );
             texture.Name = textureName;
-            texture.ID = randomIDGenerator.Next( 800000, int.MaxValue );
+            texture.ID = sRandom.Next( 800000, int.MaxValue );
             textureSet.Textures.Add( texture );
 
             return texture;
@@ -253,11 +253,11 @@ namespace MikuMikuLibrary.Models
         {
             if ( !aiNode.HasMeshes )
                 return null;
-            
+
             // Select meshes that have triangles
-            var aiMeshes = aiNode.MeshIndices.Select( x => aiScene.Meshes[ x ] ).Where( x => 
+            var aiMeshes = aiNode.MeshIndices.Select( x => aiScene.Meshes[ x ] ).Where( x =>
                 x.PrimitiveType == Ai.PrimitiveType.Triangle && x.Faces.Any( y => y.IndexCount == 3 ) ).ToList();
-                
+
             if ( aiMeshes.Count == 0 )
                 return null;
 
@@ -321,7 +321,7 @@ namespace MikuMikuLibrary.Models
                 if ( aiMesh.HasVertexColors( 0 ) )
                 {
                     if ( subMesh.Colors == null )
-                        subMesh.Colors = Enumerable.Repeat( Color.One, vertexCount ).ToArray();
+                        subMesh.Colors = Enumerable.Repeat( Color.White, vertexCount ).ToArray();
 
                     for ( int i = 0; i < aiMesh.VertexColorChannels[ 0 ].Count; i++ )
                         subMesh.Colors[ vertexOffset + i ] = new Color( aiMesh.VertexColorChannels[ 0 ][ i ].R, aiMesh.VertexColorChannels[ 0 ][ i ].G, aiMesh.VertexColorChannels[ 0 ][ i ].B, aiMesh.VertexColorChannels[ 0 ][ i ].A );
@@ -352,9 +352,9 @@ namespace MikuMikuLibrary.Models
                             subMesh.BoneWeights[ vertexOffset + aiWeight.VertexID ].AddWeight( i, aiWeight.Weight );
                     }
                 }
-                
+
                 indexTable.Indices = aiMesh.Faces.Where( x => x.IndexCount == 3 ).SelectMany( x => x.Indices ).Select( x => ( ushort )( vertexOffset + x ) ).ToArray();
-                
+
                 ushort[] triangleStrip = TriangleStripUtilities.GenerateStrips( indexTable.Indices );
                 if ( triangleStrip != null )
                 {

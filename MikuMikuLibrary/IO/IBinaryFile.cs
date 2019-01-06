@@ -20,7 +20,7 @@ namespace MikuMikuLibrary.IO
     {
         Load = 1,
         Save = 2,
-        HasSectionFormat = 4,
+        HasModernVersion = 4,
         UsesSourceStream = 8,
     }
 }

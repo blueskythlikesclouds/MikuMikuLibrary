@@ -10,19 +10,19 @@ namespace MikuMikuLibrary.IO.Sections
 {
     public static partial class SectionManager
     {
-        private static readonly Dictionary<Type, SectionInfo> sectionInfos = new Dictionary<Type, SectionInfo>();
-        private static readonly Dictionary<string, SectionInfo> sectionInfosBySignature = new Dictionary<string, SectionInfo>();
-        private static readonly Dictionary<Type, SectionInfo> singleSectionInfosByDataType = new Dictionary<Type, SectionInfo>();
+        private static readonly Dictionary<Type, SectionInfo> sSectionInfos = new Dictionary<Type, SectionInfo>();
+        private static readonly Dictionary<string, SectionInfo> sSectionInfosBySignature = new Dictionary<string, SectionInfo>();
+        private static readonly Dictionary<Type, SectionInfo> sSingleSectionInfosByDataType = new Dictionary<Type, SectionInfo>();
 
-        public static IReadOnlyDictionary<Type, SectionInfo> SectionInfos => sectionInfos;
+        public static IReadOnlyDictionary<Type, SectionInfo> SectionInfos => sSectionInfos;
 
-        public static IReadOnlyDictionary<string, SectionInfo> SectionInfosBySignature => sectionInfosBySignature;
-        
-        public static IReadOnlyDictionary<Type, SectionInfo> SingleSectionInfosByDataType => singleSectionInfosByDataType;
+        public static IReadOnlyDictionary<string, SectionInfo> SectionInfosBySignature => sSectionInfosBySignature;
+
+        public static IReadOnlyDictionary<Type, SectionInfo> SingleSectionInfosByDataType => sSingleSectionInfosByDataType;
 
         public static SectionInfo Register( Type sectionType )
         {
-            if ( sectionInfos.ContainsKey( sectionType ) )
+            if ( sSectionInfos.ContainsKey( sectionType ) )
                 throw new ArgumentException( "Section type is already registered", nameof( sectionType ) );
 
             if ( !SectionInfo.IsSection( sectionType ) )
@@ -30,18 +30,18 @@ namespace MikuMikuLibrary.IO.Sections
 
             var sectionInfo = new SectionInfo( sectionType );
 
-            sectionInfos.Add( sectionType, sectionInfo );
-            sectionInfosBySignature.Add( sectionInfo.Signature, sectionInfo );
+            sSectionInfos.Add( sectionType, sectionInfo );
+            sSectionInfosBySignature.Add( sectionInfo.Signature, sectionInfo );
 
-            if ( !singleSectionInfosByDataType.ContainsKey( sectionInfo.DataType ) )
-                singleSectionInfosByDataType.Add( sectionInfo.DataType, sectionInfo );
+            if ( !sSingleSectionInfosByDataType.ContainsKey( sectionInfo.DataType ) )
+                sSingleSectionInfosByDataType.Add( sectionInfo.DataType, sectionInfo );
 
             return sectionInfo;
         }
 
         public static bool TryRegister( Type sectionType, out SectionInfo sectionInfo )
         {
-            if ( sectionInfos.ContainsKey( sectionType ) )
+            if ( sSectionInfos.ContainsKey( sectionType ) )
             {
                 sectionInfo = null;
                 return false;
@@ -55,18 +55,18 @@ namespace MikuMikuLibrary.IO.Sections
 
             sectionInfo = new SectionInfo( sectionType );
 
-            sectionInfos.Add( sectionType, sectionInfo );
-            sectionInfosBySignature.Add( sectionInfo.Signature, sectionInfo );
+            sSectionInfos.Add( sectionType, sectionInfo );
+            sSectionInfosBySignature.Add( sectionInfo.Signature, sectionInfo );
 
-            if ( !singleSectionInfosByDataType.ContainsKey( sectionInfo.DataType ) )
-                singleSectionInfosByDataType.Add( sectionInfo.DataType, sectionInfo );
+            if ( !sSingleSectionInfosByDataType.ContainsKey( sectionInfo.DataType ) )
+                sSingleSectionInfosByDataType.Add( sectionInfo.DataType, sectionInfo );
 
             return true;
         }
 
         public static SectionInfo GetOrRegister( Type sectionType )
         {
-            if ( sectionInfos.TryGetValue( sectionType, out SectionInfo sectionInfo ) )
+            if ( sSectionInfos.TryGetValue( sectionType, out SectionInfo sectionInfo ) )
                 return sectionInfo;
 
             return Register( sectionType );
@@ -74,12 +74,12 @@ namespace MikuMikuLibrary.IO.Sections
 
         public static Section CreateSection( Type sectionType, Stream source, object dataToRead = null )
         {
-            return sectionInfos[ sectionType ].Create( source, dataToRead );
+            return sSectionInfos[ sectionType ].Create( source, dataToRead );
         }
 
         public static Section CreateSection( Type sectionType, object dataToWrite, Endianness endianness )
         {
-            return sectionInfos[ sectionType ].Create( dataToWrite, endianness );
+            return sSectionInfos[ sectionType ].Create( dataToWrite, endianness );
         }
 
 #if DEBUG

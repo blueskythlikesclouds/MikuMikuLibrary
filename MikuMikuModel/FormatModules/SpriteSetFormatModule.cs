@@ -5,7 +5,7 @@ namespace MikuMikuModel.FormatModules
 {
     public class SpriteSetFormatModule : FormatModule<SpriteSet>
     {
-        public override FormatModuleFlags Flags => 
+        public override FormatModuleFlags Flags =>
             FormatModuleFlags.Import | FormatModuleFlags.Export;
 
         public override string Name => "Sprite Set";

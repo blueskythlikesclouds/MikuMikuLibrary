@@ -5,7 +5,7 @@
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer mComponents = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -13,9 +13,9 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose( bool disposing )
         {
-            if ( disposing && ( components != null ) )
+            if ( disposing && ( mComponents != null ) )
             {
-                components.Dispose();
+                mComponents.Dispose();
             }
             base.Dispose( disposing );
         }
@@ -28,245 +28,245 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.createButton = new System.Windows.Forms.Button();
-            this.renameButton = new System.Windows.Forms.Button();
-            this.cloneButton = new System.Windows.Forms.Button();
-            this.reloadButton = new System.Windows.Forms.Button();
-            this.removeButton = new System.Windows.Forms.Button();
-            this.listBox = new System.Windows.Forms.ListBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.boneDatabaseLabel = new System.Windows.Forms.Label();
-            this.textureDatabaseLabel = new System.Windows.Forms.Label();
-            this.objectDatabaseLabel = new System.Windows.Forms.Label();
-            this.boneDatabaseBrowseButton = new System.Windows.Forms.Button();
-            this.boneDatabasePathTextBox = new System.Windows.Forms.TextBox();
-            this.textureDatabaseBrowseButton = new System.Windows.Forms.Button();
-            this.textureDatabasePathTextBox = new System.Windows.Forms.TextBox();
-            this.objectDatabaseBrowseButton = new System.Windows.Forms.Button();
-            this.objectDatabasePathTextBox = new System.Windows.Forms.TextBox();
-            this.okButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.mGroupBox1 = new System.Windows.Forms.GroupBox();
+            this.mCreateButton = new System.Windows.Forms.Button();
+            this.mRenameButton = new System.Windows.Forms.Button();
+            this.mCloneButton = new System.Windows.Forms.Button();
+            this.mReloadButton = new System.Windows.Forms.Button();
+            this.mRemoveButton = new System.Windows.Forms.Button();
+            this.mListBox = new System.Windows.Forms.ListBox();
+            this.mGroupBox2 = new System.Windows.Forms.GroupBox();
+            this.mBoneDatabaseLabel = new System.Windows.Forms.Label();
+            this.mTextureDatabaseLabel = new System.Windows.Forms.Label();
+            this.mObjectDatabaseLabel = new System.Windows.Forms.Label();
+            this.mBoneDatabaseBrowseButton = new System.Windows.Forms.Button();
+            this.mBoneDatabasePathTextBox = new System.Windows.Forms.TextBox();
+            this.mTextureDatabaseBrowseButton = new System.Windows.Forms.Button();
+            this.mTextureDatabasePathTextBox = new System.Windows.Forms.TextBox();
+            this.mObjectDatabaseBrowseButton = new System.Windows.Forms.Button();
+            this.mObjectDatabasePathTextBox = new System.Windows.Forms.TextBox();
+            this.mOkButton = new System.Windows.Forms.Button();
+            this.mCancelButton = new System.Windows.Forms.Button();
+            this.mGroupBox1.SuspendLayout();
+            this.mGroupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.createButton);
-            this.groupBox1.Controls.Add(this.renameButton);
-            this.groupBox1.Controls.Add(this.cloneButton);
-            this.groupBox1.Controls.Add(this.reloadButton);
-            this.groupBox1.Controls.Add(this.removeButton);
-            this.groupBox1.Controls.Add(this.listBox);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(410, 181);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Configurations";
+            this.mGroupBox1.Controls.Add( this.mCreateButton );
+            this.mGroupBox1.Controls.Add( this.mRenameButton );
+            this.mGroupBox1.Controls.Add( this.mCloneButton );
+            this.mGroupBox1.Controls.Add( this.mReloadButton );
+            this.mGroupBox1.Controls.Add( this.mRemoveButton );
+            this.mGroupBox1.Controls.Add( this.mListBox );
+            this.mGroupBox1.Location = new System.Drawing.Point( 12, 12 );
+            this.mGroupBox1.Name = "groupBox1";
+            this.mGroupBox1.Size = new System.Drawing.Size( 410, 181 );
+            this.mGroupBox1.TabIndex = 0;
+            this.mGroupBox1.TabStop = false;
+            this.mGroupBox1.Text = "Configurations";
             // 
             // createButton
             // 
-            this.createButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.createButton.Location = new System.Drawing.Point(6, 146);
-            this.createButton.Name = "createButton";
-            this.createButton.Size = new System.Drawing.Size(75, 23);
-            this.createButton.TabIndex = 1;
-            this.createButton.Text = "Create";
-            this.createButton.UseVisualStyleBackColor = true;
-            this.createButton.Click += new System.EventHandler(this.OnCreate);
+            this.mCreateButton.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mCreateButton.Location = new System.Drawing.Point( 6, 146 );
+            this.mCreateButton.Name = "createButton";
+            this.mCreateButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mCreateButton.TabIndex = 1;
+            this.mCreateButton.Text = "Create";
+            this.mCreateButton.UseVisualStyleBackColor = true;
+            this.mCreateButton.Click += new System.EventHandler( this.OnCreate );
             // 
             // renameButton
             // 
-            this.renameButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.renameButton.Location = new System.Drawing.Point(168, 146);
-            this.renameButton.Name = "renameButton";
-            this.renameButton.Size = new System.Drawing.Size(75, 23);
-            this.renameButton.TabIndex = 5;
-            this.renameButton.Text = "Rename";
-            this.renameButton.UseVisualStyleBackColor = true;
-            this.renameButton.Click += new System.EventHandler(this.OnRename);
+            this.mRenameButton.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mRenameButton.Location = new System.Drawing.Point( 168, 146 );
+            this.mRenameButton.Name = "renameButton";
+            this.mRenameButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mRenameButton.TabIndex = 5;
+            this.mRenameButton.Text = "Rename";
+            this.mRenameButton.UseVisualStyleBackColor = true;
+            this.mRenameButton.Click += new System.EventHandler( this.OnRename );
             // 
             // cloneButton
             // 
-            this.cloneButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cloneButton.Location = new System.Drawing.Point(249, 146);
-            this.cloneButton.Name = "cloneButton";
-            this.cloneButton.Size = new System.Drawing.Size(75, 23);
-            this.cloneButton.TabIndex = 2;
-            this.cloneButton.Text = "Clone";
-            this.cloneButton.UseVisualStyleBackColor = true;
-            this.cloneButton.Click += new System.EventHandler(this.OnClone);
+            this.mCloneButton.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mCloneButton.Location = new System.Drawing.Point( 249, 146 );
+            this.mCloneButton.Name = "cloneButton";
+            this.mCloneButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mCloneButton.TabIndex = 2;
+            this.mCloneButton.Text = "Clone";
+            this.mCloneButton.UseVisualStyleBackColor = true;
+            this.mCloneButton.Click += new System.EventHandler( this.OnClone );
             // 
             // reloadButton
             // 
-            this.reloadButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.reloadButton.Location = new System.Drawing.Point(330, 146);
-            this.reloadButton.Name = "reloadButton";
-            this.reloadButton.Size = new System.Drawing.Size(75, 23);
-            this.reloadButton.TabIndex = 4;
-            this.reloadButton.Text = "Reload";
-            this.reloadButton.UseVisualStyleBackColor = true;
-            this.reloadButton.Click += new System.EventHandler(this.OnReload);
+            this.mReloadButton.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mReloadButton.Location = new System.Drawing.Point( 330, 146 );
+            this.mReloadButton.Name = "reloadButton";
+            this.mReloadButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mReloadButton.TabIndex = 4;
+            this.mReloadButton.Text = "Reload";
+            this.mReloadButton.UseVisualStyleBackColor = true;
+            this.mReloadButton.Click += new System.EventHandler( this.OnReload );
             // 
             // removeButton
             // 
-            this.removeButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.removeButton.Location = new System.Drawing.Point(87, 146);
-            this.removeButton.Name = "removeButton";
-            this.removeButton.Size = new System.Drawing.Size(75, 23);
-            this.removeButton.TabIndex = 3;
-            this.removeButton.Text = "Remove";
-            this.removeButton.UseVisualStyleBackColor = true;
-            this.removeButton.Click += new System.EventHandler(this.OnRemove);
+            this.mRemoveButton.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mRemoveButton.Location = new System.Drawing.Point( 87, 146 );
+            this.mRemoveButton.Name = "removeButton";
+            this.mRemoveButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mRemoveButton.TabIndex = 3;
+            this.mRemoveButton.Text = "Remove";
+            this.mRemoveButton.UseVisualStyleBackColor = true;
+            this.mRemoveButton.Click += new System.EventHandler( this.OnRemove );
             // 
             // listBox
             // 
-            this.listBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listBox.FormattingEnabled = true;
-            this.listBox.Location = new System.Drawing.Point(6, 19);
-            this.listBox.Name = "listBox";
-            this.listBox.Size = new System.Drawing.Size(398, 121);
-            this.listBox.TabIndex = 0;
-            this.listBox.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
+            this.mListBox.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+            | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mListBox.FormattingEnabled = true;
+            this.mListBox.Location = new System.Drawing.Point( 6, 19 );
+            this.mListBox.Name = "listBox";
+            this.mListBox.Size = new System.Drawing.Size( 398, 121 );
+            this.mListBox.TabIndex = 0;
+            this.mListBox.SelectedIndexChanged += new System.EventHandler( this.OnSelectedIndexChanged );
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.boneDatabaseLabel);
-            this.groupBox2.Controls.Add(this.textureDatabaseLabel);
-            this.groupBox2.Controls.Add(this.objectDatabaseLabel);
-            this.groupBox2.Controls.Add(this.boneDatabaseBrowseButton);
-            this.groupBox2.Controls.Add(this.boneDatabasePathTextBox);
-            this.groupBox2.Controls.Add(this.textureDatabaseBrowseButton);
-            this.groupBox2.Controls.Add(this.textureDatabasePathTextBox);
-            this.groupBox2.Controls.Add(this.objectDatabaseBrowseButton);
-            this.groupBox2.Controls.Add(this.objectDatabasePathTextBox);
-            this.groupBox2.Location = new System.Drawing.Point(12, 199);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(410, 117);
-            this.groupBox2.TabIndex = 1;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Configuration";
+            this.mGroupBox2.Controls.Add( this.mBoneDatabaseLabel );
+            this.mGroupBox2.Controls.Add( this.mTextureDatabaseLabel );
+            this.mGroupBox2.Controls.Add( this.mObjectDatabaseLabel );
+            this.mGroupBox2.Controls.Add( this.mBoneDatabaseBrowseButton );
+            this.mGroupBox2.Controls.Add( this.mBoneDatabasePathTextBox );
+            this.mGroupBox2.Controls.Add( this.mTextureDatabaseBrowseButton );
+            this.mGroupBox2.Controls.Add( this.mTextureDatabasePathTextBox );
+            this.mGroupBox2.Controls.Add( this.mObjectDatabaseBrowseButton );
+            this.mGroupBox2.Controls.Add( this.mObjectDatabasePathTextBox );
+            this.mGroupBox2.Location = new System.Drawing.Point( 12, 199 );
+            this.mGroupBox2.Name = "groupBox2";
+            this.mGroupBox2.Size = new System.Drawing.Size( 410, 117 );
+            this.mGroupBox2.TabIndex = 1;
+            this.mGroupBox2.TabStop = false;
+            this.mGroupBox2.Text = "Configuration";
             // 
             // boneDatabaseLabel
             // 
-            this.boneDatabaseLabel.AutoSize = true;
-            this.boneDatabaseLabel.Location = new System.Drawing.Point(7, 82);
-            this.boneDatabaseLabel.Name = "boneDatabaseLabel";
-            this.boneDatabaseLabel.Size = new System.Drawing.Size(84, 13);
-            this.boneDatabaseLabel.TabIndex = 9;
-            this.boneDatabaseLabel.Text = "Bone Database:";
+            this.mBoneDatabaseLabel.AutoSize = true;
+            this.mBoneDatabaseLabel.Location = new System.Drawing.Point( 7, 82 );
+            this.mBoneDatabaseLabel.Name = "boneDatabaseLabel";
+            this.mBoneDatabaseLabel.Size = new System.Drawing.Size( 84, 13 );
+            this.mBoneDatabaseLabel.TabIndex = 9;
+            this.mBoneDatabaseLabel.Text = "Bone Database:";
             // 
             // textureDatabaseLabel
             // 
-            this.textureDatabaseLabel.AutoSize = true;
-            this.textureDatabaseLabel.Location = new System.Drawing.Point(7, 54);
-            this.textureDatabaseLabel.Name = "textureDatabaseLabel";
-            this.textureDatabaseLabel.Size = new System.Drawing.Size(95, 13);
-            this.textureDatabaseLabel.TabIndex = 8;
-            this.textureDatabaseLabel.Text = "Texture Database:";
+            this.mTextureDatabaseLabel.AutoSize = true;
+            this.mTextureDatabaseLabel.Location = new System.Drawing.Point( 7, 54 );
+            this.mTextureDatabaseLabel.Name = "textureDatabaseLabel";
+            this.mTextureDatabaseLabel.Size = new System.Drawing.Size( 95, 13 );
+            this.mTextureDatabaseLabel.TabIndex = 8;
+            this.mTextureDatabaseLabel.Text = "Texture Database:";
             // 
             // objectDatabaseLabel
             // 
-            this.objectDatabaseLabel.AutoSize = true;
-            this.objectDatabaseLabel.Location = new System.Drawing.Point(7, 27);
-            this.objectDatabaseLabel.Name = "objectDatabaseLabel";
-            this.objectDatabaseLabel.Size = new System.Drawing.Size(90, 13);
-            this.objectDatabaseLabel.TabIndex = 7;
-            this.objectDatabaseLabel.Text = "Object Database:";
+            this.mObjectDatabaseLabel.AutoSize = true;
+            this.mObjectDatabaseLabel.Location = new System.Drawing.Point( 7, 27 );
+            this.mObjectDatabaseLabel.Name = "objectDatabaseLabel";
+            this.mObjectDatabaseLabel.Size = new System.Drawing.Size( 90, 13 );
+            this.mObjectDatabaseLabel.TabIndex = 7;
+            this.mObjectDatabaseLabel.Text = "Object Database:";
             // 
             // boneDatabaseBrowseButton
             // 
-            this.boneDatabaseBrowseButton.Location = new System.Drawing.Point(330, 78);
-            this.boneDatabaseBrowseButton.Name = "boneDatabaseBrowseButton";
-            this.boneDatabaseBrowseButton.Size = new System.Drawing.Size(75, 22);
-            this.boneDatabaseBrowseButton.TabIndex = 6;
-            this.boneDatabaseBrowseButton.Text = "Browse";
-            this.boneDatabaseBrowseButton.UseVisualStyleBackColor = true;
-            this.boneDatabaseBrowseButton.Click += new System.EventHandler(this.OnBoneDatabaseBrowse);
+            this.mBoneDatabaseBrowseButton.Location = new System.Drawing.Point( 330, 78 );
+            this.mBoneDatabaseBrowseButton.Name = "boneDatabaseBrowseButton";
+            this.mBoneDatabaseBrowseButton.Size = new System.Drawing.Size( 75, 22 );
+            this.mBoneDatabaseBrowseButton.TabIndex = 6;
+            this.mBoneDatabaseBrowseButton.Text = "Browse";
+            this.mBoneDatabaseBrowseButton.UseVisualStyleBackColor = true;
+            this.mBoneDatabaseBrowseButton.Click += new System.EventHandler( this.OnBoneDatabaseBrowse );
             // 
             // boneDatabasePathTextBox
             // 
-            this.boneDatabasePathTextBox.Location = new System.Drawing.Point(103, 79);
-            this.boneDatabasePathTextBox.Name = "boneDatabasePathTextBox";
-            this.boneDatabasePathTextBox.Size = new System.Drawing.Size(221, 20);
-            this.boneDatabasePathTextBox.TabIndex = 5;
-            this.boneDatabasePathTextBox.TextChanged += new System.EventHandler(this.OnBoneDatabasePathTextBoxTextChanged);
+            this.mBoneDatabasePathTextBox.Location = new System.Drawing.Point( 103, 79 );
+            this.mBoneDatabasePathTextBox.Name = "boneDatabasePathTextBox";
+            this.mBoneDatabasePathTextBox.Size = new System.Drawing.Size( 221, 20 );
+            this.mBoneDatabasePathTextBox.TabIndex = 5;
+            this.mBoneDatabasePathTextBox.TextChanged += new System.EventHandler( this.OnBoneDatabasePathTextBoxTextChanged );
             // 
             // textureDatabaseBrowseButton
             // 
-            this.textureDatabaseBrowseButton.Location = new System.Drawing.Point(330, 50);
-            this.textureDatabaseBrowseButton.Name = "textureDatabaseBrowseButton";
-            this.textureDatabaseBrowseButton.Size = new System.Drawing.Size(75, 22);
-            this.textureDatabaseBrowseButton.TabIndex = 4;
-            this.textureDatabaseBrowseButton.Text = "Browse";
-            this.textureDatabaseBrowseButton.UseVisualStyleBackColor = true;
-            this.textureDatabaseBrowseButton.Click += new System.EventHandler(this.OnTextureDatabaseBrowse);
+            this.mTextureDatabaseBrowseButton.Location = new System.Drawing.Point( 330, 50 );
+            this.mTextureDatabaseBrowseButton.Name = "textureDatabaseBrowseButton";
+            this.mTextureDatabaseBrowseButton.Size = new System.Drawing.Size( 75, 22 );
+            this.mTextureDatabaseBrowseButton.TabIndex = 4;
+            this.mTextureDatabaseBrowseButton.Text = "Browse";
+            this.mTextureDatabaseBrowseButton.UseVisualStyleBackColor = true;
+            this.mTextureDatabaseBrowseButton.Click += new System.EventHandler( this.OnTextureDatabaseBrowse );
             // 
             // textureDatabasePathTextBox
             // 
-            this.textureDatabasePathTextBox.Location = new System.Drawing.Point(103, 51);
-            this.textureDatabasePathTextBox.Name = "textureDatabasePathTextBox";
-            this.textureDatabasePathTextBox.Size = new System.Drawing.Size(221, 20);
-            this.textureDatabasePathTextBox.TabIndex = 3;
-            this.textureDatabasePathTextBox.TextChanged += new System.EventHandler(this.OnTextureDatabasePathTextBoxTextChanged);
+            this.mTextureDatabasePathTextBox.Location = new System.Drawing.Point( 103, 51 );
+            this.mTextureDatabasePathTextBox.Name = "textureDatabasePathTextBox";
+            this.mTextureDatabasePathTextBox.Size = new System.Drawing.Size( 221, 20 );
+            this.mTextureDatabasePathTextBox.TabIndex = 3;
+            this.mTextureDatabasePathTextBox.TextChanged += new System.EventHandler( this.OnTextureDatabasePathTextBoxTextChanged );
             // 
             // objectDatabaseBrowseButton
             // 
-            this.objectDatabaseBrowseButton.Location = new System.Drawing.Point(330, 22);
-            this.objectDatabaseBrowseButton.Name = "objectDatabaseBrowseButton";
-            this.objectDatabaseBrowseButton.Size = new System.Drawing.Size(75, 22);
-            this.objectDatabaseBrowseButton.TabIndex = 2;
-            this.objectDatabaseBrowseButton.Text = "Browse";
-            this.objectDatabaseBrowseButton.UseVisualStyleBackColor = true;
-            this.objectDatabaseBrowseButton.Click += new System.EventHandler(this.OnObjectDatabaseBrowse);
+            this.mObjectDatabaseBrowseButton.Location = new System.Drawing.Point( 330, 22 );
+            this.mObjectDatabaseBrowseButton.Name = "objectDatabaseBrowseButton";
+            this.mObjectDatabaseBrowseButton.Size = new System.Drawing.Size( 75, 22 );
+            this.mObjectDatabaseBrowseButton.TabIndex = 2;
+            this.mObjectDatabaseBrowseButton.Text = "Browse";
+            this.mObjectDatabaseBrowseButton.UseVisualStyleBackColor = true;
+            this.mObjectDatabaseBrowseButton.Click += new System.EventHandler( this.OnObjectDatabaseBrowse );
             // 
             // objectDatabasePathTextBox
             // 
-            this.objectDatabasePathTextBox.Location = new System.Drawing.Point(103, 23);
-            this.objectDatabasePathTextBox.Name = "objectDatabasePathTextBox";
-            this.objectDatabasePathTextBox.Size = new System.Drawing.Size(221, 20);
-            this.objectDatabasePathTextBox.TabIndex = 1;
-            this.objectDatabasePathTextBox.TextChanged += new System.EventHandler(this.OnObjectDatabasePathTextBoxTextChanged);
+            this.mObjectDatabasePathTextBox.Location = new System.Drawing.Point( 103, 23 );
+            this.mObjectDatabasePathTextBox.Name = "objectDatabasePathTextBox";
+            this.mObjectDatabasePathTextBox.Size = new System.Drawing.Size( 221, 20 );
+            this.mObjectDatabasePathTextBox.TabIndex = 1;
+            this.mObjectDatabasePathTextBox.TextChanged += new System.EventHandler( this.OnObjectDatabasePathTextBoxTextChanged );
             // 
             // okButton
             // 
-            this.okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.okButton.Location = new System.Drawing.Point(266, 322);
-            this.okButton.Name = "okButton";
-            this.okButton.Size = new System.Drawing.Size(75, 23);
-            this.okButton.TabIndex = 2;
-            this.okButton.Text = "OK";
-            this.okButton.UseVisualStyleBackColor = true;
+            this.mOkButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.mOkButton.Location = new System.Drawing.Point( 266, 322 );
+            this.mOkButton.Name = "okButton";
+            this.mOkButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mOkButton.TabIndex = 2;
+            this.mOkButton.Text = "OK";
+            this.mOkButton.UseVisualStyleBackColor = true;
             // 
             // cancelButton
             // 
-            this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(347, 322);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 3;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
+            this.mCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.mCancelButton.Location = new System.Drawing.Point( 347, 322 );
+            this.mCancelButton.Name = "cancelButton";
+            this.mCancelButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mCancelButton.TabIndex = 3;
+            this.mCancelButton.Text = "Cancel";
+            this.mCancelButton.UseVisualStyleBackColor = true;
             // 
             // ConfigurationForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(434, 354);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.okButton);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
+            this.CancelButton = this.mCancelButton;
+            this.ClientSize = new System.Drawing.Size( 434, 354 );
+            this.Controls.Add( this.mCancelButton );
+            this.Controls.Add( this.mOkButton );
+            this.Controls.Add( this.mGroupBox2 );
+            this.Controls.Add( this.mGroupBox1 );
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -274,33 +274,33 @@
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Configurations";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.ResumeLayout(false);
+            this.mGroupBox1.ResumeLayout( false );
+            this.mGroupBox2.ResumeLayout( false );
+            this.mGroupBox2.PerformLayout();
+            this.ResumeLayout( false );
 
         }
 
         #endregion
 
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button renameButton;
-        private System.Windows.Forms.Button reloadButton;
-        private System.Windows.Forms.Button removeButton;
-        private System.Windows.Forms.Button cloneButton;
-        private System.Windows.Forms.ListBox listBox;
-        private System.Windows.Forms.Button createButton;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Button objectDatabaseBrowseButton;
-        private System.Windows.Forms.TextBox objectDatabasePathTextBox;
-        private System.Windows.Forms.Label boneDatabaseLabel;
-        private System.Windows.Forms.Label textureDatabaseLabel;
-        private System.Windows.Forms.Label objectDatabaseLabel;
-        private System.Windows.Forms.Button boneDatabaseBrowseButton;
-        private System.Windows.Forms.TextBox boneDatabasePathTextBox;
-        private System.Windows.Forms.Button textureDatabaseBrowseButton;
-        private System.Windows.Forms.TextBox textureDatabasePathTextBox;
-        private System.Windows.Forms.Button okButton;
-        private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.GroupBox mGroupBox1;
+        private System.Windows.Forms.Button mRenameButton;
+        private System.Windows.Forms.Button mReloadButton;
+        private System.Windows.Forms.Button mRemoveButton;
+        private System.Windows.Forms.Button mCloneButton;
+        private System.Windows.Forms.ListBox mListBox;
+        private System.Windows.Forms.Button mCreateButton;
+        private System.Windows.Forms.GroupBox mGroupBox2;
+        private System.Windows.Forms.Button mObjectDatabaseBrowseButton;
+        private System.Windows.Forms.TextBox mObjectDatabasePathTextBox;
+        private System.Windows.Forms.Label mBoneDatabaseLabel;
+        private System.Windows.Forms.Label mTextureDatabaseLabel;
+        private System.Windows.Forms.Label mObjectDatabaseLabel;
+        private System.Windows.Forms.Button mBoneDatabaseBrowseButton;
+        private System.Windows.Forms.TextBox mBoneDatabasePathTextBox;
+        private System.Windows.Forms.Button mTextureDatabaseBrowseButton;
+        private System.Windows.Forms.TextBox mTextureDatabasePathTextBox;
+        private System.Windows.Forms.Button mOkButton;
+        private System.Windows.Forms.Button mCancelButton;
     }
 }

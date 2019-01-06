@@ -8,46 +8,46 @@ namespace MikuMikuModel.Configurations
 {
     public class ConfigurationList : ICloneable, IEquatable<ConfigurationList>
     {
-        private static ConfigurationList instance;
-        private static readonly XmlSerializer serializer = new XmlSerializer( typeof( ConfigurationList ) );
+        private static ConfigurationList sInstance;
+        private static readonly XmlSerializer sSerializer = new XmlSerializer( typeof( ConfigurationList ) );
 
         public static ConfigurationList Instance
         {
             get
             {
-                if ( instance == null )
+                if ( sInstance == null )
                 {
                     if ( !File.Exists( FilePath ) )
                     {
-                        instance = new ConfigurationList();
-                        instance.Save();
+                        sInstance = new ConfigurationList();
+                        sInstance.Save();
                     }
 
                     else
                     {
                         using ( var stream = File.OpenRead( FilePath ) )
-                            instance = ( ConfigurationList )serializer.Deserialize( stream );
+                            sInstance = ( ConfigurationList )sSerializer.Deserialize( stream );
                     }
                 }
 
-                return instance;
+                return sInstance;
             }
         }
 
         public static string FilePath => Path.ChangeExtension( Application.ExecutablePath, "xml" );
         public static string BackupFilePath => Path.ChangeExtension( Path.ChangeExtension( Application.ExecutablePath, null ) + "-Backup", "xml" );
 
-        private Configuration currentConfiguration;
+        private Configuration mCurrentConfiguration;
 
         public List<Configuration> Configurations { get; }
 
         [XmlIgnore]
         public Configuration CurrentConfiguration
         {
-            get => currentConfiguration;
+            get => mCurrentConfiguration;
             set
             {
-                currentConfiguration = value;
+                mCurrentConfiguration = value;
 
                 if ( !Configurations.Contains( value ) )
                     Configurations.Add( value );
@@ -56,7 +56,7 @@ namespace MikuMikuModel.Configurations
 
         public void DetermineCurrentConfiguration( string referenceFilePath )
         {
-            currentConfiguration = FindConfiguration( referenceFilePath ) ?? currentConfiguration;
+            mCurrentConfiguration = FindConfiguration( referenceFilePath ) ?? mCurrentConfiguration;
         }
 
         public Configuration FindConfiguration( string referenceFilePath )
@@ -78,7 +78,7 @@ namespace MikuMikuModel.Configurations
                 File.Copy( FilePath, BackupFilePath, true );
 
             using ( var stream = File.Create( FilePath ) )
-                serializer.Serialize( stream, this );
+                sSerializer.Serialize( stream, this );
         }
 
         public object Clone()

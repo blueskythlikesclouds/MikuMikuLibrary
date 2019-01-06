@@ -7,7 +7,7 @@ namespace MikuMikuLibrary.Materials
 {
     public class Material
     {
-        public const int ByteSize = 0x4B0;
+        public const int BYTE_SIZE = 0x4B0;
 
         public int Field00 { get; set; }
         public string Shader { get; set; }
@@ -58,7 +58,7 @@ namespace MikuMikuLibrary.Materials
                 Field02 = ( Field02 & ~1 ) | ( value ? 1 : 0 );
             }
         }
-        
+
         public IEnumerable<MaterialTexture> MaterialTextures
         {
             get
@@ -74,7 +74,7 @@ namespace MikuMikuLibrary.Materials
             }
         }
 
-        public IEnumerable<MaterialTexture> ActiveMaterialTextures => 
+        public IEnumerable<MaterialTexture> ActiveMaterialTextures =>
             MaterialTextures.Where( x => x.IsActive );
 
         internal void Read( EndianBinaryReader reader )

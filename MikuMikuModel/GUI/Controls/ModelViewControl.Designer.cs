@@ -5,7 +5,7 @@
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer mComponents = null;
 
         #region Component Designer generated code
 
@@ -15,7 +15,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            mComponents = new System.ComponentModel.Container();
         }
 
         #endregion

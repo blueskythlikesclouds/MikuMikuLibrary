@@ -10,10 +10,10 @@ namespace MikuMikuLibrary.Textures
 {
     public static class TextureDecoder
     {
-        private readonly static Matrix4x4 YCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
-                                                                      0.0f, -0.1873f, 1.8556f, 0.0f,
-                                                                      1.5748f, -0.4681f, 0.0f, 0.0f,
-                                                                      0.0f, 0.0f, 0.0f, 1.0f );
+        private readonly static Matrix4x4 sYCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
+                                                                       0.0f, -0.1873f, 1.8556f, 0.0f,
+                                                                       1.5748f, -0.4681f, 0.0f, 0.0f,
+                                                                       0.0f, 0.0f, 0.0f, 1.0f );
 
         // Thanks to Brolijah for finding this out!!
         private static unsafe void ConvertYCbCrToRGBA( int* lumPtr, int* cbrPtr, int* outPtr, int width, int height )
@@ -28,7 +28,7 @@ namespace MikuMikuLibrary.Textures
                     Color lum = Color.FromArgb( *( lumPtr + lumOffset ) );
                     Color cbr = Color.FromArgb( *( cbrPtr + cbrOffset ) );
 
-                    Vector3 rgb = Vector3.Transform( new Vector3( lum.R / 255.0f, cbr.R / 255.0f - 0.5f, cbr.G / 255.0f - 0.5f ), YCbCrToRGB );
+                    Vector3 rgb = Vector3.Transform( new Vector3( lum.R / 255.0f, cbr.R / 255.0f - 0.5f, cbr.G / 255.0f - 0.5f ), sYCbCrToRGB );
                     rgb = Vector3.Multiply( Vector3.Max( Vector3.Zero, Vector3.Min( Vector3.One, rgb ) ), 255.0f );
 
                     *( outPtr + lumOffset ) = Color.FromArgb( lum.G, ( int )rgb.X, ( int )rgb.Y, ( int )rgb.Z ).ToArgb();
@@ -70,7 +70,7 @@ namespace MikuMikuLibrary.Textures
             }
             else
             {
-                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height, Texture.GetDDSPixelFormat( subTexture.Format ) );
+                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
                 Marshal.Copy( buffer, 0, bitmapData.Scan0, buffer.Length );
                 bitmap.UnlockBits( bitmapData );
@@ -105,10 +105,10 @@ namespace MikuMikuLibrary.Textures
                 var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );
 
                 var lumBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture[ 0 ].Data, texture[ 0 ].Width, texture[ 0 ].Height, Texture.GetDDSPixelFormat( texture.Format ) );
+                    texture[ 0 ].Data, texture[ 0 ].Width, texture[ 0 ].Height, TextureUtilities.GetDDSPixelFormat( texture.Format ) );
 
                 var cbrBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture[ 1 ].Data, texture[ 1 ].Width, texture[ 1 ].Height, Texture.GetDDSPixelFormat( texture.Format ) );
+                    texture[ 1 ].Data, texture[ 1 ].Width, texture[ 1 ].Height, TextureUtilities.GetDDSPixelFormat( texture.Format ) );
 
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
                 fixed ( byte* lumPtr = lumBuffer )
@@ -148,7 +148,7 @@ namespace MikuMikuLibrary.Textures
 
         public static void DecodeToDDS( Texture texture, Stream destination )
         {
-            var ddsHeader = new DDSHeader( texture.Width, texture.Height, Texture.GetDDSPixelFormat( texture.Format ) );
+            var ddsHeader = new DDSHeader( texture.Width, texture.Height, TextureUtilities.GetDDSPixelFormat( texture.Format ) );
 
             if ( texture.UsesDepth )
             {

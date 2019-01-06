@@ -12,9 +12,9 @@ namespace MikuMikuModel.Configurations
         public static readonly string BackupDirectory = Path.Combine(
             Path.GetDirectoryName( Application.ExecutablePath ), "Backups" );
 
-        private ObjectDatabase objectDatabase;
-        private TextureDatabase textureDatabase;
-        private BoneDatabase boneDatabase;
+        private ObjectDatabase mObjectDatabase;
+        private TextureDatabase mTextureDatabase;
+        private BoneDatabase mBoneDatabase;
 
         public string Name { get; set; }
         public string ObjectDatabaseFilePath { get; set; }
@@ -25,45 +25,45 @@ namespace MikuMikuModel.Configurations
         {
             get
             {
-                if ( objectDatabase == null && File.Exists( ObjectDatabaseFilePath ) )
+                if ( mObjectDatabase == null && File.Exists( ObjectDatabaseFilePath ) )
                 {
-                    objectDatabase = BinaryFile.Load<ObjectDatabase>( ObjectDatabaseFilePath );
+                    mObjectDatabase = BinaryFile.Load<ObjectDatabase>( ObjectDatabaseFilePath );
                     DoBackup( ObjectDatabaseFilePath );
                 }
 
-                return objectDatabase;
+                return mObjectDatabase;
             }
-            set => objectDatabase = value;
+            set => mObjectDatabase = value;
         }
 
         public TextureDatabase TextureDatabase
         {
             get
             {
-                if ( textureDatabase == null && File.Exists( TextureDatabaseFilePath ) )
+                if ( mTextureDatabase == null && File.Exists( TextureDatabaseFilePath ) )
                 {
-                    textureDatabase = BinaryFile.Load<TextureDatabase>( TextureDatabaseFilePath );
+                    mTextureDatabase = BinaryFile.Load<TextureDatabase>( TextureDatabaseFilePath );
                     DoBackup( TextureDatabaseFilePath );
                 }
 
-                return textureDatabase;
+                return mTextureDatabase;
             }
-            set => textureDatabase = value;
+            set => mTextureDatabase = value;
         }
 
         public BoneDatabase BoneDatabase
         {
             get
             {
-                if ( boneDatabase == null && File.Exists( BoneDatabaseFilePath ) )
+                if ( mBoneDatabase == null && File.Exists( BoneDatabaseFilePath ) )
                 {
-                    boneDatabase = BinaryFile.Load<BoneDatabase>( BoneDatabaseFilePath );
+                    mBoneDatabase = BinaryFile.Load<BoneDatabase>( BoneDatabaseFilePath );
                     DoBackup( BoneDatabaseFilePath );
                 }
 
-                return boneDatabase;
+                return mBoneDatabase;
             }
-            set => boneDatabase = value;
+            set => mBoneDatabase = value;
         }
 
         public object Clone()

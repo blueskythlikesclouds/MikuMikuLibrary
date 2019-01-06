@@ -9,68 +9,68 @@ namespace MikuMikuModel.GUI.Forms
 {
     public partial class ConfigurationForm : Form
     {
-        private readonly ConfigurationList configurationList;
+        private readonly ConfigurationList mConfigurationList;
 
         public ConfigurationForm()
         {
             InitializeComponent();
 
-            configurationList = ( ConfigurationList )ConfigurationList.Instance.Clone();
+            mConfigurationList = ( ConfigurationList )ConfigurationList.Instance.Clone();
         }
 
-        public Configuration SelectedConfiguration => 
-            listBox.SelectedIndex < 0 ? null : configurationList.Configurations[ listBox.SelectedIndex ];
+        public Configuration SelectedConfiguration =>
+            mListBox.SelectedIndex < 0 ? null : mConfigurationList.Configurations[ mListBox.SelectedIndex ];
 
         private void SetConfiguration( Configuration configuration )
         {
-            listBox.SelectedIndex = configurationList.Configurations.IndexOf( configuration );
-            objectDatabasePathTextBox.Text = configuration?.ObjectDatabaseFilePath;
-            textureDatabasePathTextBox.Text = configuration?.TextureDatabaseFilePath;
-            boneDatabasePathTextBox.Text = configuration?.BoneDatabaseFilePath;
+            mListBox.SelectedIndex = mConfigurationList.Configurations.IndexOf( configuration );
+            mObjectDatabasePathTextBox.Text = configuration?.ObjectDatabaseFilePath;
+            mTextureDatabasePathTextBox.Text = configuration?.TextureDatabaseFilePath;
+            mBoneDatabasePathTextBox.Text = configuration?.BoneDatabaseFilePath;
         }
 
         private void UpdateListBox()
         {
-            int previousIndex = listBox.SelectedIndex;
+            int previousIndex = mListBox.SelectedIndex;
 
-            listBox.Items.Clear();
+            mListBox.Items.Clear();
 
-            foreach ( var configuration in configurationList.Configurations )
-                listBox.Items.Add( configuration.Name );
+            foreach ( var configuration in mConfigurationList.Configurations )
+                mListBox.Items.Add( configuration.Name );
 
-            if ( previousIndex >= listBox.Items.Count )
-                listBox.SelectedIndex = listBox.Items.Count - 1;
+            if ( previousIndex >= mListBox.Items.Count )
+                mListBox.SelectedIndex = mListBox.Items.Count - 1;
             else
-                listBox.SelectedIndex = previousIndex;
+                mListBox.SelectedIndex = previousIndex;
         }
 
         protected override void OnLoad( EventArgs e )
         {
             UpdateListBox();
-            objectDatabasePathTextBox.Enabled = false;
-            textureDatabasePathTextBox.Enabled = false;
-            boneDatabasePathTextBox.Enabled = false;
-            objectDatabaseBrowseButton.Enabled = false;
-            textureDatabaseBrowseButton.Enabled = false;
-            boneDatabaseBrowseButton.Enabled = false;
-            removeButton.Enabled = false;
-            renameButton.Enabled = false;
-            cloneButton.Enabled = false;
-            reloadButton.Enabled = false;
+            mObjectDatabasePathTextBox.Enabled = false;
+            mTextureDatabasePathTextBox.Enabled = false;
+            mBoneDatabasePathTextBox.Enabled = false;
+            mObjectDatabaseBrowseButton.Enabled = false;
+            mTextureDatabaseBrowseButton.Enabled = false;
+            mBoneDatabaseBrowseButton.Enabled = false;
+            mRemoveButton.Enabled = false;
+            mRenameButton.Enabled = false;
+            mCloneButton.Enabled = false;
+            mReloadButton.Enabled = false;
 
             base.OnLoad( e );
         }
 
         protected override void OnFormClosing( FormClosingEventArgs e )
         {
-            bool instanceEquals = configurationList.Equals( ConfigurationList.Instance );
+            bool instanceEquals = mConfigurationList.Equals( ConfigurationList.Instance );
             if ( DialogResult != DialogResult.OK && !instanceEquals )
             {
                 var result = MessageBox.Show( "You have unsaved changes. Do you want to save them?", "Miku Miku Model", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question );
                 if ( result == DialogResult.OK )
                 {
                     ConfigurationList.Instance.Configurations.Clear();
-                    ConfigurationList.Instance.Configurations.AddRange( configurationList.Configurations );
+                    ConfigurationList.Instance.Configurations.AddRange( mConfigurationList.Configurations );
                     ConfigurationList.Instance.Save();
                 }
                 else if ( result == DialogResult.Cancel )
@@ -81,7 +81,7 @@ namespace MikuMikuModel.GUI.Forms
             else if ( DialogResult == DialogResult.OK && !instanceEquals )
             {
                 ConfigurationList.Instance.Configurations.Clear();
-                ConfigurationList.Instance.Configurations.AddRange( configurationList.Configurations );
+                ConfigurationList.Instance.Configurations.AddRange( mConfigurationList.Configurations );
                 ConfigurationList.Instance.Save();
             }
 
@@ -91,12 +91,12 @@ namespace MikuMikuModel.GUI.Forms
         private void OnCreate( object sender, EventArgs e )
         {
             var name = "New Configuration";
-            if ( configurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
+            if ( mConfigurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
             {
                 for ( int i = 0; ; i++ )
                 {
                     name = $"New Configuration {i}";
-                    if ( !configurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
+                    if ( !mConfigurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
                     {
                         break;
                     }
@@ -108,27 +108,27 @@ namespace MikuMikuModel.GUI.Forms
                 Name = name
             };
 
-            configurationList.Configurations.Add( configuration );
+            mConfigurationList.Configurations.Add( configuration );
             UpdateListBox();
             SetConfiguration( configuration );
         }
 
         private void OnRemove( object sender, EventArgs e )
         {
-            configurationList.Configurations.RemoveAt( listBox.SelectedIndex );
+            mConfigurationList.Configurations.RemoveAt( mListBox.SelectedIndex );
             UpdateListBox();
         }
 
         private void OnRename( object sender, EventArgs e )
         {
-            var configuration = configurationList.Configurations[ listBox.SelectedIndex ];
+            var configuration = mConfigurationList.Configurations[ mListBox.SelectedIndex ];
             while ( true )
             {
                 using ( var renameForm = new RenameForm( configuration.Name ) )
                 {
                     if ( renameForm.ShowDialog( this ) == DialogResult.OK )
                     {
-                        if ( configurationList.Configurations.Any( x => x != configuration && x.Name.Equals( renameForm.TextBoxText, StringComparison.OrdinalIgnoreCase ) ) )
+                        if ( mConfigurationList.Configurations.Any( x => x != configuration && x.Name.Equals( renameForm.TextBoxText, StringComparison.OrdinalIgnoreCase ) ) )
                         {
                             MessageBox.Show( "A configuration with the same name already exists.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error );
                         }
@@ -154,12 +154,12 @@ namespace MikuMikuModel.GUI.Forms
             var clone = ( Configuration )SelectedConfiguration.Clone();
 
             var name = clone.Name;
-            if ( configurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
+            if ( mConfigurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
             {
                 for ( int i = 0; ; i++ )
                 {
                     name = $"{clone.Name} {i}";
-                    if ( !configurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
+                    if ( !mConfigurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
                     {
                         break;
                     }
@@ -167,7 +167,7 @@ namespace MikuMikuModel.GUI.Forms
             }
 
             clone.Name = name;
-            configurationList.Configurations.Insert( listBox.SelectedIndex + 1, clone );
+            mConfigurationList.Configurations.Insert( mListBox.SelectedIndex + 1, clone );
             UpdateListBox();
         }
 
@@ -180,59 +180,59 @@ namespace MikuMikuModel.GUI.Forms
 
         private void OnObjectDatabaseBrowse( object sender, EventArgs e )
         {
-            objectDatabasePathTextBox.Text =
+            mObjectDatabasePathTextBox.Text =
                 FormatModuleUtilities.SelectModuleImport<ObjectDatabase>(
                     "Select an object database file. (obj_db.bin)",
-                    SelectedConfiguration?.ObjectDatabaseFilePath ) ?? objectDatabasePathTextBox.Text;
+                    SelectedConfiguration?.ObjectDatabaseFilePath ) ?? mObjectDatabasePathTextBox.Text;
         }
 
         private void OnTextureDatabaseBrowse( object sender, EventArgs e )
         {
-            textureDatabasePathTextBox.Text =
+            mTextureDatabasePathTextBox.Text =
                 FormatModuleUtilities.SelectModuleImport<TextureDatabase>(
                 "Select a texture database file. (tex_db.bin)",
-                SelectedConfiguration?.TextureDatabaseFilePath ) ?? textureDatabasePathTextBox.Text;
+                SelectedConfiguration?.TextureDatabaseFilePath ) ?? mTextureDatabasePathTextBox.Text;
         }
 
         private void OnBoneDatabaseBrowse( object sender, EventArgs e )
         {
-            boneDatabasePathTextBox.Text =
+            mBoneDatabasePathTextBox.Text =
                 FormatModuleUtilities.SelectModuleImport<BoneDatabase>(
                     "Select a bone database file. (bone_data.bin/bone_data.bon)",
-                     SelectedConfiguration?.BoneDatabaseFilePath ) ?? boneDatabasePathTextBox.Text;
+                     SelectedConfiguration?.BoneDatabaseFilePath ) ?? mBoneDatabasePathTextBox.Text;
         }
 
         private void OnSelectedIndexChanged( object sender, EventArgs e )
         {
-            objectDatabasePathTextBox.Enabled = listBox.SelectedIndex >= 0;
-            textureDatabasePathTextBox.Enabled = listBox.SelectedIndex >= 0;
-            boneDatabasePathTextBox.Enabled = listBox.SelectedIndex >= 0;
-            objectDatabaseBrowseButton.Enabled = listBox.SelectedIndex >= 0;
-            textureDatabaseBrowseButton.Enabled = listBox.SelectedIndex >= 0;
-            boneDatabaseBrowseButton.Enabled = listBox.SelectedIndex >= 0;
-            removeButton.Enabled = listBox.SelectedIndex >= 0;
-            renameButton.Enabled = listBox.SelectedIndex >= 0;
-            cloneButton.Enabled = listBox.SelectedIndex >= 0;
-            reloadButton.Enabled = listBox.SelectedIndex >= 0;
+            mObjectDatabasePathTextBox.Enabled = mListBox.SelectedIndex >= 0;
+            mTextureDatabasePathTextBox.Enabled = mListBox.SelectedIndex >= 0;
+            mBoneDatabasePathTextBox.Enabled = mListBox.SelectedIndex >= 0;
+            mObjectDatabaseBrowseButton.Enabled = mListBox.SelectedIndex >= 0;
+            mTextureDatabaseBrowseButton.Enabled = mListBox.SelectedIndex >= 0;
+            mBoneDatabaseBrowseButton.Enabled = mListBox.SelectedIndex >= 0;
+            mRemoveButton.Enabled = mListBox.SelectedIndex >= 0;
+            mRenameButton.Enabled = mListBox.SelectedIndex >= 0;
+            mCloneButton.Enabled = mListBox.SelectedIndex >= 0;
+            mReloadButton.Enabled = mListBox.SelectedIndex >= 0;
 
-            SetConfiguration( listBox.SelectedIndex >= 0 ? configurationList.Configurations[ listBox.SelectedIndex ] : null );
+            SetConfiguration( mListBox.SelectedIndex >= 0 ? mConfigurationList.Configurations[ mListBox.SelectedIndex ] : null );
         }
 
         private void OnObjectDatabasePathTextBoxTextChanged( object sender, EventArgs e )
         {
-            SelectedConfiguration.ObjectDatabaseFilePath = objectDatabasePathTextBox.Text;
+            SelectedConfiguration.ObjectDatabaseFilePath = mObjectDatabasePathTextBox.Text;
             SelectedConfiguration.ObjectDatabase = null;
         }
 
         private void OnTextureDatabasePathTextBoxTextChanged( object sender, EventArgs e )
         {
-            SelectedConfiguration.TextureDatabaseFilePath = textureDatabasePathTextBox.Text;
+            SelectedConfiguration.TextureDatabaseFilePath = mTextureDatabasePathTextBox.Text;
             SelectedConfiguration.TextureDatabase = null;
         }
 
         private void OnBoneDatabasePathTextBoxTextChanged( object sender, EventArgs e )
         {
-            SelectedConfiguration.BoneDatabaseFilePath = boneDatabasePathTextBox.Text;
+            SelectedConfiguration.BoneDatabaseFilePath = mBoneDatabasePathTextBox.Text;
             SelectedConfiguration.BoneDatabase = null;
         }
     }

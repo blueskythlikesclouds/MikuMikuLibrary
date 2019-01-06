@@ -21,7 +21,10 @@ namespace MikuMikuLibrary.Models
     {
         public static readonly BoneWeight Empty = new BoneWeight
         {
-            Index1 = -1, Index2 = -1, Index3 = -1, Index4 = -1,
+            Index1 = -1,
+            Index2 = -1,
+            Index3 = -1,
+            Index4 = -1,
         };
 
         public float Weight1, Weight2, Weight3, Weight4;

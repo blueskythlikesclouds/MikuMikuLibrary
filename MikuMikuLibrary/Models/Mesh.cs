@@ -8,7 +8,7 @@ namespace MikuMikuLibrary.Models
 {
     public class Mesh
     {
-        public const int ByteSize = 0x50;
+        public const int BYTE_SIZE = 0x50;
 
         public List<SubMesh> SubMeshes { get; }
         public List<Material> Materials { get; }
@@ -47,7 +47,7 @@ namespace MikuMikuLibrary.Models
             SubMeshes.Capacity = subMeshCount;
             for ( int i = 0; i < subMeshCount; i++ )
             {
-                reader.ReadAtOffset( subMeshesOffset + ( i * SubMesh.ByteSize( section?.Format ?? BinaryFormat.DT ) ), () =>
+                reader.ReadAtOffset( subMeshesOffset + ( i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ) ), () =>
                 {
                     var submesh = new SubMesh();
                     submesh.Read( reader, section );
@@ -58,7 +58,7 @@ namespace MikuMikuLibrary.Models
             Materials.Capacity = materialCount;
             for ( int i = 0; i < materialCount; i++ )
             {
-                reader.ReadAtOffset( materialsOffset + ( i * Material.ByteSize ), () =>
+                reader.ReadAtOffset( materialsOffset + ( i * Material.BYTE_SIZE ), () =>
                 {
                     var material = new Material();
                     material.Read( reader );

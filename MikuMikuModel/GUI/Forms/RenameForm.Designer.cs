@@ -5,7 +5,7 @@
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer mComponents = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -13,9 +13,9 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose( bool disposing )
         {
-            if ( disposing && ( components != null ) )
+            if ( disposing && ( mComponents != null ) )
             {
-                components.Dispose();
+                mComponents.Dispose();
             }
             base.Dispose( disposing );
         }
@@ -28,51 +28,51 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.okButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.textBox = new System.Windows.Forms.TextBox();
+            this.mOkButton = new System.Windows.Forms.Button();
+            this.mCancelButton = new System.Windows.Forms.Button();
+            this.mTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // okButton
             // 
-            this.okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.okButton.Location = new System.Drawing.Point(166, 44);
-            this.okButton.Name = "okButton";
-            this.okButton.Size = new System.Drawing.Size(75, 23);
-            this.okButton.TabIndex = 0;
-            this.okButton.Text = "OK";
-            this.okButton.UseVisualStyleBackColor = true;
+            this.mOkButton.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mOkButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.mOkButton.Location = new System.Drawing.Point( 166, 44 );
+            this.mOkButton.Name = "okButton";
+            this.mOkButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mOkButton.TabIndex = 0;
+            this.mOkButton.Text = "OK";
+            this.mOkButton.UseVisualStyleBackColor = true;
             // 
             // cancelButton
             // 
-            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelButton.Location = new System.Drawing.Point(247, 44);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 1;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
+            this.mCancelButton.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mCancelButton.Location = new System.Drawing.Point( 247, 44 );
+            this.mCancelButton.Name = "cancelButton";
+            this.mCancelButton.Size = new System.Drawing.Size( 75, 23 );
+            this.mCancelButton.TabIndex = 1;
+            this.mCancelButton.Text = "Cancel";
+            this.mCancelButton.UseVisualStyleBackColor = true;
             // 
             // textBox
             // 
-            this.textBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox.Location = new System.Drawing.Point(12, 12);
-            this.textBox.Name = "textBox";
-            this.textBox.Size = new System.Drawing.Size(310, 20);
-            this.textBox.TabIndex = 2;
+            this.mTextBox.Anchor = ( ( System.Windows.Forms.AnchorStyles )( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.mTextBox.Location = new System.Drawing.Point( 12, 12 );
+            this.mTextBox.Name = "textBox";
+            this.mTextBox.Size = new System.Drawing.Size( 310, 20 );
+            this.mTextBox.TabIndex = 2;
             // 
             // RenameForm
             // 
-            this.AcceptButton = this.okButton;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AcceptButton = this.mOkButton;
+            this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(334, 79);
-            this.Controls.Add(this.textBox);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.okButton);
+            this.CancelButton = this.mCancelButton;
+            this.ClientSize = new System.Drawing.Size( 334, 79 );
+            this.Controls.Add( this.mTextBox );
+            this.Controls.Add( this.mCancelButton );
+            this.Controls.Add( this.mOkButton );
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -80,15 +80,15 @@
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Rename";
-            this.ResumeLayout(false);
+            this.ResumeLayout( false );
             this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Button okButton;
-        private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.TextBox textBox;
+        private System.Windows.Forms.Button mOkButton;
+        private System.Windows.Forms.Button mCancelButton;
+        private System.Windows.Forms.TextBox mTextBox;
     }
 }

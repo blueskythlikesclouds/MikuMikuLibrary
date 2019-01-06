@@ -20,7 +20,7 @@ namespace MikuMikuLibrary.Models
             if ( model.TextureSet != null )
             {
                 var texturesOutputDirectory = Path.GetDirectoryName( outputFileName );
-                Texture.SaveTextures( model.TextureSet, texturesOutputDirectory );
+                TextureUtilities.SaveTextures( model.TextureSet, texturesOutputDirectory );
             }
         }
 
@@ -30,7 +30,7 @@ namespace MikuMikuLibrary.Models
             aiScene.RootNode = new Ai.Node( "RootNode" );
 
             if ( model.TextureSet != null )
-                Texture.RenameTextures( model.TextureSet, textureDatabase );
+                TextureUtilities.RenameTextures( model.TextureSet, textureDatabase );
 
             foreach ( var mesh in model.Meshes )
                 ConvertAiMaterialsFromMaterials( aiScene, mesh.Materials, model.TextureSet );
@@ -63,7 +63,7 @@ namespace MikuMikuLibrary.Models
 
             var texturesOutputDirectory = Path.GetDirectoryName( outputFileName );
             foreach ( var model in models.Where( x => x.TextureSet != null ) )
-                Texture.SaveTextures( model.TextureSet, texturesOutputDirectory );
+                TextureUtilities.SaveTextures( model.TextureSet, texturesOutputDirectory );
         }
 
         public static Ai.Scene ConvertAiSceneFromModels( List<Model> models, TextureDatabase textureDatabase = null )
@@ -72,7 +72,7 @@ namespace MikuMikuLibrary.Models
             aiScene.RootNode = new Ai.Node( "RootNode" );
 
             foreach ( var model in models.Where( x => x.TextureSet != null ) )
-                Texture.RenameTextures( model.TextureSet, textureDatabase );
+                TextureUtilities.RenameTextures( model.TextureSet, textureDatabase );
 
             foreach ( var model in models )
             {
@@ -285,7 +285,7 @@ namespace MikuMikuLibrary.Models
 
             var texture = textureList.Textures.FirstOrDefault( x => x.ID == textureID );
             if ( texture != null )
-                return new Ai.TextureSlot( Texture.GetFileName( texture ), type, 0, Ai.TextureMapping.FromUV, 0, 0, Ai.TextureOperation.Add, Ai.TextureWrapMode.Wrap, Ai.TextureWrapMode.Wrap, 0 );
+                return new Ai.TextureSlot( TextureUtilities.GetFileName( texture ), type, 0, Ai.TextureMapping.FromUV, 0, 0, Ai.TextureOperation.Add, Ai.TextureWrapMode.Wrap, Ai.TextureWrapMode.Wrap, 0 );
 
             return default( Ai.TextureSlot );
         }

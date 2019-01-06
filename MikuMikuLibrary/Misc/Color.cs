@@ -6,8 +6,8 @@ namespace MikuMikuLibrary.Misc
     {
         public float R, G, B, A;
 
-        public static readonly Color One = new Color( 1, 1, 1, 1 );
-        public static readonly Color Zero = new Color( 0, 0, 0, 0 );
+        public static readonly Color White = new Color( 1, 1, 1, 1 );
+        public static readonly Color Transparent = new Color( 0, 0, 0, 0 );
 
         public Color( float r, float g, float b, float a )
         {

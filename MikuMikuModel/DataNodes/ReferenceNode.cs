@@ -28,9 +28,9 @@ namespace MikuMikuModel.DataNodes
 
         private void OnNodeMoved( object sender, DataNodeNodeMovedEventArgs e )
         {
-            var node = nodes[ e.OldIndex ];
-            nodes.RemoveAt( e.OldIndex );
-            nodes.Insert( e.NewIndex, node );
+            var node = mNodes[ e.OldIndex ];
+            mNodes.RemoveAt( e.OldIndex );
+            mNodes.Insert( e.NewIndex, node );
             OnMove( e.OldIndex, e.NewIndex, node );
         }
 

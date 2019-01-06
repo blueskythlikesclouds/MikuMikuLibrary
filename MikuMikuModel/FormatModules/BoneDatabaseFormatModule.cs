@@ -7,7 +7,7 @@ namespace MikuMikuModel.FormatModules
 {
     public class BoneDatabaseFormatModule : FormatModule<BoneDatabase>
     {
-        public override FormatModuleFlags Flags => 
+        public override FormatModuleFlags Flags =>
             FormatModuleFlags.Import | FormatModuleFlags.Export;
 
         public override string Name => "Bone Database";

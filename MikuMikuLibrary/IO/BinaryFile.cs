@@ -8,8 +8,8 @@ namespace MikuMikuLibrary.IO
 {
     public abstract class BinaryFile : IBinaryFile
     {
-        protected Stream stream;
-        protected bool ownsStream;
+        protected Stream mStream;
+        protected bool mOwnsStream;
 
         public abstract BinaryFileFlags Flags { get; }
         public virtual BinaryFormat Format { get; set; }
@@ -47,14 +47,14 @@ namespace MikuMikuLibrary.IO
 
             if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
             {
-                stream = source;
-                ownsStream = !leaveOpen;
+                mStream = source;
+                mOwnsStream = !leaveOpen;
             }
 
             bool readAsSection = false;
 
             // Attempt to detect the section format and read with that
-            if ( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) )
+            if ( Flags.HasFlag( BinaryFileFlags.HasModernVersion ) )
             {
                 long position = source.Position;
                 var signatureBytes = new byte[ 4 ];
@@ -115,7 +115,7 @@ namespace MikuMikuLibrary.IO
                 throw new NotSupportedException( "Binary file is not able to save" );
 
             // See if we are supposed to write in sectioned format
-            if ( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) && BinaryFormatUtilities.IsModern( Format ) )
+            if ( Flags.HasFlag( BinaryFileFlags.HasModernVersion ) && BinaryFormatUtilities.IsModern( Format ) )
                 GetSectionInstanceForWriting().Write( destination );
 
             else
@@ -141,13 +141,13 @@ namespace MikuMikuLibrary.IO
             // Adopt this stream
             if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
             {
-                if ( ownsStream )
-                    stream.Dispose();
+                if ( mOwnsStream )
+                    mStream.Dispose();
 
-                stream = destination;
-                ownsStream = !leaveOpen;
+                mStream = destination;
+                mOwnsStream = !leaveOpen;
 
-                stream.Flush();
+                mStream.Flush();
             }
             else if ( !leaveOpen )
             {
@@ -161,7 +161,7 @@ namespace MikuMikuLibrary.IO
                 throw new NotSupportedException( "Binary file is not able to save" );
 
             // Prevent any kind of conflict.
-            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && stream is FileStream fileStream )
+            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && mStream is FileStream fileStream )
             {
                 filePath = Path.GetFullPath( filePath );
                 string thisFilePath = Path.GetFullPath( fileStream.Name );
@@ -181,8 +181,8 @@ namespace MikuMikuLibrary.IO
                     File.Delete( filePath );
                     File.Move( thisFilePath, filePath );
 
-                    stream = new FileStream( filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite );
-                    ownsStream = true;
+                    mStream = new FileStream( filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite );
+                    mOwnsStream = true;
 
                     return;
                 }
@@ -211,8 +211,8 @@ namespace MikuMikuLibrary.IO
         /// <param name="disposing">Whether or not the managed objects are going to be disposed.</param>
         protected virtual void Dispose( bool disposing )
         {
-            if ( disposing && Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && ownsStream )
-                stream?.Dispose();
+            if ( disposing && Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && mOwnsStream )
+                mStream?.Dispose();
         }
 
         ~BinaryFile()

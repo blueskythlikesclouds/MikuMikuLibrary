@@ -7,7 +7,7 @@ namespace MikuMikuModel.FormatModules
 {
     public class BitmapFormatModule : FormatModule<Bitmap>
     {
-        public override FormatModuleFlags Flags => 
+        public override FormatModuleFlags Flags =>
             FormatModuleFlags.Import | FormatModuleFlags.Export;
 
         public override string Name => "Bitmap";

@@ -11,7 +11,7 @@ namespace MikuMikuLibrary.Textures
     public class TextureSet : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
 
         public List<Texture> Textures { get; }
 

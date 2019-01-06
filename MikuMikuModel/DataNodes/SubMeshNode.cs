@@ -12,7 +12,7 @@ namespace MikuMikuModel.DataNodes
     {
         public override DataNodeFlags Flags => DataNodeFlags.Branch;
 
-        public override DataNodeActionFlags ActionFlags => 
+        public override DataNodeActionFlags ActionFlags =>
             DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename;
 
         public override Control Control

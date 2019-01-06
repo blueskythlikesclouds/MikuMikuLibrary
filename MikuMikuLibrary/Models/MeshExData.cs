@@ -29,7 +29,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockConstraint : MeshExBlock
     {
-        public override string Kind => "CNS";
+        public override string Signature => "CNS";
 
         public string Field10 { get; set; }
         public string Field11 { get; set; }
@@ -121,7 +121,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockMotion : MeshExBlock
     {
-        public override string Kind => "MOT";
+        public override string Signature => "MOT";
 
         public string Name { get; set; }
         public List<int> BoneIDs { get; }
@@ -176,7 +176,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockExpression : MeshExBlock
     {
-        public override string Kind => "EXP";
+        public override string Signature => "EXP";
 
         public string BoneName { get; set; }
         public List<string> Expressions { get; }
@@ -212,7 +212,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExBlockOsage : MeshExBlock
     {
-        public override string Kind => "OSG";
+        public override string Signature => "OSG";
 
         public int Field00 { get; set; }
         public int Field01 { get; set; }
@@ -242,7 +242,7 @@ namespace MikuMikuLibrary.Models
 
     public abstract class MeshExBlock
     {
-        public abstract string Kind { get; }
+        public abstract string Signature { get; }
 
         public string ParentName { get; set; }
         public Vector3 Position { get; set; }
@@ -294,7 +294,7 @@ namespace MikuMikuLibrary.Models
 
     public class MeshExData
     {
-        public const int ByteSize = 0x60;
+        public const int BYTE_SIZE = 0x60;
 
         public List<MeshExOsageBoneEntry> OsageBones { get; }
         public List<string> OsageNames { get; }
@@ -336,7 +336,7 @@ namespace MikuMikuLibrary.Models
             {
                 while ( true )
                 {
-                    string exBlockKind = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+                    string exBlockSignature = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     long exBlockDataOffset = reader.ReadOffset();
 
                     if ( exBlockDataOffset == 0 )
@@ -346,7 +346,7 @@ namespace MikuMikuLibrary.Models
 
                     reader.ReadAtOffset( exBlockDataOffset, () =>
                     {
-                        switch ( exBlockKind )
+                        switch ( exBlockSignature )
                         {
                             case "OSG":
                                 exBlock = new MeshExBlockOsage();
@@ -361,7 +361,7 @@ namespace MikuMikuLibrary.Models
                                 exBlock = new MeshExBlockConstraint();
                                 break;
                             default:
-                                Debug.WriteLine( $"WARNING: Unknown ex-block type {exBlockKind}" );
+                                Debug.WriteLine( $"WARNING: Unknown ex-block type {exBlockSignature}" );
                                 break;
                         }
 
@@ -415,7 +415,7 @@ namespace MikuMikuLibrary.Models
             {
                 foreach ( var exBlock in ExBlocks )
                 {
-                    writer.AddStringToStringTable( exBlock.Kind );
+                    writer.AddStringToStringTable( exBlock.Signature );
                     writer.EnqueueOffsetWrite( 16, AlignmentKind.Left, () => exBlock.Write( writer ) );
                 }
                 writer.WriteNulls( 8 );

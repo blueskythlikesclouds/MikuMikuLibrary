@@ -8,7 +8,7 @@ namespace MikuMikuLibrary.Archives
     {
         bool CanAdd { get; }
         bool CanRemove { get; }
-        
+
         IEnumerable<THandle> Entries { get; }
 
         bool Contains( THandle handle );

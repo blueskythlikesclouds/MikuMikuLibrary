@@ -9,22 +9,19 @@ namespace MikuMikuModel.DataNodes
 {
     public static class DataNodeFactory
     {
-        private static readonly Dictionary<Type, Type> dataNodeTypes;
+        private static readonly Dictionary<Type, Type> sDataNodeTypes;
 
-        public static IReadOnlyDictionary<Type, Type> DataNodeTypes
-        {
-            get { return dataNodeTypes; }
-        }
+        public static IReadOnlyDictionary<Type, Type> DataNodeTypes => sDataNodeTypes;
 
         public static void Register( Type dataType, Type nodeType )
         {
             if ( !typeof( DataNode ).IsAssignableFrom( nodeType ) )
                 throw new ArgumentException( "Node type doesn't inherit IDataNode", nameof( nodeType ) );
 
-            if ( dataNodeTypes.ContainsKey( dataType ) )
+            if ( sDataNodeTypes.ContainsKey( dataType ) )
                 throw new ArgumentException( "Library already contains the data type", nameof( dataType ) );
 
-            dataNodeTypes.Add( dataType, nodeType );
+            sDataNodeTypes.Add( dataType, nodeType );
         }
 
         public static DataNode Create( Type type, string name, object data )
@@ -86,7 +83,7 @@ namespace MikuMikuModel.DataNodes
 
         static DataNodeFactory()
         {
-            dataNodeTypes = new Dictionary<Type, Type>();
+            sDataNodeTypes = new Dictionary<Type, Type>();
 
             // Try registering types with at least one generic type on the base type
             var assembly = Assembly.GetEntryAssembly();

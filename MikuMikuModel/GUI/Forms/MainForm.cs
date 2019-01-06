@@ -14,7 +14,7 @@ namespace MikuMikuModel.GUI.Forms
 {
     public partial class MainForm : Form
     {
-        private string currentlyOpenFilePath;
+        private string mCurrentlyOpenFilePath;
 
         private void OnOpen( object sender, EventArgs e )
         {
@@ -38,19 +38,19 @@ namespace MikuMikuModel.GUI.Forms
 
         private void OnAfterSelect( object sender, TreeViewEventArgs e )
         {
-            if ( treeView.SelectedDataNode is ReferenceNode referenceNode )
-                propertyGrid.SelectedObject = referenceNode.Reference;
+            if ( mTreeView.SelectedDataNode is ReferenceNode referenceNode )
+                mPropertyGrid.SelectedObject = referenceNode.Reference;
             else
-                propertyGrid.SelectedObject = treeView.SelectedDataNode;
+                mPropertyGrid.SelectedObject = mTreeView.SelectedDataNode;
 
             // Set the control on the left to the node's control
-            mainSplitContainer.Panel1.Controls.Clear();
+            mMainSplitContainer.Panel1.Controls.Clear();
 
             Control control;
-            if ( ( control = treeView.ControlOfSelectedDataNode ) != null )
+            if ( ( control = mTreeView.ControlOfSelectedDataNode ) != null )
             {
                 control.Dock = DockStyle.Fill;
-                mainSplitContainer.Panel1.Controls.Add( control );
+                mMainSplitContainer.Panel1.Controls.Add( control );
             }
         }
 
@@ -78,13 +78,13 @@ namespace MikuMikuModel.GUI.Forms
 
         protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
         {
-            foreach ( var menuItem in menuStrip.Items )
+            foreach ( var menuItem in mMenuStrip.Items )
             {
                 if ( CheckKeyPressRecursively( menuItem, keyData ) )
                     return true;
             }
 
-            var strip = treeView.SelectedNode?.ContextMenuStrip;
+            var strip = mTreeView.SelectedNode?.ContextMenuStrip;
             if ( strip != null )
             {
                 foreach ( var menuItem in strip.Items )
@@ -135,20 +135,20 @@ namespace MikuMikuModel.GUI.Forms
 
         public void Reset()
         {
-            treeView.TopDataNode?.Dispose();
-            treeView.Nodes.Clear();
+            mTreeView.TopDataNode?.Dispose();
+            mTreeView.Nodes.Clear();
 
-            propertyGrid.SelectedObject = null;
+            mPropertyGrid.SelectedObject = null;
 
-            mainSplitContainer.Panel1.Controls.Clear();
+            mMainSplitContainer.Panel1.Controls.Clear();
 
-            saveToolStripMenuItem.Enabled = false;
-            saveAsToolStripMenuItem.Enabled = false;
-            closeToolStripMenuItem.Enabled = false;
+            mSaveToolStripMenuItem.Enabled = false;
+            mSaveAsToolStripMenuItem.Enabled = false;
+            mCloseToolStripMenuItem.Enabled = false;
 
             Text = $"Miku Miku Model";
 
-            currentlyOpenFilePath = null;
+            mCurrentlyOpenFilePath = null;
         }
 
         public void OpenFile()
@@ -181,18 +181,18 @@ namespace MikuMikuModel.GUI.Forms
 
             // Wrap the node and add it to the tree view
             var wrappedNode = new DataTreeNode( node );
-            treeView.Nodes.Add( wrappedNode );
+            mTreeView.Nodes.Add( wrappedNode );
 
             // Restore menu items
-            saveToolStripMenuItem.Enabled = true;
-            saveAsToolStripMenuItem.Enabled = true;
-            closeToolStripMenuItem.Enabled = true;
+            mSaveToolStripMenuItem.Enabled = true;
+            mSaveAsToolStripMenuItem.Enabled = true;
+            mCloseToolStripMenuItem.Enabled = true;
 
             // Update the title to have the name of node
             Text = $"Miku Miku Model - {node.Name}";
 
             // Update the file path for the save method
-            currentlyOpenFilePath = filePath;
+            mCurrentlyOpenFilePath = filePath;
 
             // Expand the node
             wrappedNode.Expand();
@@ -200,26 +200,26 @@ namespace MikuMikuModel.GUI.Forms
 
         private void SaveFile( string filePath )
         {
-            if ( treeView.TopDataNode == null )
+            if ( mTreeView.TopDataNode == null )
                 return;
 
-            treeView.TopDataNode.Export( filePath );
+            mTreeView.TopDataNode.Export( filePath );
 
             // Save the texture database
             ConfigurationList.Instance.CurrentConfiguration?.TextureDatabase?.Save(
                 ConfigurationList.Instance.CurrentConfiguration?.TextureDatabaseFilePath );
 
-            currentlyOpenFilePath = filePath;
+            mCurrentlyOpenFilePath = filePath;
         }
 
         private bool SaveFile()
         {
-            if ( treeView.TopDataNode == null )
+            if ( mTreeView.TopDataNode == null )
                 return false;
 
-            if ( !string.IsNullOrEmpty( currentlyOpenFilePath ) )
+            if ( !string.IsNullOrEmpty( mCurrentlyOpenFilePath ) )
             {
-                SaveFile( currentlyOpenFilePath );
+                SaveFile( mCurrentlyOpenFilePath );
                 return true;
             }
 
@@ -228,11 +228,11 @@ namespace MikuMikuModel.GUI.Forms
 
         private bool SaveFileAs()
         {
-            var path = treeView.TopDataNode?.Export();
+            var path = mTreeView.TopDataNode?.Export();
             if ( string.IsNullOrEmpty( path ) )
                 return false;
 
-            currentlyOpenFilePath = path;
+            mCurrentlyOpenFilePath = path;
             return true;
         }
 
@@ -241,7 +241,7 @@ namespace MikuMikuModel.GUI.Forms
         /// </summary>
         private bool AskForSavingChanges()
         {
-            if ( treeView.TopDataNode == null || !treeView.TopDataNode.HasPendingChanges )
+            if ( mTreeView.TopDataNode == null || !mTreeView.TopDataNode.HasPendingChanges )
                 return false;
 
             var result = MessageBox.Show(
@@ -276,7 +276,7 @@ namespace MikuMikuModel.GUI.Forms
         {
             if ( disposing )
             {
-                components?.Dispose();
+                mComponents?.Dispose();
                 ModelViewControl.DisposeInstance();
                 TextureViewControl.DisposeInstance();
             }
@@ -310,7 +310,7 @@ namespace MikuMikuModel.GUI.Forms
 
         private void OnPropertyValueChanged( object s, PropertyValueChangedEventArgs e )
         {
-            treeView.SelectedDataNode?.NotifyPropertyChanged( e.ChangedItem.Label );
+            mTreeView.SelectedDataNode?.NotifyPropertyChanged( e.ChangedItem.Label );
         }
     }
 }

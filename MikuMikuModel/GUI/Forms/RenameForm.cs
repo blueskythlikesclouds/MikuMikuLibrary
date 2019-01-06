@@ -6,15 +6,15 @@ namespace MikuMikuModel.GUI.Forms
     {
         public string TextBoxText
         {
-            get => textBox.Text;
-            set => textBox.Text = value;
+            get => mTextBox.Text;
+            set => mTextBox.Text = value;
         }
 
         public RenameForm( string textBoxText )
         {
             InitializeComponent();
             TextBoxText = textBoxText;
-            textBox.Focus();
+            mTextBox.Focus();
         }
     }
 }

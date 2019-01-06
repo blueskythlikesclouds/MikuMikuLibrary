@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace MikuMikuLibrary.Textures
 {
-    public partial class Texture
+    public class TextureUtilities
     {
         public static void RenameTexture( Texture texture, TextureSet textures, TextureDatabase textureDatabase = null )
         {

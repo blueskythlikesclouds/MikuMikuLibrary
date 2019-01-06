@@ -7,31 +7,31 @@ namespace MikuMikuLibrary.Textures
 {
     public partial class Texture
     {
-        private SubTexture[,] subTextures;
+        private SubTexture[,] mSubTextures;
 
         public int ID { get; set; }
         public string Name { get; set; }
 
-        public int Width => subTextures[ 0, 0 ].Width;
-        public int Height => subTextures[ 0, 0 ].Height;
-        public TextureFormat Format => subTextures[ 0, 0 ].Format;
+        public int Width => mSubTextures[ 0, 0 ].Width;
+        public int Height => mSubTextures[ 0, 0 ].Height;
+        public TextureFormat Format => mSubTextures[ 0, 0 ].Format;
 
-        public bool IsYCbCr => 
+        public bool IsYCbCr =>
             Format == TextureFormat.ATI2 && Depth == 1 && MipMapCount == 2;
 
-        public int Depth => subTextures.GetLength( 0 );
-        public int MipMapCount => subTextures.GetLength( 1 );
+        public int Depth => mSubTextures.GetLength( 0 );
+        public int MipMapCount => mSubTextures.GetLength( 1 );
 
         public bool UsesDepth => Depth > 1;
         public bool UsesMipMaps => MipMapCount > 1;
 
-        public SubTexture this[ int level, int mipMapIndex ] => subTextures[ level, mipMapIndex ]; 
-        public SubTexture this[ int mipMapIndex ] => subTextures[ 0, mipMapIndex ];
+        public SubTexture this[ int level, int mipMapIndex ] => mSubTextures[ level, mipMapIndex ];
+        public SubTexture this[ int mipMapIndex ] => mSubTextures[ 0, mipMapIndex ];
 
         public IEnumerable<SubTexture> EnumerateMipMaps( int level = 0 )
         {
             for ( int i = 0; i < MipMapCount; i++ )
-                yield return subTextures[ level, i ];
+                yield return mSubTextures[ level, i ];
         }
 
         public IEnumerable<IEnumerable<SubTexture>> EnumerateLevels()
@@ -56,14 +56,14 @@ namespace MikuMikuLibrary.Textures
             if ( depth == 1 && mipMapCount != subTextureCount )
                 mipMapCount = ( byte )subTextureCount;
 
-            subTextures = new SubTexture[ depth, mipMapCount ];
+            mSubTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )
             {
                 for ( int j = 0; j < mipMapCount; j++ )
                 {
                     reader.ReadAtOffset( reader.ReadUInt32(), () =>
                     {
-                        subTextures[ i, j ] = new SubTexture( reader );
+                        mSubTextures[ i, j ] = new SubTexture( reader );
                     } );
                 }
             }
@@ -83,7 +83,7 @@ namespace MikuMikuLibrary.Textures
             {
                 for ( int j = 0; j < MipMapCount; j++ )
                 {
-                    var subTexture = subTextures[ i, j ];
+                    var subTexture = mSubTextures[ i, j ];
                     writer.EnqueueOffsetWrite( 4, AlignmentKind.Left, () =>
                     {
                         subTexture.Write( writer );
@@ -100,12 +100,12 @@ namespace MikuMikuLibrary.Textures
             depth = Math.Max( 1, depth );
             mipMapCount = Math.Max( 1, mipMapCount );
 
-            subTextures = new SubTexture[ depth, mipMapCount ];
+            mSubTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )
             {
                 for ( int j = 0; j < mipMapCount; j++ )
                 {
-                    subTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, ( i * mipMapCount ) + j );
+                    mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, ( i * mipMapCount ) + j );
                 }
             }
         }

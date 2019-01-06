@@ -7,27 +7,27 @@ namespace MikuMikuModel.FormatModules
 {
     public static class FormatModuleRegistry
     {
-        private static readonly Dictionary<Type, IFormatModule> modules = new Dictionary<Type, IFormatModule>();
+        private static readonly Dictionary<Type, IFormatModule> sModules = new Dictionary<Type, IFormatModule>();
 
-        public static IReadOnlyDictionary<Type, IFormatModule> ModulesByType => modules;
+        public static IReadOnlyDictionary<Type, IFormatModule> ModulesByType => sModules;
 
-        public static IEnumerable<Type> ModelTypes => modules.Keys;
-        public static IEnumerable<IFormatModule> Modules => modules.Values;
+        public static IEnumerable<Type> ModelTypes => sModules.Keys;
+        public static IEnumerable<IFormatModule> Modules => sModules.Values;
 
         public static void Register( IFormatModule module )
         {
-            if ( modules.ContainsKey( module.ModelType ) )
+            if ( sModules.ContainsKey( module.ModelType ) )
                 throw new ArgumentException( "Format module is already registered", nameof( module ) );
 
-            modules.Add( module.ModelType, module );
+            sModules.Add( module.ModelType, module );
         }
 
         public static bool TryRegister( IFormatModule module )
         {
-            if ( modules.ContainsKey( module.ModelType ) )
+            if ( sModules.ContainsKey( module.ModelType ) )
                 return false;
 
-            modules.Add( module.ModelType, module );
+            sModules.Add( module.ModelType, module );
             return true;
         }
 
