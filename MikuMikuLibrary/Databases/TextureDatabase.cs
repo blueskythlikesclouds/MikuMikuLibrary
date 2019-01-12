@@ -16,11 +16,11 @@ namespace MikuMikuLibrary.Databases
     public class TextureDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public List<TextureEntry> Textures { get; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int textureCount = reader.ReadInt32();
             long texturesOffset = reader.ReadOffset();
@@ -39,7 +39,7 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( Textures.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>

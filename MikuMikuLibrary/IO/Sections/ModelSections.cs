@@ -1,38 +1,34 @@
 ﻿using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Models;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
+using System.Numerics;
 
 namespace MikuMikuLibrary.IO.Sections
 {
-    [Section( "MOSD", typeof( Model ) )]
+    [Section( "MOSD" )]
     public class ModelSection : BinaryFileSection<Model>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
 
         [SubSection( typeof( MeshSection ) )]
-        public List<Mesh> Meshes => Data.Meshes;
+        public List<Mesh> Meshes => DataObject.Meshes;
 
-        public ModelSection( Stream source, Model dataToRead = null ) : base( source, dataToRead )
-        {
-        }
-
-        public ModelSection( Model dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
+        public ModelSection( SectionMode mode, Model dataObject = null ) : base( mode, dataObject )
         {
         }
     }
 
-    [Section( "OMDL", typeof( Mesh ) )]
+    [Section( "OMDL" )]
     public class MeshSection : Section<Mesh>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
 
         [SubSection( typeof( MeshSkinSection ) )]
         public MeshSkin Skin
         {
-            get => Data.Skin;
-            set => Data.Skin = value;
+            get => DataObject.Skin;
+            set => DataObject.Skin = value;
         }
 
         [SubSection]
@@ -41,118 +37,130 @@ namespace MikuMikuLibrary.IO.Sections
         [SubSection]
         public MeshVertexDataSection VertexData { get; set; }
 
-        protected override void Read( EndianBinaryReader reader, long length )
-        {
-            Data.Read( reader, this );
-        }
+        protected override void Read( Mesh dataObject, EndianBinaryReader reader, long length ) =>
+            dataObject.Read( reader, this );
 
-        protected override void Write( EndianBinaryWriter writer )
-        {
-            Data.Write( writer, this );
-        }
+        protected override void Write( Mesh dataObject, EndianBinaryWriter writer ) =>
+            dataObject.Write( writer, this );
 
-        public MeshSection( Stream source, Mesh dataToRead = null ) : base( source, dataToRead )
+        public MeshSection( SectionMode mode, Mesh dataObject = null ) : base( mode, dataObject )
         {
-        }
-
-        public MeshSection( Mesh dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
-            IndexData = new MeshIndexDataSection( new MemoryStream(), endianness, addressSpace );
-            VertexData = new MeshVertexDataSection( new MemoryStream(), endianness, addressSpace );
+            IndexData = new MeshIndexDataSection( mode, this );
+            VertexData = new MeshVertexDataSection( mode, this );
         }
     }
 
-    [Section( "OSKN", typeof( MeshSkin ) )]
+
+    [Section( "OSKN" )]
     public class MeshSkinSection : Section<MeshSkin>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
 
-        protected override void Read( EndianBinaryReader reader, long length )
-        {
-            Data.Read( reader );
-        }
+        protected override void Read( MeshSkin dataObject, EndianBinaryReader reader, long length ) => dataObject.Read( reader );
 
-        protected override void Write( EndianBinaryWriter writer )
-        {
-            Data.Write( writer );
-        }
+        protected override void Write( MeshSkin dataObject, EndianBinaryWriter writer ) => dataObject.Write( writer );
 
-        public MeshSkinSection( Stream source, MeshSkin dataToRead = null ) : base( source, dataToRead )
-        {
-        }
-
-        public MeshSkinSection( MeshSkin dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
+        public MeshSkinSection( SectionMode mode, MeshSkin dataObject = null ) : base( mode, dataObject )
         {
         }
     }
 
-    // TODO: Can I do this in a better way perhaps?
-
-    public abstract class MemoryStreamSection : Section<MemoryStream>
+    [Section( "OVTX" )]
+    public class MeshVertexDataSection : Section<object>
     {
-        /// <summary>
-        /// Used when section is open for reading.
-        /// Will be null otherwise
-        /// </summary>
-        public EndianBinaryReader Reader { get; }
+        private readonly List<SubMesh> mSubMeshes;
+        private long mCurrentOffset;
 
-        /// <summary>
-        /// Used when section is open for writing.
-        /// Will be null otherwise
-        /// </summary>
-        public EndianBinaryWriter Writer { get; }
-
-        protected override void Read( EndianBinaryReader reader, long length )
-        {
-            // Copy the data to the memory stream
-            var bytes = reader.ReadBytes( ( int )length );
-            Data.Write( bytes, 0, bytes.Length );
-            Data.Seek( 0, SeekOrigin.Begin );
-        }
-
-        protected override void Write( EndianBinaryWriter writer )
-        {
-            // Copy the contents to the section
-            Data.Seek( 0, SeekOrigin.Begin );
-            Data.CopyTo( writer.BaseStream );
-        }
-
-        public MemoryStreamSection( Stream source, MemoryStream dataToRead = null ) : base( source, dataToRead )
-        {
-            Reader = new EndianBinaryReader( Data, Encoding.UTF8, true, Endianness );
-        }
-
-        public MemoryStreamSection( MemoryStream dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
-            Writer = new EndianBinaryWriter( Data, Encoding.UTF8, true, endianness );
-        }
-    }
-
-    [Section( "OVTX", typeof( MemoryStream ) )]
-    public class MeshVertexDataSection : MemoryStreamSection
-    {
         public override SectionFlags Flags => SectionFlags.None;
 
-        public MeshVertexDataSection( Stream source, MemoryStream dataToRead = null ) : base( source, dataToRead )
+        public long AddSubMesh( SubMesh subMesh, int stride )
+        {
+            long current = mCurrentOffset;
+            {
+                mSubMeshes.Add( subMesh );
+                mCurrentOffset += subMesh.Vertices.Length * stride;
+            }
+
+            return current;
+        }
+
+        protected override void Read( object dataObject, EndianBinaryReader reader, long length )
         {
         }
 
-        public MeshVertexDataSection( MemoryStream dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
+        protected override void Write( object dataObject, EndianBinaryWriter writer )
         {
+            foreach ( var subMesh in mSubMeshes )
+            {
+                for ( int i = 0; i < subMesh.Vertices.Length; i++ )
+                {
+                    writer.Write( subMesh.Vertices?[ i ] ?? Vector3.Zero );
+                    writer.Write( subMesh.Normals?[ i ] ?? Vector3.Zero, VectorBinaryFormat.Int16 );
+                    writer.WriteNulls( 2 );
+                    writer.Write( subMesh.Tangents?[ i ] ?? Vector4.Zero, VectorBinaryFormat.Int16 );
+                    writer.Write( subMesh.UVChannel1?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
+                    writer.Write( subMesh.UVChannel2?[ i ] ?? subMesh.UVChannel1?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
+                    writer.Write( subMesh.Colors?[ i ] ?? Color.White, VectorBinaryFormat.Half );
+
+                    if ( subMesh.BoneWeights != null )
+                    {
+                        writer.Write( ( ushort )( subMesh.BoneWeights[ i ].Weight1 * 32768f ) );
+                        writer.Write( ( ushort )( subMesh.BoneWeights[ i ].Weight2 * 32768f ) );
+                        writer.Write( ( ushort )( subMesh.BoneWeights[ i ].Weight3 * 32768f ) );
+                        writer.Write( ( ushort )( subMesh.BoneWeights[ i ].Weight4 * 32768f ) );
+                        writer.Write( ( byte )( subMesh.BoneWeights[ i ].Index1 * 3 ) );
+                        writer.Write( ( byte )( subMesh.BoneWeights[ i ].Index2 * 3 ) );
+                        writer.Write( ( byte )( subMesh.BoneWeights[ i ].Index3 * 3 ) );
+                        writer.Write( ( byte )( subMesh.BoneWeights[ i ].Index4 * 3 ) );
+                    }
+                }
+            }
+        }
+
+        public MeshVertexDataSection( SectionMode mode, object dataObject = null ) : base( mode, dataObject )
+        {
+            if ( mode == SectionMode.Write )
+                mSubMeshes = new List<SubMesh>();
         }
     }
 
-    [Section( "OIDX", typeof( MemoryStream ) )]
-    public class MeshIndexDataSection : MemoryStreamSection
+    [Section( "OIDX" )]
+    public class MeshIndexDataSection : Section<object>
     {
+        private readonly List<ushort[]> mIndices;
+        private long mCurrentOffset;
+
         public override SectionFlags Flags => SectionFlags.None;
 
-        public MeshIndexDataSection( Stream source, MemoryStream dataToRead = null ) : base( source, dataToRead )
+        public long AddIndices( ushort[] indices )
+        {
+            long current = mCurrentOffset;
+            {
+                mIndices.Add( indices );
+                mCurrentOffset += indices.Length * 2;
+                mCurrentOffset = AlignmentUtilities.Align( mCurrentOffset, 4 );
+            }
+
+            return current;
+        }
+
+        protected override void Read( object dataObject, EndianBinaryReader reader, long length )
         {
         }
 
-        public MeshIndexDataSection( MemoryStream dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
+        protected override void Write( object dataObject, EndianBinaryWriter writer )
         {
+            foreach ( var indices in mIndices )
+            {
+                writer.Write( indices );
+                writer.WriteAlignmentPadding( 4 );
+            }
+        }
+
+        public MeshIndexDataSection( SectionMode mode, object dataObject = null ) : base( mode, dataObject )
+        {
+            if ( mode == SectionMode.Write )
+                mIndices = new List<ushort[]>();
         }
     }
 }

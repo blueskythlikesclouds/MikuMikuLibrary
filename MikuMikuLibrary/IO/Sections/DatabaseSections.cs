@@ -1,75 +1,54 @@
 ﻿using MikuMikuLibrary.Databases;
-using System.IO;
 
 namespace MikuMikuLibrary.IO.Sections
 {
-    [Section( "AEDB", typeof( AetDatabase ) )]
+    [Section( "AEDB" )]
     public class AetDatabaseSection : BinaryFileSection<AetDatabase>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
-
-        public AetDatabaseSection( Stream source, AetDatabase dataToRead = null ) : base( source, dataToRead )
+        public AetDatabaseSection( SectionMode mode, AetDatabase dataObject = null ) : base( mode, dataObject )
         {
         }
 
-        public AetDatabaseSection( AetDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
-        }
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
     }
 
-    [Section( "BONE", typeof( BoneDatabase ) )]
+    [Section( "BONE" )]
     public class BoneDatabaseSection : BinaryFileSection<BoneDatabase>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
-
-        public BoneDatabaseSection( Stream source, BoneDatabase dataToRead = null ) : base( source, dataToRead )
+        public BoneDatabaseSection( SectionMode mode, BoneDatabase dataObject = null ) : base( mode, dataObject )
         {
         }
 
-        public BoneDatabaseSection( BoneDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
-        }
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
     }
 
-    [Section( "MOSI", typeof( ObjectDatabase ) )]
+    [Section( "MOSI" )]
     public class ObjectDatabaseSection : BinaryFileSection<ObjectDatabase>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
-
-        public ObjectDatabaseSection( Stream source, ObjectDatabase dataToRead = null ) : base( source, dataToRead )
+        public ObjectDatabaseSection( SectionMode mode, ObjectDatabase dataObject = null ) : base( mode, dataObject )
         {
         }
 
-        public ObjectDatabaseSection( ObjectDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
-        }
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
     }
 
-    [Section( "SPDB", typeof( SpriteDatabase ) )]
+    [Section( "SPDB" )]
     public class SpriteDatabaseSection : BinaryFileSection<SpriteDatabase>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
-
-        public SpriteDatabaseSection( Stream source, SpriteDatabase dataToRead = null ) : base( source, dataToRead )
+        public SpriteDatabaseSection( SectionMode mode, SpriteDatabase dataObject = null ) : base( mode, dataObject )
         {
         }
 
-        public SpriteDatabaseSection( SpriteDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
-        }
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
     }
 
-    [Section( "MTXI", typeof( TextureDatabase ) )]
+    [Section( "MTXI" )]
     public class TextureDatabaseSection : BinaryFileSection<TextureDatabase>
     {
-        public override SectionFlags Flags => SectionFlags.RelocationTableSection;
-
-        public TextureDatabaseSection( Stream source, TextureDatabase dataToRead = null ) : base( source, dataToRead )
+        public TextureDatabaseSection( SectionMode mode, TextureDatabase dataObject = null ) : base( mode, dataObject )
         {
         }
 
-        public TextureDatabaseSection( TextureDatabase dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
-        }
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
     }
 }

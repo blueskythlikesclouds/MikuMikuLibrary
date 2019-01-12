@@ -287,7 +287,7 @@ namespace MikuMikuLibrary.Databases
         public List<StageEntry> Stages { get; }
         public bool IsFutureTone { get; set; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int count = reader.ReadInt32();
             uint section1Offset = reader.ReadUInt32();
@@ -331,7 +331,7 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( Stages.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>

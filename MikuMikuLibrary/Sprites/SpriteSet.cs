@@ -9,12 +9,12 @@ namespace MikuMikuLibrary.Sprites
     public class SpriteSet : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public List<Sprite> Sprites { get; }
-        public TextureSet TextureSet { get; }
+        public TextureSet TextureSet { get; internal set; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int signature = reader.ReadInt32();
             uint texturesOffset = reader.ReadUInt32();
@@ -25,7 +25,10 @@ namespace MikuMikuLibrary.Sprites
             long spriteNamesOffset = reader.ReadOffset();
             long spriteUnknownsOffset = reader.ReadOffset();
 
-            reader.ReadAtOffsetIf( section == null, texturesOffset, () => TextureSet.Load( reader.BaseStream, true ) );
+            reader.ReadAtOffsetIf( section == null, texturesOffset, () =>
+            {
+                TextureSet.Load( reader.BaseStream, true );
+            } );
 
             Sprites.Capacity = spriteCount;
             reader.ReadAtOffset( spritesOffset, () =>
@@ -57,7 +60,7 @@ namespace MikuMikuLibrary.Sprites
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( 0 );
             writer.ScheduleWriteOffsetIf( section == null, 16, AlignmentMode.Left, () => TextureSet.Save( writer.BaseStream, true ) );

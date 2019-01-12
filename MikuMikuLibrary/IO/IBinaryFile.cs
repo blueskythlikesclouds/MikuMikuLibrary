@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 
 namespace MikuMikuLibrary.IO
 {
@@ -8,6 +10,9 @@ namespace MikuMikuLibrary.IO
         BinaryFileFlags Flags { get; }
         BinaryFormat Format { get; set; }
         Endianness Endianness { get; set; }
+
+        void Read( EndianBinaryReader reader, ISection section = null );
+        void Write( EndianBinaryWriter writer, ISection section = null );
 
         void Load( string filePath );
         void Load( Stream source, bool leaveOpen );
@@ -20,7 +25,7 @@ namespace MikuMikuLibrary.IO
     {
         Load = 1,
         Save = 2,
-        HasModernVersion = 4,
+        HasSectionedVersion = 4,
         UsesSourceStream = 8,
     }
 }

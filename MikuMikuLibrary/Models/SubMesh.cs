@@ -188,7 +188,7 @@ namespace MikuMikuLibrary.Models
                     var vertexReader = section.VertexData.Reader;
                     for ( int i = 0; i < vertexCount; i++ )
                     {
-                        vertexReader.SeekBegin( dataOffset + ( stride * i ) );
+                        vertexReader.SeekBegin( section.VertexData.DataOffset + dataOffset + ( stride * i ) );
                         Vertices[ i ] = vertexReader.ReadVector3();
                         Normals[ i ] = vertexReader.ReadVector3( VectorBinaryFormat.Int16 );
                         vertexReader.SeekCurrent( 2 );
@@ -381,35 +381,8 @@ namespace MikuMikuLibrary.Models
 
             void WriteVertexAttributesModern()
             {
-                long vertexPosition = section.VertexData.Data.Position;
-                var vertexWriter = section.VertexData.Writer;
-
-                for ( int i = 0; i < Vertices.Length; i++ )
-                {
-                    // Should I even do it like this? lol
-                    vertexWriter.Write( Vertices?[ i ] ?? Vector3.Zero );
-                    vertexWriter.Write( Normals?[ i ] ?? Vector3.Zero, VectorBinaryFormat.Int16 );
-                    vertexWriter.WriteNulls( 2 );
-                    vertexWriter.Write( Tangents?[ i ] ?? Vector4.Zero, VectorBinaryFormat.Int16 );
-                    vertexWriter.Write( UVChannel1?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
-                    vertexWriter.Write( UVChannel2?[ i ] ?? UVChannel1?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
-                    vertexWriter.Write( Colors?[ i ] ?? Color.White, VectorBinaryFormat.Half );
-
-                    if ( BoneWeights != null )
-                    {
-                        vertexWriter.Write( ( ushort )( BoneWeights[ i ].Weight1 * 32768f ) );
-                        vertexWriter.Write( ( ushort )( BoneWeights[ i ].Weight2 * 32768f ) );
-                        vertexWriter.Write( ( ushort )( BoneWeights[ i ].Weight3 * 32768f ) );
-                        vertexWriter.Write( ( ushort )( BoneWeights[ i ].Weight4 * 32768f ) );
-                        vertexWriter.Write( ( byte )( BoneWeights[ i ].Index1 * 3 ) );
-                        vertexWriter.Write( ( byte )( BoneWeights[ i ].Index2 * 3 ) );
-                        vertexWriter.Write( ( byte )( BoneWeights[ i ].Index3 * 3 ) );
-                        vertexWriter.Write( ( byte )( BoneWeights[ i ].Index4 * 3 ) );
-                    }
-                }
-
                 writer.WriteNulls( section.Format == BinaryFormat.X ? 0x6C : 0x34 );
-                writer.Write( ( uint )vertexPosition );
+                writer.Write( ( uint )section.VertexData.AddSubMesh( this, stride ) );
                 writer.WriteNulls( section.Format == BinaryFormat.X ? 0x38 : 0x1C );
                 writer.Write( BoneWeights != null ? 4 : 2 );
                 writer.WriteNulls( 0x18 );

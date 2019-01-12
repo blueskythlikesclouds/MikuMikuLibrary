@@ -177,11 +177,11 @@ namespace MikuMikuLibrary.Databases
     public class BoneDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public List<SkeletonEntry> Skeletons { get; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             uint signature = reader.ReadUInt32();
             int skeletonCount = reader.ReadInt32();
@@ -209,7 +209,7 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( 0x09102720 );
             writer.Write( Skeletons.Count );

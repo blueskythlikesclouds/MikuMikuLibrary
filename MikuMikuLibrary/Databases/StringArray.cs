@@ -11,7 +11,7 @@ namespace MikuMikuLibrary.Databases
 
         public List<string> Strings { get; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             var offsets = new List<long>();
 
@@ -38,7 +38,7 @@ namespace MikuMikuLibrary.Databases
             }
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             foreach ( var str in Strings )
                 writer.AddStringToStringTable( str );

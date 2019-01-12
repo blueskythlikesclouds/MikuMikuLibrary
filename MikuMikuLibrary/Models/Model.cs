@@ -14,7 +14,7 @@ namespace MikuMikuLibrary.Models
     public class Model : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public override Endianness Endianness
         {
@@ -39,7 +39,7 @@ namespace MikuMikuLibrary.Models
 
         public int BoneCount => Meshes.Count != 0 ? 0x39393939 : -1;
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             uint signature = reader.ReadUInt32();
             if ( signature != 0x5062500 && signature != 0x5062501 )
@@ -108,7 +108,7 @@ namespace MikuMikuLibrary.Models
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( section != null ? 0x5062501 : 0x5062500 );
             writer.Write( Meshes.Count );

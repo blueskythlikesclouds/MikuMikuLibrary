@@ -1,28 +1,27 @@
 ﻿using MikuMikuLibrary.IO.Common;
-using System.IO;
 
 namespace MikuMikuLibrary.IO.Sections
 {
-    public abstract class BinaryFileSection<T> : Section<T> where T : BinaryFile
+    public abstract class BinaryFileSection<T> : Section<T> where T : IBinaryFile, new()
     {
-        protected override void Read( EndianBinaryReader reader, long length )
+        protected override void Read( T dataObject, EndianBinaryReader reader, long length )
         {
-            Data.Endianness = reader.Endianness;
-            Data.Read( reader, this );
+            dataObject.Format = Format;
+            dataObject.Endianness = Endianness;
+            {
+                dataObject.Read( reader, this );
+            }
         }
 
-        protected override void Write( EndianBinaryWriter writer )
-        {
-            Data.Endianness = writer.Endianness;
-            Data.Write( writer, this );
-        }
+        protected override void Write( T dataObject, EndianBinaryWriter writer ) => dataObject.Write( writer, this );
 
-        public BinaryFileSection( Stream source, T dataToRead = null ) : base( source, dataToRead )
+        public BinaryFileSection( SectionMode mode, T dataObject = default( T ) ) : base( mode, dataObject )
         {
-        }
-
-        public BinaryFileSection( T dataToWrite, Endianness endianness, AddressSpace addressSpace ) : base( dataToWrite, endianness, addressSpace )
-        {
+            if ( mode == SectionMode.Write )
+            {
+                Endianness = dataObject.Endianness;
+                AddressSpace = BinaryFormatUtilities.GetAddressSpace( dataObject.Format );
+            }
         }
     }
 }

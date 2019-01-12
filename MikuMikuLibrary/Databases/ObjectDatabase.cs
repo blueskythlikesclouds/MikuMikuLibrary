@@ -41,12 +41,12 @@ namespace MikuMikuLibrary.Databases
     public class ObjectDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public List<ObjectEntry> Objects { get; }
         public int Unknown { get; set; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int objectCount = reader.ReadInt32();
             Unknown = reader.ReadInt32();
@@ -95,7 +95,7 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( Objects.Count );
             writer.Write( Unknown );

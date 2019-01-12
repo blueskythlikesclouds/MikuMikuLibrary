@@ -91,8 +91,10 @@ namespace MikuMikuLibrary.Models
             }
             else
             {
-                section.IndexData.Reader.SeekBegin( indicesOffset );
-                Indices = section.IndexData.Reader.ReadUInt16s( indexCount );
+                var indexReader = section.IndexData.Reader;
+
+                indexReader.SeekBegin( section.IndexData.DataOffset + indicesOffset );
+                Indices = indexReader.ReadUInt16s( indexCount );
             }
         }
 
@@ -115,12 +117,7 @@ namespace MikuMikuLibrary.Models
             // Modern Format
             if ( section != null )
             {
-                section.IndexData.Writer.WriteAlignmentPadding( 4 );
-                writer.Write( ( uint )section.IndexData.Data.Position );
-
-                // Write the indices to the index data
-                section.IndexData.Writer.Write( Indices );
-
+                writer.Write( ( uint )section.IndexData.AddIndices( Indices ) );
                 writer.WriteNulls( section.Format == BinaryFormat.X ? 24 : 20 );
                 writer.Write( BoundingBox );
                 writer.Write( Field00 );

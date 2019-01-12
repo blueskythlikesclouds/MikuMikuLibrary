@@ -121,7 +121,7 @@ namespace MikuMikuLibrary.Archives.Farc
             return mEntries.Keys.GetEnumerator();
         }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             string signature = reader.ReadString( StringBinaryFormat.FixedLength, 4 );
             if ( signature != "FARC" && signature != "FArC" && signature != "FArc" )
@@ -256,7 +256,7 @@ namespace MikuMikuLibrary.Archives.Farc
             }
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( "FArc", StringBinaryFormat.FixedLength, 4 );
             writer.ScheduleWriteOffset( OffsetMode.Size, () =>

@@ -527,6 +527,19 @@ namespace MikuMikuLibrary.IO.Common
             return mStringBuilder.ToString();
         }
 
+        public string PeekString( StringBinaryFormat format, int fixedLength = -1 )
+        {
+            string ret;
+
+            long current = Position;
+            {
+                ret = ReadString( format, fixedLength );
+            }
+            SeekBegin( current );
+
+            return ret;
+        }
+
         public string[] ReadStrings( int count, StringBinaryFormat format, int fixedLength = -1 )
         {
             string[] value = new string[ count ];

@@ -11,11 +11,11 @@ namespace MikuMikuLibrary.Textures
     public class TextureSet : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public List<Texture> Textures { get; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             reader.PushBaseOffset();
 
@@ -44,7 +44,7 @@ namespace MikuMikuLibrary.Textures
             reader.PopBaseOffset();
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.PushBaseOffset();
 
@@ -63,7 +63,7 @@ namespace MikuMikuLibrary.Textures
             writer.PopBaseOffset();
         }
 
-        protected override Section GetSectionInstanceForWriting() => new TextureSetSection( this, Endianness, AddressSpace.Int32 );
+        protected override ISection GetSectionInstanceForWriting() => new TextureSetSection( SectionMode.Write, this );
 
         public override void Load( string filePath )
         {

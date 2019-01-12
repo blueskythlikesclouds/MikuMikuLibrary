@@ -2,12 +2,10 @@
 
 namespace MikuMikuLibrary.IO.Sections
 {
-    [Section( "EOFC" )]
-    public class EndOfFileSection : Section<object>
+    [Section( "ENRS" )]
+    public class EndianReverseTableSection : Section<object>
     {
         public override SectionFlags Flags => SectionFlags.None;
-        public override Endianness Endianness => Endianness.LittleEndian;
-        public override AddressSpace AddressSpace => AddressSpace.Int32;
 
         protected override void Read( object dataObject, EndianBinaryReader reader, long length )
         {
@@ -17,7 +15,7 @@ namespace MikuMikuLibrary.IO.Sections
         {
         }
 
-        public EndOfFileSection( SectionMode mode, object dataObject = null ) : base( mode, dataObject )
+        public EndianReverseTableSection( SectionMode mode, object dataObject = null ) : base( mode, dataObject )
         {
         }
     }

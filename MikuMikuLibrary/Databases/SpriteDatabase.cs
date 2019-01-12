@@ -39,11 +39,11 @@ namespace MikuMikuLibrary.Databases
     public class SpriteDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public List<SpriteSetEntry> SpriteSets { get; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int spriteSetCount = reader.ReadInt32();
             uint spriteSetsOffset = reader.ReadUInt32();
@@ -107,7 +107,7 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( SpriteSets.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>

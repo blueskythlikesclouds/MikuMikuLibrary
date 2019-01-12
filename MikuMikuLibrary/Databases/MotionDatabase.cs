@@ -73,7 +73,7 @@ namespace MikuMikuLibrary.Databases
         public List<MotionSetEntry> MotionSets { get; }
         public List<string> BoneNames { get; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int version = reader.ReadInt32();
             uint motionSetsOffset = reader.ReadUInt32();
@@ -107,7 +107,7 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( 1 );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>

@@ -31,11 +31,11 @@ namespace MikuMikuLibrary.Databases
     public class AetDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasModernVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
 
         public List<AetSetEntry> AetSets { get; }
 
-        public override void Read( EndianBinaryReader reader, Section section = null )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int aetSetCount = reader.ReadInt32();
             uint aetSetsOffset = reader.ReadUInt32();
@@ -94,7 +94,7 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public override void Write( EndianBinaryWriter writer, Section section = null )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( AetSets.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
