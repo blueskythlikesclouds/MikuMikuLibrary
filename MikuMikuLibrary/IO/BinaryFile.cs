@@ -183,7 +183,7 @@ namespace MikuMikuLibrary.IO
                         {
                             Write( writer );
                         }
-                        writer.DoScheduledWriteOffsets();
+                        writer.PerformScheduledWrites();
                         writer.PopStringTablesReversed();
                     }
                 }

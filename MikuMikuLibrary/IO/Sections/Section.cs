@@ -154,7 +154,7 @@ namespace MikuMikuLibrary.IO.Sections
                     {
                         Write( mDataObject, Writer );
                     }
-                    Writer.DoScheduledWriteOffsets();
+                    Writer.PerformScheduledWrites();
                     Writer.PopStringTablesReversed();
                 }
                 Writer.Endianness = Endianness.LittleEndian;

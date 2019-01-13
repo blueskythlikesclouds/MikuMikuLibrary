@@ -88,7 +88,7 @@ namespace MikuMikuLibrary.Sprites
                 foreach ( var sprite in Sprites )
                     sprite.WriteSecond( writer );
             } );
-            writer.DoScheduledWriteOffsetsReversed();
+            writer.PerformScheduledWritesReversed();
         }
 
         public SpriteSet()

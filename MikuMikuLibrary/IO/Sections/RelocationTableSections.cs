@@ -18,6 +18,8 @@ namespace MikuMikuLibrary.IO.Sections
         {
             var bytes = new List<byte>();
 
+            dataObject.Sort();
+
             long currentOffset = 0;
             foreach ( var offset in dataObject )
             {
@@ -70,6 +72,8 @@ namespace MikuMikuLibrary.IO.Sections
         protected override void Write( List<long> dataObject, EndianBinaryWriter writer )
         {
             var bytes = new List<byte>();
+
+            dataObject.Sort();
 
             long currentOffset = 0;
             foreach ( var offset in dataObject )

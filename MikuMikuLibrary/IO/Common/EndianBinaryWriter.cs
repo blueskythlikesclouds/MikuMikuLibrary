@@ -31,7 +31,7 @@ namespace MikuMikuLibrary.IO.Common
 
     public class EndianBinaryWriter : BinaryWriter
     {
-        private class ScheduledWriteOffset
+        private class ScheduledWrite
         {
             public long BaseOffset;
             public long FieldOffset;
@@ -62,7 +62,7 @@ namespace MikuMikuLibrary.IO.Common
         private Encoding mEncoding;
         private Stack<long> mOffsets;
         private Stack<long> mBaseOffsets;
-        private LinkedList<ScheduledWriteOffset> mScheduledWriteOffsets;
+        private LinkedList<ScheduledWrite> mScheduledWrites;
         private Stack<StringTable> mStringTables;
         private List<long> mOffsetPositions;
 
@@ -178,7 +178,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public void ScheduleWriteOffset( int alignment, byte alignmentFillerByte, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action )
         {
-            mScheduledWriteOffsets.AddLast( new ScheduledWriteOffset
+            mScheduledWrites.AddLast( new ScheduledWrite
             {
                 FieldOffset = PrepareWriteOffset( offsetMode ),
                 Alignment = alignment,
@@ -266,37 +266,37 @@ namespace MikuMikuLibrary.IO.Common
             return offset;
         }
 
-        private void DoScheduledWriteOffset( LinkedListNode<ScheduledWriteOffset> scheduledWriteOffsetNode, long baseOffset )
+        private void PerformScheduledWrite( LinkedListNode<ScheduledWrite> scheduledWriteNode, long baseOffset )
         {
-            var scheduledWriteOffset = scheduledWriteOffsetNode.Value;
+            var scheduledWrite = scheduledWriteNode.Value;
 
-            if ( scheduledWriteOffset.AlignmentMode == AlignmentMode.Left || scheduledWriteOffset.AlignmentMode == AlignmentMode.Center )
-                WriteAlignmentPadding( scheduledWriteOffset.Alignment, scheduledWriteOffset.AlignmentFillerByte );
+            if ( scheduledWrite.AlignmentMode == AlignmentMode.Left || scheduledWrite.AlignmentMode == AlignmentMode.Center )
+                WriteAlignmentPadding( scheduledWrite.Alignment, scheduledWrite.AlignmentFillerByte );
 
-            var first = mScheduledWriteOffsets.Last;
+            var first = mScheduledWrites.Last;
 
             long startOffset = Position;
             {
-                scheduledWriteOffset.Action();
+                scheduledWrite.Action();
             }
             long endOffset = Position;
 
-            var last = mScheduledWriteOffsets.Last;
+            var last = mScheduledWrites.Last;
 
-            if ( scheduledWriteOffset.AlignmentMode == AlignmentMode.Left || scheduledWriteOffset.AlignmentMode == AlignmentMode.Center )
-                WriteAlignmentPadding( scheduledWriteOffset.Alignment, scheduledWriteOffset.AlignmentFillerByte );
+            if ( scheduledWrite.AlignmentMode == AlignmentMode.Left || scheduledWrite.AlignmentMode == AlignmentMode.Center )
+                WriteAlignmentPadding( scheduledWrite.Alignment, scheduledWrite.AlignmentFillerByte );
 
-            if ( scheduledWriteOffset.BaseOffset > 0 )
-                baseOffset = scheduledWriteOffset.BaseOffset;
+            if ( scheduledWrite.BaseOffset > 0 )
+                baseOffset = scheduledWrite.BaseOffset;
 
-            for ( LinkedListNode<ScheduledWriteOffset> current = first.Next; current != null && current != last.Next; current = current.Next )
-                DoScheduledWriteOffset( current, baseOffset );
+            for ( var current = first.Next; current != null && current != last.Next; current = current.Next )
+                PerformScheduledWrite( current, baseOffset );
 
-            mOffsetPositions.Add( scheduledWriteOffset.FieldOffset );
+            mOffsetPositions.Add( scheduledWrite.FieldOffset );
 
-            WriteAtOffset( scheduledWriteOffset.FieldOffset, () =>
+            WriteAtOffset( scheduledWrite.FieldOffset, () =>
             {
-                switch ( scheduledWriteOffset.OffsetMode )
+                switch ( scheduledWrite.OffsetMode )
                 {
                     case OffsetMode.Offset:
                         WriteOffset( startOffset - baseOffset );
@@ -313,29 +313,29 @@ namespace MikuMikuLibrary.IO.Common
                         WriteOffset( startOffset - baseOffset );
                         break;
                     default:
-                        throw new ArgumentException( nameof( scheduledWriteOffset.OffsetMode ) );
+                        throw new ArgumentException( nameof( scheduledWrite.OffsetMode ) );
                 }
             } );
         }
 
-        public void DoScheduledWriteOffsets()
+        public void PerformScheduledWrites()
         {
-            if ( mScheduledWriteOffsets.Count == 0 )
+            if ( mScheduledWrites.Count == 0 )
                 return;
 
-            var first = mScheduledWriteOffsets.First;
-            var last = mScheduledWriteOffsets.Last;
+            var first = mScheduledWrites.First;
+            var last = mScheduledWrites.Last;
 
-            for ( LinkedListNode<ScheduledWriteOffset> current = first; current != null && current != last.Next; current = current.Next )
-                DoScheduledWriteOffset( current, 0 );
+            for ( var current = first; current != null && current != last.Next; current = current.Next )
+                PerformScheduledWrite( current, 0 );
 
-            mScheduledWriteOffsets.Clear();
+            mScheduledWrites.Clear();
         }
 
-        public void DoScheduledWriteOffsetsReversed()
+        public void PerformScheduledWritesReversed()
         {
-            mScheduledWriteOffsets = new LinkedList<ScheduledWriteOffset>( mScheduledWriteOffsets.Reverse() );
-            DoScheduledWriteOffsets();
+            mScheduledWrites = new LinkedList<ScheduledWrite>( mScheduledWrites.Reverse() );
+            PerformScheduledWrites();
         }
 
         public void PushStringTable( StringBinaryFormat format, int fixedLength = -1 ) =>
@@ -354,10 +354,8 @@ namespace MikuMikuLibrary.IO.Common
             } );
         }
 
-        public void PopStringTable()
+        private void WriteStringTable( StringTable stringTable )
         {
-            var stringTable = mStringTables.Pop();
-
             if ( stringTable.Strings.Count == 0 )
                 return;
 
@@ -390,6 +388,11 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
+        public void PopStringTable()
+        {
+            WriteStringTable( mStringTables.Pop() );
+        }
+
         public void PopStringTables()
         {
             while ( mStringTables.Count > 0 )
@@ -406,12 +409,10 @@ namespace MikuMikuLibrary.IO.Common
 
             else
             {
-                var stringTableStack = new Stack<StringTable>( mStringTables.Count );
                 foreach ( var stringTable in mStringTables )
-                    stringTableStack.Push( stringTable );
+                    WriteStringTable( stringTable );
 
-                mStringTables = stringTableStack;
-                PopStringTables();
+                mStringTables.Clear();
             }
         }
 
@@ -806,7 +807,7 @@ namespace MikuMikuLibrary.IO.Common
         {
             if ( disposing )
             {
-                DoScheduledWriteOffsets();
+                PerformScheduledWrites();
                 PopStringTablesReversed();
             }
 
@@ -856,7 +857,7 @@ namespace MikuMikuLibrary.IO.Common
             mEncoding = encoding;
             mOffsets = new Stack<long>();
             mBaseOffsets = new Stack<long>();
-            mScheduledWriteOffsets = new LinkedList<ScheduledWriteOffset>();
+            mScheduledWrites = new LinkedList<ScheduledWrite>();
             mStringTables = new Stack<StringTable>();
             mOffsetPositions = new List<long>();
         }
