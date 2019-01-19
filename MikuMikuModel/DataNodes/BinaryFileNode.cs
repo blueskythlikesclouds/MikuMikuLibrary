@@ -1,11 +1,12 @@
 ﻿using MikuMikuLibrary.IO;
+using MikuMikuModel.Resources;
 using System.Drawing;
 
 namespace MikuMikuModel.DataNodes
 {
     public abstract class BinaryFileNode<T> : DataNode<T> where T : IBinaryFile
     {
-        public override Bitmap Icon => Properties.Resources.File;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/File.png" );
 
         public BinaryFormat Format
         {

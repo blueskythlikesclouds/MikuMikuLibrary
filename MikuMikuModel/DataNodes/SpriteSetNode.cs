@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace MikuMikuModel.DataNodes
 {
-    [DataNodeSpecialName( "Sprite Set" )]
+    [DataNodePrettyName( "Sprite Set" )]
     public class SpriteSetNode : BinaryFileNode<SpriteSet>
     {
         public override DataNodeFlags Flags => DataNodeFlags.Branch;

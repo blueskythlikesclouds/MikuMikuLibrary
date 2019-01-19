@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace MikuMikuModel.DataNodes
 {
-    [DataNodeSpecialName( "Index Table" )]
+    [DataNodePrettyName( "Index table" )]
     public class IndexTableNode : DataNode<IndexTable>
     {
         public override DataNodeFlags Flags => DataNodeFlags.Leaf;

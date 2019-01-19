@@ -46,7 +46,7 @@ namespace MikuMikuModel.DataNodes
             Reference.NameChanged += OnNameChanged;
         }
 
-        protected override void InitializeViewCore() => Reference.InitializeView();
+        protected override void InitializeViewCore() => Reference.InitializeView( true );
 
         protected override void Dispose( bool disposing )
         {

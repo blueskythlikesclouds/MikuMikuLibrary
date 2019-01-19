@@ -2,6 +2,7 @@
 using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Models;
 using MikuMikuModel.GUI.Controls;
+using MikuMikuModel.Resources;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -31,7 +32,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon => Properties.Resources.Mesh;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/Mesh.png" );
 
         public int ID
         {

@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace MikuMikuModel.DataNodes
 {
-    [DataNodeSpecialName( "Submesh" )]
+    [DataNodePrettyName( "Submesh" )]
     public class SubMeshNode : DataNode<SubMesh>
     {
         public override DataNodeFlags Flags => DataNodeFlags.Branch;

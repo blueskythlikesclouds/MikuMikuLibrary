@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace MikuMikuModel.DataNodes
 {
-    [DataNodeSpecialName( "Mesh Skin" )]
+    [DataNodePrettyName( "Mesh Skin" )]
     public class MeshSkinNode : DataNode<MeshSkin>
     {
         public override DataNodeFlags Flags => DataNodeFlags.Branch;

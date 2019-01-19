@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using MikuMikuModel.Resources;
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -12,8 +13,6 @@ namespace MikuMikuModel.GUI.Controls.ModelView
     {
         private static readonly Dictionary<string, GLShaderProgram> sShaderPrograms;
         private readonly Dictionary<string, int> mUniforms;
-
-        public static string ShaderDirectoryPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Shaders" );
 
         public static IReadOnlyDictionary<string, GLShaderProgram> ShaderPrograms => sShaderPrograms;
 
@@ -109,8 +108,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             if ( sShaderPrograms.TryGetValue( shaderName, out GLShaderProgram shaderProgram ) )
                 return shaderProgram;
 
-            var fragmentShaderFilePath = Path.Combine( ShaderDirectoryPath, shaderName + ".frag" );
-            var vertexShaderFilePath = Path.Combine( ShaderDirectoryPath, shaderName + ".vert" );
+            var fragmentShaderFilePath = ResourceStore.GetPath( Path.Combine( "Shaders", shaderName + ".frag" ) );
+            var vertexShaderFilePath = ResourceStore.GetPath( Path.Combine( "Shaders", shaderName + ".vert" ) );
 
             if ( !File.Exists( fragmentShaderFilePath ) || !File.Exists( vertexShaderFilePath ) )
                 return null;

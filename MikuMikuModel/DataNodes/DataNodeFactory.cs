@@ -70,10 +70,10 @@ namespace MikuMikuModel.DataNodes
             return Create( filePath, FormatModuleRegistry.ModelTypes );
         }
 
-        public static string GetSpecialName( Type type )
+        public static string GetPrettyName( Type type )
         {
             var name = ( type.GetCustomAttributes( false ).FirstOrDefault(
-                x => x is DataNodeSpecialNameAttribute ) as DataNodeSpecialNameAttribute )?.Name;
+                x => x is DataNodePrettyNameAttribute ) as DataNodePrettyNameAttribute )?.Name;
 
             if ( string.IsNullOrEmpty( name ) && type.Name.EndsWith( "Node", StringComparison.OrdinalIgnoreCase ) )
                 return type.Name.Substring( 0, type.Name.Length - 4 );

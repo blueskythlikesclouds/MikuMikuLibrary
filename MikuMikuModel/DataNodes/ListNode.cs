@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MikuMikuModel.Resources;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace MikuMikuModel.DataNodes
         public override DataNodeFlags Flags => DataNodeFlags.Branch;
         public override DataNodeActionFlags ActionFlags => DataNodeActionFlags.None;
 
-        public override Bitmap Icon => Properties.Resources.Folder;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/Folder.png" );
 
         public int Count => GetProperty<int>();
 
@@ -29,7 +30,7 @@ namespace MikuMikuModel.DataNodes
         {
             for ( int i = 0; i < Data.Count; i++ )
             {
-                var name = mNameGetter != null ? mNameGetter( Data[ i ] ) : $"{DataNodeFactory.GetSpecialName( mType )} #{i}";
+                var name = mNameGetter != null ? mNameGetter( Data[ i ] ) : $"{DataNodeFactory.GetPrettyName( mType )} #{i}";
                 Add( DataNodeFactory.Create<T>( name, Data[ i ] ) );
             }
         }

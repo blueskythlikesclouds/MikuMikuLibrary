@@ -4,6 +4,7 @@ using MikuMikuLibrary.Textures;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.GUI.Forms;
+using MikuMikuModel.Resources;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -38,7 +39,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon => Properties.Resources.Model;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/Model.png" );
 
         [Browsable( false )]
         public ListNode<Mesh> Meshes { get; set; }
@@ -125,14 +126,14 @@ namespace MikuMikuModel.DataNodes
                     {
                         var triangles = indexTable.GetTriangles();
                         var indices = new ushort[ triangles.Count * 3 ];
-                        
+
                         for ( int i = 0; i < triangles.Count; i++ )
                         {
                             indices[ ( i * 3 ) + 0 ] = triangles[ i ].A;
                             indices[ ( i * 3 ) + 1 ] = triangles[ i ].B;
                             indices[ ( i * 3 ) + 2 ] = triangles[ i ].C;
                         }
-                        
+
                         indexTable.PrimitiveType = IndexTablePrimitiveType.Triangles;
                         indexTable.Indices = indices;
                     }
@@ -252,6 +253,8 @@ namespace MikuMikuModel.DataNodes
 
                 Textures.InitializeView();
             }
+
+            Textures?.InitializeView( true );
         }
 
         protected override void OnReplace( object oldData )

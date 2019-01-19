@@ -1,6 +1,7 @@
 ﻿using MikuMikuLibrary.Textures;
 using MikuMikuLibrary.Textures.DDS;
 using MikuMikuModel.GUI.Controls;
+using MikuMikuModel.Resources;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -15,7 +16,7 @@ namespace MikuMikuModel.DataNodes
         public override DataNodeActionFlags ActionFlags =>
             DataNodeActionFlags.Export | DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Replace;
 
-        public override Bitmap Icon => Properties.Resources.Texture;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/Texture.png" );
 
         public int ID => GetProperty<int>();
         public int Width => GetProperty<int>();

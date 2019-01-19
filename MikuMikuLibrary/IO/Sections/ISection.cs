@@ -31,6 +31,8 @@ namespace MikuMikuLibrary.IO.Sections
     }
 
     public enum SectionMode { Read, Write };
+
+    [Flags]
     public enum SectionFlags
     {
         None = 0,

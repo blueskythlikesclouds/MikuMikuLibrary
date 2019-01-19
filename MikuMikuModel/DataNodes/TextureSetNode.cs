@@ -1,6 +1,7 @@
 ﻿using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Textures;
+using MikuMikuModel.Resources;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -9,7 +10,7 @@ using System.Windows.Forms;
 
 namespace MikuMikuModel.DataNodes
 {
-    [DataNodeSpecialName( "Texture Set" )]
+    [DataNodePrettyName( "Texture Set" )]
     public class TextureSetNode : BinaryFileNode<TextureSet>
     {
         public override DataNodeFlags Flags => DataNodeFlags.Branch;
@@ -24,7 +25,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon => Properties.Resources.TextureSet;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/TextureSet.png" );
 
         [Browsable( false )]
         public ListNode<Texture> Textures { get; set; }

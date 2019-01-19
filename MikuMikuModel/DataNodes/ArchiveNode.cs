@@ -1,6 +1,7 @@
 ﻿using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.IO;
 using MikuMikuModel.FormatModules;
+using MikuMikuModel.Resources;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -16,7 +17,7 @@ namespace MikuMikuModel.DataNodes
 
         public override DataNodeFlags Flags => DataNodeFlags.Branch;
         public override DataNodeActionFlags ActionFlags => mFlags;
-        public override Bitmap Icon => Properties.Resources.Archive;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/Archive.png" );
 
         protected override void InitializeCore()
         {

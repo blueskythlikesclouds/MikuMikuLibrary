@@ -88,6 +88,9 @@
     <Compile Include="DataNodes\TextureDatabaseNode.cs" />
     <Compile Include="DataNodes\TextureNode.cs" />
     <Compile Include="DataNodes\TextureSetNode.cs" />
+    <Compile Include="DataNodes\TypeConverters\ColorTypeConverter.cs" />
+    <Compile Include="DataNodes\TypeConverters\Int32HexTypeConverter.cs" />
+    <Compile Include="DataNodes\TypeConverters\VectorTypeConverter.cs" />
     <Compile Include="DataNodes\Wrappers\DataTreeNode.cs" />
     <Compile Include="DataNodes\Wrappers\DataTreeView.cs">
       <SubType>Component</SubType>
@@ -148,6 +151,7 @@
     <Compile Include="FormatModules\IFormatModule.cs" />
     <Compile Include="FormatModules\FormatModule.cs" />
     <Compile Include="FormatModules\FormatModuleRegistry.cs" />
+    <Compile Include="Resources\ResourceStore.cs" />
     <EmbeddedResource Include="GUI\Controls\TextureViewControl.resx">
       <DependentUpon>TextureViewControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -170,22 +174,22 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="Shaders\Default.frag">
+    <None Include="Resources\Shaders\Default.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Shaders\Default.vert">
+    <None Include="Resources\Shaders\Default.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Shaders\DefaultBasic.frag">
+    <None Include="Resources\Shaders\DefaultBasic.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Shaders\DefaultBasic.vert">
+    <None Include="Resources\Shaders\DefaultBasic.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Shaders\Grid.frag">
+    <None Include="Resources\Shaders\Grid.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Shaders\Grid.vert">
+    <None Include="Resources\Shaders\Grid.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="OpenTK.dll.config" />
@@ -211,22 +215,54 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="MikuPoke.ico" />
-    <None Include="Resources\TextureSet.png" />
-    <None Include="Resources\Texture.png" />
-    <None Include="Resources\MaterialTexture.png" />
-    <None Include="Resources\Material.png" />
-    <None Include="Resources\Model.png" />
-    <None Include="Resources\Mesh.png" />
-    <None Include="Resources\File.png" />
-    <None Include="Resources\Archive.png" />
-    <None Include="Resources\Rename.png" />
-    <None Include="Resources\Remove.png" />
-    <None Include="Resources\Node.png" />
-    <None Include="Resources\MoveUp.png" />
-    <None Include="Resources\MoveDown.png" />
-    <None Include="Resources\Import.png" />
-    <None Include="Resources\Folder.png" />
-    <None Include="Resources\Export.png" />
+    <None Include="Resources\Icons\TextureSet.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Texture.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\MaterialTexture.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Material.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Model.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Mesh.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\File.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Archive.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Rename.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Remove.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Node.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\MoveUp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\MoveDown.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Import.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Folder.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Icons\Export.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

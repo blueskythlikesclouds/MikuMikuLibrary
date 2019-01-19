@@ -1,4 +1,5 @@
 ﻿using MikuMikuLibrary.Sprites;
+using MikuMikuModel.DataNodes.TypeConverters;
 using System.ComponentModel;
 
 namespace MikuMikuModel.DataNodes
@@ -10,11 +11,13 @@ namespace MikuMikuModel.DataNodes
         public override DataNodeActionFlags ActionFlags =>
             DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename;
 
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field00
         {
             get => GetProperty<int>();
             set => SetProperty( value );
         }
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field01
         {
             get => GetProperty<int>();

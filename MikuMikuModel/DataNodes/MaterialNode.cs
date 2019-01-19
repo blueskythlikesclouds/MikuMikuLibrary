@@ -1,5 +1,7 @@
 ﻿using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Misc;
+using MikuMikuModel.DataNodes.TypeConverters;
+using MikuMikuModel.Resources;
 using System.ComponentModel;
 
 namespace MikuMikuModel.DataNodes
@@ -11,8 +13,9 @@ namespace MikuMikuModel.DataNodes
         public override DataNodeActionFlags ActionFlags =>
             DataNodeActionFlags.Move | DataNodeActionFlags.Remove | DataNodeActionFlags.Rename;
 
-        public override System.Drawing.Bitmap Icon => Properties.Resources.Material;
+        public override System.Drawing.Bitmap Icon => ResourceStore.LoadBitmap( "Icons/Archive.png" );
 
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field00
         {
             get => GetProperty<int>();
@@ -23,35 +26,41 @@ namespace MikuMikuModel.DataNodes
             get => GetProperty<string>();
             set => SetProperty( value );
         }
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field01
         {
             get => GetProperty<int>();
             set => SetProperty( value );
         }
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field02
         {
             get => GetProperty<int>();
             set => SetProperty( value );
         }
         [DisplayName( "Diffuse color" )]
+        [TypeConverter( typeof( ColorTypeConverter ) )]
         public Color DiffuseColor
         {
             get => GetProperty<Color>();
             set => SetProperty( value );
         }
         [DisplayName( "Ambient color" )]
+        [TypeConverter( typeof( ColorTypeConverter ) )]
         public Color AmbientColor
         {
             get => GetProperty<Color>();
             set => SetProperty( value );
         }
         [DisplayName( "Specular color" )]
+        [TypeConverter( typeof( ColorTypeConverter ) )]
         public Color SpecularColor
         {
             get => GetProperty<Color>();
             set => SetProperty( value );
         }
         [DisplayName( "Emission color" )]
+        [TypeConverter( typeof( ColorTypeConverter ) )]
         public Color EmissionColor
         {
             get => GetProperty<Color>();

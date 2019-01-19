@@ -1,22 +1,26 @@
 ﻿using MikuMikuLibrary.Materials;
+using MikuMikuModel.DataNodes.TypeConverters;
+using MikuMikuModel.Resources;
 using System.ComponentModel;
 using System.Drawing;
 
 namespace MikuMikuModel.DataNodes
 {
-    [DataNodeSpecialName( "Material Texture" )]
+    [DataNodePrettyName( "Material Texture" )]
     public class MaterialTextureNode : DataNode<MaterialTexture>
     {
         public override DataNodeFlags Flags => DataNodeFlags.Leaf;
         public override DataNodeActionFlags ActionFlags => DataNodeActionFlags.None;
 
-        public override Bitmap Icon => Properties.Resources.MaterialTexture;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/MaterialTexture.png" );
 
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field00
         {
             get => GetProperty<int>();
             set => SetProperty( value );
         }
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field01
         {
             get => GetProperty<int>();
@@ -28,6 +32,7 @@ namespace MikuMikuModel.DataNodes
             get => GetProperty<int>();
             set => SetProperty( value );
         }
+        [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field02
         {
             get => GetProperty<int>();

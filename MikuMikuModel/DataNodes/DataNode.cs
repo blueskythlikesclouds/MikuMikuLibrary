@@ -1,6 +1,7 @@
 ﻿using MikuMikuModel.Configurations;
 using MikuMikuModel.FormatModules;
 using MikuMikuModel.GUI.Forms;
+using MikuMikuModel.Resources;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -85,7 +86,7 @@ namespace MikuMikuModel.DataNodes
         public abstract Type DataType { get; }
 
         [Browsable( false )]
-        public virtual string SpecialName => DataNodeFactory.GetSpecialName( GetType() );
+        public virtual string PrettyName => DataNodeFactory.GetPrettyName( GetType() );
 
         public virtual string Name
         {
@@ -141,7 +142,7 @@ namespace MikuMikuModel.DataNodes
         public virtual IEnumerable<DataNode> Nodes => mNodes;
 
         [Browsable( false )]
-        public virtual Bitmap Icon => Properties.Resources.Node;
+        public virtual Bitmap Icon => ResourceStore.LoadBitmap( "Icons/Node.png" );
 
         //
         // Methods
@@ -755,11 +756,11 @@ namespace MikuMikuModel.DataNodes
     //
 
     [AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
-    public class DataNodeSpecialNameAttribute : Attribute
+    public class DataNodePrettyNameAttribute : Attribute
     {
         public string Name { get; }
 
-        public DataNodeSpecialNameAttribute( string name )
+        public DataNodePrettyNameAttribute( string name )
         {
             Name = name;
         }

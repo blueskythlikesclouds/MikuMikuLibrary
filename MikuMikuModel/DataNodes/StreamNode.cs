@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using MikuMikuModel.Resources;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 
@@ -18,7 +19,7 @@ namespace MikuMikuModel.DataNodes
             }
         }
 
-        public override Bitmap Icon => Properties.Resources.File;
+        public override Bitmap Icon => ResourceStore.LoadBitmap( "Icons/File.png" );
 
         [DisplayName( "File path" )]
         public string FilePath => ( Data as FileStream )?.Name;
