@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace MikuMikuLibrary.Models
 {
-    public class MeshExEntry
+    public class ExEntry
     {
         public int Field00 { get; set; }
         public int Field01 { get; set; }
@@ -27,7 +27,7 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public class MeshExBlockConstraint : MeshExBlock
+    public class ExBlockConstraint : ExBlock
     {
         public override string Signature => "CNS";
 
@@ -119,7 +119,7 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public class MeshExBlockMotion : MeshExBlock
+    public class ExBlockMotion : ExBlock
     {
         public override string Signature => "MOT";
 
@@ -167,14 +167,14 @@ namespace MikuMikuLibrary.Models
             } );
         }
 
-        public MeshExBlockMotion()
+        public ExBlockMotion()
         {
             BoneIDs = new List<int>();
             BoneMatrices = new List<Matrix4x4>();
         }
     }
 
-    public class MeshExBlockExpression : MeshExBlock
+    public class ExBlockExpression : ExBlock
     {
         public override string Signature => "EXP";
 
@@ -204,13 +204,13 @@ namespace MikuMikuLibrary.Models
             writer.WriteNulls( ( 12 - Expressions.Count ) * 4 );
         }
 
-        public MeshExBlockExpression()
+        public ExBlockExpression()
         {
             Expressions = new List<string>();
         }
     }
 
-    public class MeshExBlockOsage : MeshExBlock
+    public class ExBlockOsage : ExBlock
     {
         public override string Signature => "OSG";
 
@@ -243,7 +243,7 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public abstract class MeshExBlock
+    public abstract class ExBlock
     {
         public abstract string Signature { get; }
 
@@ -274,7 +274,7 @@ namespace MikuMikuLibrary.Models
         internal abstract void WriteBody( EndianBinaryWriter writer );
     }
 
-    public class MeshExOsageBoneEntry
+    public class ExOsageBoneEntry
     {
         public int BoneID { get; set; }
         public float Field00 { get; set; }
@@ -295,15 +295,15 @@ namespace MikuMikuLibrary.Models
         }
     }
 
-    public class MeshExData
+    public class ExData
     {
         public const int BYTE_SIZE = 0x60;
 
-        public List<MeshExOsageBoneEntry> OsageBones { get; }
+        public List<ExOsageBoneEntry> OsageBones { get; }
         public List<string> OsageNames { get; }
-        public List<MeshExBlock> ExBlocks { get; }
+        public List<ExBlock> ExBlocks { get; }
         public List<string> BoneNames { get; }
-        public List<MeshExEntry> Entries { get; }
+        public List<ExEntry> Entries { get; }
 
         internal void Read( EndianBinaryReader reader )
         {
@@ -322,7 +322,7 @@ namespace MikuMikuLibrary.Models
                 OsageBones.Capacity = osageBoneCount;
                 for ( int i = 0; i < osageBoneCount; i++ )
                 {
-                    var osageBone = new MeshExOsageBoneEntry();
+                    var osageBone = new ExOsageBoneEntry();
                     osageBone.Read( reader );
                     OsageBones.Add( osageBone );
                 }
@@ -345,23 +345,23 @@ namespace MikuMikuLibrary.Models
                     if ( exBlockDataOffset == 0 )
                         break;
 
-                    MeshExBlock exBlock = null;
+                    ExBlock exBlock = null;
 
                     reader.ReadAtOffset( exBlockDataOffset, () =>
                     {
                         switch ( exBlockSignature )
                         {
                             case "OSG":
-                                exBlock = new MeshExBlockOsage();
+                                exBlock = new ExBlockOsage();
                                 break;
                             case "EXP":
-                                exBlock = new MeshExBlockExpression();
+                                exBlock = new ExBlockExpression();
                                 break;
                             case "MOT":
-                                exBlock = new MeshExBlockMotion();
+                                exBlock = new ExBlockMotion();
                                 break;
                             case "CNS":
-                                exBlock = new MeshExBlockConstraint();
+                                exBlock = new ExBlockConstraint();
                                 break;
                             default:
                                 Debug.WriteLine( $"WARNING: Unknown ex-block type {exBlockSignature}" );
@@ -388,7 +388,7 @@ namespace MikuMikuLibrary.Models
             {
                 while ( true )
                 {
-                    var exEntry = new MeshExEntry();
+                    var exEntry = new ExEntry();
                     exEntry.Read( reader );
 
                     if ( exEntry.Field00 == 0 )
@@ -438,13 +438,13 @@ namespace MikuMikuLibrary.Models
             writer.WriteNulls( writer.AddressSpace == AddressSpace.Int64 ? 32 : 28 );
         }
 
-        public MeshExData()
+        public ExData()
         {
-            OsageBones = new List<MeshExOsageBoneEntry>();
-            ExBlocks = new List<MeshExBlock>();
+            OsageBones = new List<ExOsageBoneEntry>();
+            ExBlocks = new List<ExBlock>();
             OsageNames = new List<string>();
             BoneNames = new List<string>();
-            Entries = new List<MeshExEntry>();
+            Entries = new List<ExEntry>();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace MikuMikuModel.DataNodes
         public ListNode<Material> Materials { get; set; }
 
         [Browsable( false )]
-        public MeshSkinNode Skin { get; set; }
+        public SkinNode Skin { get; set; }
 
         protected override void InitializeCore()
         {
@@ -77,7 +77,7 @@ namespace MikuMikuModel.DataNodes
             Add( Materials = new ListNode<Material>( "Materials", Data.Materials ) );
 
             if ( Data.Skin != null )
-                Add( Skin = new MeshSkinNode( nameof( Data.Skin ), Data.Skin ) );
+                Add( Skin = new SkinNode( nameof( Data.Skin ), Data.Skin ) );
         }
 
         protected override void OnRename( string oldName )

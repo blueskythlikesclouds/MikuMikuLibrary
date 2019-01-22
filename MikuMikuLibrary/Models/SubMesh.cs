@@ -233,7 +233,7 @@ namespace MikuMikuLibrary.Models
                 {
                     for ( int i = 0; i < Tangents.Length; i++ )
                     {
-                        float direction = Tangents[ i ].W < 0.0f ? -1.0f : 1.0f;
+                        int direction = Math.Sign( Tangents[ i ].W );
                         Vector3 tangent = Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
 
                         Tangents[ i ] = new Vector4( tangent, direction );

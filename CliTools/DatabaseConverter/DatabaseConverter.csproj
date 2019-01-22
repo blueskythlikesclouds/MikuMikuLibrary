@@ -70,7 +70,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>del "$(TargetDir)\AssimpNet.xml"
-del "$(TargetDir)\AssimpNet.dll"
-del "$(TargetDir)\NvTriStripDotNet.dll"</PostBuildEvent>
+del "$(TargetDir)\AssimpNet.dll"</PostBuildEvent>
   </PropertyGroup>
 </Project>

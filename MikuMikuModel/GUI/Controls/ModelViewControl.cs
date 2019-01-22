@@ -34,7 +34,7 @@ namespace MikuMikuModel.GUI.Controls
         private Vector3 mCamDir = new Vector3( 0, 0, -1 );
         private Point mPrevMousePos;
         private static readonly Vector3 sCamUp = new Vector3( 0, 1, 0 );
-        private static readonly float sFieldOfView = MathHelper.DegreesToRadians( 45 );
+        private static readonly float sFieldOfView = MathHelper.DegreesToRadians( 65 );
 
         private bool mLeft, mRight, mUp, mDown;
 
@@ -55,7 +55,7 @@ namespace MikuMikuModel.GUI.Controls
             foreach ( var mesh in model.Meshes )
                 bSphere.Merge( mesh.BoundingSphere );
 
-            var distance = ( float )( ( bSphere.Radius * 2f ) / Math.Tan( sFieldOfView ) ) + 0.5f;
+            var distance = ( float )( ( bSphere.Radius * 2f ) / Math.Tan( sFieldOfView ) ) + 0.75f;
 
             mCamPos = new Vector3(
                 bSphere.Center.X,
@@ -73,7 +73,7 @@ namespace MikuMikuModel.GUI.Controls
 
             mModel = new GLMesh( mesh, new Dictionary<int, GLTexture>(), textureSet );
 
-            var distance = ( float )( ( mesh.BoundingSphere.Radius * 2f ) / Math.Tan( sFieldOfView ) ) + 0.5f;
+            var distance = ( float )( ( mesh.BoundingSphere.Radius * 2f ) / Math.Tan( sFieldOfView ) ) + 0.75f;
 
             mCamPos = new Vector3(
                 mesh.BoundingSphere.Center.X,
@@ -100,7 +100,7 @@ namespace MikuMikuModel.GUI.Controls
 
             mModel = new GLSubMesh( subMesh, materials );
 
-            var distance = ( float )( ( subMesh.BoundingSphere.Radius * 2f ) / Math.Tan( sFieldOfView ) ) + 0.5f;
+            var distance = ( float )( ( subMesh.BoundingSphere.Radius * 2f ) / Math.Tan( sFieldOfView ) ) + 0.75f;
 
             mCamPos = new Vector3(
                 subMesh.BoundingSphere.Center.X,
@@ -131,10 +131,16 @@ namespace MikuMikuModel.GUI.Controls
             mCamDir = Vector3.Normalize( front );
 
             float cameraSpeed = ModifierKeys.HasFlag( Keys.Shift ) ? 0.8f : ModifierKeys.HasFlag( Keys.Control ) ? 0.025f : 0.1f;
-            if ( mUp ) mCamPos += mCamDir * cameraSpeed;
-            else if ( mDown ) mCamPos -= mCamDir * cameraSpeed;
-            if ( mLeft ) mCamPos -= Vector3.Normalize( Vector3.Cross( mCamDir, sCamUp ) ) * cameraSpeed;
-            else if ( mRight ) mCamPos += Vector3.Normalize( Vector3.Cross( mCamDir, sCamUp ) ) * cameraSpeed;
+
+            if ( mUp && !mDown )
+                mCamPos += mCamDir * cameraSpeed;
+            else if ( mDown && !mUp )
+                mCamPos -= mCamDir * cameraSpeed;
+
+            if ( mLeft && !mRight )
+                mCamPos -= Vector3.Normalize( Vector3.Cross( mCamDir, sCamUp ) ) * cameraSpeed;
+            else if ( mRight && !mLeft )
+                mCamPos += Vector3.Normalize( Vector3.Cross( mCamDir, sCamUp ) ) * cameraSpeed;
         }
 
         private Matrix4 GetViewMatrix()

@@ -82,7 +82,7 @@ namespace MikuMikuLibrary.Models
                 {
                     reader.ReadOffset( () =>
                     {
-                        mesh.Skin = new MeshSkin();
+                        mesh.Skin = new Skin();
                         mesh.Skin.Read( reader );
                     } );
                 }

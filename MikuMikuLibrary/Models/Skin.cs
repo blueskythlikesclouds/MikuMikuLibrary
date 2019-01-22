@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace MikuMikuLibrary.Models
 {
-    public class MeshSkin
+    public class Skin
     {
         public const int BYTE_SIZE = 0x40;
 
         public List<Bone> Bones { get; }
-        public MeshExData ExData { get; set; }
+        public ExData ExData { get; set; }
 
         internal void Read( EndianBinaryReader reader )
         {
@@ -46,7 +46,7 @@ namespace MikuMikuLibrary.Models
 
             reader.ReadAtOffset( meshExDataOffset, () =>
             {
-                ExData = new MeshExData();
+                ExData = new ExData();
                 ExData.Read( reader );
             } );
 
@@ -84,7 +84,7 @@ namespace MikuMikuLibrary.Models
             writer.WriteNulls( writer.AddressSpace == AddressSpace.Int64 ? 32 : 40 );
         }
 
-        public MeshSkin()
+        public Skin()
         {
             Bones = new List<Bone>();
         }

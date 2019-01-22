@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Ai = Assimp;
 
-namespace MikuMikuLibrary.Models
+namespace MikuMikuLibrary.Models.Processing.Assimp
 {
     public static class SceneUtilities
     {

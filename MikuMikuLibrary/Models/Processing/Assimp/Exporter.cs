@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using Ai = Assimp;
 
-namespace MikuMikuLibrary.Models
+namespace MikuMikuLibrary.Models.Processing.Assimp
 {
-    public static class ModelExporter
+    public static class Exporter
     {
         public static void ConvertAiSceneFromModel( Model model, string outputFileName, TextureDatabase textureDatabase = null, bool appendTags = false )
         {
@@ -126,22 +125,13 @@ namespace MikuMikuLibrary.Models
             }
         }
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        private static Ai.Matrix4x4 GetAiMatrix4x4FromMatrix4x4( Matrix4x4 m )
-        {
-            return new Ai.Matrix4x4( m.M11, m.M12, m.M13, m.M14,
-                                     m.M21, m.M22, m.M23, m.M24,
-                                     m.M31, m.M32, m.M33, m.M34,
-                                     m.M41, m.M42, m.M43, m.M44 );
-        }
-
         private static Ai.Node ConvertAiNodeFromBone( Ai.Node parent, Matrix4x4 inverseParentTransform, Bone bone, bool appendTags = false )
         {
             Matrix4x4.Invert( bone.Matrix, out Matrix4x4 inverse );
             var transform = Matrix4x4.Multiply( inverseParentTransform, inverse );
 
             var aiNode = new Ai.Node( bone.Name, parent );
-            aiNode.Transform = GetAiMatrix4x4FromMatrix4x4( transform );
+            aiNode.Transform = transform.ToAssimp();
 
             if ( appendTags )
                 aiNode.Name = $"{aiNode.Name}{Tag.Create( "ID", bone.ID )}";
@@ -219,7 +209,7 @@ namespace MikuMikuLibrary.Models
                             var bone = mesh.Skin.Bones[ boneIndex ];
                             var aiBone = new Ai.Bone();
                             aiBone.Name = bone.Name;
-                            aiBone.OffsetMatrix = GetAiMatrix4x4FromMatrix4x4( bone.Matrix );
+                            aiBone.OffsetMatrix = bone.Matrix.ToAssimp();
 
                             if ( appendTags )
                                 aiBone.Name = $"{aiBone.Name}{Tag.Create( "ID", bone.ID )}";
@@ -290,21 +280,15 @@ namespace MikuMikuLibrary.Models
             return default( Ai.TextureSlot );
         }
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        private static Ai.Color4D GetAiColor4DFromColor( Color color )
-        {
-            return new Ai.Color4D( color.R, color.G, color.B, color.A );
-        }
-
         private static Ai.Material ConvertAiMaterialFromMaterial( Material material, TextureSet textures )
         {
             var aiMaterial = new Ai.Material
             {
                 Name = material.Name,
-                ColorDiffuse = GetAiColor4DFromColor( material.DiffuseColor ),
-                ColorAmbient = GetAiColor4DFromColor( material.AmbientColor ),
-                ColorSpecular = GetAiColor4DFromColor( material.SpecularColor ),
-                ColorEmissive = GetAiColor4DFromColor( material.EmissionColor ),
+                ColorDiffuse = material.DiffuseColor.ToAssimp(),
+                ColorAmbient = material.AmbientColor.ToAssimp(),
+                ColorSpecular = material.SpecularColor.ToAssimp(),
+                ColorEmissive = material.EmissionColor.ToAssimp(),
                 Shininess = material.Shininess,
                 ShadingMode = Ai.ShadingMode.Phong,
             };

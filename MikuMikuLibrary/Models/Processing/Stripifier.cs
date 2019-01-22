@@ -1,15 +1,15 @@
 ﻿using NvTriStripDotNet;
 
-namespace MikuMikuLibrary.Models
+namespace MikuMikuLibrary.Models.Processing
 {
-    public static class TriangleStripUtilities
+    public static class Stripifier
     {
         private static readonly NvStripifier sStripifier = new NvStripifier
         {
             CacheSize = NvStripifier.CACHESIZE_RSX,
         };
 
-        public static ushort[] GenerateStrips( ushort[] indices )
+        public static ushort[] Stripify( ushort[] indices )
         {
             sStripifier.GenerateStrips( indices, out PrimitiveGroup[] primitiveGroups );
 

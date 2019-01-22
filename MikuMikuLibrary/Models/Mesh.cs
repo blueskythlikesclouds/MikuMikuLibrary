@@ -4,7 +4,6 @@ using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Maths;
 using System.Collections.Generic;
-using System;
 
 namespace MikuMikuLibrary.Models
 {
@@ -14,7 +13,7 @@ namespace MikuMikuLibrary.Models
 
         public List<SubMesh> SubMeshes { get; }
         public List<Material> Materials { get; }
-        public MeshSkin Skin { get; set; }
+        public Skin Skin { get; set; }
         public string Name { get; set; }
         public int ID { get; set; }
         public BoundingSphere BoundingSphere { get; set; }

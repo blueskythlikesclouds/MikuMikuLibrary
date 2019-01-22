@@ -7,12 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using Ai = Assimp;
 
-namespace MikuMikuLibrary.Models
+namespace MikuMikuLibrary.Models.Processing.Assimp
 {
-    public static class ModelImporter
+    public static class Importer
     {
         private static Random sRandom = new Random();
 
@@ -29,7 +28,7 @@ namespace MikuMikuLibrary.Models
                 TextureSet = new TextureSet()
             };
 
-            var transformation = GetMatrix4x4FromAiMatrix4x4( aiScene.RootNode.Transform );
+            var transformation = aiScene.RootNode.Transform.ToNumericsTransposed();
             foreach ( var aiNode in aiScene.RootNode.Children )
             {
                 var mesh = ConvertMeshFromAiNode( aiNode, aiScene, transformation, texturesDirectory, model.TextureSet );
@@ -62,48 +61,14 @@ namespace MikuMikuLibrary.Models
             return model;
         }
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        private static Matrix4x4 GetMatrix4x4FromAiMatrix4x4( Ai.Matrix4x4 matrix, bool transpose = true )
+        private static Ai.Matrix4x4 GetGlobalTransformation( Ai.Node aiNode )
         {
-            if ( transpose )
-            {
-                return new Matrix4x4( matrix.A1, matrix.B1, matrix.C1, matrix.D1,
-                                      matrix.A2, matrix.B2, matrix.C2, matrix.D2,
-                                      matrix.A3, matrix.B3, matrix.C3, matrix.D3,
-                                      matrix.A4, matrix.B4, matrix.C4, matrix.D4 );
-            }
+            var transform = Ai.Matrix4x4.Identity;
 
-            else
-            {
-                return new Matrix4x4( matrix.A1, matrix.A2, matrix.A3, matrix.A4,
-                                      matrix.B1, matrix.B2, matrix.B3, matrix.B4,
-                                      matrix.C1, matrix.C2, matrix.C3, matrix.C4,
-                                      matrix.D1, matrix.D2, matrix.D3, matrix.D4 );
-            }
-        }
-
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        private static Matrix4x4 GetWorldTransformation( Ai.Node aiNode, bool transpose = true )
-        {
-            var transform = GetMatrix4x4FromAiMatrix4x4( aiNode.Transform, transpose );
-            var parent = aiNode.Parent;
-
-            while ( parent != null )
-            {
-                var parentTransform = GetMatrix4x4FromAiMatrix4x4( parent.Transform, transpose );
-                transform = parentTransform * transform;
-                parent = parent.Parent;
-            }
+            for ( var node = aiNode; aiNode != null; aiNode = aiNode.Parent )
+                transform = transform * aiNode.Transform;
 
             return transform;
-        }
-
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        private static Vector2 ClampTextureCoordinates( Vector2 uv )
-        {
-            return new Vector2(
-                uv.X > 1f ? ( uv.X - ( int )uv.X ) : uv.X < 0f ? 1f + ( uv.X - ( int )uv.X ) : uv.X,
-                uv.Y > 1f ? ( uv.Y - ( int )uv.Y ) : uv.Y < 0f ? 1f + ( uv.Y - ( int )uv.Y ) : uv.Y );
         }
 
         private static Bone ConvertBoneFromAiBone( Ai.Bone aiBone, Ai.Scene aiScene, int boneID )
@@ -112,9 +77,9 @@ namespace MikuMikuLibrary.Models
 
             var aiBoneNode = aiScene.RootNode.FindNode( aiBone.Name );
             if ( aiBoneNode != null )
-                Matrix4x4.Invert( GetWorldTransformation( aiBoneNode, false ), out inverseTransformation );
+                Matrix4x4.Invert( GetGlobalTransformation( aiBoneNode ).ToNumerics(), out inverseTransformation );
             else
-                inverseTransformation = GetMatrix4x4FromAiMatrix4x4( aiBone.OffsetMatrix, false );
+                inverseTransformation = aiBone.OffsetMatrix.ToNumerics();
 
             return new Bone
             {
@@ -137,7 +102,7 @@ namespace MikuMikuLibrary.Models
 
             texture = TextureEncoder.Encode( textureFilePath );
             texture.Name = textureName;
-            texture.ID = sRandom.Next( 800000, int.MaxValue );
+            texture.ID = sRandom.Next( int.MinValue, int.MaxValue );
             textureSet.Textures.Add( texture );
 
             return texture;
@@ -146,12 +111,6 @@ namespace MikuMikuLibrary.Models
         private static Texture ConvertTexture( string textureName, string texturesDirectory, TextureSet textureSet )
         {
             return ConvertTexture( Path.Combine( texturesDirectory, textureName ), textureSet );
-        }
-
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        private static Color GetColorFromAiColor4D( Ai.Color4D color )
-        {
-            return new Color( color.R, color.G, color.B, color.A );
         }
 
         private static Material ConvertMaterialFromAiMaterial( Ai.Material aiMaterial, string texturesDirectory, TextureSet textureSet )
@@ -164,22 +123,22 @@ namespace MikuMikuLibrary.Models
             material.Field25 = 1;
 
             if ( aiMaterial.HasColorDiffuse )
-                material.DiffuseColor = GetColorFromAiColor4D( aiMaterial.ColorDiffuse );
+                material.DiffuseColor = aiMaterial.ColorDiffuse.ToMML();
             else
                 material.DiffuseColor = new Color( 1, 1, 1, 1 );
 
             if ( aiMaterial.HasColorAmbient )
-                material.AmbientColor = GetColorFromAiColor4D( aiMaterial.ColorAmbient );
+                material.AmbientColor = aiMaterial.ColorAmbient.ToMML();
             else
                 material.AmbientColor = new Color( 1, 1, 1, 1 );
 
             if ( aiMaterial.HasColorSpecular )
-                material.SpecularColor = GetColorFromAiColor4D( aiMaterial.ColorSpecular );
+                material.SpecularColor = aiMaterial.ColorSpecular.ToMML();
             else
                 material.SpecularColor = new Color( 0.5f, 0.5f, 0.5f, 1 );
 
             if ( aiMaterial.HasColorEmissive )
-                material.EmissionColor = GetColorFromAiColor4D( aiMaterial.ColorEmissive );
+                material.EmissionColor = aiMaterial.ColorEmissive.ToMML();
             else
                 material.EmissionColor = new Color( 0, 0, 0, 1 );
 
@@ -262,7 +221,7 @@ namespace MikuMikuLibrary.Models
             if ( aiMeshes.Count == 0 )
                 return null;
 
-            var transformation = parentTransformation * GetMatrix4x4FromAiMatrix4x4( aiNode.Transform );
+            var transformation = parentTransformation * aiNode.Transform.ToNumericsTransposed();
             int vertexCount = aiMeshes.Sum( x => x.VertexCount );
 
             var subMesh = new SubMesh
@@ -275,7 +234,7 @@ namespace MikuMikuLibrary.Models
             foreach ( var aiMesh in aiMeshes )
             {
                 for ( int i = 0; i < aiMesh.Vertices.Count; i++ )
-                    subMesh.Vertices[ vertexOffset + i ] = Vector3.Transform( new Vector3( aiMesh.Vertices[ i ].X, aiMesh.Vertices[ i ].Y, aiMesh.Vertices[ i ].Z ), transformation );
+                    subMesh.Vertices[ vertexOffset + i ] = Vector3.Transform( aiMesh.Vertices[ i ].ToNumerics(), transformation );
 
                 if ( aiMesh.HasNormals )
                 {
@@ -283,7 +242,7 @@ namespace MikuMikuLibrary.Models
                         subMesh.Normals = new Vector3[ vertexCount ];
 
                     for ( int i = 0; i < aiMesh.Normals.Count; i++ )
-                        subMesh.Normals[ vertexOffset + i ] = Vector3.Normalize( Vector3.TransformNormal( new Vector3( aiMesh.Normals[ i ].X, aiMesh.Normals[ i ].Y, aiMesh.Normals[ i ].Z ), transformation ) );
+                        subMesh.Normals[ vertexOffset + i ] = Vector3.Normalize( Vector3.TransformNormal( aiMesh.Normals[ i ].ToNumerics(), transformation ) );
                 }
 
                 if ( aiMesh.HasTangentBasis )
@@ -293,9 +252,9 @@ namespace MikuMikuLibrary.Models
 
                     for ( int i = 0; i < aiMesh.Tangents.Count; i++ )
                     {
-                        Vector3 tangent = Vector3.TransformNormal( new Vector3( aiMesh.Tangents[ i ].X, aiMesh.Tangents[ i ].Y, aiMesh.Tangents[ i ].Z ), transformation );
-                        Vector3 bitangent = Vector3.TransformNormal( new Vector3( aiMesh.BiTangents[ i ].X, aiMesh.BiTangents[ i ].Y, aiMesh.BiTangents[ i ].Z ), transformation );
-                        float direction = Vector3.Dot( bitangent, Vector3.Cross( subMesh.Normals[ vertexOffset + i ], tangent ) ) > 0 ? 1.0f : -1.0f;
+                        Vector3 tangent = Vector3.TransformNormal( aiMesh.Tangents[ i ].ToNumerics(), transformation );
+                        Vector3 bitangent = Vector3.TransformNormal( aiMesh.BiTangents[ i ].ToNumerics(), transformation );
+                        int direction = Math.Sign( Vector3.Dot( bitangent, Vector3.Cross( subMesh.Normals[ vertexOffset + i ], tangent ) ) );
 
                         subMesh.Tangents[ vertexOffset + i ] = new Vector4( tangent, direction );
                     }
@@ -307,7 +266,7 @@ namespace MikuMikuLibrary.Models
                         subMesh.UVChannel1 = new Vector2[ vertexCount ];
 
                     for ( int i = 0; i < aiMesh.TextureCoordinateChannels[ 0 ].Count; i++ )
-                        subMesh.UVChannel1[ vertexOffset + i ] = ClampTextureCoordinates( new Vector2( aiMesh.TextureCoordinateChannels[ 0 ][ i ].X, 1f - aiMesh.TextureCoordinateChannels[ 0 ][ i ].Y ) );
+                        subMesh.UVChannel1[ vertexOffset + i ] = new Vector2( aiMesh.TextureCoordinateChannels[ 0 ][ i ].X, 1f - aiMesh.TextureCoordinateChannels[ 0 ][ i ].Y );
                 }
 
                 if ( aiMesh.HasTextureCoords( 1 ) )
@@ -316,13 +275,17 @@ namespace MikuMikuLibrary.Models
                         subMesh.UVChannel2 = new Vector2[ vertexCount ];
 
                     for ( int i = 0; i < aiMesh.TextureCoordinateChannels[ 1 ].Count; i++ )
-                        subMesh.UVChannel2[ vertexOffset + i ] = ClampTextureCoordinates( new Vector2( aiMesh.TextureCoordinateChannels[ 1 ][ i ].X, 1f - aiMesh.TextureCoordinateChannels[ 1 ][ i ].Y ) );
+                        subMesh.UVChannel2[ vertexOffset + i ] = new Vector2( aiMesh.TextureCoordinateChannels[ 1 ][ i ].X, 1f - aiMesh.TextureCoordinateChannels[ 1 ][ i ].Y );
                 }
 
                 if ( aiMesh.HasVertexColors( 0 ) )
                 {
                     if ( subMesh.Colors == null )
-                        subMesh.Colors = Enumerable.Repeat( Color.White, vertexCount ).ToArray();
+                    {
+                        subMesh.Colors = new Color[ vertexCount ];
+                        for ( int i = 0; i < subMesh.Colors.Length; i++ )
+                            subMesh.Colors[ i ] = Color.White;
+                    }
 
                     for ( int i = 0; i < aiMesh.VertexColorChannels[ 0 ].Count; i++ )
                         subMesh.Colors[ vertexOffset + i ] = new Color( aiMesh.VertexColorChannels[ 0 ][ i ].R, aiMesh.VertexColorChannels[ 0 ][ i ].G, aiMesh.VertexColorChannels[ 0 ][ i ].B, aiMesh.VertexColorChannels[ 0 ][ i ].A );
@@ -333,7 +296,11 @@ namespace MikuMikuLibrary.Models
                 if ( aiMesh.HasBones )
                 {
                     if ( subMesh.BoneWeights == null )
-                        subMesh.BoneWeights = Enumerable.Repeat( BoneWeight.Empty, vertexCount ).ToArray();
+                    {
+                        subMesh.BoneWeights = new BoneWeight[ vertexCount ];
+                        for ( int i = 0; i < subMesh.BoneWeights.Length; i++ )
+                            subMesh.BoneWeights[ i ] = BoneWeight.Empty;
+                    }
 
                     indexTable.BoneIndices = new ushort[ aiMesh.Bones.Count ];
                     for ( int i = 0; i < aiMesh.Bones.Count; i++ )
@@ -356,7 +323,7 @@ namespace MikuMikuLibrary.Models
 
                 indexTable.Indices = aiMesh.Faces.Where( x => x.IndexCount == 3 ).SelectMany( x => x.Indices ).Select( x => ( ushort )( vertexOffset + x ) ).ToArray();
 
-                ushort[] triangleStrip = TriangleStripUtilities.GenerateStrips( indexTable.Indices );
+                ushort[] triangleStrip = Stripifier.Stripify( indexTable.Indices );
                 if ( triangleStrip != null )
                 {
                     indexTable.PrimitiveType = IndexTablePrimitiveType.TriangleStrip;
@@ -394,7 +361,7 @@ namespace MikuMikuLibrary.Models
             if ( subMesh != null )
                 mesh.SubMeshes.Add( subMesh );
 
-            var transformation = parentTransformation * GetMatrix4x4FromAiMatrix4x4( aiNode.Transform );
+            var transformation = parentTransformation * aiNode.Transform.ToNumericsTransposed();
             foreach ( var aiChildNode in aiNode.Children )
                 ConvertSubMeshesFromAiNodesRecursively( mesh, aiChildNode, aiScene, transformation, boneMap, materialMap, texturesDirectory, textureSet );
         }
@@ -404,7 +371,7 @@ namespace MikuMikuLibrary.Models
             var mesh = new Mesh
             {
                 Name = aiNode.Name,
-                Skin = new MeshSkin()
+                Skin = new Skin()
             };
 
             var boneMap = new Dictionary<string, int>( StringComparer.OrdinalIgnoreCase );

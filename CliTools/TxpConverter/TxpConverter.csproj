@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D27E2934-CDF4-4735-B92E-02705DCB1310}</ProjectGuid>
+    <ProjectGuid>{EC3E5054-0044-43D6-8A3F-B1E33E7B2176}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>FarcPack</RootNamespace>
-    <AssemblyName>FarcPack</AssemblyName>
+    <RootNamespace>TxpConverter</RootNamespace>
+    <AssemblyName>TxpConverter</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -36,6 +36,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -70,7 +71,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>del "$(TargetDir)\AssimpNet.xml"
-del "$(TargetDir)\AssimpNet.dll"
-del "$(TargetDir)\NvTriStripDotNet.dll"</PostBuildEvent>
+del "$(TargetDir)\AssimpNet.dll"</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -1,5 +1,7 @@
 ﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Models;
+using MikuMikuLibrary.Models.Processing;
+using MikuMikuLibrary.Models.Processing.Assimp;
 using MikuMikuLibrary.Textures;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
@@ -59,7 +61,7 @@ namespace MikuMikuModel.DataNodes
 
                 Data.Save( path, objectDatabase, textureDatabase, boneDatabase );
             } );
-            RegisterExportHandler<Assimp.Scene>( ( path ) => ModelExporter.ConvertAiSceneFromModel( Data, path ) );
+            RegisterExportHandler<Assimp.Scene>( ( path ) => Exporter.ConvertAiSceneFromModel( Data, path ) );
             RegisterReplaceHandler<Model>( ( path ) =>
             {
                 var configuration = ConfigurationList.Instance.FindConfiguration( path );
@@ -74,9 +76,9 @@ namespace MikuMikuModel.DataNodes
             RegisterReplaceHandler<Assimp.Scene>( ( path ) =>
             {
                 if ( Data.Meshes.Count > 1 )
-                    return ModelImporter.ConvertModelFromAiScene( path );
+                    return Importer.ConvertModelFromAiScene( path );
 
-                return ModelImporter.ConvertModelFromAiSceneWithSingleMesh( path );
+                return Importer.ConvertModelFromAiSceneWithSingleMesh( path );
             } );
             RegisterDataUpdateHandler( () =>
             {
@@ -107,7 +109,7 @@ namespace MikuMikuModel.DataNodes
                 {
                     if ( indexTable.PrimitiveType == IndexTablePrimitiveType.Triangles )
                     {
-                        ushort[] triangleStrip = TriangleStripUtilities.GenerateStrips( indexTable.Indices );
+                        ushort[] triangleStrip = Stripifier.Stripify( indexTable.Indices );
                         if ( triangleStrip != null )
                         {
                             indexTable.PrimitiveType = IndexTablePrimitiveType.TriangleStrip;

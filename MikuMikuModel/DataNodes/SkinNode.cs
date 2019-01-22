@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace MikuMikuModel.DataNodes
 {
     [DataNodePrettyName( "Mesh Skin" )]
-    public class MeshSkinNode : DataNode<MeshSkin>
+    public class SkinNode : DataNode<Skin>
     {
         public override DataNodeFlags Flags => DataNodeFlags.Branch;
         public override DataNodeActionFlags ActionFlags => DataNodeActionFlags.None;
@@ -13,13 +13,13 @@ namespace MikuMikuModel.DataNodes
         public ListNode<Bone> Bones { get; set; }
 
         [Browsable( false )]
-        public MeshExDataNode ExData { get; set; }
+        public ExDataNode ExData { get; set; }
 
         protected override void InitializeCore()
         {
             RegisterDataUpdateHandler( () =>
             {
-                var data = new MeshSkin();
+                var data = new Skin();
                 data.Bones.AddRange( Bones.Data );
                 data.ExData = ExData?.Data;
                 return data;
@@ -31,10 +31,10 @@ namespace MikuMikuModel.DataNodes
             Add( Bones = new ListNode<Bone>( nameof( Data.Bones ), Data.Bones ) );
 
             if ( Data.ExData != null )
-                Add( ExData = new MeshExDataNode( "Ex data", Data.ExData ) );
+                Add( ExData = new ExDataNode( "Ex data", Data.ExData ) );
         }
 
-        public MeshSkinNode( string name, MeshSkin data ) : base( name, data )
+        public SkinNode( string name, Skin data ) : base( name, data )
         {
         }
     }

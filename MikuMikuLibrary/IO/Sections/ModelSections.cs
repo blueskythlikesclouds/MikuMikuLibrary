@@ -24,8 +24,8 @@ namespace MikuMikuLibrary.IO.Sections
     {
         public override SectionFlags Flags => SectionFlags.HasRelocationTable;
 
-        [SubSection( typeof( MeshSkinSection ) )]
-        public MeshSkin Skin
+        [SubSection( typeof( SkinSection ) )]
+        public Skin Skin
         {
             get => DataObject.Skin;
             set => DataObject.Skin = value;
@@ -52,15 +52,15 @@ namespace MikuMikuLibrary.IO.Sections
 
 
     [Section( "OSKN" )]
-    public class MeshSkinSection : Section<MeshSkin>
+    public class SkinSection : Section<Skin>
     {
         public override SectionFlags Flags => SectionFlags.HasRelocationTable;
 
-        protected override void Read( MeshSkin dataObject, EndianBinaryReader reader, long length ) => dataObject.Read( reader );
+        protected override void Read( Skin dataObject, EndianBinaryReader reader, long length ) => dataObject.Read( reader );
 
-        protected override void Write( MeshSkin dataObject, EndianBinaryWriter writer ) => dataObject.Write( writer );
+        protected override void Write( Skin dataObject, EndianBinaryWriter writer ) => dataObject.Write( writer );
 
-        public MeshSkinSection( SectionMode mode, MeshSkin dataObject = null ) : base( mode, dataObject )
+        public SkinSection( SectionMode mode, Skin dataObject = null ) : base( mode, dataObject )
         {
         }
     }
