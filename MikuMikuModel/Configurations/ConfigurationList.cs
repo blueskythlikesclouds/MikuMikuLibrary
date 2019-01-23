@@ -25,8 +25,24 @@ namespace MikuMikuModel.Configurations
 
                     else
                     {
-                        using ( var stream = File.OpenRead( FilePath ) )
-                            sInstance = ( ConfigurationList )sSerializer.Deserialize( stream );
+                        try
+                        {
+                            using ( var stream = File.OpenRead( FilePath ) )
+                                sInstance = ( ConfigurationList ) sSerializer.Deserialize( stream );
+                        }
+                        catch
+                        {
+                            if ( File.Exists( BackupFilePath ) )
+                            {
+                                using ( var stream = File.OpenRead( BackupFilePath ) )
+                                    sInstance = ( ConfigurationList ) sSerializer.Deserialize( stream );
+                            }
+                            else
+                            {
+                                sInstance = new ConfigurationList();
+                                sInstance.Save();
+                            }
+                        }
                     }
                 }
 
