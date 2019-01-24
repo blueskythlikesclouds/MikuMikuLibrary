@@ -99,6 +99,11 @@
     <Compile Include="Models\Processing\Stripifier\Utils.cs" />
     <Compile Include="Models\Processing\Stripifier\VertexCache.cs" />
     <Compile Include="Models\Processing\Stripifier.cs" />
+    <Compile Include="Motions\KeyFrame.cs" />
+    <Compile Include="Motions\KeyFrameSet.cs" />
+    <Compile Include="Motions\Motion.cs" />
+    <Compile Include="Motions\MotionSet.cs" />
+    <Compile Include="Motions\KeyFrameType.cs" />
     <Compile Include="Sprites\SpriteCropper.cs" />
     <Compile Include="Sprites\SpriteOrganizer.cs" />
     <Compile Include="Textures\DDS\DDSCodec.cs" />

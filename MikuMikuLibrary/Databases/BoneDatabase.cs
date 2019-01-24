@@ -9,30 +9,22 @@ namespace MikuMikuLibrary.Databases
 {
     public class BoneEntry
     {
-        [Flags]
-        public enum BoneEnum
-        {
-            Flag01 = 0b001,
-            Flag02 = 0b010,
-            Flag04 = 0b100,
-        }
-
-        public BoneEnum Field00 { get; set; }
+        public int Field00 { get; set; }
         public bool HasParent { get; set; }
-        public byte ParentNameIndex { get; set; }
         public byte Field01 { get; set; }
-        public byte PairNameIndex { get; set; }
         public byte Field02 { get; set; }
+        public byte Field03 { get; set; }
+        public byte Field04 { get; set; }
         public string Name { get; set; }
 
         internal void Read( EndianBinaryReader reader )
         {
-            Field00 = ( BoneEnum )reader.ReadByte();
+            Field00 = reader.ReadByte();
             HasParent = reader.ReadBoolean();
-            ParentNameIndex = reader.ReadByte();
             Field01 = reader.ReadByte();
-            PairNameIndex = reader.ReadByte();
             Field02 = reader.ReadByte();
+            Field03 = reader.ReadByte();
+            Field04 = reader.ReadByte();
             reader.SeekCurrent( 2 );
             Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
         }
@@ -41,10 +33,10 @@ namespace MikuMikuLibrary.Databases
         {
             writer.Write( ( byte )Field00 );
             writer.Write( HasParent );
-            writer.Write( ParentNameIndex );
             writer.Write( Field01 );
-            writer.Write( PairNameIndex );
             writer.Write( Field02 );
+            writer.Write( Field03 );
+            writer.Write( Field04 );
             writer.WriteNulls( 2 );
             writer.AddStringToStringTable( Name );
         }

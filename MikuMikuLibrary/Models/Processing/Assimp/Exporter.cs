@@ -107,24 +107,6 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             return aiScene;
         }
 
-        private static void SetBoneIDsFromSkeletonEntry( List<Bone> bones, SkeletonEntry skeletonEntry )
-        {
-            foreach ( var bone in bones )
-            {
-                var boneEntry = skeletonEntry.Bones.FirstOrDefault( x => x.Name == bone.Name );
-                if ( boneEntry != null )
-                {
-                    if ( boneEntry.HasParent )
-                    {
-                        var parentName = skeletonEntry.BoneNames1[ boneEntry.ParentNameIndex ];
-                        var parentBone = bones.FirstOrDefault( x => x.Name == parentName );
-                        if ( parentBone != null )
-                            bone.ParentID = parentBone.ID;
-                    }
-                }
-            }
-        }
-
         private static Ai.Node ConvertAiNodeFromBone( Ai.Node parent, Matrix4x4 inverseParentTransform, Bone bone, bool appendTags = false )
         {
             Matrix4x4.Invert( bone.Matrix, out Matrix4x4 inverse );
