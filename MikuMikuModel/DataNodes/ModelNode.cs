@@ -13,7 +13,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Windows.Forms;
 
 namespace MikuMikuModel.DataNodes
@@ -153,7 +152,7 @@ namespace MikuMikuModel.DataNodes
             {
                 bool found = false;
 
-                var objectDatabase = ConfigurationList.Instance.CurrentConfiguration?.ObjectDatabase;
+                var objectDatabase = mConfiguration?.ObjectDatabase;
                 if ( objectDatabase != null )
                 {
                     // Try finding an object that uses us, models don't seem to get reused
@@ -169,7 +168,7 @@ namespace MikuMikuModel.DataNodes
                                 found = true;
 
                                 // Pass the IDs, and rename the textures
-                                var textureDatabase = ConfigurationList.Instance.CurrentConfiguration?.TextureDatabase;
+                                var textureDatabase = mConfiguration?.TextureDatabase;
                                 for ( int i = 0; i < Data.TextureIDs.Count; i++ )
                                 {
                                     textureSetNode.Data.Textures[ i ].ID = Data.TextureIDs[ i ];
@@ -197,7 +196,7 @@ namespace MikuMikuModel.DataNodes
                         if ( textureSetNode.Data.Textures.Count == Data.TextureIDs.Count )
                         {
                             // Pass the IDs and rename them
-                            var textureDatabase = ConfigurationList.Instance.CurrentConfiguration?.TextureDatabase;
+                            var textureDatabase = mConfiguration?.TextureDatabase;
                             for ( int i = 0; i < Data.TextureIDs.Count; i++ )
                             {
                                 textureSetNode.Data.Textures[ i ].ID = Data.TextureIDs[ i ];
@@ -261,10 +260,10 @@ namespace MikuMikuModel.DataNodes
 
         protected override void OnReplace( object oldData )
         {
-            Model oldDataT = ( Model )oldData;
+            Model oldDataT = ( Model ) oldData;
 
             // Replace the mesh name with the one we replaced.
-            if ( oldDataT.Meshes.Count == Data.Meshes.Count )
+            if ( oldDataT.Meshes.Count == Data.Meshes.Count && oldDataT.Meshes.Count == 1 )
             {
                 Data.Meshes[ 0 ].Name = oldDataT.Meshes[ 0 ].Name;
                 Data.Meshes[ 0 ].ID = oldDataT.Meshes[ 0 ].ID;

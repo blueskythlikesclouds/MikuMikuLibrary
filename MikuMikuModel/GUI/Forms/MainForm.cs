@@ -5,7 +5,6 @@ using MikuMikuModel.DataNodes.Wrappers;
 using MikuMikuModel.FormatModules;
 using MikuMikuModel.GUI.Controls;
 using System;
-using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
@@ -16,25 +15,10 @@ namespace MikuMikuModel.GUI.Forms
     {
         private string mCurrentlyOpenFilePath;
 
-        private void OnOpen( object sender, EventArgs e )
-        {
-            OpenFile();
-        }
-
-        private void OnSave( object sender, EventArgs e )
-        {
-            SaveFile();
-        }
-
-        private void OnSaveAs( object sender, EventArgs e )
-        {
-            SaveFileAs();
-        }
-
-        private void OnExit( object sender, EventArgs e )
-        {
-            Close();
-        }
+        private void OnOpen( object sender, EventArgs e ) => OpenFile();
+        private void OnSave( object sender, EventArgs e ) => SaveFile();
+        private void OnSaveAs( object sender, EventArgs e ) => SaveFileAs();
+        private void OnExit( object sender, EventArgs e ) => Close();
 
         private void OnAfterSelect( object sender, TreeViewEventArgs e )
         {
@@ -128,10 +112,7 @@ namespace MikuMikuModel.GUI.Forms
             base.OnDragDrop( drgevent );
         }
 
-        private void OnNodeClose( object sender, EventArgs e )
-        {
-            CloseFile();
-        }
+        private void OnNodeClose( object sender, EventArgs e ) => CloseFile();
 
         public void Reset()
         {
@@ -241,7 +222,7 @@ namespace MikuMikuModel.GUI.Forms
         /// </summary>
         private bool AskForSavingChanges()
         {
-            if ( mTreeView.TopDataNode == null || !mTreeView.TopDataNode.HasPendingChanges )
+            if ( mTreeView.TopDataNode == null || !mTreeView.TopDataNode.HadAnyChanges )
                 return false;
 
             var result = MessageBox.Show(

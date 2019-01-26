@@ -25,7 +25,7 @@ namespace MikuMikuLibrary.IO
     {
         Load = 1,
         Save = 2,
-        HasSectionedVersion = 4,
+        HasSectionFormat = 4,
         UsesSourceStream = 8,
     }
 }

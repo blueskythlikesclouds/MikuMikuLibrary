@@ -71,6 +71,12 @@ namespace MikuMikuModel.DataNodes
             get => GetProperty<float>();
             set => SetProperty( value );
         }
+        [DisplayName( "Is alpha enabled" )]
+        public bool IsAlphaEnabled
+        {
+            get => GetProperty<bool>();
+            set => SetProperty( value );
+        }
         public float Field20
         {
             get => GetProperty<float>();

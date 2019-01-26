@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
@@ -19,11 +15,18 @@ namespace MikuMikuLibrary.Motions
         {
             while ( reader.Position < reader.Length )
             {
-                var motion = new Motion();
-                if ( !motion.Read( reader ) )
-                    break;
+                long current = reader.Position;
+                {
+                    if ( reader.ReadOffset() == 0 )
+                        break;
+                }
+                reader.SeekBegin( current );
 
-                Motions.Add( motion );
+                var motion = new Motion();
+                {
+                    motion.Read( reader );
+                    Motions.Add( motion );
+                }
             }
         }
 

@@ -1,10 +1,10 @@
 ﻿namespace MikuMikuLibrary.Motions
 {
-    internal enum KeyFrameType
+    internal enum KeySetType
     {
         None,
         Static,
         Linear,
-        LinearInterpolated,
+        Interpolated,
     }
 }

@@ -150,6 +150,26 @@ namespace MikuMikuModel.FormatModules
             return null;
         }
 
+        public static string SelectModuleImport( IEnumerable<Type> types, string title = "Select a file to import from.", string filePath = null )
+        {
+            using ( var dialog = new OpenFileDialog() )
+            {
+                dialog.AutoUpgradeEnabled = true;
+                dialog.CheckPathExists = true;
+                dialog.CheckPathExists = true;
+                dialog.Filter = GetFilter( types, FormatModuleFlags.Import );
+                dialog.Title = title;
+                dialog.FileName = filePath;
+                dialog.ValidateNames = true;
+                dialog.AddExtension = true;
+
+                if ( dialog.ShowDialog() == DialogResult.OK )
+                    return dialog.FileName;
+            }
+
+            return null;
+        }
+
         public static string SelectModuleExport<T>( string title = "Select a file to export to.", string filePath = null )
         {
             using ( var dialog = new SaveFileDialog() )

@@ -1,7 +1,9 @@
-﻿using MikuMikuLibrary.IO;
+﻿using System;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -129,6 +131,9 @@ namespace MikuMikuLibrary.Databases
             writer.Write( BoneNames.Count );
             writer.WriteAlignmentPadding( 64 );
         }
+
+        public MotionSetEntry GetMotionSet( string name ) =>
+            MotionSets.FirstOrDefault( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
 
         public MotionDatabase()
         {

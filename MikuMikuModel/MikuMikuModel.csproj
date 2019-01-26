@@ -74,10 +74,16 @@
     <Compile Include="DataNodes\ExDataNode.cs" />
     <Compile Include="DataNodes\FarcArchiveNode.cs" />
     <Compile Include="DataNodes\IndexTableNode.cs" />
+    <Compile Include="DataNodes\KeyControllerNode.cs" />
+    <Compile Include="DataNodes\KeySetNode.cs" />
+    <Compile Include="DataNodes\KeySetVectorNode.cs" />
     <Compile Include="DataNodes\ListNode.cs" />
     <Compile Include="DataNodes\MaterialNode.cs" />
     <Compile Include="DataNodes\MaterialTextureNode.cs" />
     <Compile Include="DataNodes\MeshNode.cs" />
+    <Compile Include="DataNodes\MotionControllerNode.cs" />
+    <Compile Include="DataNodes\MotionNode.cs" />
+    <Compile Include="DataNodes\MotionSetNode.cs" />
     <Compile Include="DataNodes\SkinNode.cs" />
     <Compile Include="DataNodes\ModelNode.cs" />
     <Compile Include="DataNodes\ReferenceNode.cs" />
@@ -101,6 +107,8 @@
     <Compile Include="FormatModules\FarcArchiveFormatModule.cs" />
     <Compile Include="FormatModules\FormatModuleUtilities.cs" />
     <Compile Include="FormatModules\ModelFormatModule.cs" />
+    <Compile Include="FormatModules\MotionDatabaseFormatModule.cs" />
+    <Compile Include="FormatModules\MotionSetFormatModule.cs" />
     <Compile Include="FormatModules\ObjectDatabaseFormatModule.cs" />
     <Compile Include="FormatModules\SpriteSetFormatModule.cs" />
     <Compile Include="FormatModules\StreamFormatModule.cs" />
@@ -140,6 +148,12 @@
     <Compile Include="GUI\Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\Forms\FarcArchiveViewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Forms\FarcArchiveViewForm.Designer.cs">
+      <DependentUpon>FarcArchiveViewForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Forms\RenameForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -160,6 +174,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Forms\FarcArchiveViewForm.resx">
+      <DependentUpon>FarcArchiveViewForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Forms\RenameForm.resx">
       <DependentUpon>RenameForm.cs</DependentUpon>

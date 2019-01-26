@@ -1,53 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 
 namespace MikuMikuLibrary.Motions
 {
-    public class Motion
+    public class Motion : BinaryFile
     {
+        public override BinaryFileFlags Flags =>
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
+
+        public int ID { get; set; }
+        public string Name { get; set; }
         public int HighBits { get; set; }
         public int FrameCount { get; set; }
-        public List<KeyFrameSet> KeyFrameSets { get; }
+        public List<KeySet> KeySets { get; }
         public List<int> BoneIndices { get; }
 
-        internal bool Read( EndianBinaryReader reader )
+        public override void Read( EndianBinaryReader reader, ISection section = null )
         {
-            long keyFrameSetCountOffset = reader.ReadOffset();
-            if ( keyFrameSetCountOffset == 0 )
-                return false;
-
-            long keyFrameSetTypesOffset = reader.ReadOffset();
-            long keyFrameSetsOffset = reader.ReadOffset();
+            long keySetCountOffset = reader.ReadOffset();
+            long keySetTypesOffset = reader.ReadOffset();
+            long keySetsOffset = reader.ReadOffset();
             long boneIndicesOffset = reader.ReadOffset();
 
-            reader.ReadAtOffset( keyFrameSetCountOffset, () =>
+            reader.ReadAtOffset( keySetCountOffset, () =>
             {
                 int info = reader.ReadUInt16();
-                int keyFrameSetCount = info & 0x3FFF;
-
+                int keySetCount = info & 0x3FFF;
                 HighBits = info >> 14;
                 FrameCount = reader.ReadUInt16();
 
-                KeyFrameSets.Capacity = keyFrameSetCount;
-                reader.ReadAtOffset( keyFrameSetTypesOffset, () =>
+                KeySets.Capacity = keySetCount;
+                reader.ReadAtOffset( keySetTypesOffset, () =>
                 {
-                    for ( int i = 0, b = 0; i < keyFrameSetCount; i++ )
+                    for ( int i = 0, b = 0; i < keySetCount; i++ )
                     {
                         if ( i % 8 == 0 )
                             b = reader.ReadUInt16();
 
-                        KeyFrameSets.Add( new KeyFrameSet { Type = ( KeyFrameType )( ( b >> ( i % 8 * 2 ) ) & 3 ) } );
+                        KeySets.Add( new KeySet { Type = ( KeySetType ) ( ( b >> ( i % 8 * 2 ) ) & 3 ) } );
                     }
 
-                    reader.ReadAtOffset( keyFrameSetsOffset, () =>
+                    reader.ReadAtOffset( keySetsOffset, () =>
                     {
-                        foreach ( var keyFrameSet in KeyFrameSets )
-                            keyFrameSet.Read( reader );
+                        foreach ( var keySet in KeySets )
+                            keySet.Read( reader );
                     } );
                 } );
             } );
@@ -62,60 +61,99 @@ namespace MikuMikuLibrary.Motions
                     index = reader.ReadUInt16();
                 } while ( index != 0 );
             } );
-
-            return true;
         }
 
-        internal void Write( EndianBinaryWriter writer )
+        public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                writer.Write( ( ushort )( ( HighBits << 14 ) | KeyFrameSets.Count ) );
-                writer.Write( ( ushort )FrameCount );
+                writer.Write( ( ushort ) ( ( HighBits << 14 ) | KeySets.Count ) );
+                writer.Write( ( ushort ) FrameCount );
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                for ( int i = 0, b = 0; i < KeyFrameSets.Count; i++ )
+                for ( int i = 0, b = 0; i < KeySets.Count; i++ )
                 {
-                    var keyFrameSet = KeyFrameSets[ i ];
+                    var keySet = KeySets[ i ];
 
-                    if ( keyFrameSet.KeyFrames.Count == 1 )
-                        keyFrameSet.Type = KeyFrameType.Static;
+                    if ( keySet.Keys.Count == 1 )
+                        keySet.Type = KeySetType.Static;
 
-                    else if ( keyFrameSet.KeyFrames.Count > 1 )
-                        keyFrameSet.Type = keyFrameSet.IsInterpolated
-                            ? KeyFrameType.LinearInterpolated
-                            : KeyFrameType.Linear;
+                    else if ( keySet.Keys.Count > 1 )
+                        keySet.Type = keySet.IsInterpolated
+                            ? KeySetType.Interpolated
+                            : KeySetType.Linear;
 
                     else
-                        keyFrameSet.Type = KeyFrameType.None;
+                        keySet.Type = KeySetType.None;
 
-                    b |= ( int )keyFrameSet.Type << ( i % 8 * 2 );
+                    b |= ( int ) keySet.Type << ( i % 8 * 2 );
 
-                    if ( i == KeyFrameSets.Count - 1 || ( i != 0 && ( i % 8 ) == 7 ) )
+                    if ( i == KeySets.Count - 1 || i % 8 == 7 )
                     {
-                        writer.Write( ( ushort )b );
+                        writer.Write( ( ushort ) b );
                         b = 0;
                     }
                 }
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var keyFrameSet in KeyFrameSets )
-                    keyFrameSet.Write( writer );
+                foreach ( var keySet in KeySets )
+                    keySet.Write( writer );
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var index in BoneIndices )
-                    writer.Write( ( ushort )index );
+                foreach ( int index in BoneIndices )
+                    writer.Write( ( ushort ) index );
 
-                writer.Write( ( ushort )0 );
+                writer.Write( ( ushort ) 0 );
             } );
+        }
+
+        public MotionController GetController( SkeletonEntry skeletonEntry, MotionDatabase motionDatabase )
+        {
+            var controller = new MotionController { FrameCount = FrameCount };
+
+            for ( int i = 0, j = 0; i < BoneIndices.Count; i++ )
+            {
+                string boneName = motionDatabase.BoneNames[ BoneIndices[ i ] ];
+
+                var boneEntry = skeletonEntry.GetBoneEntry( boneName );
+                if ( boneEntry == null )
+                {
+                    boneName = motionDatabase.BoneNames[ BoneIndices[ ++i ] ];
+                    boneEntry = skeletonEntry.GetBoneEntry( boneName );
+
+                    if ( boneEntry == null )
+                        break;
+                }
+
+                var keyController = new KeyController { Target = boneName };
+
+                if ( boneEntry.Field00 >= 3 )
+                    keyController.Position = new KeySetVector
+                    {
+                        X = KeySets[ j++ ],
+                        Y = KeySets[ j++ ],
+                        Z = KeySets[ j++ ],
+                    };
+
+                keyController.Rotation = new KeySetVector
+                {
+                    X = KeySets[ j++ ],
+                    Y = KeySets[ j++ ],
+                    Z = KeySets[ j++ ],
+                };
+
+                controller.KeyControllers.Add( keyController );
+            }
+
+            return controller;
         }
 
         public Motion()
         {
-            KeyFrameSets = new List<KeyFrameSet>();
+            KeySets = new List<KeySet>();
             BoneIndices = new List<int>();
         }
     }

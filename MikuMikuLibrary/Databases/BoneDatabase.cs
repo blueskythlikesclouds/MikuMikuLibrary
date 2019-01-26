@@ -1,8 +1,9 @@
-﻿using MikuMikuLibrary.IO;
+﻿using System;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace MikuMikuLibrary.Databases
@@ -156,6 +157,9 @@ namespace MikuMikuLibrary.Databases
             writer.WriteNulls( 32 );
         }
 
+        public BoneEntry GetBoneEntry( string boneName ) =>
+            Bones.FirstOrDefault( x => x.Name.Equals( boneName, StringComparison.OrdinalIgnoreCase ) );
+
         public SkeletonEntry()
         {
             Bones = new List<BoneEntry>();
@@ -169,7 +173,7 @@ namespace MikuMikuLibrary.Databases
     public class BoneDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
         public List<SkeletonEntry> Skeletons { get; }
 

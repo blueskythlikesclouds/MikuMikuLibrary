@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -80,18 +81,21 @@ namespace MikuMikuModel.Configurations
             var directoryPath = Path.GetFullPath( Path.GetDirectoryName( referenceFilePath ) ) + Path.DirectorySeparatorChar;
             foreach ( var configuration in Configurations )
             {
-                string pathToUse = configuration.ObjectDatabaseFilePath;
-                if ( string.IsNullOrEmpty( pathToUse ) )
-                    pathToUse = configuration.TextureDatabaseFilePath;
-                if ( string.IsNullOrEmpty( pathToUse ) )
-                    pathToUse = configuration.BoneDatabaseFilePath;
-                if ( string.IsNullOrEmpty( pathToUse ) )
-                    continue;
-            
-                var directoryPath2 = Path.GetFullPath( Path.GetDirectoryName( pathToUse ) ) + Path.DirectorySeparatorChar;
-                if ( directoryPath.StartsWith( directoryPath2, StringComparison.OrdinalIgnoreCase ) )
+                bool result = false;
+
+                result |= ComparePath( configuration.ObjectDatabaseFilePath );
+                result |= ComparePath( configuration.TextureDatabaseFilePath );
+                result |= ComparePath( configuration.BoneDatabaseFilePath );
+                result |= ComparePath( configuration.MotionDatabaseFilePath );
+
+                if ( result )
                     return configuration;
             }
+
+            bool ComparePath( string path ) =>
+                !string.IsNullOrEmpty( path ) && directoryPath.StartsWith(
+                    Path.GetFullPath( Path.GetDirectoryName( path ) ) + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase );
 
             return null;
         }
@@ -121,18 +125,8 @@ namespace MikuMikuModel.Configurations
             if ( ReferenceEquals( other, this ) )
                 return true;
 
-            if ( other.Configurations.Count == Configurations.Count )
-            {
-                for ( int i = 0; i < other.Configurations.Count; i++ )
-                {
-                    if ( !other.Configurations[ i ].Equals( Configurations[ i ] ) )
-                        return false;
-                }
-
-                return true;
-            }
-
-            return false;
+            return other.Configurations.Count == Configurations.Count &&
+                   !other.Configurations.Where( ( t, i ) => !t.Equals( Configurations[ i ] ) ).Any();
         }
 
         private ConfigurationList()

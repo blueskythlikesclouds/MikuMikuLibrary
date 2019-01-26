@@ -30,7 +30,7 @@ namespace MikuMikuModel.DataNodes
         {
             for ( int i = 0; i < Data.Count; i++ )
             {
-                var name = mNameGetter != null ? mNameGetter( Data[ i ] ) : $"{DataNodeFactory.GetPrettyName( mType )} #{i}";
+                var name = mNameGetter?.Invoke( Data[ i ] ) ?? $"{DataNodeFactory.GetPrettyName( mType )} #{i}";
                 Add( DataNodeFactory.Create<T>( name, Data[ i ] ) );
             }
         }

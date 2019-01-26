@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
@@ -37,6 +36,8 @@ namespace MikuMikuModel.DataNodes
         protected string mName;
         protected DataNode mParent;
         private bool mHasPendingChanges;
+
+        protected readonly Configuration mConfiguration;
 
         //
         // Event Handlers
@@ -115,7 +116,9 @@ namespace MikuMikuModel.DataNodes
         [Browsable( false )]
         public virtual bool IsInitialized { get; private set; }
 
+#if !DEBUG
         [Browsable( false )]
+#endif
         public virtual bool HasPendingChanges
         {
             get => mHasPendingChanges;
@@ -128,6 +131,8 @@ namespace MikuMikuModel.DataNodes
                     mHasPendingChanges = value;
                     if ( mParent != null )
                         mParent.HasPendingChanges = true;
+
+                    HadAnyChanges = true;
                 }
             }
         }
@@ -137,6 +142,11 @@ namespace MikuMikuModel.DataNodes
 
         [Browsable( false )]
         public virtual bool IsViewInitialized { get; private set; }
+
+#if !DEBUG
+        [Browsable( false )]
+#endif
+        public bool HadAnyChanges { get; protected internal set; } // Hi I'm a weird af hack how you doin
 
         [Browsable( false )]
         public virtual IEnumerable<DataNode> Nodes => mNodes;
@@ -203,7 +213,7 @@ namespace MikuMikuModel.DataNodes
 
         public virtual DataNode<T> FindNode<T>( string name, StringComparison comparison )
         {
-            return ( DataNode<T> )FindNode( typeof( T ), name, comparison );
+            return ( DataNode<T> ) FindNode( typeof( T ), name, comparison );
         }
 
         public virtual DataNode FindParent( Type dataType )
@@ -216,7 +226,7 @@ namespace MikuMikuModel.DataNodes
 
         public virtual DataNode<T> FindParent<T>()
         {
-            return ( DataNode<T> )FindParent( typeof( T ) );
+            return ( DataNode<T> ) FindParent( typeof( T ) );
         }
 
         public virtual void Export( string filePath )
@@ -229,6 +239,7 @@ namespace MikuMikuModel.DataNodes
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
                 mExportHandlers[ module.ModelType ].Invoke( filePath );
+                HadAnyChanges = false;
             }
             else
             {
@@ -352,7 +363,7 @@ namespace MikuMikuModel.DataNodes
         public virtual void Replace( object data )
         {
             if ( data == null )
-                throw new ArgumentNullException( nameof( data ) );
+                return;
 
             if ( data.GetType() != DataType && !data.GetType().IsSubclassOf( DataType ) )
                 throw new ArgumentException( "Data does not equal node's data type", nameof( data ) );
@@ -381,13 +392,14 @@ namespace MikuMikuModel.DataNodes
                 return;
 
             var module = FormatModuleUtilities.GetModuleForImport( filePath, mReplaceHandlers.Keys );
-            if ( module != null )
+            try
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
                 Replace( mReplaceHandlers[ module.ModelType ].Invoke( filePath ) );
             }
-            else
+            catch
             {
+                // TODO: Show some kind of error message?
                 MessageBox.Show( "Node could not be replaced.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error );
             }
         }
@@ -450,11 +462,11 @@ namespace MikuMikuModel.DataNodes
 
             var property = DataType.GetProperty( propertyName, typeof( T ) );
             if ( property != null && property.CanRead )
-                return ( T )property.GetValue( Data );
+                return ( T ) property.GetValue( Data );
 
             var field = DataType.GetField( propertyName );
             if ( field != null )
-                return ( T )field.GetValue( Data );
+                return ( T ) field.GetValue( Data );
 
             Debug.WriteLine( $"Could not find property: {propertyName}" );
             return default( T );
@@ -618,10 +630,10 @@ namespace MikuMikuModel.DataNodes
             DataReplaced?.Invoke( this, new DataNodeDataReplacedEventArgs( this, oldData ) );
 
         public IEnumerator<DataNode> GetEnumerator() =>
-            ( ( IEnumerable<DataNode> )mNodes ).GetEnumerator();
+            ( ( IEnumerable<DataNode> ) mNodes ).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() =>
-            ( ( IEnumerable<DataNode> )mNodes ).GetEnumerator();
+            ( ( IEnumerable<DataNode> ) mNodes ).GetEnumerator();
 
         public void Dispose()
         {
@@ -658,6 +670,7 @@ namespace MikuMikuModel.DataNodes
             mExportHandlers = new Dictionary<Type, DataNodeExportHandler>();
             mReplaceHandlers = new Dictionary<Type, DataNodeReplaceHandler>();
             mCustomHandlers = new List<ToolStripItem>();
+            mConfiguration = ConfigurationList.Instance.CurrentConfiguration;
 
             Initialize();
         }

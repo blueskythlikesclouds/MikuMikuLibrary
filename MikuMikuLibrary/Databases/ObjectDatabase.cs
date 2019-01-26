@@ -41,7 +41,7 @@ namespace MikuMikuLibrary.Databases
     public class ObjectDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
         public List<ObjectEntry> Objects { get; }
         public int Unknown { get; set; }

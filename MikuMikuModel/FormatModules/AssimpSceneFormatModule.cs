@@ -1,5 +1,4 @@
 ﻿using Assimp;
-using MikuMikuLibrary.Models;
 using MikuMikuLibrary.Models.Processing.Assimp;
 using System;
 using System.IO;

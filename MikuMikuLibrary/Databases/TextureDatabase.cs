@@ -16,7 +16,7 @@ namespace MikuMikuLibrary.Databases
     public class TextureDatabase : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
         public List<TextureEntry> Textures { get; }
 

@@ -2,7 +2,6 @@
 using MikuMikuLibrary.IO;
 using MikuMikuModel.FormatModules;
 using MikuMikuModel.Resources;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -13,7 +12,6 @@ namespace MikuMikuModel.DataNodes
     public abstract class ArchiveNode<TArchive> : DataNode<TArchive> where TArchive : IArchive<string>, new()
     {
         private DataNodeActionFlags mFlags;
-        private Dictionary<DataNode, object> mValueMap;
 
         public override DataNodeFlags Flags => DataNodeFlags.Branch;
         public override DataNodeActionFlags ActionFlags => mFlags;
@@ -21,8 +19,6 @@ namespace MikuMikuModel.DataNodes
 
         protected override void InitializeCore()
         {
-            mValueMap = new Dictionary<DataNode, object>();
-
             if ( Data.Flags.HasFlag( BinaryFileFlags.Load ) )
             {
                 mFlags |= DataNodeActionFlags.Replace;
@@ -63,16 +59,12 @@ namespace MikuMikuModel.DataNodes
                 // We're gonna work with the original data always
                 foreach ( var node in Nodes )
                 {
-                    Stream stream = null;
-
-                    bool exists;
-                    if ( ( exists = mValueMap.TryGetValue( node, out object value ) && !value.Equals( node.Data ) ) || !exists )
-                        stream = new FormatModuleStream( node.Data, node.Name );
-
-                    if ( stream != null )
+                    if ( node.HadAnyChanges )
                     {
-                        Data.Add( node.Name, stream, false, ConflictPolicy.Replace );
-                        mValueMap[ node ] = node.Data;
+                        node.HadAnyChanges = false;
+
+                        Data.Add( node.Name, new FormatModuleStream( node.Data, node.Name ), false,
+                            ConflictPolicy.Replace );
                     }
                 }
 
@@ -83,11 +75,7 @@ namespace MikuMikuModel.DataNodes
         protected override void InitializeViewCore()
         {
             foreach ( var handle in Data )
-            {
-                var node = DataNodeFactory.Create( Data.Open( handle, EntryStreamMode.MemoryStream ), handle );
-                mValueMap[ node ] = node.Data;
-                Add( node );
-            }
+                Add( DataNodeFactory.Create( Data.Open( handle, EntryStreamMode.MemoryStream ), handle ) );
         }
 
         public ArchiveNode( string name, TArchive data ) : base( name, data )

@@ -52,7 +52,7 @@ namespace MikuMikuLibrary.IO
                 mOwnsStream = !leaveOpen;
             }
 
-            if ( !( Flags.HasFlag( BinaryFileFlags.HasSectionedVersion ) && ReadModern() ) )
+            if ( !( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) && ReadModern() ) )
                 ReadClassic();
 
             if ( !leaveOpen && !Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
@@ -136,7 +136,7 @@ namespace MikuMikuLibrary.IO
             if ( !Flags.HasFlag( BinaryFileFlags.Save ) )
                 throw new NotSupportedException( "Binary file is not able to save" );
 
-            if ( Flags.HasFlag( BinaryFileFlags.HasSectionedVersion ) && BinaryFormatUtilities.IsModern( Format ) )
+            if ( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) && BinaryFormatUtilities.IsModern( Format ) )
                 WriteModern();
 
             else

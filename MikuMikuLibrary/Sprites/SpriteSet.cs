@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Sprites
     public class SpriteSet : BinaryFile
     {
         public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionedVersion;
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
         public List<Sprite> Sprites { get; }
         public TextureSet TextureSet { get; internal set; }
