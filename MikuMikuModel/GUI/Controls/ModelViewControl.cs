@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
 
 namespace MikuMikuModel.GUI.Controls
 {
@@ -25,8 +26,8 @@ namespace MikuMikuModel.GUI.Controls
         }
 
         private IGLDraw mModel;
-        private GLShaderProgram mDefaultShader;
-        private GLShaderProgram mGridShader;
+        private readonly GLShaderProgram mDefaultShader;
+        private readonly GLShaderProgram mGridShader;
 
         private Vector3 mCamPos = Vector3.Zero;
         private Vector3 mCamRot = new Vector3( -90, 0, 0 );
@@ -37,7 +38,7 @@ namespace MikuMikuModel.GUI.Controls
 
         private bool mLeft, mRight, mUp, mDown;
 
-        private int mGridVertexArrayID;
+        private int mGridVertexArrayId;
         private GLBuffer<Vector3> mGridVertexBuffer;
 
         public void SetModel( Model model, TextureSet textureSet )
@@ -183,8 +184,8 @@ namespace MikuMikuModel.GUI.Controls
                 vertices.Add( new Vector3( 10, 0, i ) );
             }
 
-            mGridVertexArrayID = GL.GenVertexArray();
-            GL.BindVertexArray( mGridVertexArrayID );
+            mGridVertexArrayId = GL.GenVertexArray();
+            GL.BindVertexArray( mGridVertexArrayId );
 
             mGridVertexBuffer = new GLBuffer<Vector3>( BufferTarget.ArrayBuffer, vertices.ToArray(), 12, BufferUsageHint.StaticDraw );
 
@@ -199,7 +200,7 @@ namespace MikuMikuModel.GUI.Controls
             mGridShader.SetUniform( "projection", projection );
             mGridShader.SetUniform( "color", new Vector4( 0.15f, 0.15f, 0.15f, 1f ) );
 
-            GL.BindVertexArray( mGridVertexArrayID );
+            GL.BindVertexArray( mGridVertexArrayId );
             GL.DrawArrays( PrimitiveType.Lines, 0, mGridVertexBuffer.Length );
         }
 
@@ -324,8 +325,10 @@ namespace MikuMikuModel.GUI.Controls
 
         protected override void OnResize( EventArgs e )
         {
+            if ( mDefaultShader != null )
+                GL.Viewport( ClientRectangle );
+
             base.OnResize( e );
-            GL.Viewport( ClientRectangle );
         }
 
         /// <summary>
@@ -345,7 +348,7 @@ namespace MikuMikuModel.GUI.Controls
                 Application.Idle -= OnApplicationIdle;
             }
 
-            GL.DeleteVertexArray( mGridVertexArrayID );
+            GL.DeleteVertexArray( mGridVertexArrayId );
             base.Dispose( disposing );
         }
 
@@ -358,7 +361,6 @@ namespace MikuMikuModel.GUI.Controls
         {
             InitializeComponent();
             MakeCurrent();
-            VSync = true;
 
             mDefaultShader = GLShaderProgram.Create( "Default" );
             if ( mDefaultShader == null )
@@ -367,7 +369,7 @@ namespace MikuMikuModel.GUI.Controls
             mGridShader = GLShaderProgram.Create( "Grid" );
             if ( mDefaultShader == null || mGridShader == null )
             {
-                Debug.WriteLine( "Shader compile failed. GL rendering will be disabled." );
+                Debug.WriteLine( "Shader compilation failed. GL rendering will be disabled." );
 
                 Visible = false;
                 return;

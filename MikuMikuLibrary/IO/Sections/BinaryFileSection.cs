@@ -15,13 +15,13 @@ namespace MikuMikuLibrary.IO.Sections
 
         protected override void Write( T dataObject, EndianBinaryWriter writer ) => dataObject.Write( writer, this );
 
-        public BinaryFileSection( SectionMode mode, T dataObject = default( T ) ) : base( mode, dataObject )
+        protected BinaryFileSection( SectionMode mode, T dataObject = default( T ) ) : base( mode, dataObject )
         {
-            if ( mode == SectionMode.Write )
-            {
-                Endianness = dataObject.Endianness;
-                AddressSpace = BinaryFormatUtilities.GetAddressSpace( dataObject.Format );
-            }
+            if ( mode != SectionMode.Write )
+                return;
+
+            Endianness = dataObject.Endianness;
+            AddressSpace = BinaryFormatUtilities.GetAddressSpace( dataObject.Format );
         }
     }
 }

@@ -16,14 +16,55 @@ namespace MikuMikuLibrary.Motions
         public int HighBits { get; set; }
         public int FrameCount { get; set; }
         public List<KeySet> KeySets { get; }
-        public List<int> BoneIndices { get; }
+        public List<BoneInfo> BoneInfos { get; }
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
+            if ( section != null )
+            {
+                if ( section.Format == BinaryFormat.F2nd )
+                    reader.SeekCurrent( 4 );
+
+                ID = reader.ReadInt32();
+                Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            }
+
             long keySetCountOffset = reader.ReadOffset();
             long keySetTypesOffset = reader.ReadOffset();
             long keySetsOffset = reader.ReadOffset();
-            long boneIndicesOffset = reader.ReadOffset();
+            long boneInfosOffset = reader.ReadOffset();
+
+            if ( section != null )
+            {
+                long boneIDsOffset = reader.ReadOffset();
+                int boneInfoCount = reader.ReadInt32();
+
+                BoneInfos.Capacity = boneInfoCount;
+                reader.ReadAtOffset( boneInfosOffset, () =>
+                {
+                    for ( int i = 0; i < boneInfoCount; i++ )
+                        BoneInfos.Add( new BoneInfo
+                        { Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) } );
+                } );
+
+                reader.ReadAtOffset( boneIDsOffset, () =>
+                {
+                    foreach ( var boneInfo in BoneInfos )
+                        boneInfo.ID = ( int ) reader.ReadUInt64();
+                } );
+            }
+            else
+            {
+                reader.ReadAtOffset( boneInfosOffset, () =>
+                {
+                    int index = reader.ReadUInt16();
+                    do
+                    {
+                        BoneInfos.Add( new BoneInfo { ID = index } );
+                        index = reader.ReadUInt16();
+                    } while ( index != 0 );
+                } );
+            }
 
             reader.ReadAtOffset( keySetCountOffset, () =>
             {
@@ -49,17 +90,6 @@ namespace MikuMikuLibrary.Motions
                             keySet.Read( reader );
                     } );
                 } );
-            } );
-
-            reader.ReadAtOffset( boneIndicesOffset, () =>
-            {
-                int index = reader.ReadUInt16();
-
-                do
-                {
-                    BoneIndices.Add( index );
-                    index = reader.ReadUInt16();
-                } while ( index != 0 );
             } );
         }
 
@@ -103,25 +133,25 @@ namespace MikuMikuLibrary.Motions
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( int index in BoneIndices )
-                    writer.Write( ( ushort ) index );
+                foreach ( var boneInfo in BoneInfos )
+                    writer.Write( ( ushort ) boneInfo.ID );
 
                 writer.Write( ( ushort ) 0 );
             } );
         }
 
-        public MotionController GetController( SkeletonEntry skeletonEntry, MotionDatabase motionDatabase )
+        public MotionController GetController( SkeletonEntry skeletonEntry, MotionDatabase motionDatabase = null )
         {
-            var controller = new MotionController { FrameCount = FrameCount };
+            var controller = new MotionController { FrameCount = FrameCount, Name = Name };
 
-            for ( int i = 0, j = 0; i < BoneIndices.Count; i++ )
+            for ( int i = 0, j = 0; i < BoneInfos.Count; i++ )
             {
-                string boneName = motionDatabase.BoneNames[ BoneIndices[ i ] ];
+                string boneName = BoneInfos[ i ].Name ?? motionDatabase.BoneNames[ BoneInfos[ i ].ID ];
 
                 var boneEntry = skeletonEntry.GetBoneEntry( boneName );
                 if ( boneEntry == null )
                 {
-                    boneName = motionDatabase.BoneNames[ BoneIndices[ ++i ] ];
+                    boneName = BoneInfos[ ++i ].Name ?? motionDatabase.BoneNames[ BoneInfos[ i ].ID ];
                     boneEntry = skeletonEntry.GetBoneEntry( boneName );
 
                     if ( boneEntry == null )
@@ -154,7 +184,13 @@ namespace MikuMikuLibrary.Motions
         public Motion()
         {
             KeySets = new List<KeySet>();
-            BoneIndices = new List<int>();
+            BoneInfos = new List<BoneInfo>();
         }
+    }
+
+    public class BoneInfo
+    {
+        public string Name { get; set; }
+        public int ID { get; set; }
     }
 }

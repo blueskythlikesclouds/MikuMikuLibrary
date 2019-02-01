@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace MikuMikuLibrary.Models
 {
-    public enum IndexTablePrimitiveType
+    public enum PrimitiveType
     {
         Triangles = 4,
         TriangleStrip = 5,
@@ -48,7 +48,7 @@ namespace MikuMikuLibrary.Models
         public ushort[] Indices { get; set; }
         public ushort[] BoneIndices { get; set; }
         public int MaterialIndex { get; set; }
-        public IndexTablePrimitiveType PrimitiveType { get; set; }
+        public PrimitiveType PrimitiveType { get; set; }
 
         // Modern Formats
         public BoundingBox BoundingBox { get; set; }
@@ -63,7 +63,7 @@ namespace MikuMikuLibrary.Models
             int boneIndexCount = reader.ReadInt32();
             long boneIndicesOffset = reader.ReadOffset();
             uint field00 = reader.ReadUInt32();
-            PrimitiveType = ( IndexTablePrimitiveType )reader.ReadUInt32();
+            PrimitiveType = ( PrimitiveType )reader.ReadUInt32();
             int field01 = reader.ReadInt32();
             int indexCount = reader.ReadInt32();
             uint indicesOffset = reader.ReadUInt32();
@@ -146,14 +146,14 @@ namespace MikuMikuLibrary.Models
                 ushort* start = indicesPtr;
                 ushort* end = start + Indices.Length;
 
-                if ( PrimitiveType == IndexTablePrimitiveType.Triangles )
+                if ( PrimitiveType == PrimitiveType.Triangles )
                 {
                     triangles.Capacity = Indices.Length / 3;
 
                     while ( start < end )
                         triangles.Add( new Triangle( *start++, *start++, *start++ ) );
                 }
-                else if ( PrimitiveType == IndexTablePrimitiveType.TriangleStrip )
+                else if ( PrimitiveType == PrimitiveType.TriangleStrip )
                 {
                     ushort a = *start++; ushort b = *start++; ushort c = 0;
                     int direction = -1;
@@ -192,7 +192,7 @@ namespace MikuMikuLibrary.Models
 
         public IndexTable()
         {
-            PrimitiveType = IndexTablePrimitiveType.Triangles;
+            PrimitiveType = PrimitiveType.Triangles;
         }
     }
 }

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using System.Xml.Serialization;
+using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Configurations
 {
@@ -16,34 +16,26 @@ namespace MikuMikuModel.Configurations
         {
             get
             {
-                if ( sInstance == null )
+                if ( sInstance != null )
+                    return sInstance;
+
+                if ( !File.Exists( FilePath ) )
                 {
-                    if ( !File.Exists( FilePath ) )
+                    sInstance = new ConfigurationList();
+                    sInstance.Save();
+                }
+
+                else
+                {
+                    try
+                    {
+                        using ( var stream = File.OpenRead( FilePath ) )
+                            sInstance = ( ConfigurationList ) sSerializer.Deserialize( stream );
+                    }
+                    catch
                     {
                         sInstance = new ConfigurationList();
                         sInstance.Save();
-                    }
-
-                    else
-                    {
-                        try
-                        {
-                            using ( var stream = File.OpenRead( FilePath ) )
-                                sInstance = ( ConfigurationList ) sSerializer.Deserialize( stream );
-                        }
-                        catch
-                        {
-                            if ( File.Exists( BackupFilePath ) )
-                            {
-                                using ( var stream = File.OpenRead( BackupFilePath ) )
-                                    sInstance = ( ConfigurationList ) sSerializer.Deserialize( stream );
-                            }
-                            else
-                            {
-                                sInstance = new ConfigurationList();
-                                sInstance.Save();
-                            }
-                        }
                     }
                 }
 
@@ -51,8 +43,7 @@ namespace MikuMikuModel.Configurations
             }
         }
 
-        public static string FilePath => Path.ChangeExtension( Application.ExecutablePath, "xml" );
-        public static string BackupFilePath => Path.ChangeExtension( Path.ChangeExtension( Application.ExecutablePath, null ) + "-Backup", "xml" );
+        public static string FilePath => ResourceStore.GetPath( "ConfigurationList.xml" );
 
         private Configuration mCurrentConfiguration;
 
@@ -66,15 +57,13 @@ namespace MikuMikuModel.Configurations
             {
                 mCurrentConfiguration = value;
 
-                if ( !Configurations.Contains( value ) )
+                if ( !Configurations.Contains( value ) && value != null )
                     Configurations.Add( value );
             }
         }
 
-        public void DetermineCurrentConfiguration( string referenceFilePath )
-        {
+        public void DetermineCurrentConfiguration( string referenceFilePath ) =>
             mCurrentConfiguration = FindConfiguration( referenceFilePath ) ?? mCurrentConfiguration;
-        }
 
         public Configuration FindConfiguration( string referenceFilePath )
         {
@@ -102,11 +91,11 @@ namespace MikuMikuModel.Configurations
 
         public void Save()
         {
-            if ( File.Exists( FilePath ) )
-                File.Copy( FilePath, BackupFilePath, true );
-
             using ( var stream = File.Create( FilePath ) )
                 sSerializer.Serialize( stream, this );
+
+            foreach ( var configuration in Configurations )
+                configuration.Save();
         }
 
         public object Clone()

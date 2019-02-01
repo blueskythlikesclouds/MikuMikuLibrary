@@ -24,6 +24,7 @@ namespace MikuMikuLibrary.IO.Sections
         long SectionSize { get; }
         string Signature { get; }
 
+        void ProcessDataObject();
         void Read( Stream source );
         void Read( Stream source, bool skipSignature );
         void Write( Stream destination );

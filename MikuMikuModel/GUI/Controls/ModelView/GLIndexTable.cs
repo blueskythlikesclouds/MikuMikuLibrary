@@ -2,12 +2,15 @@
 using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
 
+using GLPrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
+using MMLPrimitiveType = MikuMikuLibrary.Models.PrimitiveType;
+
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
     public class GLIndexTable : IGLDraw
     {
         public GLBuffer<ushort> ElementBuffer { get; }
-        public PrimitiveType PrimitiveType { get; }
+        public GLPrimitiveType PrimitiveType { get; }
         public GLMaterial Material { get; }
 
         public void Draw( GLShaderProgram shaderProgram )
@@ -28,10 +31,10 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         {
             ElementBuffer = new GLBuffer<ushort>( BufferTarget.ElementArrayBuffer, indexTable.Indices, sizeof( ushort ), BufferUsageHint.StaticDraw );
 
-            if ( indexTable.PrimitiveType == IndexTablePrimitiveType.TriangleStrip )
-                PrimitiveType = PrimitiveType.TriangleStrip;
+            if ( indexTable.PrimitiveType == MMLPrimitiveType.TriangleStrip )
+                PrimitiveType = GLPrimitiveType.TriangleStrip;
             else
-                PrimitiveType = PrimitiveType.Triangles;
+                PrimitiveType = GLPrimitiveType.Triangles;
 
             Material = materials[ indexTable.MaterialIndex ];
         }

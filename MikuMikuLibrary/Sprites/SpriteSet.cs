@@ -1,8 +1,11 @@
-﻿using MikuMikuLibrary.IO;
+﻿using System;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Textures;
 using System.Collections.Generic;
+using System.IO;
+using MikuMikuLibrary.Databases;
 
 namespace MikuMikuLibrary.Sprites
 {
@@ -41,13 +44,13 @@ namespace MikuMikuLibrary.Sprites
                 }
             } );
 
-            reader.ReadAtOffset( textureNamesOffset, () =>
+            reader.ReadAtOffsetIf( section?.Endianness != Endianness.BigEndian, textureNamesOffset, () =>
             {
                 foreach ( var texture in TextureSet.Textures )
                     texture.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
-            reader.ReadAtOffset( spriteNamesOffset, () =>
+            reader.ReadAtOffsetIf( section?.Endianness != Endianness.BigEndian, spriteNamesOffset, () =>
             {
                 foreach ( var sprite in Sprites )
                     sprite.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
@@ -89,6 +92,27 @@ namespace MikuMikuLibrary.Sprites
                     sprite.WriteSecond( writer );
             } );
             writer.PerformScheduledWritesReversed();
+        }
+
+        public override void Load( string filePath )
+        {
+            base.Load( filePath );
+
+            if ( !filePath.EndsWith( ".spr", StringComparison.OrdinalIgnoreCase ) )
+                return;
+
+            string spriteDatabaseFilePath = Path.ChangeExtension( filePath, "spi" );
+            if ( !File.Exists( spriteDatabaseFilePath ) )
+                return;
+
+            var spriteDatabase = BinaryFile.Load<SpriteDatabase>( spriteDatabaseFilePath );
+            var spriteSetEntry = spriteDatabase.SpriteSets[ 0 ];
+
+            foreach ( var spriteEntry in spriteSetEntry.Sprites )
+                Sprites[ spriteEntry.Index ].Name = spriteEntry.Name;
+
+            foreach ( var textureEntry in spriteSetEntry.Textures )
+                TextureSet.Textures[ textureEntry.Index ].Name = textureEntry.Name;
         }
 
         public SpriteSet()

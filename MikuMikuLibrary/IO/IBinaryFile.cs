@@ -15,9 +15,9 @@ namespace MikuMikuLibrary.IO
         void Write( EndianBinaryWriter writer, ISection section = null );
 
         void Load( string filePath );
-        void Load( Stream source, bool leaveOpen );
+        void Load( Stream source, bool leaveOpen = false );
         void Save( string filePath );
-        void Save( Stream destination, bool leaveOpen );
+        void Save( Stream destination, bool leaveOpen = false );
     }
 
     [Flags]

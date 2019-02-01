@@ -1,29 +1,46 @@
-﻿using System;
-using System.IO;
+﻿using System.Linq;
 using System.Windows.Forms;
-using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.Archives.Farc;
-using MikuMikuLibrary.IO;
-using MikuMikuModel.Resources;
+using MikuMikuModel.Nodes;
+using MikuMikuModel.Nodes.Archives;
+using MikuMikuModel.Nodes.Misc;
+using MikuMikuModel.Nodes.Wrappers;
 
 namespace MikuMikuModel.GUI.Forms
 {
-    public partial class FarcArchiveViewForm : Form
+    public partial class FarcArchiveViewForm<T> : Form where T : class
     {
         private readonly FarcArchive mFarcArchive;
+        private readonly FarcArchiveNode mRootNode;
 
-        public string SelectedEntryName => mTreeView.SelectedNode?.Name;
-
-        public Stream OpenSelectedEntry( EntryStreamMode mode ) =>
-            SelectedEntryName != null ? mFarcArchive.Open( SelectedEntryName, mode ) : null;
-
-        private void OnLoad( object sender, EventArgs e )
+        public INode SelectedNode
         {
-            var fileIcon = ResourceStore.LoadBitmap( "Icons/File.png" );
-            mTreeView.ImageList.Images.Add( fileIcon );
+            get
+            {
+                var node = ( mNodeTreeView.SelectedDataNode as ReferenceNode )?.Node;
 
-            foreach ( string entryName in mFarcArchive )
-                mTreeView.Nodes.Add( entryName );
+                node?.Populate();
+                return node;
+            }
+        }
+
+        protected override void OnFormClosing( FormClosingEventArgs e )
+        {
+            if ( DialogResult == DialogResult.OK && mNodeTreeView.SelectedNode == null )
+            {
+                MessageBox.Show( "Please select a node.", "Miku Miku Model", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error );
+
+                e.Cancel = true;
+            }
+
+            base.OnFormClosing( e );
+        }
+
+        private void OnNodeMouseDoubleClick( object sender, TreeNodeMouseClickEventArgs e )
+        {
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         protected override void Dispose( bool disposing )
@@ -32,6 +49,8 @@ namespace MikuMikuModel.GUI.Forms
             {
                 mComponents?.Dispose();
                 mFarcArchive?.Dispose();
+                mRootNode?.Dispose();
+                mNodeTreeView.TopNode?.Dispose();
             }
 
             base.Dispose( disposing );
@@ -40,13 +59,14 @@ namespace MikuMikuModel.GUI.Forms
         public FarcArchiveViewForm( FarcArchive farcArchive )
         {
             InitializeComponent();
-            mFarcArchive = farcArchive;
-        }
 
-        public FarcArchiveViewForm( string filePath )
-        {
-            InitializeComponent();
-            mFarcArchive = BinaryFile.Load<FarcArchive>( filePath );
+            mFarcArchive = farcArchive;
+            mRootNode = new FarcArchiveNode( "FARC Archive", mFarcArchive );
+            mRootNode.Populate();
+
+            foreach ( var node in mRootNode.Nodes.Where( x => x.DataType == typeof( T ) ) )
+                mNodeTreeView.Nodes.Add( new NodeAsTreeNode( new ReferenceNode( node ), true )
+                    { HideContextMenuStrip = true } );
         }
     }
 }

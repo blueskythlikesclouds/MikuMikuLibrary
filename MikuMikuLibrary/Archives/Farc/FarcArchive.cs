@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -47,6 +48,9 @@ namespace MikuMikuLibrary.Archives.Farc
                         throw new InvalidOperationException( $"Entry already exists ({handle})" );
 
                     case ConflictPolicy.Replace:
+                        if ( source is EntryStream<string> entryStream && entryStream.Source == source )
+                            break;
+
                         entry.Dispose();
                         entry.Stream = source;
                         entry.OwnsStream = !leaveOpen;
@@ -75,11 +79,11 @@ namespace MikuMikuLibrary.Archives.Farc
 
         public void Remove( string handle )
         {
-            if ( mEntries.TryGetValue( handle, out var entry ) )
-            {
-                entry.Dispose();
-                mEntries.Remove( handle );
-            }
+            if ( !mEntries.TryGetValue( handle, out var entry ) )
+                return;
+
+            entry.Dispose();
+            mEntries.Remove( handle );
         }
 
         public EntryStream<string> Open( string handle, EntryStreamMode mode )
@@ -87,13 +91,13 @@ namespace MikuMikuLibrary.Archives.Farc
             var entry = mEntries[ handle ];
             var entryStream = entry.Open( mStream );
 
-            if ( mode == EntryStreamMode.MemoryStream )
-            {
-                var temp = entryStream;
-                entryStream = new MemoryStream();
-                temp.CopyTo( entryStream );
-                entryStream.Position = 0;
-            }
+            if ( mode != EntryStreamMode.MemoryStream )
+                return new EntryStream<string>( entry.Handle, entryStream );
+
+            var temp = entryStream;
+            entryStream = new MemoryStream();
+            temp.CopyTo( entryStream );
+            entryStream.Position = 0;
 
             return new EntryStream<string>( entry.Handle, entryStream );
         }
@@ -263,7 +267,7 @@ namespace MikuMikuLibrary.Archives.Farc
             {
                 writer.Write( mAlignment );
 
-                foreach ( var entry in mEntries.Values )
+                foreach ( var entry in mEntries.Values.OrderBy( x => x.Handle ) )
                 {
                     writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
                     writer.ScheduleWriteOffset( mAlignment, 0x78, AlignmentMode.Center, OffsetMode.OffsetAndSize, () =>

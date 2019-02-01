@@ -2,7 +2,7 @@
 
 namespace MikuMikuLibrary.Sprites
 {
-    public partial class Sprite
+    public class Sprite
     {
         public string Name { get; set; }
         public int Field00 { get; set; }

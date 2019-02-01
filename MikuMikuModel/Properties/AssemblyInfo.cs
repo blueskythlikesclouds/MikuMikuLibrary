@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle( "MikuMikuModel" )]
-[assembly: AssemblyDescription( "" )]
+[assembly: AssemblyTitle( "Miku Miku Model" )]
+[assembly: AssemblyDescription( "This program is the GUI front-end of Miku Miku Library. It allows you to view and edit formats supported by the library, such as models, textures, motions and sprites." )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
-[assembly: AssemblyProduct( "MikuMikuModel" )]
-[assembly: AssemblyCopyright( "Copyright ©  2018 blueskythlikesclouds" )]
+[assembly: AssemblyProduct( "Miku Miku Model" )]
+[assembly: AssemblyCopyright( "Copyright © 2019 Skyth" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 
@@ -31,5 +31,8 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion( "1.0.0.0" )]
-[assembly: AssemblyFileVersion( "1.0.0.0" )]
+#if DEBUG
+[assembly: AssemblyVersion( "1.1.*" )]
+#else
+[assembly: AssemblyVersion( "1.1.0" )]
+#endif

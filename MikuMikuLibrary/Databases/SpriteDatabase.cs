@@ -9,21 +9,21 @@ namespace MikuMikuLibrary.Databases
 {
     public class SpriteEntry
     {
-        public ushort ID { get; set; }
+        public int ID { get; set; }
         public string Name { get; set; }
-        public ushort Index { get; set; }
+        public int Index { get; set; }
     }
 
     public class SpriteTextureEntry
     {
-        public ushort ID { get; set; }
+        public int ID { get; set; }
         public string Name { get; set; }
-        public ushort Index { get; set; }
+        public int Index { get; set; }
     }
 
     public class SpriteSetEntry
     {
-        public ushort ID { get; set; }
+        public int ID { get; set; }
         public string Name { get; set; }
         public string FileName { get; set; }
         public List<SpriteEntry> Sprites { get; }
@@ -46,28 +46,27 @@ namespace MikuMikuLibrary.Databases
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int spriteSetCount = reader.ReadInt32();
-            uint spriteSetsOffset = reader.ReadUInt32();
+            long spriteSetsOffset = reader.ReadOffset();
             int spriteCount = reader.ReadInt32();
-            uint spritesOffset = reader.ReadUInt32();
+            long spritesOffset = reader.ReadOffset();
 
             reader.ReadAtOffset( spriteSetsOffset, () =>
             {
                 SpriteSets.Capacity = spriteCount;
                 for ( int i = 0; i < spriteSetCount; i++ )
                 {
-                    ushort id = reader.ReadUInt16();
-                    reader.SeekCurrent( 2 );
-                    uint nameOffset = reader.ReadUInt32();
-                    uint fileNameOffset = reader.ReadUInt32();
+                    int id = reader.ReadInt32();
+                    long nameOffset = reader.ReadOffset();
+                    long fileNameOffset = reader.ReadOffset();
                     int index = reader.ReadInt32();
-                    Debug.Assert( index == i );
                     long endOffset = reader.Position;
 
-                    var spriteSetEntry = new SpriteSetEntry();
-                    spriteSetEntry.ID = id;
-                    spriteSetEntry.Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
-                    spriteSetEntry.FileName = reader.ReadStringAtOffset( fileNameOffset, StringBinaryFormat.NullTerminated );
-                    SpriteSets.Add( spriteSetEntry );
+                    SpriteSets.Add( new SpriteSetEntry
+                    {
+                        ID = id,
+                        Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated ),
+                        FileName = reader.ReadStringAtOffset( fileNameOffset, StringBinaryFormat.NullTerminated )
+                    } );
                 }
             } );
 
@@ -75,12 +74,15 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < spriteCount; i++ )
                 {
-                    ushort id = reader.ReadUInt16();
-                    reader.SeekCurrent( 2 );
-                    uint nameOffset = reader.ReadUInt32();
-                    ushort index = reader.ReadUInt16();
-                    ushort setIndex = reader.ReadUInt16();
+                    int id = reader.ReadInt32();
+                    long nameOffset = reader.ReadOffset();
+                    int info = reader.ReadInt32();
 
+                    if ( section?.Format == BinaryFormat.X )
+                        reader.SeekCurrent( 4 );
+
+                    int index = ( ushort ) ( info & 0xFFFF );
+                    int setIndex = ( ushort ) ( ( info >> 16 ) & 0xFFFF );
                     string name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
                     var set = SpriteSets[ setIndex & 0xFFF ];
@@ -116,7 +118,6 @@ namespace MikuMikuLibrary.Databases
                 {
                     var spriteSetEntry = SpriteSets[ i ];
                     writer.Write( spriteSetEntry.ID );
-                    writer.WriteNulls( 2 );
                     writer.AddStringToStringTable( spriteSetEntry.Name );
                     writer.AddStringToStringTable( spriteSetEntry.FileName );
                     writer.Write( i );
@@ -131,19 +132,21 @@ namespace MikuMikuLibrary.Databases
                     foreach ( var spriteEntry in spriteSetEntry.Sprites )
                     {
                         writer.Write( spriteEntry.ID );
-                        writer.WriteNulls( 2 );
                         writer.AddStringToStringTable( spriteEntry.Name );
-                        writer.Write( spriteEntry.Index );
-                        writer.Write( ( ushort )i );
+                        writer.Write( spriteEntry.Index | i << 16 );
+
+                        if ( section?.Format == BinaryFormat.X )
+                            writer.WriteNulls( 4 );
                     }
 
                     foreach ( var textureEntry in spriteSetEntry.Textures )
                     {
                         writer.Write( textureEntry.ID );
-                        writer.WriteNulls( 2 );
                         writer.AddStringToStringTable( textureEntry.Name );
-                        writer.Write( textureEntry.Index );
-                        writer.Write( ( ushort )( i | 0x1000 ) );
+                        writer.Write( textureEntry.Index | ( i | 0x1000 ) << 16 );
+
+                        if ( section?.Format == BinaryFormat.X )
+                            writer.WriteNulls( 4 );
                     }
                 }
             } );

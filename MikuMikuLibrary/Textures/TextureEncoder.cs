@@ -4,11 +4,14 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Numerics;
 
 namespace MikuMikuLibrary.Textures
 {
     public static class TextureEncoder
     {
+        private static readonly Matrix4x4 sRGBtoYCbCr;
+
         public static Texture Encode( Stream source )
         {
             var ddsHeader = new DDSHeader( source );
@@ -58,6 +61,39 @@ namespace MikuMikuLibrary.Textures
                 Encode( texture[ i ], bitmap );
 
             return texture;
+        }
+
+        public static unsafe Texture EncodeYCbCr( Bitmap bitmap )
+        {
+            var texture = new Texture( bitmap.Width, bitmap.Height, TextureFormat.ATI2, 1, 2 );
+
+            var lumTexture = texture[ 0 ];
+            var cbrTexture = texture[ 1 ];
+
+            var bitmapData = bitmap.LockBits( new Rectangle( 0, 0, bitmap.Width, bitmap.Height ),
+                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
+
+            using ( var lumBitmap = new Bitmap( lumTexture.Width, lumTexture.Height ) )
+            using ( var cbrBitmap = new Bitmap( cbrTexture.Width, cbrTexture.Height ) )
+            {
+                var lumData = lumBitmap.LockBits( new Rectangle( 0, 0, lumBitmap.Width, lumBitmap.Height ),
+                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
+
+                var cbrData = lumBitmap.LockBits( new Rectangle( 0, 0, cbrBitmap.Width, cbrBitmap.Height ),
+                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
+
+                for ( int x = 0; x < lumBitmap.Width; x++ )
+                for ( int y = 0; y < lumBitmap.Height; y++ )
+                {
+                    var color = Color.FromArgb( *( ( int* ) bitmapData.Scan0 + y * bitmapData.Stride + x ) );
+                    var ycbcrColor = Vector3.Transform( new Vector3( color.R / 255f, color.G / 255f, color.B / 255f ),
+                        sRGBtoYCbCr );
+
+                    var lumColor = Color.FromArgb( 0, ( int ) ( ycbcrColor.X * 255f ), color.A, 0 );
+                    // TODO: FINISH ME
+                }
+            }
+            throw new NotImplementedException();
         }
 
         private unsafe static void Encode( SubTexture subTexture, Bitmap bitmap )
@@ -139,6 +175,11 @@ namespace MikuMikuLibrary.Textures
                 *destination++ = g;
                 *destination++ = b;
             }
+        }
+
+        static TextureEncoder()
+        {
+            Matrix4x4.Invert( TextureDecoder.sYCbCrToRGB, out sRGBtoYCbCr );
         }
     }
 }

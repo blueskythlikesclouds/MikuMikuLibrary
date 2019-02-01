@@ -24,10 +24,10 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
                            value.A3, value.B3, value.C3, value.D3,
                            value.A4, value.B4, value.C4, value.D4 );
 
-        public static Ai.Vector2D ToAssimp( this Ai.Vector2D value ) =>
+        public static Ai.Vector2D ToAssimp( this Vector2 value ) =>
             new Ai.Vector2D( value.X, value.Y );
 
-        public static Ai.Vector3D ToAssimp( this Ai.Vector3D value ) =>
+        public static Ai.Vector3D ToAssimp( this Vector3 value ) =>
             new Ai.Vector3D( value.X, value.Y, value.Z );
 
         public static Ai.Matrix4x4 ToAssimp( this Matrix4x4 value ) =>

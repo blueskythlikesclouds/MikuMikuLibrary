@@ -50,6 +50,7 @@
             this.mObjectDatabasePathTextBox = new System.Windows.Forms.TextBox();
             this.mOkButton = new System.Windows.Forms.Button();
             this.mCancelButton = new System.Windows.Forms.Button();
+            this.mSearchButton = new System.Windows.Forms.Button();
             this.mGroupBox1.SuspendLayout();
             this.mGroupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -291,12 +292,26 @@
             this.mCancelButton.Text = "Cancel";
             this.mCancelButton.UseVisualStyleBackColor = true;
             // 
+            // mSearchButton
+            // 
+            this.mSearchButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mSearchButton.Enabled = false;
+            this.mSearchButton.Location = new System.Drawing.Point(12, 342);
+            this.mSearchButton.Name = "mSearchButton";
+            this.mSearchButton.Size = new System.Drawing.Size(75, 22);
+            this.mSearchButton.TabIndex = 13;
+            this.mSearchButton.Text = "Search";
+            this.mSearchButton.UseVisualStyleBackColor = true;
+            this.mSearchButton.Click += new System.EventHandler(this.OnSearch);
+            // 
             // ConfigurationForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.mCancelButton;
             this.ClientSize = new System.Drawing.Size(434, 370);
+            this.Controls.Add(this.mSearchButton);
             this.Controls.Add(this.mCancelButton);
             this.Controls.Add(this.mOkButton);
             this.Controls.Add(this.mGroupBox2);
@@ -339,5 +354,6 @@
         private System.Windows.Forms.Label mMotionDatabaseLabel;
         private System.Windows.Forms.TextBox mMotionDatabasePathTextBox;
         private System.Windows.Forms.Button mMotionDatabaseBrowseButton;
+        private System.Windows.Forms.Button mSearchButton;
     }
 }

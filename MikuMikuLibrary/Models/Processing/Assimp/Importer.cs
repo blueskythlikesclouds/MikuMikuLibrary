@@ -326,7 +326,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
                 ushort[] triangleStrip = Stripifier.Stripify( indexTable.Indices );
                 if ( triangleStrip != null )
                 {
-                    indexTable.PrimitiveType = IndexTablePrimitiveType.TriangleStrip;
+                    indexTable.PrimitiveType = PrimitiveType.TriangleStrip;
                     indexTable.Indices = triangleStrip;
                 }
 

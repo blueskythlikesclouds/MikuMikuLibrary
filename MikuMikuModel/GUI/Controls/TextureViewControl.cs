@@ -17,7 +17,7 @@ namespace MikuMikuModel.GUI.Controls
         }
 
         private Texture mTexture;
-        private Bitmap[,] mBitmaps;
+        private Bitmap[ , ] mBitmaps;
         private Bitmap mYcbcrBitmap;
         private int mMipMapIndex;
         private int mLevelIndex;
@@ -58,49 +58,30 @@ namespace MikuMikuModel.GUI.Controls
             }
         }
 
-        private void SetFormatText()
-        {
-            if ( mTexture.IsYCbCr )
-                mFormatLabel.Text = "Format: YCbCr";
-            else
-                mFormatLabel.Text = $"Format: {Enum.GetName( typeof( TextureFormat ), mTexture.Format )}";
-        }
+        private void SetFormatText() =>
+            mFormatLabel.Text = mTexture.IsYCbCr
+                ? "Format: YCbCr"
+                : $"Format: {Enum.GetName( typeof( TextureFormat ), mTexture.Format )}";
 
-        private void SetSizeText()
-        {
-            if ( mTexture.IsYCbCr )
-                mSizeLabel.Text = $"Size: {mTexture.Width}x{mTexture.Height}";
-            else
-                mSizeLabel.Text = $"Size: {mTexture[ mLevelIndex, mMipMapIndex ].Width}x{mTexture[ mLevelIndex, mMipMapIndex ].Height}";
-        }
+        private void SetSizeText() =>
+            mSizeLabel.Text = mTexture.IsYCbCr
+                ? $"Size: {mTexture.Width}x{mTexture.Height}"
+                : $"Size: {mTexture[ mLevelIndex, mMipMapIndex ].Width}x{mTexture[ mLevelIndex, mMipMapIndex ].Height}";
 
-        private void SetMipMapText()
-        {
-            if ( mTexture.IsYCbCr )
-                mMipMapLabel.Text = "MipMap: 1/1";
-            else
-                mMipMapLabel.Text = $"MipMap: {mMipMapIndex + 1}/{mTexture.MipMapCount}";
-        }
+        private void SetMipMapText() =>
+            mMipMapLabel.Text = mTexture.IsYCbCr ? "MipMap: 1/1" : $"MipMap: {mMipMapIndex + 1}/{mTexture.MipMapCount}";
 
-        private void SetLevelText()
-        {
-            if ( mTexture.IsYCbCr )
-                mLevelLabel.Text = "Level: 1/1";
-            else
-                mLevelLabel.Text = $"Level: {mLevelIndex + 1}/{mTexture.Depth}";
-        }
+        private void SetLevelText() => mLevelLabel.Text =
+            mTexture.IsYCbCr ? "Level: 1/1" : $"Level: {mLevelIndex + 1}/{mTexture.Depth}";
 
         private void SetControlBackground()
         {
-            if ( mTexture.IsYCbCr )
-                BackgroundImage = mYcbcrBitmap;
-            else
-                BackgroundImage = mBitmaps[ mLevelIndex, mMipMapIndex ];
+            BackgroundImage = mTexture.IsYCbCr ? mYcbcrBitmap : mBitmaps[ mLevelIndex, mMipMapIndex ];
 
-            if ( ClientSize.Width < BackgroundImage.Width || ClientSize.Height < BackgroundImage.Height )
-                BackgroundImageLayout = ImageLayout.Zoom;
-            else
-                BackgroundImageLayout = ImageLayout.Center;
+            BackgroundImageLayout =
+                ClientSize.Width < BackgroundImage.Width || ClientSize.Height < BackgroundImage.Height
+                    ? ImageLayout.Zoom
+                    : ImageLayout.Center;
 
             Refresh();
         }
@@ -127,8 +108,8 @@ namespace MikuMikuModel.GUI.Controls
             {
                 mBitmaps = new Bitmap[ texture.Depth, texture.MipMapCount ];
                 for ( int i = 0; i < texture.Depth; i++ )
-                    for ( int j = 0; j < texture.MipMapCount; j++ )
-                        mBitmaps[ i, j ] = TextureDecoder.Decode( texture[ i, j ] );
+                for ( int j = 0; j < texture.MipMapCount; j++ )
+                    mBitmaps[ i, j ] = TextureDecoder.Decode( texture[ i, j ] );
             }
 
             SetAll();
@@ -181,6 +162,7 @@ namespace MikuMikuModel.GUI.Controls
                 mComponents?.Dispose();
                 DisposeBitmaps();
             }
+
             base.Dispose( disposing );
         }
 

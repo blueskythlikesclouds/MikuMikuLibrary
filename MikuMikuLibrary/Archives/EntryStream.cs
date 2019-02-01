@@ -4,51 +4,50 @@ namespace MikuMikuLibrary.Archives
 {
     public sealed class EntryStream<THandle> : Stream
     {
-        private Stream mSource;
-
+        public Stream Source { get; }
         public THandle Handle { get; }
 
-        public override bool CanRead => mSource.CanRead;
-        public override bool CanWrite => mSource.CanWrite;
-        public override bool CanSeek => mSource.CanSeek;
+        public override bool CanRead => Source.CanRead;
+        public override bool CanWrite => Source.CanWrite;
+        public override bool CanSeek => Source.CanSeek;
 
         public override long Position
         {
-            get => mSource.Position;
-            set => mSource.Position = value;
+            get => Source.Position;
+            set => Source.Position = value;
         }
 
-        public override long Length => mSource.Length;
+        public override long Length => Source.Length;
 
         public override void Flush()
         {
-            mSource.Flush();
+            Source.Flush();
         }
 
         public override int Read( byte[] buffer, int offset, int count )
         {
-            return mSource.Read( buffer, 0, count );
+            return Source.Read( buffer, 0, count );
         }
 
         public override long Seek( long offset, SeekOrigin origin )
         {
-            return mSource.Seek( offset, origin );
+            return Source.Seek( offset, origin );
         }
 
         public override void SetLength( long value )
         {
-            mSource.SetLength( value );
+            Source.SetLength( value );
         }
 
         public override void Write( byte[] buffer, int offset, int count )
         {
-            mSource.Write( buffer, 0, count );
+            Source.Write( buffer, 0, count );
         }
 
         public EntryStream( THandle entry, Stream source )
         {
             Handle = entry;
-            mSource = source;
+            Source = source;
         }
     }
 

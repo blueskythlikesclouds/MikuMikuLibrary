@@ -10,10 +10,10 @@ namespace MikuMikuLibrary.Textures
 {
     public static class TextureDecoder
     {
-        private readonly static Matrix4x4 sYCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
-                                                                       0.0f, -0.1873f, 1.8556f, 0.0f,
-                                                                       1.5748f, -0.4681f, 0.0f, 0.0f,
-                                                                       0.0f, 0.0f, 0.0f, 1.0f );
+        internal readonly static Matrix4x4 sYCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
+                                                                        0.0f, -0.1873f, 1.8556f, 0.0f,
+                                                                        1.5748f, -0.4681f, 0.0f, 0.0f,
+                                                                        0.0f, 0.0f, 0.0f, 1.0f );
 
         // Thanks to Brolijah for finding this out!!
         private static unsafe void ConvertYCbCrToRGBA( int* lumPtr, int* cbrPtr, int* outPtr, int width, int height )

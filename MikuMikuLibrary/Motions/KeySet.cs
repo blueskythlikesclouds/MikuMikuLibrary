@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Motions
@@ -21,7 +22,7 @@ namespace MikuMikuLibrary.Motions
 
                 Keys.Capacity = keyCount;
                 for ( int i = 0; i < keyCount; i++ )
-                    Keys.Add( new Key { FrameIndex = reader.ReadUInt16() } );
+                    Keys.Add( new Key { Frame = reader.ReadUInt16() } );
 
                 reader.Align( 4 );
 
@@ -42,9 +43,9 @@ namespace MikuMikuLibrary.Motions
 
             else if ( Keys.Count > 1 )
             {
-                writer.Write( ( ushort )Keys.Count );
+                writer.Write( ( ushort ) Keys.Count );
                 foreach ( var key in Keys )
-                    writer.Write( ( ushort )key.FrameIndex );
+                    writer.Write( ( ushort ) key.Frame );
 
                 writer.WriteAlignmentPadding( 4 );
                 foreach ( var key in Keys )
@@ -58,8 +59,34 @@ namespace MikuMikuLibrary.Motions
 
         public float Interpolate( float frame )
         {
-            return 0;
-        }
+            if ( Keys.Count <= 1 )
+                return Keys.Count != 1 ? 0 : Keys[ 0 ].Value;
+
+            Key previous = null;
+            Key next = null;
+
+            foreach ( var key in Keys )
+            {
+                previous = next;
+                next = key;
+
+                if ( Math.Abs( key.Frame - frame ) < 0.000001 )
+                    return key.Value;
+
+                if ( frame < next.Frame )
+                    break;
+            }
+
+            float factor = ( frame - Keys[ Keys.Count - 1 ].Frame ) /
+                           ( next.Frame - Keys[ Keys.Count - 1 ].Frame );
+
+            if ( IsInterpolated )
+                return ( ( factor - 1.0f ) * 2.0f - 1.0f ) * ( factor * factor ) * ( previous.Value - next.Value ) +
+                       ( ( factor - 1.0f ) * previous.Interpolation + factor * next.Interpolation ) *
+                       ( factor - 1.0f ) * ( frame - Keys[ Keys.Count - 1 ].Frame ) + previous.Value;
+
+            return ( factor * 2.0f - 3.0f ) * ( factor * factor ) * ( previous.Value - next.Value ) + previous.Value;
+        }   
 
         public KeySet()
         {

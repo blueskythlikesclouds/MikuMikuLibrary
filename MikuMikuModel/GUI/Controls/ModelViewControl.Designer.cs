@@ -15,7 +15,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            mComponents = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // ModelViewControl
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.Name = "ModelViewControl";
+            this.Size = new System.Drawing.Size(148, 148);
+            this.VSync = true;
+            this.ResumeLayout(false);
+
         }
 
         #endregion

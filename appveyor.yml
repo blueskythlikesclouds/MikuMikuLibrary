@@ -8,13 +8,13 @@ build:
     project: MikuMikuLibrary.sln
 
 artifacts:
-    - path: CmdTools/DatabaseConverter/bin/Release
-      name: DatabaseConverter
-    - path: CmdTools/FarcPack/bin/Release
-      name: FarcPack
-    - path: CmdTools/TxpConverter/bin/Release
-      name: TxpConverter
-    - path: MikuMikuLibrary/bin/Release
-      name: MikuMikuLibrary
     - path: MikuMikuModel/bin/Release
       name: MikuMikuModel
+    - path: MikuMikuLibrary/bin/Release
+      name: MikuMikuLibrary
+    - path: CliTools/DatabaseConverter/bin/Release
+      name: DatabaseConverter
+    - path: CliTools/FarcPack/bin/Release
+      name: FarcPack
+    - path: CliTools/TxpConverter/bin/Release
+      name: TxpConverter

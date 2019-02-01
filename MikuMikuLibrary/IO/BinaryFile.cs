@@ -69,9 +69,9 @@ namespace MikuMikuLibrary.IO
 
                 long current = source.Position;
                 {
-                    var signature = ReadSignature();
+                    string signature = ReadSignature();
 
-                    if ( SectionRegistry.SectionInfosBySignature.TryGetValue( signature, out SectionInfo sectionInfo ) )
+                    if ( SectionRegistry.SectionInfosBySignature.TryGetValue( signature, out var sectionInfo ) )
                     {
                         using ( var section = sectionInfo.Create( SectionMode.Read, this ) )
                         {
@@ -84,12 +84,16 @@ namespace MikuMikuLibrary.IO
 
                                 using ( var siblingSection = sectionInfo.Create( SectionMode.Read ) )
                                 {
+                                    siblingSection.Read( source, true );
+
                                     if ( siblingSection is EndOfFileSection )
                                         break;
-                                    else if ( section.SectionInfo.SubSectionInfos.TryGetValue( sectionInfo, out var subSectionInfo ) )
+                                    if ( section.SectionInfo.SubSectionInfos.TryGetValue( sectionInfo, out var subSectionInfo ) )
                                         subSectionInfo.ProcessPropertyForReading( siblingSection, section );
                                 }
                             }
+
+                            section.ProcessDataObject();
                         }
 
                         return true;

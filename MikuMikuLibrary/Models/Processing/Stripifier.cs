@@ -13,7 +13,7 @@ namespace MikuMikuLibrary.Models.Processing
         {
             sStripifier.GenerateStrips( indices, out PrimitiveGroup[] primitiveGroups );
 
-            if ( primitiveGroups.Length == 1 && primitiveGroups[ 0 ].Type == PrimitiveType.TriangleStrip )
+            if ( primitiveGroups.Length == 1 && primitiveGroups[ 0 ].Type == NvTriStripDotNet.PrimitiveType.TriangleStrip )
                 return primitiveGroups[ 0 ].Indices;
 
             return null;
