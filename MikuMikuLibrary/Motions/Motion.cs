@@ -87,7 +87,7 @@ namespace MikuMikuLibrary.Motions
                     reader.ReadAtOffset( keySetsOffset, () =>
                     {
                         foreach ( var keySet in KeySets )
-                            keySet.Read( reader );
+                            keySet.Read( reader, section != null );
                     } );
                 } );
             } );
@@ -149,18 +149,9 @@ namespace MikuMikuLibrary.Motions
                 string boneName = BoneInfos[ i ].Name ?? motionDatabase.BoneNames[ BoneInfos[ i ].ID ];
 
                 var boneEntry = skeletonEntry.GetBoneEntry( boneName );
-                if ( boneEntry == null )
-                {
-                    boneName = BoneInfos[ ++i ].Name ?? motionDatabase.BoneNames[ BoneInfos[ i ].ID ];
-                    boneEntry = skeletonEntry.GetBoneEntry( boneName );
+                var keyController = new KeyController { Name = boneName };
 
-                    if ( boneEntry == null )
-                        break;
-                }
-
-                var keyController = new KeyController { Target = boneName };
-
-                if ( boneEntry.Field00 >= 3 )
+                if ( boneEntry?.Field00 >= 3 )
                     keyController.Position = new KeySetVector
                     {
                         X = KeySets[ j++ ],
@@ -168,12 +159,13 @@ namespace MikuMikuLibrary.Motions
                         Z = KeySets[ j++ ],
                     };
 
-                keyController.Rotation = new KeySetVector
-                {
-                    X = KeySets[ j++ ],
-                    Y = KeySets[ j++ ],
-                    Z = KeySets[ j++ ],
-                };
+                if ( boneEntry != null )
+                    keyController.Rotation = new KeySetVector
+                    {
+                        X = KeySets[ j++ ],
+                        Y = KeySets[ j++ ],
+                        Z = KeySets[ j++ ],
+                    };
 
                 controller.KeyControllers.Add( keyController );
             }

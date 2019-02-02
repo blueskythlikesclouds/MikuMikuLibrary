@@ -93,6 +93,8 @@
     <Compile Include="Modules\ModuleExportUtilities.cs" />
     <Compile Include="Modules\ModuleFilterGenerator.cs" />
     <Compile Include="Modules\ModuleImportUtilities.cs" />
+    <Compile Include="Modules\Motions\MotionModule.cs" />
+    <Compile Include="Modules\Motions\MotionSetModule.cs" />
     <Compile Include="Modules\Sprites\SpriteSetModule.cs" />
     <Compile Include="Modules\Textures\TextureModule.cs" />
     <Compile Include="Modules\Textures\TextureSetModule.cs" />
@@ -114,6 +116,12 @@
     <Compile Include="Nodes\Models\ModelNode.cs" />
     <Compile Include="Nodes\Models\SkinNode.cs" />
     <Compile Include="Nodes\Models\SubMeshNode.cs" />
+    <Compile Include="Nodes\Motions\KeyControllerNode.cs" />
+    <Compile Include="Nodes\Motions\KeySetNode.cs" />
+    <Compile Include="Nodes\Motions\KeySetVectorNode.cs" />
+    <Compile Include="Nodes\Motions\MotionControllerNode.cs" />
+    <Compile Include="Nodes\Motions\MotionNode.cs" />
+    <Compile Include="Nodes\Motions\MotionSetNode.cs" />
     <Compile Include="Nodes\Node.cs" />
     <Compile Include="Nodes\NodeEventArgs.cs" />
     <Compile Include="Nodes\NodeFactory.cs" />
@@ -211,6 +219,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="MikuPoke.ico" />
+    <Content Include="Resources\Icons\Motion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\Icons\TextureSet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

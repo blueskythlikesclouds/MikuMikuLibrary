@@ -7,14 +7,18 @@ namespace MikuMikuModel.Resources
 {
     public static class ResourceStore
     {
-        private static readonly Dictionary<string, object> sResources = new Dictionary<string, object>( StringComparer.OrdinalIgnoreCase );
-        private static readonly string sResourcesDirectory = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Resources" );
+        private static readonly Dictionary<string, object> sResources =
+            new Dictionary<string, object>( StringComparer.OrdinalIgnoreCase );
 
-        public static string GetPath( string relativePath ) => Path.GetFullPath( Path.Combine( sResourcesDirectory, relativePath ) );
+        private static readonly string sResourcesDirectory =
+            Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Resources" );
+
+        public static string GetPath( string relativePath ) =>
+            Path.GetFullPath( Path.Combine( sResourcesDirectory, relativePath ) );
 
         public static string GetPathIfExist( string relativePath )
         {
-            var fullPath = GetPath( relativePath );
+            string fullPath = GetPath( relativePath );
             if ( !File.Exists( fullPath ) )
                 throw new FileNotFoundException( "Requested resource path does not exist", fullPath );
 
@@ -23,10 +27,10 @@ namespace MikuMikuModel.Resources
 
         public static T Load<T>( string relativePath, Func<string, T> loadFunc )
         {
-            var fullPath = GetPath( relativePath );
+            string fullPath = GetPath( relativePath );
 
             if ( sResources.TryGetValue( fullPath, out var obj ) )
-                return ( T )obj;
+                return ( T ) obj;
 
             if ( !File.Exists( fullPath ) )
                 throw new FileNotFoundException( "Requested resource could not be found", fullPath );
@@ -34,7 +38,7 @@ namespace MikuMikuModel.Resources
             obj = loadFunc( fullPath );
 
             sResources[ fullPath ] = obj;
-            return ( T )obj;
+            return ( T ) obj;
         }
 
         public static Bitmap LoadBitmap( string relativePath ) => Load( relativePath, ( path ) => new Bitmap( path ) );

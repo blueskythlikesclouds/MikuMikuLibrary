@@ -11,27 +11,61 @@ namespace MikuMikuLibrary.Motions
 
         internal KeySetType Type { get; set; }
 
-        internal void Read( EndianBinaryReader reader )
+        internal void Read( EndianBinaryReader reader, bool isModern )
         {
             if ( Type == KeySetType.Static )
                 Keys.Add( new Key { Value = reader.ReadSingle() } );
 
             else if ( Type != KeySetType.None )
             {
-                ushort keyCount = reader.ReadUInt16();
-
-                Keys.Capacity = keyCount;
-                for ( int i = 0; i < keyCount; i++ )
-                    Keys.Add( new Key { Frame = reader.ReadUInt16() } );
-
-                reader.Align( 4 );
-
                 IsInterpolated = Type == KeySetType.Interpolated;
-                foreach ( var key in Keys )
+
+                if ( isModern )
+                    ReadModern();
+                else
+                    ReadClassic();
+
+                void ReadClassic()
                 {
-                    key.Value = reader.ReadSingle();
+                    ushort keyCount = reader.ReadUInt16();
+
+                    Keys.Capacity = keyCount;
+                    for ( int i = 0; i < keyCount; i++ )
+                        Keys.Add( new Key { Frame = reader.ReadUInt16() } );
+
+                    reader.Align( 4 );
+
+                    foreach ( var key in Keys )
+                    {
+                        key.Value = reader.ReadSingle();
+                        if ( IsInterpolated )
+                            key.Interpolation = reader.ReadSingle();
+                    }
+                }
+
+                void ReadModern()
+                {
+                    ushort keyCount = reader.ReadUInt16();
+                    ushort type = reader.ReadUInt16();
+
+                    for ( int i = 0; i < keyCount; i++ )
+                        Keys.Add( new Key() );
+
                     if ( IsInterpolated )
-                        key.Interpolation = reader.ReadSingle();
+                        foreach ( var key in Keys )
+                            key.Interpolation = reader.ReadSingle();
+
+                    reader.Align( 4 );
+                    foreach ( var key in Keys )
+                        key.Value = type == 1
+                            ? reader.ReadHalf()
+                            : reader.ReadSingle();
+
+                    reader.Align( 4 );
+                    foreach ( var key in Keys )
+                        key.Frame = reader.ReadUInt16();
+
+                    reader.Align( 4 );
                 }
             }
         }

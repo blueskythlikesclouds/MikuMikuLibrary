@@ -48,7 +48,7 @@ namespace MikuMikuModel.Nodes.Models
         {
             RegisterExportHandler<Model>( filePath =>
             {
-                var configuration = ConfigurationList.Instance.FindConfiguration( filePath );
+                var configuration = ConfigurationList.Instance.CurrentConfiguration;
 
                 var objectDatabase = configuration?.ObjectDatabase;
                 var textureDatabase = configuration?.TextureDatabase;
@@ -59,7 +59,7 @@ namespace MikuMikuModel.Nodes.Models
             RegisterExportHandler<Scene>( filePath => Exporter.ConvertAiSceneFromModel( Data, filePath ) );
             RegisterReplaceHandler<Model>( filePath =>
             {
-                var configuration = ConfigurationList.Instance.FindConfiguration( filePath );
+                var configuration = ConfigurationList.Instance.CurrentConfiguration;
 
                 var objectDatabase = configuration?.ObjectDatabase;
                 var textureDatabase = configuration?.TextureDatabase;

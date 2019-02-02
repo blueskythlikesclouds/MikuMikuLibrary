@@ -16,12 +16,12 @@ namespace MikuMikuLibrary.Motions
             {
                 var keyControllers = motionDatabase != null
                     ? ( IEnumerable<KeyController> ) KeyControllers.OrderBy( x =>
-                        motionDatabase.BoneNames.IndexOf( x.Target ) )
+                        motionDatabase.BoneNames.IndexOf( x.Name ) )
                     : KeyControllers;
 
                 foreach ( var keyController in keyControllers )
                 {
-                    var boneEntry = skeletonEntry.GetBoneEntry( keyController.Target );
+                    var boneEntry = skeletonEntry.GetBoneEntry( keyController.Name );
                     if ( boneEntry == null )
                         continue;
 
@@ -38,8 +38,8 @@ namespace MikuMikuLibrary.Motions
 
                     motion.BoneInfos.Add( new BoneInfo
                     {
-                        Name = keyController.Target,
-                        ID = motionDatabase?.BoneNames?.IndexOf( keyController.Target ) ?? -1,
+                        Name = keyController.Name,
+                        ID = motionDatabase?.BoneNames?.IndexOf( keyController.Name ) ?? -1,
                     } );
                 }
             }
