@@ -13,12 +13,12 @@ namespace MikuMikuModel.Modules.IO
 
         protected override Stream ImportCore( Stream source, string fileName ) => source;
 
-        protected override void ExportCore( Stream obj, Stream destination, string fileName )
+        protected override void ExportCore( Stream model, Stream destination, string fileName )
         {
-            if ( obj.CanSeek )
-                obj.Seek( 0, SeekOrigin.Begin );
+            if ( model.CanSeek )
+                model.Seek( 0, SeekOrigin.Begin );
 
-            obj.CopyTo( destination );
+            model.CopyTo( destination );
         }
     }
 }

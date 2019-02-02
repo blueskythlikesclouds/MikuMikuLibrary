@@ -16,10 +16,10 @@ namespace MikuMikuModel.Modules.Models
                 ? SceneUtilities.Import( fileStream.Name )
                 : throw new ArgumentException( "Assimp scene can only be imported from a file stream", nameof( source ) );
 
-        protected override void ExportCore( Scene obj, Stream destination, string fileName )
+        protected override void ExportCore( Scene model, Stream destination, string fileName )
         {
             if ( destination is FileStream fileStream )
-                SceneUtilities.Export( obj, fileStream.Name );
+                SceneUtilities.Export( model, fileStream.Name );
             else
                 throw new ArgumentException( "Assimp scene can only be exported to file stream", nameof( destination ) );
         }

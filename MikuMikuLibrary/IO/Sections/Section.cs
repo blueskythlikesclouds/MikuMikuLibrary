@@ -11,14 +11,14 @@ namespace MikuMikuLibrary.IO.Sections
     {
         private readonly List<ISection> mSections = new List<ISection>();
         private T mDataObject;
-        private bool mIsObjectProcessed;
-        private bool mIsProcessingObject;
+        private bool mObjectProcessed;
+        private bool mProcessingObject;
 
         public T DataObject
         {
             get
             {
-                if ( !mIsObjectProcessed && !mIsProcessingObject )
+                if ( !mObjectProcessed && !mProcessingObject )
                     ProcessDataObject();
 
                 return mDataObject;
@@ -210,10 +210,10 @@ namespace MikuMikuLibrary.IO.Sections
 
         public void ProcessDataObject()
         {
-            if ( mIsObjectProcessed )
+            if ( mObjectProcessed )
                 return;
 
-            mIsProcessingObject = true;
+            mProcessingObject = true;
 
             switch ( Mode )
             {
@@ -264,8 +264,8 @@ namespace MikuMikuLibrary.IO.Sections
                 }
             }
 
-            mIsObjectProcessed = true;
-            mIsProcessingObject = false;
+            mObjectProcessed = true;
+            mProcessingObject = false;
         }
 
         protected abstract void Read( T dataObject, EndianBinaryReader reader, long length );

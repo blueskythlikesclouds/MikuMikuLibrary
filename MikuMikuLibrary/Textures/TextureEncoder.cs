@@ -65,38 +65,57 @@ namespace MikuMikuLibrary.Textures
 
         public static unsafe Texture EncodeYCbCr( Bitmap bitmap )
         {
-            var texture = new Texture( bitmap.Width, bitmap.Height, TextureFormat.ATI2, 1, 2 );
+            int width = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Width );
+            int height = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Height );
 
-            var lumTexture = texture[ 0 ];
-            var cbrTexture = texture[ 1 ];
+            var texture = new Texture( width, height, TextureFormat.ATI2, 1, 2 );
 
             var bitmapData = bitmap.LockBits( new Rectangle( 0, 0, bitmap.Width, bitmap.Height ),
                 ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
 
-            using ( var lumBitmap = new Bitmap( lumTexture.Width, lumTexture.Height ) )
-            using ( var cbrBitmap = new Bitmap( cbrTexture.Width, cbrTexture.Height ) )
+            using ( var lumBitmap = new Bitmap( bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb ) )
+            using ( var cbrBitmap = new Bitmap( bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb ) )
             {
                 var lumData = lumBitmap.LockBits( new Rectangle( 0, 0, lumBitmap.Width, lumBitmap.Height ),
-                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
+                    ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
 
-                var cbrData = lumBitmap.LockBits( new Rectangle( 0, 0, cbrBitmap.Width, cbrBitmap.Height ),
-                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
+                var cbrData = cbrBitmap.LockBits( new Rectangle( 0, 0, cbrBitmap.Width, cbrBitmap.Height ),
+                    ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
 
                 for ( int x = 0; x < lumBitmap.Width; x++ )
                 for ( int y = 0; y < lumBitmap.Height; y++ )
                 {
-                    var color = Color.FromArgb( *( ( int* ) bitmapData.Scan0 + y * bitmapData.Stride + x ) );
-                    var ycbcrColor = Vector3.Transform( new Vector3( color.R / 255f, color.G / 255f, color.B / 255f ),
-                        sRGBtoYCbCr );
+                    var color = Color.FromArgb( *( ( int* ) bitmapData.Scan0 + y * bitmap.Width + x ) );
+                    var ycbcrVector =
+                        Vector3.Transform( Vector3.Divide( new Vector3( color.R, color.G, color.B ), 255 ),
+                            sRGBtoYCbCr );
 
-                    var lumColor = Color.FromArgb( 0, ( int ) ( ycbcrColor.X * 255f ), color.A, 0 );
-                    // TODO: FINISH ME
+                    var lumColor = Color.FromArgb( ( int ) ( ycbcrVector.X * 255 ), color.A, 0 );
+
+                    var cbrVector =
+                        Vector3.Multiply(
+                            Vector3.Min( Vector3.One, new Vector3( ycbcrVector.Y + 0.5f, ycbcrVector.Z + 0.5f, 0 ) ),
+                            255 );
+
+                    var cbrColor = Color.FromArgb( ( int ) cbrVector.X, ( int ) cbrVector.Y, 0 );
+
+                    *( ( int* ) lumData.Scan0 + y * lumBitmap.Width + x ) = lumColor.ToArgb();
+                    *( ( int* ) cbrData.Scan0 + y * cbrBitmap.Width + x ) = cbrColor.ToArgb();
                 }
+
+                lumBitmap.UnlockBits( lumData );
+                cbrBitmap.UnlockBits( cbrData );
+
+                Encode( texture[ 0 ], lumBitmap );
+                Encode( texture[ 1 ], cbrBitmap );
             }
-            throw new NotImplementedException();
+
+            bitmap.UnlockBits( bitmapData );
+
+            return texture;
         }
 
-        private unsafe static void Encode( SubTexture subTexture, Bitmap bitmap )
+        private static unsafe void Encode( SubTexture subTexture, Bitmap bitmap )
         {
             bool ownsBitmap = false;
 
@@ -148,7 +167,7 @@ namespace MikuMikuLibrary.Textures
                 return Encode( bitmap, DDSCodec.HasTransparency( bitmap ) ? TextureFormat.DXT5 : TextureFormat.DXT1, true );
         }
 
-        private unsafe static void Int32RGBAToByte( int* source, byte* destination, int length )
+        private static unsafe void Int32RGBAToByte( int* source, byte* destination, int length )
         {
             byte* end = destination + length;
 
@@ -162,7 +181,7 @@ namespace MikuMikuLibrary.Textures
             }
         }
 
-        private unsafe static void BGRtoRGB( byte* source, byte* destination, int length )
+        private static unsafe void BGRtoRGB( byte* source, byte* destination, int length )
         {
             byte* end = source + length;
             while ( source < end )

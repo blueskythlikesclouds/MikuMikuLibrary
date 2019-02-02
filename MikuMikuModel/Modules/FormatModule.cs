@@ -28,21 +28,21 @@ namespace MikuMikuModel.Modules
                 return ImportCore( stream, Path.GetFileName( filePath ) );
         }
 
-        public virtual void Export( T obj, Stream destination, string fileName = null )
+        public virtual void Export( T model, Stream destination, string fileName = null )
         {
             if ( !Flags.HasFlag( FormatModuleFlags.Export ) )
                 throw new NotSupportedException( "FormatModule can't export" );
 
-            ExportCore( obj, destination, fileName );
+            ExportCore( model, destination, fileName );
         }
 
-        public virtual void Export( T obj, string filePath )
+        public virtual void Export( T model, string filePath )
         {
             if ( !Flags.HasFlag( FormatModuleFlags.Export ) )
                 throw new NotSupportedException( "FormatModule can't export" );
 
             using ( var stream = File.Create( filePath ) )
-                ExportCore( obj, stream, Path.GetFileName( filePath ) );
+                ExportCore( model, stream, Path.GetFileName( filePath ) );
         }
 
         public virtual bool Match( string fileName ) =>
@@ -52,14 +52,14 @@ namespace MikuMikuModel.Modules
         public virtual bool Match( byte[] buffer ) => true;
 
         protected abstract T ImportCore( Stream source, string fileName );
-        protected abstract void ExportCore( T obj, Stream destination, string fileName );
+        protected abstract void ExportCore( T model, Stream destination, string fileName );
 
         #region Explicit IFormatModule Implementation
         object IFormatModule.Import( string filePath ) => Import( filePath );
         object IFormatModule.Import( Stream source, string fileName ) => Import( source, fileName );
 
-        void IFormatModule.Export( object obj, string filePath ) => Export( ( T ) obj, filePath );
-        void IFormatModule.Export( object obj, Stream destination, string fileName ) => Export( ( T ) obj, destination, fileName );
+        void IFormatModule.Export( object model, string filePath ) => Export( ( T ) model, filePath );
+        void IFormatModule.Export( object model, Stream destination, string fileName ) => Export( ( T ) model, destination, fileName );
         #endregion
     }
 }

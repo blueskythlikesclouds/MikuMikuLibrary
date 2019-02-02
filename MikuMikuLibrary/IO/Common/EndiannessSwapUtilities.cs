@@ -86,7 +86,7 @@ namespace MikuMikuLibrary.IO.Common
             value = Swap( value );
         }
 
-        public unsafe static float Swap( float value )
+        public static unsafe float Swap( float value )
         {
             return UnsafeUtilities.ReinterpretCast<uint, float>(
                 Swap( UnsafeUtilities.ReinterpretCast<float, uint>( value ) )
@@ -98,7 +98,7 @@ namespace MikuMikuLibrary.IO.Common
             value = Swap( value );
         }
 
-        public unsafe static double Swap( double value )
+        public static unsafe double Swap( double value )
         {
             return UnsafeUtilities.ReinterpretCast<ulong, double>(
                 Swap( UnsafeUtilities.ReinterpretCast<double, ulong>( value ) )
@@ -110,7 +110,7 @@ namespace MikuMikuLibrary.IO.Common
             value = Swap( value );
         }
 
-        public unsafe static decimal Swap( decimal value )
+        public static unsafe decimal Swap( decimal value )
         {
             ulong* pData = stackalloc ulong[ 2 ];
 

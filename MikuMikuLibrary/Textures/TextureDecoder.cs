@@ -10,7 +10,7 @@ namespace MikuMikuLibrary.Textures
 {
     public static class TextureDecoder
     {
-        internal readonly static Matrix4x4 sYCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
+        internal static readonly Matrix4x4 sYCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
                                                                         0.0f, -0.1873f, 1.8556f, 0.0f,
                                                                         1.5748f, -0.4681f, 0.0f, 0.0f,
                                                                         0.0f, 0.0f, 0.0f, 1.0f );
@@ -36,7 +36,7 @@ namespace MikuMikuLibrary.Textures
             }
         }
 
-        public unsafe static Bitmap Decode( SubTexture subTexture )
+        public static unsafe Bitmap Decode( SubTexture subTexture )
         {
             var bitmap = new Bitmap( subTexture.Width, subTexture.Height );
             var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );
@@ -97,7 +97,7 @@ namespace MikuMikuLibrary.Textures
             //yield return 2;
         }
 
-        public unsafe static Bitmap Decode( Texture texture )
+        public static unsafe Bitmap Decode( Texture texture )
         {
             if ( texture.IsYCbCr )
             {
@@ -192,7 +192,7 @@ namespace MikuMikuLibrary.Textures
                 DecodeToDDS( texture, destination );
         }
 
-        private unsafe static void ByteRGBAToInt32( byte* source, int* destination, int length )
+        private static unsafe void ByteRGBAToInt32( byte* source, int* destination, int length )
         {
             byte* end = source + length;
             while ( source < end )
@@ -206,7 +206,7 @@ namespace MikuMikuLibrary.Textures
             }
         }
 
-        private unsafe static void RGBtoBGR( byte* source, byte* destination, int length )
+        private static unsafe void RGBtoBGR( byte* source, byte* destination, int length )
         {
             byte* end = source + length;
             while ( source < end )
@@ -221,7 +221,7 @@ namespace MikuMikuLibrary.Textures
             }
         }
 
-        private unsafe static void RGBA4toRGBA( byte* source, int* destination, int length )
+        private static unsafe void RGBA4toRGBA( byte* source, int* destination, int length )
         {
             short* start = ( short* )source;
             short* end = ( short* )( source + length );

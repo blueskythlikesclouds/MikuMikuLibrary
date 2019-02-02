@@ -23,7 +23,6 @@
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Name = "ModelViewControl";
             this.Size = new System.Drawing.Size(148, 148);
-            this.VSync = true;
             this.ResumeLayout(false);
 
         }

@@ -14,7 +14,7 @@ namespace MikuMikuModel.Modules.Imaging
         protected override Bitmap ImportCore( Stream source, string fileName ) => 
             ( Bitmap )Image.FromStream( source );
 
-        protected override void ExportCore( Bitmap obj, Stream destination, string fileName )
+        protected override void ExportCore( Bitmap model, Stream destination, string fileName )
         {
             var imageFormat = ImageFormat.Png;
 
@@ -45,7 +45,7 @@ namespace MikuMikuModel.Modules.Imaging
                 }
             }
 
-            obj.Save( destination, imageFormat );
+            model.Save( destination, imageFormat );
         }
     }
 }

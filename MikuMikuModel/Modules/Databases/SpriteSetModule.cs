@@ -28,7 +28,7 @@ namespace MikuMikuModel.Modules.Databases
         protected override SpriteDatabase ImportCore( Stream source, string fileName ) =>
             BinaryFile.Load<SpriteDatabase>( source, true );
 
-        protected override void ExportCore( SpriteDatabase obj, Stream destination, string fileName ) =>
-            obj.Save( destination, true );
+        protected override void ExportCore( SpriteDatabase model, Stream destination, string fileName ) =>
+            model.Save( destination, true );
     }
 }

@@ -18,7 +18,7 @@ namespace MikuMikuModel.Nodes.IO
 
         private readonly Func<Stream> mStreamGetter;
         private bool mLoaded;
-        private bool mIsDirty;
+        private bool mDirty;
 
         public event EventHandler DirtyStateChanged;
 
@@ -43,19 +43,19 @@ namespace MikuMikuModel.Nodes.IO
         [Browsable( false )]
         public virtual bool IsDirty
         {
-            get => mIsDirty;
+            get => mDirty;
             protected set
             {
                 if ( IsPopulating && value )
                     return;
 
-                bool previousValue = mIsDirty;
-                mIsDirty = value;
+                bool previousValue = mDirty;
+                mDirty = value;
 
-                if ( previousValue != mIsDirty )
+                if ( previousValue != mDirty )
                 {
                     OnDirtyStateChanged();
-                    if ( mIsDirty )
+                    if ( mDirty )
                         IsPendingSynchronization = true;
                 }
             }
@@ -156,6 +156,10 @@ namespace MikuMikuModel.Nodes.IO
         protected override void OnReplace( T previousData )
         {
             IsDirty = true;
+
+            Data.Format = previousData.Format;
+            Data.Endianness = previousData.Endianness;
+
             base.OnReplace( previousData );
         }
 
@@ -167,17 +171,6 @@ namespace MikuMikuModel.Nodes.IO
 
         protected virtual void OnDirtyStateChanged() =>
             DirtyStateChanged?.Invoke( this, EventArgs.Empty );
-
-        protected override void ReplaceInternal( T data )
-        {
-            var previousFormat = Data.Format;
-            var previousEndianness = Data.Endianness;
-            {
-                base.ReplaceInternal( data );
-            }
-            Data.Format = previousFormat;
-            Data.Endianness = previousEndianness;
-        }
 
         protected override void Initialize()
         {

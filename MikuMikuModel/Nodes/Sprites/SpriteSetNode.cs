@@ -13,6 +13,8 @@ namespace MikuMikuModel.Nodes.Sprites
 {
     public class SpriteSetNode : BinaryFileNode<SpriteSet>
     {
+        private TextureSetNode mTextureSetNode;
+
         public override NodeFlags Flags =>
             NodeFlags.Add | NodeFlags.Import | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
 
@@ -55,13 +57,17 @@ namespace MikuMikuModel.Nodes.Sprites
                         Data.TextureSet.Textures[ textureEntry.Index ].Name = textureEntry.Name;
                 }
             }
-
             Nodes.Add( new ListNode<Sprite>( "Sprites", Data.Sprites, x => x.Name ) );
-            Nodes.Add( new TextureSetNode( "Texture Set", Data.TextureSet ) );
+            Nodes.Add( mTextureSetNode = new TextureSetNode( "Texture Set", Data.TextureSet ) );
         }
 
         protected override void SynchronizeCore()
         {
+            if ( Data.TextureSet == mTextureSetNode.Data )
+                return;
+
+            Data.TextureSet.Textures.Clear();
+            Data.TextureSet.Textures.AddRange( mTextureSetNode.Data.Textures );
         }
 
         public SpriteSetNode( string name, SpriteSet data ) : base( name, data )

@@ -23,7 +23,7 @@ namespace MikuMikuModel.Modules.Archives
         protected override FarcArchive ImportCore( Stream source, string fileName ) =>
             BinaryFile.Load<FarcArchive>( source, true );
 
-        protected override void ExportCore( FarcArchive obj, Stream destination, string fileName ) =>
-            obj.Save( destination, true );
+        protected override void ExportCore( FarcArchive model, Stream destination, string fileName ) =>
+            model.Save( destination, true );
     }
 }

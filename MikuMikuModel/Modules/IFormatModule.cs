@@ -14,8 +14,8 @@ namespace MikuMikuModel.Modules
         object Import( string filePath );
         object Import( Stream source, string fileName = null );
 
-        void Export( object obj, string filePath );
-        void Export( object obj, Stream destination, string fileName = null );
+        void Export( object model, string filePath );
+        void Export( object model, Stream destination, string fileName = null );
 
         bool Match( string fileName );
         bool Match( byte[] buffer );

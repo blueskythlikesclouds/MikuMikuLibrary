@@ -45,8 +45,8 @@ namespace MikuMikuModel.Nodes
 
         private ContextMenuStrip mContextMenuStrip;
 
-        private bool mIsPendingSynchronization;
-        private bool mIsPopulated;
+        private bool mPendingSynchronization;
+        private bool mPopulated;
 
         private readonly Dictionary<Type, NodeImportHandler> mImportHandlers;
         private readonly Dictionary<Type, NodeExportHandler> mExportHandlers;
@@ -117,17 +117,17 @@ namespace MikuMikuModel.Nodes
         public Configuration Configuration { get; private set; }
 
         [Browsable( false )]
-        public bool IsPopulated => mIsPopulated && !IsPopulating;
+        public bool IsPopulated => mPopulated && !IsPopulating;
         protected bool IsPopulating { get; private set; }
 
         [Browsable( false )]
         public bool IsPendingSynchronization
         {
-            get => mIsPendingSynchronization && !IsSynchronizing;
+            get => mPendingSynchronization && !IsSynchronizing;
             protected set
             {
                 if ( !IsPopulating )
-                    mIsPendingSynchronization = value;
+                    mPendingSynchronization = value;
             }
         }
         protected bool IsSynchronizing { get; private set; }
@@ -152,7 +152,7 @@ namespace MikuMikuModel.Nodes
                 PopulateCore();
             }
             IsPopulating = false;
-            mIsPopulated = true;
+            mPopulated = true;
         }
 
         public void Synchronize()
@@ -162,7 +162,7 @@ namespace MikuMikuModel.Nodes
                 foreach ( var node in mNodes )
                     node.Synchronize();
             }
-            if ( IsSynchronizing || !mIsPendingSynchronization )
+            if ( IsSynchronizing || !mPendingSynchronization )
                 return;
 
             IsSynchronizing = true;
@@ -170,7 +170,7 @@ namespace MikuMikuModel.Nodes
                 SynchronizeCore();
             }
             IsSynchronizing = false;
-            mIsPendingSynchronization = false;
+            mPendingSynchronization = false;
         }
 
         public TNode FindParent<TNode>() where TNode : INode
@@ -350,28 +350,10 @@ namespace MikuMikuModel.Nodes
             var previousData = Data;
             {
                 mData = data;
-                mIsPopulated = false;
-                mIsPendingSynchronization = false;
+                mPopulated = false;
+                mPendingSynchronization = false;
 
                 OnReplace( previousData );
-
-                mData = previousData;
-                ReplaceInternal( data );
-            }
-        }
-
-        protected virtual void ReplaceInternal( T data )
-        {
-            // This is pretty bothersome for nodes that have an abstract
-            // class as the data type. Need to find a better way to make it work.
-            // For the time being, I'm doing this hack because StreamNode's Data
-            // is always accessed directly, unlike other nodes.
-            if ( !DataType.IsAbstract )
-                mData = data;
-            else
-            {
-                foreach ( var fieldInfo in sFieldInfos )
-                    fieldInfo.SetValue( mData, fieldInfo.GetValue( data ) );
             }
         }
 
@@ -462,7 +444,11 @@ namespace MikuMikuModel.Nodes
 
         protected void SetProperty<TProperty>( TProperty value, [CallerMemberName] string propertyName = null )
         {
-            GetPropertyInfo( propertyName )?.SetValue( InternalData, value );
+            var propertyInfo = GetPropertyInfo( propertyName );
+            if ( propertyInfo.PropertyType.IsValueType && propertyInfo.GetValue( InternalData ).Equals( value ) )
+                return;
+
+            propertyInfo.SetValue( InternalData, value );
             OnPropertyChanged( propertyName );
         }
 

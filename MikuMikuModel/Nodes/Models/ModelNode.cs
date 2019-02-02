@@ -164,52 +164,34 @@ namespace MikuMikuModel.Nodes.Models
 
         protected override void SynchronizeCore()
         {
+            if ( mTextureSetNode != null )
+                Data.TextureSet = ( TextureSet )mTextureSetNode.Data;
         }
 
-        protected override void ReplaceInternal( Model data )
+        protected override void OnReplace( Model previousData )
         {
-            if ( Data.Meshes.Count == 1 && data.Meshes.Count == 1 )
-            {
-                var oldMesh = Data.Meshes[ 0 ];
-                var newMesh = data.Meshes[ 0 ];
+            if ( Data.Meshes.Count == 1 && previousData.Meshes.Count == 1 )
+                Data.Meshes[ 0 ].Name = previousData.Meshes[ 0 ].Name;
 
-                newMesh.Name = oldMesh.Name;
-                newMesh.ID = oldMesh.ID;
+            foreach ( var newMesh in Data.Meshes )
+            {
+                var oldMesh = previousData.Meshes.FirstOrDefault( x =>
+                    x.Name.Equals( newMesh.Name, StringComparison.OrdinalIgnoreCase ) );
+
+                if ( oldMesh == null )
+                    continue;
 
                 if ( newMesh.Skin != null && newMesh.Skin.ExData == null )
                     newMesh.Skin.ExData = oldMesh.Skin?.ExData;
 
-                Data.Meshes[ 0 ] = newMesh;
-            }
-            else
-            {
-                foreach ( var newMesh in data.Meshes )
-                {
-                    var correspondingOldMesh = Data.Meshes.FirstOrDefault( x =>
-                        x.Name.Equals( newMesh.Name, StringComparison.OrdinalIgnoreCase ) );
-
-                    if ( correspondingOldMesh == null )
-                        continue;
-
-                    if ( newMesh.Skin != null && newMesh.Skin.ExData == null )
-                        newMesh.Skin.ExData = correspondingOldMesh.Skin?.ExData;
-
-                    newMesh.Name = correspondingOldMesh.Name;
-                    newMesh.ID = correspondingOldMesh.ID;
-                }
-
-                Data.Meshes.Clear();
-                Data.Meshes.AddRange( data.Meshes );
+                newMesh.Name = oldMesh.Name;
+                newMesh.ID = oldMesh.ID;
             }
 
-            Data.TextureIDs.Clear();
-            Data.TextureIDs.AddRange( data.TextureIDs );
+            if ( mTextureSetNode != null && Data.TextureSet != null )
+                mTextureSetNode.Replace( Data.TextureSet );
 
-            mTextureSetNode?.Replace( data.TextureSet );
-            if ( mTextureSetNode != null )
-                Data.TextureSet = ( TextureSet ) mTextureSetNode.Data;
-            else
-                Data.TextureSet = data.TextureSet;
+            base.OnReplace( previousData );
         }
 
         public ModelNode( string name, Model data ) : base( name, data )

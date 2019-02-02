@@ -25,7 +25,7 @@ namespace MikuMikuModel.Modules.Textures
         protected override TextureSet ImportCore( Stream source, string fileName ) =>
             BinaryFile.Load<TextureSet>( source, true );
 
-        protected override void ExportCore( TextureSet obj, Stream destination, string fileName ) =>
-            obj.Save( destination, true );
+        protected override void ExportCore( TextureSet model, Stream destination, string fileName ) =>
+            model.Save( destination, true );
     }
 }

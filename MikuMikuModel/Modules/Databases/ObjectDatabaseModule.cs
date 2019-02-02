@@ -28,7 +28,7 @@ namespace MikuMikuModel.Modules.Databases
         protected override ObjectDatabase ImportCore( Stream source, string fileName ) =>
             BinaryFile.Load<ObjectDatabase>( source, true );
 
-        protected override void ExportCore( ObjectDatabase obj, Stream destination, string fileName ) =>
-            obj.Save( destination, true );
+        protected override void ExportCore( ObjectDatabase model, Stream destination, string fileName ) =>
+            model.Save( destination, true );
     }
 }

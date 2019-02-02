@@ -18,7 +18,7 @@ namespace MikuMikuModel.Modules.Databases
         protected override MotionDatabase ImportCore( Stream source, string fileName ) =>
             BinaryFile.Load<MotionDatabase>( source, true );
 
-        protected override void ExportCore( MotionDatabase obj, Stream destination, string fileName ) =>
-            obj.Save( destination, true );
+        protected override void ExportCore( MotionDatabase model, Stream destination, string fileName ) =>
+            model.Save( destination, true );
     }
 }

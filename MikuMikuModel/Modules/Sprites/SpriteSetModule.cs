@@ -26,7 +26,7 @@ namespace MikuMikuModel.Modules.Sprites
         protected override SpriteSet ImportCore( Stream source, string fileName ) =>
             BinaryFile.Load<SpriteSet>( source, true );
 
-        protected override void ExportCore( SpriteSet obj, Stream destination, string fileName ) =>
-            obj.Save( destination, true );
+        protected override void ExportCore( SpriteSet model, Stream destination, string fileName ) =>
+            model.Save( destination, true );
     }
 }

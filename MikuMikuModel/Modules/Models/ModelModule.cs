@@ -34,9 +34,9 @@ namespace MikuMikuModel.Modules.Models
         protected override Model ImportCore( Stream source, string fileName ) =>
             BinaryFile.Load<Model>( source, true );
 
-        protected override void ExportCore( Model obj, Stream destination, string fileName )
+        protected override void ExportCore( Model model, Stream destination, string fileName )
         {
-            obj.Save( destination,
+            model.Save( destination,
                 ConfigurationList.Instance.CurrentConfiguration?.ObjectDatabase,
                 ConfigurationList.Instance.CurrentConfiguration?.TextureDatabase,
                 ConfigurationList.Instance.CurrentConfiguration?.BoneDatabase, true );

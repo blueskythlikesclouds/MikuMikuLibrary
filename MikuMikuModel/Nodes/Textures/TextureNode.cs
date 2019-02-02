@@ -41,11 +41,6 @@ namespace MikuMikuModel.Nodes.Textures
             RegisterReplaceHandler<Texture>( TextureEncoder.Encode );
             RegisterReplaceHandler<Bitmap>( filePath =>
             {
-                // TODO: REMOVE THIS HACK
-                var parent = FindParent<SpriteSetNode>();
-                if ( parent != null && BinaryFormatUtilities.IsModern( parent.Format ) )
-                    return TextureEncoder.Encode( filePath );
-
                 using ( var bitmap = new Bitmap( filePath ) )
                 {
                     if ( Data.IsYCbCr )
@@ -68,6 +63,14 @@ namespace MikuMikuModel.Nodes.Textures
 
         protected override void SynchronizeCore()
         {
+        }
+
+        protected override void OnReplace( Texture previousData )
+        {
+            Data.Name = previousData.Name;
+            Data.ID = previousData.ID;
+
+            base.OnReplace( previousData );
         }
 
         public TextureNode( string name, Texture data ) : base( name, data )

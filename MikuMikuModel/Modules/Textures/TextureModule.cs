@@ -12,7 +12,7 @@ namespace MikuMikuModel.Modules.Textures
         protected override Texture ImportCore( Stream source, string fileName ) => 
             TextureEncoder.Encode( source );
 
-        protected override void ExportCore( Texture obj, Stream destination, string fileName ) =>
-            TextureDecoder.DecodeToDDS( obj, destination );
+        protected override void ExportCore( Texture model, Stream destination, string fileName ) =>
+            TextureDecoder.DecodeToDDS( model, destination );
     }
 }
