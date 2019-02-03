@@ -15,7 +15,7 @@ namespace MikuMikuLibrary.Models
         public List<Material> Materials { get; }
         public Skin Skin { get; set; }
         public string Name { get; set; }
-        public int ID { get; set; }
+        public int Id { get; set; }
         public BoundingSphere BoundingSphere { get; set; }
 
         internal void Read( EndianBinaryReader reader, MeshSection section = null )
@@ -48,7 +48,7 @@ namespace MikuMikuLibrary.Models
             SubMeshes.Capacity = subMeshCount;
             for ( int i = 0; i < subMeshCount; i++ )
             {
-                reader.ReadAtOffset( subMeshesOffset + ( i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ) ), () =>
+                reader.ReadAtOffset( subMeshesOffset + i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ), () =>
                 {
                     var submesh = new SubMesh();
                     submesh.Read( reader, section );
@@ -59,7 +59,7 @@ namespace MikuMikuLibrary.Models
             Materials.Capacity = materialCount;
             for ( int i = 0; i < materialCount; i++ )
             {
-                reader.ReadAtOffset( materialsOffset + ( i * Material.BYTE_SIZE ), () =>
+                reader.ReadAtOffset( materialsOffset + i * Material.BYTE_SIZE, () =>
                 {
                     var material = new Material();
                     material.Read( reader );

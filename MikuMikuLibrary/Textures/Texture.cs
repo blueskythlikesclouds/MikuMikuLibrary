@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Textures
     {
         private SubTexture[,] mSubTextures;
 
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
 
         public int Width => mSubTextures[ 0, 0 ].Width;
@@ -105,7 +105,7 @@ namespace MikuMikuLibrary.Textures
             {
                 for ( int j = 0; j < mipMapCount; j++ )
                 {
-                    mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, ( i * mipMapCount ) + j );
+                    mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, i * mipMapCount + j );
                 }
             }
         }

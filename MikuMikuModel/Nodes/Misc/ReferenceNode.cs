@@ -60,7 +60,11 @@ namespace MikuMikuModel.Nodes.Misc
             set => Node.Tag = value;
         }
 
-        public Configuration Configuration => Node.Configuration;
+        public Configuration SourceConfiguration
+        {
+            get => Node.SourceConfiguration;
+            set => Node.SourceConfiguration = value;
+        }
 
         public bool IsPopulated => Node.IsPopulated;
 
@@ -120,7 +124,11 @@ namespace MikuMikuModel.Nodes.Misc
 
         public T FindParent<T>() where T : INode
         {
-            return Node.FindParent<T>();
+            for ( var parent = Parent; parent != null; parent = parent.Parent )
+                if ( parent is T node )
+                    return node;
+
+            return default( T );
         }
 
         public T FindNode<T>( string nodeName, bool searchChildren ) where T : INode

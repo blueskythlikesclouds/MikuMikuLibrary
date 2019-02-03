@@ -6,7 +6,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
     public class GLBuffer<T> : IDisposable where T : struct
     {
         public T[] Array { get; }
-        public int ID { get; }
+        public int Id { get; }
         public BufferTarget Target { get; }
         public BufferUsageHint UsageHint { get; }
         public int Stride { get; }
@@ -15,7 +15,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public void Bind()
         {
-            GL.BindBuffer( Target, ID );
+            GL.BindBuffer( Target, Id );
         }
 
         public void Dispose()
@@ -28,7 +28,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         {
             if ( disposing ) { }
 
-            GL.DeleteBuffer( ID );
+            GL.DeleteBuffer( Id );
         }
 
         ~GLBuffer()
@@ -39,12 +39,12 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public GLBuffer( BufferTarget target, T[] array, int stride, BufferUsageHint usageHint )
         {
             Array = array;
-            ID = GL.GenBuffer();
+            Id = GL.GenBuffer();
             Target = target;
             UsageHint = usageHint;
             Stride = stride;
 
-            GL.BindBuffer( Target, ID );
+            GL.BindBuffer( Target, Id );
             GL.BufferData( Target, Length * Stride, Array, UsageHint );
         }
     }

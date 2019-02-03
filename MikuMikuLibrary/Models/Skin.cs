@@ -14,20 +14,20 @@ namespace MikuMikuLibrary.Models
 
         internal void Read( EndianBinaryReader reader )
         {
-            long boneIDsOffset = reader.ReadOffset();
+            long boneIdsOffset = reader.ReadOffset();
             long boneMatricesOffset = reader.ReadOffset();
             long boneNamesOffset = reader.ReadOffset();
             long meshExDataOffset = reader.ReadOffset();
             int boneCount = reader.ReadInt32();
-            long boneParentIDsOffset = reader.ReadOffset();
+            long boneParentIdsOffset = reader.ReadOffset();
 
-            reader.ReadAtOffset( boneIDsOffset, () =>
+            reader.ReadAtOffset( boneIdsOffset, () =>
             {
                 Bones.Capacity = boneCount;
                 for ( int i = 0; i < boneCount; i++ )
                 {
                     var bone = new Bone();
-                    bone.ID = reader.ReadInt32();
+                    bone.Id = reader.ReadInt32();
                     Bones.Add( bone );
                 }
             } );
@@ -50,10 +50,10 @@ namespace MikuMikuLibrary.Models
                 ExData.Read( reader );
             } );
 
-            reader.ReadAtOffset( boneParentIDsOffset, () =>
+            reader.ReadAtOffset( boneParentIdsOffset, () =>
             {
                 foreach ( var bone in Bones )
-                    bone.ParentID = reader.ReadInt32();
+                    bone.ParentId = reader.ReadInt32();
             } );
         }
 
@@ -62,7 +62,7 @@ namespace MikuMikuLibrary.Models
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var bone in Bones )
-                    writer.Write( bone.ID );
+                    writer.Write( bone.Id );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
@@ -76,10 +76,10 @@ namespace MikuMikuLibrary.Models
             } );
             writer.ScheduleWriteOffsetIf( ExData != null, 16, AlignmentMode.Center, () => ExData.Write( writer ) );
             writer.Write( Bones.Count );
-            writer.ScheduleWriteOffsetIf( Bones.Any( x => x.ParentID != -1 ), 16, AlignmentMode.Center, () =>
+            writer.ScheduleWriteOffsetIf( Bones.Any( x => x.ParentId != -1 ), 16, AlignmentMode.Center, () =>
             {
                 foreach ( var bone in Bones )
-                    writer.Write( bone.ParentID );
+                    writer.Write( bone.ParentId );
             } );
             writer.WriteNulls( writer.AddressSpace == AddressSpace.Int64 ? 32 : 40 );
         }

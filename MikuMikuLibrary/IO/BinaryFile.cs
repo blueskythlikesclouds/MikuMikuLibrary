@@ -4,6 +4,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using MikuMikuLibrary.Cryptography;
+using MikuMikuLibrary.Exceptions;
 
 namespace MikuMikuLibrary.IO
 {
@@ -60,22 +62,33 @@ namespace MikuMikuLibrary.IO
 
             bool ReadModern()
             {
+                var stream = source;
+
                 var bytes = new byte[ 4 ];
                 string ReadSignature()
                 {
-                    source.Read( bytes, 0, bytes.Length );
+                    stream.Read( bytes, 0, bytes.Length );
                     return Encoding.UTF8.GetString( bytes );
                 }
 
                 long current = source.Position;
                 {
                     string signature = ReadSignature();
+                    if ( signature == "DIVA" )
+                    {
+                        string signatureOtherHalf = ReadSignature();
+                        if ( signatureOtherHalf != "FILE" )
+                            throw new InvalidSignatureException( $"{signature}{signatureOtherHalf}", "DIVAFILE" );
+
+                        stream = DivafileDecryptor.DecryptToMemoryStream( source, true, true );
+                        signature = ReadSignature();
+                    }
 
                     if ( SectionRegistry.SectionInfosBySignature.TryGetValue( signature, out var sectionInfo ) )
                     {
                         using ( var section = sectionInfo.Create( SectionMode.Read, this ) )
                         {
-                            section.Read( source, true );
+                            section.Read( stream, true );
 
                             while ( source.Position < source.Length )
                             {
@@ -84,7 +97,7 @@ namespace MikuMikuLibrary.IO
 
                                 using ( var siblingSection = sectionInfo.Create( SectionMode.Read ) )
                                 {
-                                    siblingSection.Read( source, true );
+                                    siblingSection.Read( stream, true );
 
                                     if ( siblingSection is EndOfFileSection )
                                         break;
@@ -98,6 +111,9 @@ namespace MikuMikuLibrary.IO
 
                         return true;
                     }
+
+                    if ( stream != source )
+                        stream.Close();
                 }
 
                 source.Seek( current, SeekOrigin.Begin );

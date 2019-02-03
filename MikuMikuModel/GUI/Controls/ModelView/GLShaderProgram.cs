@@ -17,26 +17,26 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public static IReadOnlyDictionary<string, GLShaderProgram> ShaderPrograms => sShaderPrograms;
 
         public string Name { get; }
-        public int ID { get; }
+        public int Id { get; }
 
         public void Use()
         {
-            GL.UseProgram( ID );
+            GL.UseProgram( Id );
         }
 
         public void RegisterUniform( string name )
         {
             Debug.WriteLine( $"RegisterUniform: {name}" );
-            mUniforms[ name ] = GL.GetUniformLocation( ID, name );
+            mUniforms[ name ] = GL.GetUniformLocation( Id, name );
         }
 
         public void RegisterUniforms()
         {
-            GL.GetProgram( ID, GetProgramParameterName.ActiveUniforms, out int count );
+            GL.GetProgram( Id, GetProgramParameterName.ActiveUniforms, out int count );
             for ( int i = 0; i < count; i++ )
             {
-                GL.GetActiveUniform( ID, i, 32, out _, out _, out _, out string name );
-                mUniforms[ name ] = GL.GetUniformLocation( ID, name );
+                GL.GetActiveUniform( Id, i, 32, out _, out _, out _, out string name );
+                mUniforms[ name ] = GL.GetUniformLocation( Id, name );
                 Debug.WriteLine( $"RegisterUniforms: {name}" );
             }
         }
@@ -84,7 +84,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             {
                 Debug.WriteLine( $"GetUniformLocation: {name}" );
 
-                location = GL.GetUniformLocation( ID, name );
+                location = GL.GetUniformLocation( Id, name );
                 mUniforms.Add( name, location );
                 return location;
             }
@@ -100,7 +100,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         {
             if ( disposing ) { }
 
-            GL.DeleteProgram( ID );
+            GL.DeleteProgram( Id );
         }
 
         public static GLShaderProgram Create( string shaderName )
@@ -122,15 +122,15 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             if ( vertexShader == -1 )
                 return null;
 
-            var shaderProgramID = GL.CreateProgram();
-            GL.AttachShader( shaderProgramID, fragmentShader );
-            GL.AttachShader( shaderProgramID, vertexShader );
-            GL.LinkProgram( shaderProgramID );
+            var shaderProgramId = GL.CreateProgram();
+            GL.AttachShader( shaderProgramId, fragmentShader );
+            GL.AttachShader( shaderProgramId, vertexShader );
+            GL.LinkProgram( shaderProgramId );
 
             GL.DeleteShader( fragmentShader );
             GL.DeleteShader( vertexShader );
 
-            shaderProgram = new GLShaderProgram( shaderName, shaderProgramID );
+            shaderProgram = new GLShaderProgram( shaderName, shaderProgramId );
             sShaderPrograms.Add( shaderName, shaderProgram );
             return shaderProgram;
         }
@@ -162,7 +162,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             mUniforms = new Dictionary<string, int>( StringComparer.OrdinalIgnoreCase );
 
             Name = name;
-            ID = shaderProgram;
+            Id = shaderProgram;
             RegisterUniforms();
         }
 

@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Textures
         public int Width { get; private set; }
         public int Height { get; private set; }
         public TextureFormat Format { get; private set; }
-        public int ID { get; private set; }
+        public int Id { get; private set; }
         public byte[] Data { get; private set; }
 
         internal void Read( EndianBinaryReader reader )
@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.Textures
             Width = reader.ReadInt32();
             Height = reader.ReadInt32();
             Format = ( TextureFormat )reader.ReadInt32();
-            ID = reader.ReadInt32();
+            Id = reader.ReadInt32();
 
             int dataSize = reader.ReadInt32();
             Data = reader.ReadBytes( dataSize );
@@ -33,7 +33,7 @@ namespace MikuMikuLibrary.Textures
             writer.Write( Width );
             writer.Write( Height );
             writer.Write( ( int )Format );
-            writer.Write( ID );
+            writer.Write( Id );
             writer.Write( Data.Length );
             writer.Write( Data );
         }
@@ -48,7 +48,7 @@ namespace MikuMikuLibrary.Textures
             Width = Math.Max( 1, width );
             Height = Math.Max( 1, height );
             Format = format;
-            ID = id;
+            Id = id;
             Data = new byte[ TextureFormatUtilities.CalculateDataSize( width, height, format ) ];
         }
     }

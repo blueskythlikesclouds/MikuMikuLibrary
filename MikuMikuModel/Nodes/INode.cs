@@ -23,7 +23,7 @@ namespace MikuMikuModel.Nodes
         Bitmap Image { get; }
         object Tag { get; set; }
 
-        Configuration Configuration { get; }
+        Configuration SourceConfiguration { get; set; }
 
         bool IsPopulated { get; }
         bool IsPendingSynchronization { get; }

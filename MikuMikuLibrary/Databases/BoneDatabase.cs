@@ -8,9 +8,20 @@ using System.Numerics;
 
 namespace MikuMikuLibrary.Databases
 {
+    public enum BoneType
+    {
+        Rotation = 0,
+        Type1 = 1,
+        Position = 2,
+        Type3 = 3,
+        Type4 = 4,
+        Type5 = 5,
+        Type6 = 6,
+    };
+
     public class BoneEntry
     {
-        public int Field00 { get; set; }
+        public BoneType Type { get; set; }
         public bool HasParent { get; set; }
         public byte Field01 { get; set; }
         public byte Field02 { get; set; }
@@ -20,7 +31,7 @@ namespace MikuMikuLibrary.Databases
 
         internal void Read( EndianBinaryReader reader )
         {
-            Field00 = reader.ReadByte();
+            Type = ( BoneType ) reader.ReadByte();
             HasParent = reader.ReadBoolean();
             Field01 = reader.ReadByte();
             Field02 = reader.ReadByte();
@@ -32,7 +43,7 @@ namespace MikuMikuLibrary.Databases
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.Write( ( byte )Field00 );
+            writer.Write( ( byte ) Type );
             writer.Write( HasParent );
             writer.Write( Field01 );
             writer.Write( Field02 );
@@ -55,15 +66,15 @@ namespace MikuMikuLibrary.Databases
 
         internal void Read( EndianBinaryReader reader )
         {
-            uint bonesOffset = reader.ReadUInt32();
+            long bonesOffset = reader.ReadOffset();
             int positionCount = reader.ReadInt32();
-            uint positionsOffset = reader.ReadUInt32();
-            uint field02Offset = reader.ReadUInt32();
+            long positionsOffset = reader.ReadOffset();
+            long field02Offset = reader.ReadOffset();
             int boneName1Count = reader.ReadInt32();
-            uint boneNames1Offset = reader.ReadUInt32();
+            long boneNames1Offset = reader.ReadOffset();
             int boneName2Count = reader.ReadInt32();
-            uint boneNames2Offset = reader.ReadUInt32();
-            uint parentIndicesOffset = reader.ReadUInt32();
+            long boneNames2Offset = reader.ReadOffset();
+            long parentIndicesOffset = reader.ReadOffset();
 
             reader.ReadAtOffset( bonesOffset, () =>
             {
@@ -120,14 +131,14 @@ namespace MikuMikuLibrary.Databases
                 foreach ( var boneEntry in Bones )
                     boneEntry.Write( writer );
 
-                writer.Write( ( byte )255 );
-                writer.Write( ( byte )0 );
-                writer.Write( ( byte )0 );
-                writer.Write( ( byte )0 );
-                writer.Write( ( byte )255 );
-                writer.Write( ( byte )0 );
-                writer.Write( ( byte )0 );
-                writer.Write( ( byte )0 );
+                writer.Write( ( byte ) 255 );
+                writer.Write( ( byte ) 0 );
+                writer.Write( ( byte ) 0 );
+                writer.Write( ( byte ) 0 );
+                writer.Write( ( byte ) 255 );
+                writer.Write( ( byte ) 0 );
+                writer.Write( ( byte ) 0 );
+                writer.Write( ( byte ) 0 );
                 writer.AddStringToStringTable( "End" );
             } );
             writer.Write( Positions.Count );
@@ -151,8 +162,8 @@ namespace MikuMikuLibrary.Databases
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var parentID in ParentIndices )
-                    writer.Write( parentID );
+                foreach ( var parentId in ParentIndices )
+                    writer.Write( parentId );
             } );
             writer.WriteNulls( 32 );
         }
@@ -181,8 +192,8 @@ namespace MikuMikuLibrary.Databases
         {
             uint signature = reader.ReadUInt32();
             int skeletonCount = reader.ReadInt32();
-            uint skeletonsOffset = reader.ReadUInt32();
-            uint skeletonNamesOffset = reader.ReadUInt32();
+            long skeletonsOffset = reader.ReadOffset();
+            long skeletonNamesOffset = reader.ReadOffset();
 
             reader.ReadAtOffset( skeletonsOffset, () =>
             {

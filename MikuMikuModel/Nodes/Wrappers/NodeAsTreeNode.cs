@@ -27,7 +27,7 @@ namespace MikuMikuModel.Nodes.Wrappers
         public override ContextMenuStrip ContextMenuStrip => 
             HideContextMenuStrip ? null : Node.ContextMenuStrip;
 
-        private void OnNodeOnMoved( object sender, NodeMoveEventArgs args )
+        private void OnNodeMoved( object sender, NodeMoveEventArgs args )
         {
             var movedNode = Nodes[ args.PreviousIndex ];
             Nodes.RemoveAt( args.PreviousIndex );
@@ -35,7 +35,7 @@ namespace MikuMikuModel.Nodes.Wrappers
             TreeView.SelectedNode = movedNode;
         }
 
-        private void OnNodeOnRemoved( object sender, NodeRemoveEventArgs args )
+        private void OnNodeRemoved( object sender, NodeRemoveEventArgs args )
         {
             var removedNode = Nodes.OfType<NodeAsTreeNode>()
                 .FirstOrDefault( x => x.Node == args.RemovedNode );
@@ -43,12 +43,12 @@ namespace MikuMikuModel.Nodes.Wrappers
             if ( removedNode != null ) Nodes.Remove( removedNode );
         }
 
-        private void OnNodeOnAdded( object sender, NodeAddEventArgs args )
+        private void OnNodeAdded( object sender, NodeAddEventArgs args )
         {
             Nodes.Add( new NodeAsTreeNode( args.AddedNode ) { HideContextMenuStrip = HideContextMenuStrip } );
         }
 
-        private void OnNodeOnRenamed( object sender, NodeRenameEventArgs args )
+        private void OnNodeRenamed( object sender, NodeRenameEventArgs args )
         {
             base.Text = base.Name = Node.Name;
         }
@@ -78,15 +78,15 @@ namespace MikuMikuModel.Nodes.Wrappers
             }
 
             if ( node.Flags.HasFlag( NodeFlags.Rename ) )
-                Node.Renamed += OnNodeOnRenamed;
+                Node.Renamed += OnNodeRenamed;
 
             if ( node.Flags.HasFlag( NodeFlags.Add ) && !hideNodes )
-                Node.Added += OnNodeOnAdded;
+                Node.Added += OnNodeAdded;
 
-            Node.Removed += OnNodeOnRemoved;
+            Node.Removed += OnNodeRemoved;
 
             if ( node.Flags.HasFlag( NodeFlags.Move ) )
-                Node.Moved += OnNodeOnMoved;
+                Node.Moved += OnNodeMoved;
 
             if ( node.Flags.HasFlag( NodeFlags.Add ) && !hideNodes )
             {
@@ -104,10 +104,10 @@ namespace MikuMikuModel.Nodes.Wrappers
 
         public void Dispose()
         {
-            Node.Renamed -= OnNodeOnRenamed;
-            Node.Added -= OnNodeOnAdded;
-            Node.Removed -= OnNodeOnRemoved;
-            Node.Moved -= OnNodeOnMoved;
+            Node.Renamed -= OnNodeRenamed;
+            Node.Added -= OnNodeAdded;
+            Node.Removed -= OnNodeRemoved;
+            Node.Moved -= OnNodeMoved;
             Node.Dispose();
 
             foreach ( var node in Nodes.OfType<NodeAsTreeNode>() )

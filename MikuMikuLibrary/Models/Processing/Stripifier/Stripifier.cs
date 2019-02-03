@@ -61,7 +61,7 @@ namespace NvTriStripDotNet
                 var info = allEdgeInfos[ i ];
                 while ( info != null )
                 {
-                    var next = ( info.V0 == i ? info.NextV0 : info.NextV1 );
+                    var next = info.V0 == i ? info.NextV0 : info.NextV1;
                     info = next;
                 }
             }
@@ -123,7 +123,7 @@ namespace NvTriStripDotNet
                             else
                             {
                                 GetSharedVertices( strip.Faces[ 2 ], tFirstFace, out int nShared0, out int nShared1 );
-                                if ( ( nShared0 == tFirstFace.V1 ) && ( nShared1 == -1 ) )
+                                if ( nShared0 == tFirstFace.V1 && nShared1 == -1 )
                                 {
                                     Utils.Swap( ref tFirstFace.V1, ref tFirstFace.V2 );
                                 }
@@ -131,7 +131,7 @@ namespace NvTriStripDotNet
                         }
                     }
 
-                    if ( ( i == 0 ) || !bStitchStrips || bRestart )
+                    if ( i == 0 || !bStitchStrips || bRestart )
                     {
                         if ( !IsCw( strip.Faces[ 0 ], tFirstFace.V0, tFirstFace.V1 ) )
                             stripIndices.Add( tFirstFace.V0 );
@@ -326,7 +326,7 @@ namespace NvTriStripDotNet
 
         private bool FaceContainsIndex( FaceInfo face, uint index )
         {
-            return ( ( face.V0 == index ) || ( face.V1 == index ) || ( face.V2 == index ) );
+            return face.V0 == index || face.V1 == index || face.V2 == index;
         }
 
         /// <summary>
@@ -335,13 +335,13 @@ namespace NvTriStripDotNet
         private bool IsCw( FaceInfo faceInfo, int v0, int v1 )
         {
             if ( faceInfo.V0 == v0 )
-                return ( faceInfo.V1 == v1 );
+                return faceInfo.V1 == v1;
 
             else if ( faceInfo.V1 == v0 )
-                return ( faceInfo.V2 == v1 );
+                return faceInfo.V2 == v1;
 
             else
-                return ( faceInfo.V0 == v1 );
+                return faceInfo.V0 == v1;
         }
 
         /// <summary>
@@ -349,7 +349,7 @@ namespace NvTriStripDotNet
         /// </summary>
         private bool NextIsCw( int numIndices )
         {
-            return ( ( numIndices % 2 ) == 0 );
+            return numIndices % 2 == 0;
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace NvTriStripDotNet
 
             if ( fv0 != v0 && fv0 != v1 )
             {
-                if ( ( fv1 != v0 && fv1 != v1 ) || ( fv2 != v0 && fv2 != v1 ) )
+                if ( fv1 != v0 && fv1 != v1 || fv2 != v0 && fv2 != v1 )
                 {
                     Debug.Write( "GetNextIndex: Triangle doesn't have all of its vertices\n" );
                     Debug.Write( "GetNextIndex: Duplicate triangle probably got us derailed\n" );
@@ -381,7 +381,7 @@ namespace NvTriStripDotNet
 
             if ( fv1 != v0 && fv1 != v1 )
             {
-                if ( ( fv0 != v0 && fv0 != v1 ) || ( fv2 != v0 && fv2 != v1 ) )
+                if ( fv0 != v0 && fv0 != v1 || fv2 != v0 && fv2 != v1 )
                 {
                     Debug.Write( "GetNextIndex: Triangle doesn't have all of its vertices\n" );
                     Debug.Write( "GetNextIndex: Duplicate triangle probably got us derailed\n" );
@@ -392,7 +392,7 @@ namespace NvTriStripDotNet
 
             if ( fv2 != v0 && fv2 != v1 )
             {
-                if ( ( fv0 != v0 && fv0 != v1 ) || ( fv1 != v0 && fv1 != v1 ) )
+                if ( fv0 != v0 && fv0 != v1 || fv1 != v0 && fv1 != v1 )
                 {
                     Debug.Write( "GetNextIndex: Triangle doesn't have all of its vertices\n" );
                     Debug.Write( "GetNextIndex: Duplicate triangle probably got us derailed\n" );
@@ -402,11 +402,11 @@ namespace NvTriStripDotNet
             }
 
             // shouldn't get here, but let's try and fail gracefully
-            if ( ( fv0 == fv1 ) || ( fv0 == fv2 ) )
+            if ( fv0 == fv1 || fv0 == fv2 )
                 return fv0;
-            else if ( ( fv1 == fv0 ) || ( fv1 == fv2 ) )
+            else if ( fv1 == fv0 || fv1 == fv2 )
                 return fv1;
-            else if ( ( fv2 == fv0 ) || ( fv2 == fv1 ) )
+            else if ( fv2 == fv0 || fv2 == fv1 )
                 return fv2;
             else
                 return -1;
@@ -452,14 +452,14 @@ namespace NvTriStripDotNet
         {
             var edgeInfo = FindEdgeInfo( edgeInfos, v0, v1 );
 
-            if ( ( edgeInfo == null ) && ( v0 == v1 ) )
+            if ( edgeInfo == null && v0 == v1 )
             {
                 //we've hit a degenerate
                 return null;
             }
 
             Debug.Assert( edgeInfo != null );
-            return ( edgeInfo.Face0 == faceInfo ? edgeInfo.Face1 : edgeInfo.Face0 );
+            return edgeInfo.Face0 == faceInfo ? edgeInfo.Face1 : edgeInfo.Face0;
         }
 
         /// <summary>
@@ -651,7 +651,7 @@ namespace NvTriStripDotNet
                     var numStripsWeight = 0.0f;
                     float avgStripSize = AvgStripSize( experiments[ i ] );
                     var numStrips = ( float )experiments[ i ].Count;
-                    float value = avgStripSize * avgStripSizeWeight + ( numStrips * numStripsWeight );
+                    float value = avgStripSize * avgStripSizeWeight + numStrips * numStripsWeight;
                     //float value = 1.f / numStrips;
                     //float value = numStrips * avgStripSize;
 
@@ -733,15 +733,15 @@ namespace NvTriStripDotNet
 
                         int faceCtr = j * threshold + degenerateCount;
                         var bFirstTime = true;
-                        while ( faceCtr < threshold + ( j * threshold ) + degenerateCount )
+                        while ( faceCtr < threshold + j * threshold + degenerateCount )
                         {
                             if ( IsDegenerate( allStrips[ i ].Faces[ faceCtr ] ) )
                             {
                                 degenerateCount++;
 
                                 //last time or first time through, no need for a degenerate
-                                if ( ( ( ( faceCtr + 1 ) != threshold + ( j * threshold ) + degenerateCount ) ||
-                                       ( ( j == numTimes - 1 ) && ( numLeftover < 4 ) && ( numLeftover > 0 ) ) ) &&
+                                if ( ( faceCtr + 1 != threshold + j * threshold + degenerateCount ||
+                                       j == numTimes - 1 && numLeftover < 4 && numLeftover > 0 ) &&
                                      !bFirstTime )
                                 {
                                     currentStrip.Faces.Add( allStrips[ i ].Faces[ faceCtr++ ] );
@@ -771,7 +771,7 @@ namespace NvTriStripDotNet
                         */
                         if ( j == numTimes - 1 ) //last time through
                         {
-                            if ( ( numLeftover < 4 ) && ( numLeftover > 0 ) ) //way too small
+                            if ( numLeftover < 4 && numLeftover > 0 ) //way too small
                             {
                                 //just add to last strip
                                 var ctr = 0;
@@ -889,7 +889,7 @@ namespace NvTriStripDotNet
 
                 tempStrips2[ firstIndex ].WasVisited = true;
 
-                bool bWantsCw = ( tempStrips2[ firstIndex ].Faces.Count % 2 ) == 0;
+                bool bWantsCw = tempStrips2[ firstIndex ].Faces.Count % 2 == 0;
 
                 //this n^2 algo is what slows down stripification so much....
                 // needs to be improved
@@ -936,7 +936,7 @@ namespace NvTriStripDotNet
                                 if ( nStripFaceCount > 2 )
                                 {
                                     GetSharedVertices( strip.Faces[ 2 ], tFirstFace, out int nShared0, out int nShared1 );
-                                    if ( ( nShared0 == tFirstFace.V1 ) && ( nShared1 == -1 ) )
+                                    if ( nShared0 == tFirstFace.V1 && nShared1 == -1 )
                                     {
                                         Utils.Swap( ref tFirstFace.V1, ref tFirstFace.V2 );
                                     }
@@ -957,7 +957,7 @@ namespace NvTriStripDotNet
                     tempStrips2[ bestIndex ].WasVisited = true;
                     UpdateCacheStrip( vcache, tempStrips2[ bestIndex ] );
                     outStrips.Add( tempStrips2[ bestIndex ] );
-                    bWantsCw = ( tempStrips2[ bestIndex ].Faces.Count % 2 == 0 ) ? bWantsCw : !bWantsCw;
+                    bWantsCw = tempStrips2[ bestIndex ].Faces.Count % 2 == 0 ? bWantsCw : !bWantsCw;
                 }
             }
         }
@@ -1028,7 +1028,7 @@ namespace NvTriStripDotNet
         private bool FindTraversal( List<FaceInfo> faceInfos, List<EdgeInfo> edgeInfos, StripInfo strip, StripStartInfo startInfo )
         {
             // if the strip was v0.v1 on the edge, then v1 will be a vertex in the next edge.
-            int v = ( strip.StartInfo.ToV1 ? strip.StartInfo.StartEdge.V1 : strip.StartInfo.StartEdge.V0 );
+            int v = strip.StartInfo.ToV1 ? strip.StartInfo.StartEdge.V1 : strip.StartInfo.StartEdge.V0;
 
             FaceInfo untouchedFace = null;
             var edgeIter = edgeInfos[ v ];
@@ -1036,20 +1036,20 @@ namespace NvTriStripDotNet
             {
                 var face0 = edgeIter.Face0;
                 var face1 = edgeIter.Face1;
-                if ( ( face0 != null && !strip.IsInStrip( face0 ) ) && face1 != null && !strip.IsMarked( face1 ) )
+                if ( face0 != null && !strip.IsInStrip( face0 ) && face1 != null && !strip.IsMarked( face1 ) )
                 {
                     untouchedFace = face1;
                     break;
                 }
 
-                if ( ( face1 != null && !strip.IsInStrip( face1 ) ) && face0 != null && !strip.IsMarked( face0 ) )
+                if ( face1 != null && !strip.IsInStrip( face1 ) && face0 != null && !strip.IsMarked( face0 ) )
                 {
                     untouchedFace = face0;
                     break;
                 }
 
                 // find the next edgeIter
-                edgeIter = ( edgeIter.V0 == v ? edgeIter.NextV0 : edgeIter.NextV1 );
+                edgeIter = edgeIter.V0 == v ? edgeIter.NextV0 : edgeIter.NextV1;
             }
 
             startInfo.StartFace = untouchedFace;
@@ -1057,12 +1057,12 @@ namespace NvTriStripDotNet
             if ( edgeIter != null )
             {
                 if ( strip.SharesEdge( startInfo.StartFace, edgeInfos ) )
-                    startInfo.ToV1 = ( edgeIter.V0 == v ); //note! used to be m_v1
+                    startInfo.ToV1 = edgeIter.V0 == v; //note! used to be m_v1
                 else
-                    startInfo.ToV1 = ( edgeIter.V1 == v );
+                    startInfo.ToV1 = edgeIter.V1 == v;
             }
 
-            return ( startInfo.StartFace != null );
+            return startInfo.StartFace != null;
         }
 
         // internal int  CountRemainingTris(std.list<FaceInfo>.iterator iter, std.list<FaceInfo>.iterator  end)
@@ -1117,7 +1117,7 @@ namespace NvTriStripDotNet
                 sizeAccum -= strip.DegenerateCount;
             }
 
-            return ( ( float )sizeAccum ) / ( ( float )strips.Count );
+            return ( float )sizeAccum / ( float )strips.Count;
         }
 
         /// <summary>
@@ -1211,7 +1211,7 @@ namespace NvTriStripDotNet
                 numFaces++;
             }
 
-            return ( ( float )numHits / ( float )numFaces );
+            return ( float )numHits / ( float )numFaces;
         }
 
         /// <summary>
@@ -1266,7 +1266,7 @@ namespace NvTriStripDotNet
         {
             // reserve space for the face infos, but do not resize them.
             int numIndices = mIndices.Count;
-            faceInfos.Capacity = ( numIndices / 3 );
+            faceInfos.Capacity = numIndices / 3;
 
             // we actually resize the edge infos, so we must initialize to null
             for ( var i = 0; i < maxIndex + 1; i++ )
@@ -1422,9 +1422,9 @@ namespace NvTriStripDotNet
         {
             for ( var i = 0; i < faceInfos.Count; ++i )
             {
-                if ( ( faceInfos[ i ].V0 == faceInfo.V0 ) &&
-                     ( faceInfos[ i ].V1 == faceInfo.V1 ) &&
-                     ( faceInfos[ i ].V2 == faceInfo.V2 ) )
+                if ( faceInfos[ i ].V0 == faceInfo.V0 &&
+                     faceInfos[ i ].V1 == faceInfo.V1 &&
+                     faceInfos[ i ].V2 == faceInfo.V2 )
                     return true;
             }
 

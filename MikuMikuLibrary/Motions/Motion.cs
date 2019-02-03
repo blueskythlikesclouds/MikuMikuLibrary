@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
@@ -8,15 +10,19 @@ namespace MikuMikuLibrary.Motions
 {
     public class Motion : BinaryFile
     {
+        private MotionController mController;
+
         public override BinaryFileFlags Flags =>
             BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public int HighBits { get; set; }
         public int FrameCount { get; set; }
         public List<KeySet> KeySets { get; }
         public List<BoneInfo> BoneInfos { get; }
+
+        public bool HasController => mController != null;
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
@@ -25,7 +31,7 @@ namespace MikuMikuLibrary.Motions
                 if ( section.Format == BinaryFormat.F2nd )
                     reader.SeekCurrent( 4 );
 
-                ID = reader.ReadInt32();
+                Id = reader.ReadInt32();
                 Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             }
 
@@ -36,7 +42,7 @@ namespace MikuMikuLibrary.Motions
 
             if ( section != null )
             {
-                long boneIDsOffset = reader.ReadOffset();
+                long boneIdsOffset = reader.ReadOffset();
                 int boneInfoCount = reader.ReadInt32();
 
                 BoneInfos.Capacity = boneInfoCount;
@@ -47,10 +53,10 @@ namespace MikuMikuLibrary.Motions
                         { Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) } );
                 } );
 
-                reader.ReadAtOffset( boneIDsOffset, () =>
+                reader.ReadAtOffset( boneIdsOffset, () =>
                 {
                     foreach ( var boneInfo in BoneInfos )
-                        boneInfo.ID = ( int ) reader.ReadUInt64();
+                        boneInfo.Id = ( int ) reader.ReadUInt64();
                 } );
             }
             else
@@ -60,7 +66,7 @@ namespace MikuMikuLibrary.Motions
                     int index = reader.ReadUInt16();
                     do
                     {
-                        BoneInfos.Add( new BoneInfo { ID = index } );
+                        BoneInfos.Add( new BoneInfo { Id = index } );
                         index = reader.ReadUInt16();
                     } while ( index != 0 );
                 } );
@@ -95,6 +101,14 @@ namespace MikuMikuLibrary.Motions
 
         public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
+            if ( section != null )
+            {
+                if ( section.Format == BinaryFormat.F2nd )
+                    writer.Write( 0 );
+
+                writer.Write( Id );
+                writer.AddStringToStringTable( Name );
+            }
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 writer.Write( ( ushort ) ( ( HighBits << 14 ) | KeySets.Count ) );
@@ -119,58 +133,124 @@ namespace MikuMikuLibrary.Motions
 
                     b |= ( int ) keySet.Type << ( i % 8 * 2 );
 
-                    if ( i == KeySets.Count - 1 || i % 8 == 7 )
-                    {
-                        writer.Write( ( ushort ) b );
-                        b = 0;
-                    }
+                    if ( i != KeySets.Count - 1 && i % 8 != 7 )
+                        continue;
+
+                    writer.Write( ( ushort ) b );
+                    b = 0;
                 }
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var keySet in KeySets )
-                    keySet.Write( writer );
+                    keySet.Write( writer, section != null );
             } );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            if ( section != null )
             {
-                foreach ( var boneInfo in BoneInfos )
-                    writer.Write( ( ushort ) boneInfo.ID );
+                writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
+                {
+                    foreach ( var boneInfo in BoneInfos )
+                        writer.AddStringToStringTable( boneInfo.Name );
+                } );
+                writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
+                {
+                    foreach ( var boneInfo in BoneInfos )
+                        writer.Write( ( long ) boneInfo.Id );
+                } );
+                writer.Write( BoneInfos.Count );
+                writer.WriteAlignmentPadding( 16 );
+            }
+            else
+            {
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+                {
+                    foreach ( var boneInfo in BoneInfos )
+                        writer.Write( ( ushort ) boneInfo.Id );
 
-                writer.Write( ( ushort ) 0 );
-            } );
+                    writer.Write( ( ushort ) 0 );
+                } );
+            }
         }
 
-        public MotionController GetController( SkeletonEntry skeletonEntry, MotionDatabase motionDatabase = null )
+        public MotionController GetController( SkeletonEntry skeletonEntry = null,
+            MotionDatabase motionDatabase = null )
         {
-            var controller = new MotionController { FrameCount = FrameCount, Name = Name };
+            if ( mController != null )
+                return mController;
 
-            for ( int i = 0, j = 0; i < BoneInfos.Count; i++ )
+            if ( skeletonEntry == null )
+                throw new ArgumentNullException( nameof( skeletonEntry ) );
+
+            var controller = new MotionController( this );
+
+            int index = 0;
+            foreach ( var boneInfo in BoneInfos )
             {
-                string boneName = BoneInfos[ i ].Name ?? motionDatabase.BoneNames[ BoneInfos[ i ].ID ];
+                boneInfo.Name = boneInfo.Name ?? motionDatabase?.BoneNames[ boneInfo.Id ] ??
+                                throw new ArgumentNullException( nameof( motionDatabase ) );
 
-                var boneEntry = skeletonEntry.GetBoneEntry( boneName );
-                var keyController = new KeyController { Name = boneName };
-
-                if ( boneEntry?.Field00 >= 3 )
-                    keyController.Position = new KeySetVector
-                    {
-                        X = KeySets[ j++ ],
-                        Y = KeySets[ j++ ],
-                        Z = KeySets[ j++ ],
-                    };
+                var boneEntry = skeletonEntry.GetBoneEntry( boneInfo.Name );
+                var keyController = new KeyController { Name = boneInfo.Name };
 
                 if ( boneEntry != null )
-                    keyController.Rotation = new KeySetVector
+                {
+                    if ( boneEntry.Type != BoneType.Rotation )
+                        keyController.Position = new KeySetVector
+                        {
+                            X = KeySets[ index++ ],
+                            Y = KeySets[ index++ ],
+                            Z = KeySets[ index++ ],
+                        };
+
+                    if ( boneEntry.Type != BoneType.Position )
+                        keyController.Rotation = new KeySetVector
+                        {
+                            X = KeySets[ index++ ],
+                            Y = KeySets[ index++ ],
+                            Z = KeySets[ index++ ],
+                        };
+                }
+                else if ( !skeletonEntry.BoneNames2.Contains( boneInfo.Name ) )
+                    keyController.Position = new KeySetVector
                     {
-                        X = KeySets[ j++ ],
-                        Y = KeySets[ j++ ],
-                        Z = KeySets[ j++ ],
+                        X = KeySets[ index++ ],
+                        Y = KeySets[ index++ ],
+                        Z = KeySets[ index++ ],
                     };
+
 
                 controller.KeyControllers.Add( keyController );
             }
 
-            return controller;
+            return mController = controller;
+        }
+
+        public void Load( Stream source, SkeletonEntry skeletonEntry, bool leaveOpen = false )
+        {
+            Load( source, leaveOpen );
+
+            if ( skeletonEntry != null )
+                GetController( skeletonEntry );
+        }
+
+        public void Load( string filePath, SkeletonEntry skeletonEntry )
+        {
+            using ( var stream = File.OpenRead( filePath ) )
+                Load( stream, skeletonEntry );
+        }
+
+        public void Save( Stream destination, SkeletonEntry skeletonEntry, bool leaveOpen = false )
+        {
+            if ( skeletonEntry != null )
+                mController?.Update( skeletonEntry );
+
+            Save( destination, leaveOpen );
+        }
+
+        public void Save( string filePath, SkeletonEntry skeletonEntry )
+        {
+            using ( var stream = File.Create( filePath ) )
+                Save( stream, skeletonEntry );
         }
 
         public Motion()
@@ -183,6 +263,6 @@ namespace MikuMikuLibrary.Motions
     public class BoneInfo
     {
         public string Name { get; set; }
-        public int ID { get; set; }
+        public int Id { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MikuMikuLibrary.IO;
+using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Modules;
@@ -59,6 +60,21 @@ namespace MikuMikuModel.GUI.Forms
                     return true;
 
             return false;
+        }
+
+        protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
+        {
+            foreach ( var menuItem in mMenuStrip.Items )
+                if ( CheckKeyPressRecursively( menuItem, keyData ) )
+                    return true;
+
+            var strip = mNodeTreeView.SelectedNode?.ContextMenuStrip;
+            if ( strip != null )
+                foreach ( var menuItem in strip.Items )
+                    if ( CheckKeyPressRecursively( menuItem, keyData ) )
+                        return true;
+
+            return base.ProcessCmdKey( ref msg, keyData );
         }
 
         /// <summary>
@@ -208,35 +224,34 @@ namespace MikuMikuModel.GUI.Forms
         {
             Reset();
 
-            ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
+            bool errorsOccured = false;
+
+            INode node = null;
+            try
             {
-                bool errorsOccured = false;
-
-                INode node = null;
-                try
-                {
-                    node = NodeFactory.Create( filePath );
-                }
-                catch
-                {
-                    errorsOccured = true;
-                }
-
-                if ( errorsOccured || !typeof( IBinaryFile ).IsAssignableFrom( node.DataType ) )
-                {
-                    MessageBox.Show( "File could not be opened.", "Miku Miku Model", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error );
-
-                    node?.Dispose();
-                    return;
-                }
-
-                var treeNode = new NodeAsTreeNode( node );
-                {
-                    mNodeTreeView.Nodes.Add( treeNode );
-                }
-                treeNode.Expand();
+                node = NodeFactory.Create( filePath );
             }
+            catch
+            {
+                errorsOccured = true;
+            }
+
+            if ( errorsOccured || !typeof( IBinaryFile ).IsAssignableFrom( node.DataType ) )
+            {
+                MessageBox.Show( "File could not be opened.", "Miku Miku Model", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error );
+
+                node?.Dispose();
+                return;
+            }
+
+            node.Exported += OnNodeExported;
+
+            var treeNode = new NodeAsTreeNode( node );
+            {
+                mNodeTreeView.Nodes.Add( treeNode );
+            }
+            treeNode.Expand();
 
             mCurrentlyOpenFilePath = filePath;
             mSaveToolStripMenuItem.Enabled = true;
@@ -246,26 +261,18 @@ namespace MikuMikuModel.GUI.Forms
             SetTitle( Path.GetFileName( filePath ) );
         }
 
-        protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
-        {
-            foreach ( var menuItem in mMenuStrip.Items )
-                if ( CheckKeyPressRecursively( menuItem, keyData ) )
-                    return true;
-
-            var strip = mNodeTreeView.SelectedNode?.ContextMenuStrip;
-            if ( strip != null )
-                foreach ( var menuItem in strip.Items )
-                    if ( CheckKeyPressRecursively( menuItem, keyData ) )
-                        return true;
-
-            return base.ProcessCmdKey( ref msg, keyData );
-        }
+        private static void OnNodeExported( object sender, NodeExportEventArgs e ) =>
+            ConfigurationList.Instance.CurrentConfiguration?.SaveTextureDatabase();
 
         public void Reset()
         {
-            mNodeTreeView.TopNode?.Dispose();
-            mNodeTreeView.TopDataNode?.DisposeData();
-            mNodeTreeView.TopDataNode?.Dispose();
+            if ( mNodeTreeView.TopNode != null )
+            {
+                mNodeTreeView.TopNode.Dispose();
+                mNodeTreeView.TopDataNode.Exported -= OnNodeExported;
+                mNodeTreeView.TopDataNode.DisposeData();
+                mNodeTreeView.TopDataNode.Dispose();
+            }
             mNodeTreeView.Nodes.Clear();
 
             mPropertyGrid.SelectedObject = null;
@@ -284,11 +291,6 @@ namespace MikuMikuModel.GUI.Forms
                 return;
 
             mNodeTreeView.TopDataNode.Export( filePath );
-
-            // Save the texture database
-            ConfigurationList.Instance.CurrentConfiguration?.TextureDatabase?.Save(
-                ConfigurationList.Instance.CurrentConfiguration?.TextureDatabaseFilePath );
-
             mCurrentlyOpenFilePath = filePath;
         }
 
@@ -297,13 +299,11 @@ namespace MikuMikuModel.GUI.Forms
             if ( mNodeTreeView.TopDataNode == null )
                 return false;
 
-            if ( !string.IsNullOrEmpty( mCurrentlyOpenFilePath ) )
-            {
-                SaveFile( mCurrentlyOpenFilePath );
-                return true;
-            }
+            if ( string.IsNullOrEmpty( mCurrentlyOpenFilePath ) )
+                return SaveFileAs();
 
-            return SaveFileAs();
+            SaveFile( mCurrentlyOpenFilePath );
+            return true;
         }
 
         private bool SaveFileAs()
@@ -311,10 +311,6 @@ namespace MikuMikuModel.GUI.Forms
             string path = mNodeTreeView.TopDataNode?.Export();
             if ( string.IsNullOrEmpty( path ) )
                 return false;
-
-            // Save the texture database
-            ConfigurationList.Instance.CurrentConfiguration?.TextureDatabase?.Save(
-                ConfigurationList.Instance.CurrentConfiguration?.TextureDatabaseFilePath );
 
             mCurrentlyOpenFilePath = path;
             return true;
@@ -333,6 +329,59 @@ namespace MikuMikuModel.GUI.Forms
                 mStringBuilder.AppendFormat( " - {0}", fileName );
 
             Text = mStringBuilder.ToString();
+        }
+
+
+        private void OnCombineMotions( object sender, EventArgs e )
+        {
+            string filePath =
+                ModuleImportUtilities.SelectModuleImport<Motion>( "Select the root .mot file." );
+
+            if ( filePath == null )
+                return;
+
+            var configuration = ConfigurationList.Instance.FindConfiguration( filePath );
+            if ( configuration?.BoneDatabase == null )
+            {
+                MessageBox.Show( "Could not find suitable configuration for the file.", "Miku Miku Model",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error );
+            }
+            else
+            {
+                string baseFilePath = Path.ChangeExtension( filePath, null );
+
+                string outputFilePath = ModuleExportUtilities.SelectModuleExport<Motion>( 
+                    "Select a file to export to.",
+                    Path.GetFileName( $"{baseFilePath}_combined.mot" ) );
+
+                if ( string.IsNullOrEmpty( outputFilePath ) )
+                    return;
+
+                var skeletonEntry = configuration.BoneDatabase.Skeletons[ 0 ];
+
+                var rootMotion = new Motion();
+                {
+                    rootMotion.Load( filePath, skeletonEntry );
+                }
+
+                var rootController = rootMotion.GetController();
+                for ( int i = 1;; i++ )
+                {
+                    string divFilePath = $"{baseFilePath}_div_{i}.mot";
+                    if ( !File.Exists( divFilePath ) )
+                        break;
+
+                    var divMotion = new Motion();
+                    {
+                        divMotion.Load( divFilePath, skeletonEntry );
+                    }
+
+                    var divController = divMotion.GetController();
+                    rootController.Merge( divController );
+                }
+
+                rootMotion.Save( outputFilePath, skeletonEntry );
+            }
         }
 
         public MainForm()

@@ -35,7 +35,7 @@ namespace MikuMikuLibrary.IO.Sections
                 else if ( distance > 0x3F )
                 {
                     bytes.Add( ( byte )( 0x80 | ( distance >> 8 ) ) );
-                    bytes.Add( ( byte )( distance ) );
+                    bytes.Add( ( byte )distance );
                 }
                 else if ( distance > 0 )
                 {
@@ -90,7 +90,7 @@ namespace MikuMikuLibrary.IO.Sections
                 else if ( distance > 0x3F )
                 {
                     bytes.Add( ( byte )( 0x80 | ( distance >> 8 ) ) );
-                    bytes.Add( ( byte )( distance ) );
+                    bytes.Add( ( byte )distance );
                 }
                 else if ( distance > 0 )
                 {

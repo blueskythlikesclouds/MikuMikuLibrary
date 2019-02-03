@@ -79,6 +79,27 @@ namespace MikuMikuModel.Modules
             return null;
         }
 
+        public static string[] SelectModuleImportMultiselect<T>( string title = "Select file(s) to import.", string filePath = null )
+        {
+            using ( var dialog = new OpenFileDialog() )
+            {
+                dialog.AutoUpgradeEnabled = true;
+                dialog.CheckPathExists = true;
+                dialog.CheckPathExists = true;
+                dialog.Filter = ModuleFilterGenerator.GenerateFilter( typeof( T ) );
+                dialog.Title = title;
+                dialog.FileName = filePath;
+                dialog.ValidateNames = true;
+                dialog.AddExtension = true;
+                dialog.Multiselect = true;
+
+                if ( dialog.ShowDialog() == DialogResult.OK )
+                    return dialog.FileNames;
+            }
+
+            return null;
+        }
+
         public static string SelectModuleImport( IEnumerable<Type> modelTypes, string title = "Select a file to import from.", string filePath = null )
         {
             using ( var dialog = new OpenFileDialog() )

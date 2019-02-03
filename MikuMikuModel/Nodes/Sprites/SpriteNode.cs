@@ -8,6 +8,37 @@ namespace MikuMikuModel.Nodes.Sprites
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
+        [DisplayName( "Texture index" )]
+        public int TextureIndex
+        {
+            get => GetProperty<int>();
+            set => SetProperty( value );
+        }
+
+        public float X
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }
+
+        public float Y
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }
+
+        public float Width
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }
+
+        public float Height
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }
+
         [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field00
         {
@@ -17,13 +48,6 @@ namespace MikuMikuModel.Nodes.Sprites
 
         [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field01
-        {
-            get => GetProperty<int>();
-            set => SetProperty( value );
-        }
-
-        [DisplayName( "Texture index" )]
-        public int TextureIndex
         {
             get => GetProperty<int>();
             set => SetProperty( value );
@@ -54,30 +78,6 @@ namespace MikuMikuModel.Nodes.Sprites
         }
 
         public float Field06
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
-
-        public float X
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
-
-        public float Y
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
-
-        public float Width
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
-
-        public float Height
         {
             get => GetProperty<float>();
             set => SetProperty( value );

@@ -37,7 +37,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
                     model.Meshes.Add( mesh );
             }
 
-            model.TextureIDs.AddRange( model.TextureSet.Textures.Select( x => x.ID ) );
+            model.TextureIds.AddRange( model.TextureSet.Textures.Select( x => x.Id ) );
             return model;
         }
 
@@ -56,7 +56,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
 
             model.Meshes.Add( ConvertMeshFromAiNode( aiScene.RootNode, aiScene, Matrix4x4.Identity, texturesDirectory, model.TextureSet ) );
 
-            model.TextureIDs.AddRange( model.TextureSet.Textures.Select( x => x.ID ) );
+            model.TextureIds.AddRange( model.TextureSet.Textures.Select( x => x.Id ) );
 
             return model;
         }
@@ -71,7 +71,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             return transform;
         }
 
-        private static Bone ConvertBoneFromAiBone( Ai.Bone aiBone, Ai.Scene aiScene, int boneID )
+        private static Bone ConvertBoneFromAiBone( Ai.Bone aiBone, Ai.Scene aiScene, int boneId )
         {
             Matrix4x4 inverseTransformation;
 
@@ -84,7 +84,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             return new Bone
             {
                 Name = aiBone.Name,
-                ID = boneID,
+                Id = boneId,
                 Matrix = inverseTransformation,
             };
         }
@@ -102,7 +102,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
 
             texture = TextureEncoder.Encode( textureFilePath );
             texture.Name = textureName;
-            texture.ID = sRandom.Next( int.MinValue, int.MaxValue );
+            texture.Id = sRandom.Next( int.MinValue, int.MaxValue );
             textureSet.Textures.Add( texture );
 
             return texture;
@@ -151,41 +151,41 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             if ( aiMaterial.HasTextureDiffuse && ( texture = ConvertTexture( aiMaterial.TextureDiffuse.FilePath, texturesDirectory, textureSet ) ) != null )
             {
                 material.Field00 |= 1;
-                material.Diffuse.TextureID = texture.ID;
+                material.Diffuse.TextureId = texture.Id;
                 material.Diffuse.Field02 = 241;
             }
 
             if ( aiMaterial.HasTextureAmbient && ( texture = ConvertTexture( aiMaterial.TextureAmbient.FilePath, texturesDirectory, textureSet ) ) != null )
             {
-                material.Ambient.TextureID = texture.ID;
+                material.Ambient.TextureId = texture.Id;
                 material.Ambient.Field02 = 241;
             }
 
             if ( aiMaterial.HasTextureNormal && ( texture = ConvertTexture( aiMaterial.TextureNormal.FilePath, texturesDirectory, textureSet ) ) != null )
             {
                 material.Field00 |= 256;
-                material.Normal.TextureID = texture.ID;
+                material.Normal.TextureId = texture.Id;
                 material.Normal.Field02 = 242;
             }
 
             if ( aiMaterial.HasTextureSpecular && ( texture = ConvertTexture( aiMaterial.TextureSpecular.FilePath, texturesDirectory, textureSet ) ) != null )
             {
                 material.Field00 |= 128;
-                material.Specular.TextureID = texture.ID;
+                material.Specular.TextureId = texture.Id;
                 material.Specular.Field02 = 243;
             }
 
             if ( aiMaterial.HasTextureReflection && ( texture = ConvertTexture( aiMaterial.TextureReflection.FilePath, texturesDirectory, textureSet ) ) != null )
             {
                 material.Field00 |= 33832;
-                material.Reflection.TextureID = texture.ID;
+                material.Reflection.TextureId = texture.Id;
                 material.Reflection.Field02 = 1017;
             }
 
             if ( aiMaterial.GetMaterialTexture( Ai.TextureType.Shininess, 0, out Ai.TextureSlot shininess ) && ( texture = ConvertTexture( shininess.FilePath, texturesDirectory, textureSet ) ) != null )
             {
                 material.Field00 |= 8192;
-                material.SpecularPower.TextureID = texture.ID;
+                material.SpecularPower.TextureId = texture.Id;
                 material.SpecularPower.Field02 = 246;
             }
 

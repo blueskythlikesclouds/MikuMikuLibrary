@@ -34,7 +34,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             void ActivateTexture( GLTexture texture, string uniformName, TextureTarget target = TextureTarget.Texture2D )
             {
                 GL.ActiveTexture( TextureUnit.Texture0 + textureIndex );
-                GL.BindTexture( target, texture?.ID ?? 0 );
+                GL.BindTexture( target, texture?.Id ?? 0 );
                 shaderProgram.SetUniform( $"has{uniformName}", texture != null );
                 shaderProgram.SetUniform( uniformName, textureIndex++ );
             }
@@ -83,16 +83,16 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 if ( !materialTexture.IsActive )
                     return null;
 
-                if ( textures.TryGetValue( materialTexture.TextureID, out GLTexture texture ) )
+                if ( textures.TryGetValue( materialTexture.TextureId, out GLTexture texture ) )
                     return texture;
                 else
                 {
-                    var textureToUpload = textureSet.Textures.FirstOrDefault( x => x.ID.Equals( materialTexture.TextureID ) );
+                    var textureToUpload = textureSet.Textures.FirstOrDefault( x => x.Id.Equals( materialTexture.TextureId ) );
                     if ( textureToUpload == null )
                         return null;
 
                     texture = new GLTexture( textureToUpload );
-                    textures.Add( textureToUpload.ID, texture );
+                    textures.Add( textureToUpload.Id, texture );
                     return texture;
                 }
             }

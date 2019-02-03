@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using MikuMikuLibrary.Motions;
+using MikuMikuModel.Configurations;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Misc;
 using MikuMikuModel.Resources;
@@ -15,14 +16,63 @@ namespace MikuMikuModel.Nodes.Motions
 
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/Motion.png" );
 
+        protected override void Initialize()
+        {
+            RegisterReplaceHandler<Motion>( filePath =>
+            {
+                var configuration = ConfigurationList.Instance.CurrentConfiguration;
+                var motion = new Motion();
+                {
+                    motion.Load( filePath, configuration?.BoneDatabase?.Skeletons?[ 0 ] );
+                }
+                return motion;
+            } );
+            RegisterExportHandler<Motion>( filePath =>
+            {
+                var configuration = ConfigurationList.Instance.CurrentConfiguration;
+                {
+                    Data.Save( filePath, configuration?.BoneDatabase?.Skeletons?[ 0 ] );
+                }
+            } );
+            RegisterExportHandler<MotionSet>( filePath =>
+            {
+                using ( var motionSet = new MotionSet() )
+                {
+                    motionSet.Motions.Add( Data );
+
+                    var configuration = ConfigurationList.Instance.CurrentConfiguration;
+                    {
+                        motionSet.Save( filePath,
+                            configuration?.BoneDatabase?.Skeletons?[ 0 ], configuration?.MotionDatabase );
+                    }
+                }
+            } );
+        }
+
+        protected override void Load( Motion data, Stream source ) =>
+            data.Load( source, SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ] );
+
         protected override void PopulateCore()
         {
-            var motionDatabase = Configuration?.MotionDatabase;
-            var skeletonEntry = Configuration?.BoneDatabase?.Skeletons?[ 0 ];
+            if ( !Data.HasController )
+            {
+                var skeletonEntry = SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ];
+                var motionDatabase = SourceConfiguration?.MotionDatabase;
 
-            if ( skeletonEntry != null )
-                Nodes.Add(
-                    new MotionControllerNode( "Controller", Data.GetController( skeletonEntry, motionDatabase ) ) );
+                try
+                {
+                    Data.GetController( skeletonEntry, motionDatabase );
+                }
+                catch ( ArgumentNullException )
+                {
+
+                }
+            }
+
+            if ( Data.HasController )
+            {
+                Nodes.Add( new MotionControllerNode( "Controller", Data.GetController() ) );
+            }
             else
             {
                 Nodes.Add( new ListNode<KeySet>( "Key sets", Data.KeySets ) );
@@ -47,7 +97,7 @@ namespace MikuMikuModel.Nodes.Motions
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
-        public int ID
+        public int Id
         {
             get => GetProperty<int>();
             set => SetProperty( value );

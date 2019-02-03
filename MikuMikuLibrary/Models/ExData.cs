@@ -124,24 +124,24 @@ namespace MikuMikuLibrary.Models
         public override string Signature => "MOT";
 
         public string Name { get; set; }
-        public List<int> BoneIDs { get; }
+        public List<int> BoneIds { get; }
         public List<Matrix4x4> BoneMatrices { get; }
 
         internal override void ReadBody( EndianBinaryReader reader )
         {
             long nameOffset = reader.ReadOffset();
             int count = reader.ReadInt32();
-            long boneIDsOffset = reader.ReadOffset();
+            long boneIdsOffset = reader.ReadOffset();
             long boneMatricesOffset = reader.ReadOffset();
 
-            BoneIDs.Capacity = BoneMatrices.Capacity = count;
+            BoneIds.Capacity = BoneMatrices.Capacity = count;
 
             Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
-            reader.ReadAtOffset( boneIDsOffset, () =>
+            reader.ReadAtOffset( boneIdsOffset, () =>
             {
                 for ( int i = 0; i < count; i++ )
-                    BoneIDs.Add( reader.ReadInt32() );
+                    BoneIds.Add( reader.ReadInt32() );
             } );
 
             reader.ReadAtOffset( boneMatricesOffset, () =>
@@ -154,10 +154,10 @@ namespace MikuMikuLibrary.Models
         internal override void WriteBody( EndianBinaryWriter writer )
         {
             writer.AddStringToStringTable( Name );
-            writer.Write( BoneIDs.Count );
+            writer.Write( BoneIds.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var value in BoneIDs )
+                foreach ( var value in BoneIds )
                     writer.Write( value );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
@@ -169,7 +169,7 @@ namespace MikuMikuLibrary.Models
 
         public ExBlockMotion()
         {
-            BoneIDs = new List<int>();
+            BoneIds = new List<int>();
             BoneMatrices = new List<Matrix4x4>();
         }
     }
@@ -276,20 +276,20 @@ namespace MikuMikuLibrary.Models
 
     public class ExOsageBoneEntry
     {
-        public int BoneID { get; set; }
+        public int BoneId { get; set; }
         public float Field00 { get; set; }
         public int NameIndex { get; set; }
 
         internal void Read( EndianBinaryReader reader )
         {
-            BoneID = reader.ReadInt32();
+            BoneId = reader.ReadInt32();
             Field00 = reader.ReadSingle();
             NameIndex = reader.ReadInt32();
         }
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.Write( BoneID );
+            writer.Write( BoneId );
             writer.Write( Field00 );
             writer.Write( NameIndex );
         }

@@ -179,10 +179,7 @@ namespace MikuMikuModel.GUI.Forms
 
         private void OnReload( object sender, EventArgs e )
         {
-            SelectedConfiguration.ObjectDatabase = null;
-            SelectedConfiguration.TextureDatabase = null;
-            SelectedConfiguration.BoneDatabase = null;
-            SelectedConfiguration.MotionDatabase = null;
+            SelectedConfiguration.Clean();
         }
 
         private void OnObjectDatabaseBrowse( object sender, EventArgs e )
@@ -230,24 +227,24 @@ namespace MikuMikuModel.GUI.Forms
                 if ( folderBrowseDialog.ShowDialog( this ) != DialogResult.OK )
                     return;
 
-                SelectedConfiguration.ObjectDatabaseFilePath =
-                    SelectedConfiguration.ObjectDatabaseFilePath ??
-                    PickPath( "rom/objset/obj_db.bin", "objset/obj_db.bin", "obj_db.bin" );
+                if ( string.IsNullOrEmpty( SelectedConfiguration.ObjectDatabaseFilePath ) )
+                    SelectedConfiguration.ObjectDatabaseFilePath =
+                        PickPath( "rom/objset/obj_db.bin", "objset/obj_db.bin", "obj_db.bin" );
 
-                SelectedConfiguration.TextureDatabaseFilePath =
-                    SelectedConfiguration.TextureDatabaseFilePath ??
-                    PickPath( "rom/objset/tex_db.bin", "objset/tex_db.bin", "tex_db.bin" );
+                if ( string.IsNullOrEmpty( SelectedConfiguration.TextureDatabaseFilePath ) )
+                    SelectedConfiguration.TextureDatabaseFilePath =
+                        PickPath( "rom/objset/tex_db.bin", "objset/tex_db.bin", "tex_db.bin" );
 
-                SelectedConfiguration.BoneDatabaseFilePath =
-                    SelectedConfiguration.BoneDatabaseFilePath ??
-                    PickPath( "rom/bone_data.bin", "bone_data.bin" );
+                if ( string.IsNullOrEmpty( SelectedConfiguration.BoneDatabaseFilePath ) )
+                    SelectedConfiguration.BoneDatabaseFilePath =
+                        PickPath( "rom/bone_data.bin", "bone_data.bin" );
 
-                SelectedConfiguration.MotionDatabaseFilePath =
-                    SelectedConfiguration.MotionDatabaseFilePath ??
-                    PickPath( 
-                        "rom/rob/mot_db.farc", "rob/mot_db.farc", "mot_db.farc",
-                        "rom/rob/mot_db/mot_db.bin", "rob/mot_db/mot_db.bin", "mot_db/mot_db.bin",
-                        "rom/rob/mot_db.bin", "rob/mot_db.bin", "mot_db.bin" );
+                if ( string.IsNullOrEmpty( SelectedConfiguration.MotionDatabaseFilePath ) )
+                    SelectedConfiguration.MotionDatabaseFilePath =
+                        PickPath(
+                            "rom/rob/mot_db.farc", "rob/mot_db.farc", "mot_db.farc",
+                            "rom/rob/mot_db/mot_db.bin", "rob/mot_db/mot_db.bin", "mot_db/mot_db.bin",
+                            "rom/rob/mot_db.bin", "rob/mot_db.bin", "mot_db.bin" );
 
                 SetConfiguration( SelectedConfiguration );
 

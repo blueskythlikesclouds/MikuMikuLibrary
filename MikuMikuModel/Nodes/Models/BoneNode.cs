@@ -8,14 +8,14 @@ namespace MikuMikuModel.Nodes.Models
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
-        [DisplayName( "Parent ID" )]
-        public int ParentID
+        [DisplayName( "Parent id" )]
+        public int ParentId
         {
             get => GetProperty<int>();
             set => SetProperty( value );
         }
 
-        public int ID
+        public int Id
         {
             get => GetProperty<int>();
             set => SetProperty( value );
@@ -27,7 +27,7 @@ namespace MikuMikuModel.Nodes.Models
             set => SetProperty( value );
         }
 
-        [DisplayName( "Is ex" )]
+        [DisplayName( "Belongs in ex data" )]
         public bool IsEx => GetProperty<bool>();
 
         protected override void Initialize()

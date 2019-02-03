@@ -43,7 +43,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
                     if ( !boneParentMap.ContainsKey( bone.Name ) )
                     {
                         var parentBone =
-                            mesh.Skin.Bones.FirstOrDefault( x => x.ID == bone.ParentID );
+                            mesh.Skin.Bones.FirstOrDefault( x => x.Id == bone.ParentId );
 
                         bones.Add( bone );
                         boneParentMap.Add( bone.Name, parentBone?.Name );
@@ -90,7 +90,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
                         if ( !boneParentMap.ContainsKey( bone.Name ) )
                         {
                             var parentBone =
-                                mesh.Skin.Bones.FirstOrDefault( x => x.ID == bone.ParentID );
+                                mesh.Skin.Bones.FirstOrDefault( x => x.Id == bone.ParentId );
 
                             bones.Add( bone );
                             boneParentMap.Add( bone.Name, parentBone?.Name );
@@ -116,7 +116,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             aiNode.Transform = transform.ToAssimp();
 
             if ( appendTags )
-                aiNode.Name = $"{aiNode.Name}{Tag.Create( "ID", bone.ID )}";
+                aiNode.Name = $"{aiNode.Name}{Tag.Create( "ID", bone.Id )}";
 
             parent.Children.Add( aiNode );
             return aiNode;
@@ -194,7 +194,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
                             aiBone.OffsetMatrix = bone.Matrix.ToAssimp();
 
                             if ( appendTags )
-                                aiBone.Name = $"{aiBone.Name}{Tag.Create( "ID", bone.ID )}";
+                                aiBone.Name = $"{aiBone.Name}{Tag.Create( "ID", bone.Id )}";
 
                             for ( int j = 0; j < subMesh.BoneWeights.Length; j++ )
                             {
@@ -239,7 +239,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             }
 
             if ( appendTags )
-                aiNode.Name = $"{aiNode.Name}{Tag.Create( "ID", mesh.ID )}";
+                aiNode.Name = $"{aiNode.Name}{Tag.Create( "ID", mesh.Id )}";
 
             return aiNode;
         }
@@ -250,12 +250,12 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
                 aiScene.RootNode.Children.Add( ConvertAiNodeFromMesh( mesh, aiScene, appendTags ) );
         }
 
-        private static Ai.TextureSlot ConvertTextureSlotFromTextureID( int textureID, Ai.TextureType type, TextureSet textureList )
+        private static Ai.TextureSlot ConvertTextureSlotFromTextureId( int textureId, Ai.TextureType type, TextureSet textureList )
         {
-            if ( textureID == -1 || textureList == null )
+            if ( textureId == -1 || textureList == null )
                 return default( Ai.TextureSlot );
 
-            var texture = textureList.Textures.FirstOrDefault( x => x.ID == textureID );
+            var texture = textureList.Textures.FirstOrDefault( x => x.Id == textureId );
             if ( texture != null )
                 return new Ai.TextureSlot( TextureUtilities.GetFileName( texture ), type, 0, Ai.TextureMapping.FromUV, 0, 0, Ai.TextureOperation.Add, Ai.TextureWrapMode.Wrap, Ai.TextureWrapMode.Wrap, 0 );
 
@@ -286,7 +286,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             {
                 if ( materialTexture.IsActive )
                 {
-                    var texture = ConvertTextureSlotFromTextureID( materialTexture.TextureID, textureType, textures );
+                    var texture = ConvertTextureSlotFromTextureId( materialTexture.TextureId, textureType, textures );
                     aiMaterial.AddMaterialTexture( ref texture );
                 }
             }

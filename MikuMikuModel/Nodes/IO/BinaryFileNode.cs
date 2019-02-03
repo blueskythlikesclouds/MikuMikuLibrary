@@ -30,9 +30,9 @@ namespace MikuMikuModel.Nodes.IO
                 if ( mLoaded || mStreamGetter == null )
                     return internalData;
 
-                ConfigurationList.Instance.CurrentConfiguration = Configuration;
+                ConfigurationList.Instance.CurrentConfiguration = SourceConfiguration;
                 {
-                    internalData.Load( mStreamGetter() );
+                    Load( internalData, mStreamGetter() );
                 }
 
                 mLoaded = true;
@@ -52,12 +52,12 @@ namespace MikuMikuModel.Nodes.IO
                 bool previousValue = mDirty;
                 mDirty = value;
 
-                if ( previousValue != mDirty )
-                {
-                    OnDirtyStateChanged();
-                    if ( mDirty )
-                        IsPendingSynchronization = true;
-                }
+                if ( previousValue == mDirty )
+                    return;
+
+                OnDirtyStateChanged();
+                if ( mDirty )
+                    IsPendingSynchronization = true;
             }
         }
 
@@ -76,24 +76,27 @@ namespace MikuMikuModel.Nodes.IO
             set => SetProperty( value );
         }
 
-        public Stream GetStream() => new DynamicStream( this );
+        public virtual Stream GetStream() => new DynamicStream( this );
+
+        protected virtual void Load( T data, Stream source ) => 
+            data.Load( source ); 
 
         private void InitializeSubscription( INode node, bool unsubscribe )
         {
-            if ( node.IsPopulated || ( unsubscribe && node.IsPopulated) )
+            if ( node.IsPopulated || unsubscribe && node.IsPopulated )
                 IsDirty = true;
 
             if ( unsubscribe )
             {
                 if ( node is IDirtyNode dirtyNode )
-                    dirtyNode.DirtyStateChanged -= OnDirtyNodeOnDirtyStateChanged;
+                    dirtyNode.DirtyStateChanged -= OnNodeDirtyStateChanged;
                 else
                 {
-                    node.PropertyChanged -= OnNodeOnPropertyChanged;
-                    node.Added -= OnNodeOnAdded;
-                    node.Removed -= OnNodeOnRemoved;
-                    node.Replaced -= OnNodeOnReplaced;
-                    node.Moved -= OnNodeOnMoved;
+                    node.PropertyChanged -= OnNodePropertyChanged;
+                    node.Added -= OnNodeAdded;
+                    node.Removed -= OnNodeRemoved;
+                    node.Replaced -= OnNodeReplaced;
+                    node.Moved -= OnNodeMoved;
 
                     foreach ( var childNode in node.Nodes )
                         InitializeSubscription( childNode, true );
@@ -102,25 +105,25 @@ namespace MikuMikuModel.Nodes.IO
             else
             {
                 if ( node is IDirtyNode dirtyNode )
-                    dirtyNode.DirtyStateChanged += OnDirtyNodeOnDirtyStateChanged;
+                    dirtyNode.DirtyStateChanged += OnNodeDirtyStateChanged;
                 else
                 {
-                    node.PropertyChanged += OnNodeOnPropertyChanged;
-                    node.Added += OnNodeOnAdded;
-                    node.Removed += OnNodeOnRemoved;
-                    node.Replaced += OnNodeOnReplaced;
-                    node.Moved += OnNodeOnMoved;
+                    node.PropertyChanged += OnNodePropertyChanged;
+                    node.Added += OnNodeAdded;
+                    node.Removed += OnNodeRemoved;
+                    node.Replaced += OnNodeReplaced;
+                    node.Moved += OnNodeMoved;
                 }
             }
 
-            void OnDirtyNodeOnDirtyStateChanged( object sender, EventArgs args ) =>
+            void OnNodeDirtyStateChanged( object sender, EventArgs args ) =>
                 IsDirty = ( ( IDirtyNode ) sender ).IsDirty || IsDirty;
 
-            void OnNodeOnPropertyChanged( object sender, PropertyChangedEventArgs args ) => IsDirty = true;
-            void OnNodeOnAdded( object sender, NodeAddEventArgs args ) => InitializeSubscription( args.AddedNode, false );
-            void OnNodeOnRemoved( object sender, NodeRemoveEventArgs args ) => IsDirty = true;
-            void OnNodeOnReplaced( object sender, NodeReplaceEventArgs args ) => IsDirty = true;
-            void OnNodeOnMoved( object sender, NodeMoveEventArgs args ) => IsDirty = true;
+            void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args ) => IsDirty = true;
+            void OnNodeAdded( object sender, NodeAddEventArgs args ) => InitializeSubscription( args.AddedNode, false );
+            void OnNodeRemoved( object sender, NodeRemoveEventArgs args ) => IsDirty = true;
+            void OnNodeReplaced( object sender, NodeReplaceEventArgs args ) => IsDirty = true;
+            void OnNodeMoved( object sender, NodeMoveEventArgs args ) => IsDirty = true;
         }
 
         protected override void OnPropertyChanged( string propertyName = null )
@@ -181,8 +184,15 @@ namespace MikuMikuModel.Nodes.IO
                 {
                     farcArchiveViewForm.Text = "Select a node to replace with.";
 
-                    if ( farcArchiveViewForm.ShowDialog() == DialogResult.OK )
-                        Replace( ( T ) farcArchiveViewForm.SelectedNode.Data );
+                    if ( farcArchiveViewForm.NodeCount == 0 )
+                        MessageBox.Show( "This archive has no entries that you could replace the node with.", "Miku Miku Model",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information );
+                        
+                    else if ( farcArchiveViewForm.NodeCount == 1 )
+                        return ( T ) farcArchiveViewForm.TopNode.Data;
+
+                    else if ( farcArchiveViewForm.ShowDialog() == DialogResult.OK )
+                        return ( T ) farcArchiveViewForm.SelectedNode.Data;
                 }
 
                 return null;

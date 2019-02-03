@@ -44,7 +44,7 @@ namespace MikuMikuModel.Nodes.Textures
                         var textureEntry = textureDatabaseNode.Data.Textures[ i ];
 
                         texture.Name = textureEntry.Name;
-                        texture.ID = textureEntry.ID;
+                        texture.Id = textureEntry.Id;
                     }
 
                     mTextureDatabaseNode = textureDatabaseNode;
@@ -63,7 +63,7 @@ namespace MikuMikuModel.Nodes.Textures
             foreach ( var texture in Data.Textures )
                 textureDatabase.Textures.Add( new TextureEntry
                 {
-                    ID = texture.ID,
+                    Id = texture.Id,
                     Name = texture.Name,
                 } );
 

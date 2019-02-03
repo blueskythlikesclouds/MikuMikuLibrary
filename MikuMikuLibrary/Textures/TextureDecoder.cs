@@ -131,7 +131,7 @@ namespace MikuMikuLibrary.Textures
                 {
                     int currentIndex = 0;
                     foreach ( var i in CubeMapToDDSCubeMap() )
-                        gfx.DrawImageUnscaled( Decode( texture[ i, 0 ] ), ( currentIndex++ ) * texture.Width, 0 );
+                        gfx.DrawImageUnscaled( Decode( texture[ i, 0 ] ), currentIndex++ * texture.Width, 0 );
                 }
 
                 return bitmap;

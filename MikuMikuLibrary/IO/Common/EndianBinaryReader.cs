@@ -55,7 +55,7 @@ namespace MikuMikuLibrary.IO.Common
             get => mBaseOffsets.Count > 0 ? mBaseOffsets.Peek() : 0;
             set
             {
-                if ( ( mBaseOffsets.Count > 0 && mBaseOffsets.Peek() != value ) || mBaseOffsets.Count == 0 )
+                if ( mBaseOffsets.Count > 0 && mBaseOffsets.Peek() != value || mBaseOffsets.Count == 0 )
                     mBaseOffsets.Push( value );
             }
         }

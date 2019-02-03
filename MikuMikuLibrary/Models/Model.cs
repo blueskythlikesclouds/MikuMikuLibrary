@@ -5,7 +5,6 @@ using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Textures;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -34,7 +33,7 @@ namespace MikuMikuLibrary.Models
         }
 
         public List<Mesh> Meshes { get; }
-        public List<int> TextureIDs { get; }
+        public List<int> TextureIds { get; }
         public TextureSet TextureSet { get; set; }
 
         public int BoneCount => Meshes.Count != 0 ? 0x39393939 : -1;
@@ -50,13 +49,9 @@ namespace MikuMikuLibrary.Models
             long meshesOffset = reader.ReadOffset();
             long meshSkinningsOffset = reader.ReadOffset();
             long meshNamesOffset = reader.ReadOffset();
-            long meshIDsOffset = reader.ReadOffset();
-            long textureIDsOffset = reader.ReadOffset();
-            int textureIDCount = reader.ReadInt32();
-
-            // We are reading only if there's no section provided.
-            // The MeshSection class already parses the meshes.
-            // For classic formats, this won't be done, so we will be parsing them ourselves.
+            long meshIdsOffset = reader.ReadOffset();
+            long textureIdsOffset = reader.ReadOffset();
+            int textureIdCount = reader.ReadInt32();
 
             reader.ReadAtOffsetIf( section == null, meshesOffset, () =>
             {
@@ -94,17 +89,17 @@ namespace MikuMikuLibrary.Models
                     mesh.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
-            reader.ReadAtOffset( meshIDsOffset, () =>
+            reader.ReadAtOffset( meshIdsOffset, () =>
             {
                 foreach ( var mesh in Meshes )
-                    mesh.ID = reader.ReadInt32();
+                    mesh.Id = reader.ReadInt32();
             } );
 
-            reader.ReadAtOffset( textureIDsOffset, () =>
+            reader.ReadAtOffset( textureIdsOffset, () =>
             {
-                TextureIDs.Capacity = textureIDCount;
-                for ( int i = 0; i < textureIDCount; i++ )
-                    TextureIDs.Add( reader.ReadInt32() );
+                TextureIds.Capacity = textureIdCount;
+                for ( int i = 0; i < textureIdCount; i++ )
+                    TextureIds.Add( reader.ReadInt32() );
             } );
         }
 
@@ -113,10 +108,6 @@ namespace MikuMikuLibrary.Models
             writer.Write( section != null ? 0x5062501 : 0x5062500 );
             writer.Write( Meshes.Count );
             writer.Write( section != null ? -1 : BoneCount );
-
-            // Again the same case as the reader here.
-            // Section writers will already write the meshes,
-            // so we only write for the classic formats in this method.
 
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
@@ -134,125 +125,116 @@ namespace MikuMikuLibrary.Models
             {
                 foreach ( var mesh in Meshes )
                 {
-                    writer.ScheduleWriteOffsetIf( mesh.Skin != null && section == null, 16, AlignmentMode.Left, () =>
-                    {
-                        mesh.Skin.Write( writer );
-                    } );
+                    writer.ScheduleWriteOffsetIf( mesh.Skin != null && section == null, 16, AlignmentMode.Left,
+                        () => { mesh.Skin.Write( writer ); } );
                 }
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var mesh in Meshes )
-                    writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () => writer.Write( mesh.Name, StringBinaryFormat.NullTerminated ) );
+                    writer.ScheduleWriteOffset( 16, AlignmentMode.Left,
+                        () => writer.Write( mesh.Name, StringBinaryFormat.NullTerminated ) );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var mesh in Meshes )
-                    writer.Write( mesh.ID );
+                    writer.Write( mesh.Id );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
-                foreach ( var textureID in TextureIDs )
-                    writer.Write( textureID );
+                foreach ( var textureId in TextureIds )
+                    writer.Write( textureId );
             } );
-            writer.Write( TextureIDs.Count );
+            writer.Write( TextureIds.Count );
         }
 
-        public void Load( Stream source, TextureSet textureSet, TextureDatabase textureDatabase, bool leaveOpen = false )
+        public void Load( Stream source, TextureSet textureSet, TextureDatabase textureDatabase,
+            bool leaveOpen = false )
         {
             Load( source, leaveOpen );
 
-            if ( textureSet != null && TextureIDs.Count <= textureSet.Textures.Count )
-            {
-                TextureSet = textureSet;
-                for ( int i = 0; i < TextureIDs.Count; i++ )
-                {
-                    TextureSet.Textures[ i ].ID = TextureIDs[ i ];
+            if ( textureSet == null || TextureIds.Count != textureSet.Textures.Count )
+                return;
 
-                    var textureEntry = textureDatabase?.GetTexture( TextureIDs[ i ] );
-                    if ( textureEntry != null )
-                        TextureSet.Textures[ i ].Name = textureEntry.Name;
-                }
+            TextureSet = textureSet;
+            for ( int i = 0; i < TextureIds.Count; i++ )
+            {
+                TextureSet.Textures[ i ].Id = TextureIds[ i ];
+
+                var textureEntry = textureDatabase?.GetTexture( TextureIds[ i ] );
+                if ( textureEntry != null )
+                    TextureSet.Textures[ i ].Name = textureEntry.Name;
             }
         }
 
         public void Load( string filePath, ObjectDatabase objectDatabase, TextureDatabase textureDatabase )
         {
-            string textureFilePath = string.Empty;
-            if ( objectDatabase != null )
-            {
-                var objectEntry = objectDatabase.GetObjectByFileName( Path.GetFileName( filePath ) );
-                if ( objectEntry != null )
-                    textureFilePath = Path.Combine( Path.GetDirectoryName( filePath ), objectEntry.TextureFileName );
-            }
+            string textureSetFilePath = string.Empty;
 
-            if ( string.IsNullOrEmpty( textureFilePath ) || !File.Exists( textureFilePath ) )
+            var objectEntry = objectDatabase?.GetObjectByFileName( Path.GetFileName( filePath ) );
+            if ( objectEntry != null )
+                textureSetFilePath = Path.Combine( Path.GetDirectoryName( filePath ), objectEntry.TextureFileName );
+
+            if ( string.IsNullOrEmpty( textureSetFilePath ) || !File.Exists( textureSetFilePath ) )
             {
-                // Try to assume the file name
                 if ( filePath.EndsWith( "_obj.bin", StringComparison.OrdinalIgnoreCase ) )
-                    textureFilePath = filePath.Substring( 0, filePath.Length - 8 ) + "_tex.bin";
-
+                    textureSetFilePath = $"{filePath.Substring( 0, filePath.Length - 8 )}_tex.bin";
                 else if ( filePath.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
-                    textureFilePath = Path.ChangeExtension( filePath, "txd" );
+                    textureSetFilePath = Path.ChangeExtension( filePath, "txd" );
             }
 
             TextureSet textureSet = null;
-            if ( !string.IsNullOrEmpty( textureFilePath ) && File.Exists( textureFilePath ) )
-                textureSet = Load<TextureSet>( textureFilePath );
+            if ( File.Exists( textureSetFilePath ) )
+                textureSet = Load<TextureSet>( textureSetFilePath );
 
             using ( var source = File.OpenRead( filePath ) )
-                Load( source, textureSet, textureDatabase, false );
+                Load( source, textureSet, textureDatabase );
         }
 
-        public void Save( Stream destination, ObjectDatabase objectDatabase, TextureDatabase textureDatabase, BoneDatabase boneDatabase, bool leaveOpen = false )
+        public void Save( Stream destination, ObjectDatabase objectDatabase, TextureDatabase textureDatabase,
+            BoneDatabase boneDatabase, bool leaveOpen = false )
         {
             if ( objectDatabase != null )
             {
                 foreach ( var mesh in Meshes )
-                    mesh.ID = objectDatabase.GetMesh( mesh.Name )?.ID ?? mesh.ID;
+                    mesh.Id = objectDatabase.GetMesh( mesh.Name )?.Id ?? mesh.Id;
             }
 
             if ( boneDatabase != null )
             {
-                string fileName = ( destination is FileStream fileStream ) ? Path.GetFileName( fileStream.Name ) : string.Empty;
+                string fileName = destination is FileStream fileStream
+                    ? Path.GetFileName( fileStream.Name )
+                    : string.Empty;
 
-                // Assume we are exporting in game's style
-                var skeleton = boneDatabase.Skeletons.FirstOrDefault( x => fileName.StartsWith( x.Name, StringComparison.OrdinalIgnoreCase ) );
+                var skeletonEntry =
+                    boneDatabase.Skeletons.FirstOrDefault( x =>
+                        fileName.StartsWith( x.Name, StringComparison.OrdinalIgnoreCase ) ) ??
+                    boneDatabase.Skeletons.FirstOrDefault( x =>
+                        x.Name.Equals( "CMN", StringComparison.OrdinalIgnoreCase ) ) ??
+                    boneDatabase.Skeletons[ 0 ];
 
-                // If we couldn't find it, default to CMN skeleton
-                if ( skeleton == null )
-                    skeleton = boneDatabase.Skeletons.FirstOrDefault( x => x.Name.Equals( "CMN", StringComparison.OrdinalIgnoreCase ) );
-
-                // Still?? Then default to the first skeleton (this is unlikely to happen though)
-                if ( skeleton == null )
-                    skeleton = boneDatabase.Skeletons[ 0 ];
-
-                // Pretty much impossible to miss
-                if ( skeleton != null )
+                if ( skeletonEntry != null )
                 {
                     foreach ( var skin in Meshes.Where( x => x.Skin != null ).Select( x => x.Skin ) )
                     {
                         foreach ( var bone in skin.Bones )
                         {
-                            int index = skin.ExData?.BoneNames?.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
+                            int index = skin.ExData?.BoneNames?.FindIndex( x =>
+                                            x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
+
                             if ( index == -1 )
-                                index = skeleton.BoneNames1.FindIndex( x => x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
+                                index = skeletonEntry.BoneNames1.FindIndex( x =>
+                                    x.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
                             else
                                 index = 0x8000 | index;
 
-                            if ( index != -1 )
-                            {
-                                // Before we do this, fix the child bones
-                                foreach ( var childBone in skin.Bones.Where( x => x.ParentID.Equals( bone.ID ) ) )
-                                    childBone.ParentID = index;
+                            if ( index == -1 )
+                                continue;
 
-                                // Now replace the ID
-                                bone.ID = index;
-                            }
-                            else
-                            {
-                                Debug.WriteLine( $"Model.Save: Bone wasn't found in bone database or ex-data: {bone.Name}" );
-                            }
+                            foreach ( var childBone in skin.Bones.Where( x => x.ParentId == bone.Id ) )
+                                childBone.ParentId = index;
+
+                            bone.Id = index;
                         }
                     }
                 }
@@ -260,49 +242,69 @@ namespace MikuMikuLibrary.Models
 
             if ( textureDatabase != null && TextureSet != null )
             {
-                var newIDs = new List<int>( TextureSet.Textures.Count );
-                int currentID = textureDatabase.Textures.Max( x => x.ID ) + 1;
-                foreach ( var texture in TextureSet.Textures )
+                int id = textureDatabase.Textures.Max( x => x.Id ) + 1;
+                var idDictionary = new Dictionary<int, int>( TextureSet.Textures.Count );
+
+                for ( int i = 0; i < TextureSet.Textures.Count; i++ )
                 {
-                    var textureEntry = !string.IsNullOrEmpty( texture.Name ) ?
-                        textureDatabase.GetTexture( texture.Name ) : textureDatabase.GetTexture( texture.ID );
+                    var texture = TextureSet.Textures[ i ];
+                    var textureEntry = !string.IsNullOrEmpty( texture.Name )
+                        ? textureDatabase.GetTexture( texture.Name )
+                        : textureDatabase.GetTexture( texture.Id );
 
-                    if ( textureEntry == null )
+                    if ( i >= TextureIds.Count || TextureIds[ i ] != textureEntry?.Id )
                     {
-                        textureDatabase.Textures.Add( textureEntry = new TextureEntry
-                        {
-                            ID = currentID++,
-                            Name = texture.Name ?? $"Texture{currentID}",
-                        } );
-                    }
+                        string name = texture.Name ?? $"Texture{id}";
+                        if ( !string.IsNullOrEmpty( texture.Name ) && textureEntry?.Name == texture.Name )
+                            name = $"{name}-{id}";
 
-                    newIDs.Add( textureEntry.ID );
+                        textureDatabase.Textures.Add(
+                            textureEntry = new TextureEntry
+                            {
+                                Name = name,
+                                Id = id++
+                            } );
+                    }
+                    idDictionary[ texture.Id ] = textureEntry.Id;
+
+                    texture.Name = textureEntry.Name;
+                    texture.Id = textureEntry.Id;
                 }
 
-                if ( !newIDs.SequenceEqual( TextureIDs ) )
-                    TextureUtilities.ReAssignTextureIDs( this, newIDs );
+                foreach ( var materialTexture in Meshes.SelectMany( x => x.Materials )
+                    .SelectMany( x => x.MaterialTextures ) )
+                {
+                    if ( idDictionary.TryGetValue( materialTexture.TextureId, out id ) )
+                        materialTexture.TextureId = id;
+                }
+
+                TextureIds.Clear();
+                TextureIds.AddRange( TextureSet.Textures.Select( x => x.Id ) );
             }
 
             Save( destination, leaveOpen );
         }
 
-        public void Save( string filePath, ObjectDatabase objectDatabase, TextureDatabase textureDatabase, BoneDatabase boneDatabase )
+        public void Save( string filePath, ObjectDatabase objectDatabase, TextureDatabase textureDatabase,
+            BoneDatabase boneDatabase )
         {
             // Assume it's being exported for F2nd PS3
-            if ( BinaryFormatUtilities.IsClassic( Format ) && filePath.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
+            if ( BinaryFormatUtilities.IsClassic( Format ) &&
+                 filePath.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.F2nd;
                 Endianness = Endianness.BigEndian;
             }
 
             // Or reverse
-            else if ( BinaryFormatUtilities.IsModern( Format ) && filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
+            else if ( BinaryFormatUtilities.IsModern( Format ) &&
+                      filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.DT;
                 Endianness = Endianness.LittleEndian;
             }
 
-            var fileName = Path.GetFileName( filePath );
+            string fileName = Path.GetFileName( filePath );
 
             bool exported = false;
             if ( objectDatabase != null && TextureSet != null )
@@ -310,7 +312,9 @@ namespace MikuMikuLibrary.Models
                 var objectEntry = objectDatabase.GetObjectByFileName( fileName );
                 if ( objectEntry != null )
                 {
-                    var textureOutputPath = Path.Combine( Path.GetDirectoryName( filePath ), objectEntry.TextureFileName );
+                    string textureOutputPath =
+                        Path.Combine( Path.GetDirectoryName( filePath ), objectEntry.TextureFileName );
+
                     TextureSet.Save( textureOutputPath );
                     exported = true;
                 }
@@ -318,11 +322,11 @@ namespace MikuMikuLibrary.Models
 
             if ( !exported && TextureSet != null )
             {
-                var textureOutputPath = string.Empty;
+                string textureOutputPath = string.Empty;
 
                 // Try to assume a texture output name
                 if ( filePath.EndsWith( "_obj.bin", StringComparison.OrdinalIgnoreCase ) )
-                    textureOutputPath = filePath.Substring( 0, filePath.Length - 8 ) + "_tex.bin";
+                    textureOutputPath = $"{filePath.Substring( 0, filePath.Length - 8 )}_tex.bin";
 
                 else if ( filePath.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
                     textureOutputPath = Path.ChangeExtension( filePath, "txd" );
@@ -332,13 +336,13 @@ namespace MikuMikuLibrary.Models
             }
 
             using ( var destination = File.Create( filePath ) )
-                Save( destination, objectDatabase, textureDatabase, boneDatabase, false );
+                Save( destination, objectDatabase, textureDatabase, boneDatabase );
         }
 
         public Model()
         {
             Meshes = new List<Mesh>();
-            TextureIDs = new List<int>();
+            TextureIds = new List<int>();
         }
     }
 }

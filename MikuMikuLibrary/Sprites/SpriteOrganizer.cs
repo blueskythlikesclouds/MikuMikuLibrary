@@ -149,7 +149,7 @@ namespace MikuMikuLibrary.Sprites
                 }
                 else
                 {
-                    if ( ( width < maxSize ) || ( height < maxSize ) )
+                    if ( width < maxSize || height < maxSize )
                     {
                         if ( height < width )
                             height *= 2;
@@ -211,7 +211,7 @@ namespace MikuMikuLibrary.Sprites
                     bool adding = true;
                     while ( adding )
                     {
-                        if ( ( filledPixelCount + evaluatedPixelCount + spritePixelCount ) <= nextTexturePixelCount )
+                        if ( filledPixelCount + evaluatedPixelCount + spritePixelCount <= nextTexturePixelCount )
                         {
                             evaluatedPixelCount += spritePixelCount;
                             evaluatedSprites.Add( sprite );
@@ -223,7 +223,7 @@ namespace MikuMikuLibrary.Sprites
                             textureHeight = nextTextureHeight;
                             texturePixelCount = nextTexturePixelCount;
 
-                            if ( ( textureWidth < maxSize ) || ( textureHeight < maxSize ) )
+                            if ( textureWidth < maxSize || textureHeight < maxSize )
                             {
                                 if ( nextTextureHeight < nextTextureWidth )
                                     nextTextureHeight = nextTextureHeight * 2;
@@ -258,7 +258,7 @@ namespace MikuMikuLibrary.Sprites
 
                 if ( evaluatedSprites.Count != 0 )
                 {
-                    bool successCondition = evaluatedPixelCount > ( nextExtraPixelCount / 2 );
+                    bool successCondition = evaluatedPixelCount > nextExtraPixelCount / 2;
                     foreach ( var sprite in evaluatedSprites )
                     {
                         if ( successCondition )

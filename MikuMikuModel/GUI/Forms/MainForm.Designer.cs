@@ -19,7 +19,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mMainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.mRightSplitContainer = new System.Windows.Forms.SplitContainer();
-            this.mNodeTreeView = new MikuMikuModel.Nodes.Wrappers.NodeTreeView();
             this.mPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.mMenuStrip = new System.Windows.Forms.MenuStrip();
             this.mFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -31,8 +30,11 @@
             this.mExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mConfigurationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mToolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mCombineMotsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
+            this.mNodeTreeView = new MikuMikuModel.Nodes.Wrappers.NodeTreeView();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
             this.mMainSplitContainer.Panel2.SuspendLayout();
             this.mMainSplitContainer.SuspendLayout();
@@ -77,19 +79,6 @@
             this.mRightSplitContainer.SplitterDistance = 181;
             this.mRightSplitContainer.TabIndex = 0;
             // 
-            // mNodeTreeView
-            // 
-            this.mNodeTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mNodeTreeView.HideSelection = false;
-            this.mNodeTreeView.ImageIndex = 0;
-            this.mNodeTreeView.Location = new System.Drawing.Point(0, 0);
-            this.mNodeTreeView.Name = "mNodeTreeView";
-            this.mNodeTreeView.SelectedImageIndex = 0;
-            this.mNodeTreeView.SelectedNode = null;
-            this.mNodeTreeView.Size = new System.Drawing.Size(260, 181);
-            this.mNodeTreeView.TabIndex = 0;
-            this.mNodeTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.OnAfterSelect);
-            // 
             // mPropertyGrid
             // 
             this.mPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -107,6 +96,7 @@
             this.mMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mFileToolStripMenuItem,
             this.mConfigurationsToolStripMenuItem,
+            this.mToolsToolStripMenuItem,
             this.mHelpToolStripMenuItem,
             this.mAboutToolStripMenuItem});
             this.mMenuStrip.Location = new System.Drawing.Point(0, 0);
@@ -190,6 +180,21 @@
             this.mHelpToolStripMenuItem.Text = "Help";
             this.mHelpToolStripMenuItem.Click += new System.EventHandler(this.OnHelp);
             // 
+            // mToolsToolStripMenuItem
+            // 
+            this.mToolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mCombineMotsFileToolStripMenuItem});
+            this.mToolsToolStripMenuItem.Name = "mToolsToolStripMenuItem";
+            this.mToolsToolStripMenuItem.Size = new System.Drawing.Size(47, 21);
+            this.mToolsToolStripMenuItem.Text = "Tools";
+            // 
+            // mCombineMotsFileToolStripMenuItem
+            // 
+            this.mCombineMotsFileToolStripMenuItem.Name = "mCombineMotsFileToolStripMenuItem";
+            this.mCombineMotsFileToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
+            this.mCombineMotsFileToolStripMenuItem.Text = "Combine divided .mot files into one";
+            this.mCombineMotsFileToolStripMenuItem.Click += new System.EventHandler(this.OnCombineMotions);
+            // 
             // mAboutToolStripMenuItem
             // 
             this.mAboutToolStripMenuItem.Name = "mAboutToolStripMenuItem";
@@ -205,6 +210,19 @@
             this.mPanel.Name = "mPanel";
             this.mPanel.Size = new System.Drawing.Size(736, 25);
             this.mPanel.TabIndex = 1;
+            // 
+            // mNodeTreeView
+            // 
+            this.mNodeTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mNodeTreeView.HideSelection = false;
+            this.mNodeTreeView.ImageIndex = 0;
+            this.mNodeTreeView.Location = new System.Drawing.Point(0, 0);
+            this.mNodeTreeView.Name = "mNodeTreeView";
+            this.mNodeTreeView.SelectedImageIndex = 0;
+            this.mNodeTreeView.SelectedNode = null;
+            this.mNodeTreeView.Size = new System.Drawing.Size(260, 181);
+            this.mNodeTreeView.TabIndex = 0;
+            this.mNodeTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.OnAfterSelect);
             // 
             // MainForm
             // 
@@ -251,5 +269,7 @@
         private System.Windows.Forms.ToolStripMenuItem mAboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mHelpToolStripMenuItem;
         private System.ComponentModel.IContainer components;
+        private System.Windows.Forms.ToolStripMenuItem mToolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mCombineMotsFileToolStripMenuItem;
     }
 }

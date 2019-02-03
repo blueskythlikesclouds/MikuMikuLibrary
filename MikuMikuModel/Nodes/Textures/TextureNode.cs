@@ -1,11 +1,8 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-using MikuMikuLibrary.IO;
-using MikuMikuLibrary.Sprites;
 using MikuMikuLibrary.Textures;
 using MikuMikuLibrary.Textures.DDS;
 using MikuMikuModel.GUI.Controls;
-using MikuMikuModel.Nodes.Sprites;
 using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Nodes.Textures
@@ -24,7 +21,7 @@ namespace MikuMikuModel.Nodes.Textures
             }
         }
 
-        public int ID
+        public int Id
         {
             get => GetProperty<int>();
             set => SetProperty( value );
@@ -68,7 +65,7 @@ namespace MikuMikuModel.Nodes.Textures
         protected override void OnReplace( Texture previousData )
         {
             Data.Name = previousData.Name;
-            Data.ID = previousData.ID;
+            Data.Id = previousData.Id;
 
             base.OnReplace( previousData );
         }

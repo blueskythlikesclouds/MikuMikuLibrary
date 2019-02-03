@@ -10,7 +10,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 {
     public class GLSubMesh : IGLDraw
     {
-        public int VertexArrayID { get; }
+        public int VertexArrayId { get; }
 
         public GLBuffer<SN.Vector3> PositionBuffer { get; }
         public GLBuffer<SN.Vector3> NormalBuffer { get; }
@@ -29,7 +29,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             shaderProgram.SetUniform( "hasColor", ColorBuffer != null );
             shaderProgram.SetUniform( "hasTangent", TangentBuffer != null );
 
-            GL.BindVertexArray( VertexArrayID );
+            GL.BindVertexArray( VertexArrayId );
 
             foreach ( var indexTable in IndexTables )
                 indexTable.Draw( shaderProgram );
@@ -66,7 +66,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                     indexTable.Dispose();
             }
 
-            GL.DeleteVertexArray( VertexArrayID );
+            GL.DeleteVertexArray( VertexArrayId );
         }
 
         ~GLSubMesh()
@@ -79,8 +79,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             if ( subMesh.Vertices == null )
                 throw new ArgumentException( "Submesh must have vertices", nameof( subMesh ) );
 
-            VertexArrayID = GL.GenVertexArray();
-            GL.BindVertexArray( VertexArrayID );
+            VertexArrayId = GL.GenVertexArray();
+            GL.BindVertexArray( VertexArrayId );
 
             PositionBuffer = GenerateVertexAttribute( 0, subMesh.Vertices, 3 );
 

@@ -10,13 +10,13 @@ namespace MikuMikuLibrary.Databases
     public class MeshEntry
     {
         public string Name { get; set; }
-        public ushort ID { get; set; }
+        public ushort Id { get; set; }
     }
 
     public class ObjectEntry
     {
         public string Name { get; set; }
-        public ushort ID { get; set; }
+        public ushort Id { get; set; }
         public string FileName { get; set; }
         public string TextureFileName { get; set; }
         public string ArchiveFileName { get; set; }
@@ -27,9 +27,9 @@ namespace MikuMikuLibrary.Databases
             return Meshes.FirstOrDefault( x => x.Name.Equals( meshName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public MeshEntry GetMesh( int meshID )
+        public MeshEntry GetMesh( int meshId )
         {
-            return Meshes.FirstOrDefault( x => x.ID.Equals( meshID ) );
+            return Meshes.FirstOrDefault( x => x.Id.Equals( meshId ) );
         }
 
         public ObjectEntry()
@@ -68,7 +68,7 @@ namespace MikuMikuLibrary.Databases
                     reader.SeekCurrent( 16 );
 
                     var objectEntry = new ObjectEntry();
-                    objectEntry.ID = id;
+                    objectEntry.Id = id;
                     objectEntry.Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
                     objectEntry.FileName = reader.ReadStringAtOffset( fileNameOffset, StringBinaryFormat.NullTerminated );
                     objectEntry.TextureFileName = reader.ReadStringAtOffset( textureFileNameOffset, StringBinaryFormat.NullTerminated );
@@ -81,15 +81,15 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < meshCount; i++ )
                 {
-                    ushort meshID = reader.ReadUInt16();
-                    ushort parentObjectID = reader.ReadUInt16();
+                    ushort meshId = reader.ReadUInt16();
+                    ushort parentObjectId = reader.ReadUInt16();
                     uint nameOffset = reader.ReadUInt32();
 
                     var meshEntry = new MeshEntry();
-                    meshEntry.ID = meshID;
+                    meshEntry.Id = meshId;
                     meshEntry.Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
-                    var obj = Objects.First( x => x.ID == parentObjectID );
+                    var obj = Objects.First( x => x.Id == parentObjectId );
                     obj.Meshes.Add( meshEntry );
                 }
             } );
@@ -104,7 +104,7 @@ namespace MikuMikuLibrary.Databases
                 foreach ( var objectEntry in Objects )
                 {
                     writer.AddStringToStringTable( objectEntry.Name );
-                    writer.Write( objectEntry.ID );
+                    writer.Write( objectEntry.Id );
                     writer.WriteNulls( 2 );
                     writer.AddStringToStringTable( objectEntry.FileName );
                     writer.AddStringToStringTable( objectEntry.TextureFileName );
@@ -119,8 +119,8 @@ namespace MikuMikuLibrary.Databases
                 {
                     foreach ( var meshEntry in objectEntry.Meshes )
                     {
-                        writer.Write( meshEntry.ID );
-                        writer.Write( objectEntry.ID );
+                        writer.Write( meshEntry.Id );
+                        writer.Write( objectEntry.Id );
                         writer.AddStringToStringTable( meshEntry.Name );
                     }
                 }
@@ -132,9 +132,9 @@ namespace MikuMikuLibrary.Databases
             return Objects.FirstOrDefault( x => x.Name.Equals( objectName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public ObjectEntry GetObject( int objectID )
+        public ObjectEntry GetObject( int objectId )
         {
-            return Objects.FirstOrDefault( x => x.ID.Equals( objectID ) );
+            return Objects.FirstOrDefault( x => x.Id.Equals( objectId ) );
         }
 
         public ObjectEntry GetObjectByFileName( string fileName )
@@ -147,9 +147,9 @@ namespace MikuMikuLibrary.Databases
             return Objects.SelectMany( x => x.Meshes ).FirstOrDefault( x => x.Name.Equals( meshName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public MeshEntry GetMesh( int meshID )
+        public MeshEntry GetMesh( int meshId )
         {
-            return Objects.SelectMany( x => x.Meshes ).FirstOrDefault( x => x.ID.Equals( meshID ) );
+            return Objects.SelectMany( x => x.Meshes ).FirstOrDefault( x => x.Id.Equals( meshId ) );
         }
 
         public ObjectDatabase()

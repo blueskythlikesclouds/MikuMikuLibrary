@@ -12,6 +12,8 @@ namespace MikuMikuModel.Nodes.Misc
         public override NodeFlags Flags => NodeFlags.Add | NodeFlags.Remove | NodeFlags.Move;
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/Folder.png" );
 
+        public int Count => GetProperty<int>();
+
         protected override void Initialize()
         {
         }

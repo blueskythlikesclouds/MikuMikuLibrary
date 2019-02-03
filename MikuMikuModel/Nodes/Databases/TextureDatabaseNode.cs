@@ -42,7 +42,7 @@ namespace MikuMikuModel.Nodes.Databases
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
-        public int ID
+        public int Id
         {
             get => GetProperty<int>();
             set => SetProperty( value );

@@ -1,6 +1,6 @@
 ﻿using System.IO;
-using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Motions;
+using MikuMikuModel.Configurations;
 
 namespace MikuMikuModel.Modules.Motions
 {
@@ -13,10 +13,20 @@ namespace MikuMikuModel.Modules.Motions
         public override bool Match( byte[] buffer ) =>
             buffer[ 0 ] == 'M' && buffer[ 1 ] == 'O' && buffer[ 2 ] == 'T' && buffer[ 3 ] == 'C';
 
-        protected override Motion ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<Motion>( source, true );
+        protected override Motion ImportCore( Stream source, string fileName )
+        {
+            var motion = new Motion();
+            {
+                motion.Load( source,
+                    ConfigurationList.Instance.CurrentConfiguration?.BoneDatabase?.Skeletons?[ 0 ], true );
+            }
+            return motion;
+        }
 
-        protected override void ExportCore( Motion model, Stream destination, string fileName ) =>
-            model.Save( destination, true );
+        protected override void ExportCore( Motion model, Stream destination, string fileName )
+        {
+            model.Save( destination,
+                ConfigurationList.Instance.CurrentConfiguration?.BoneDatabase?.Skeletons?[ 0 ], true );
+        }
     }
 }

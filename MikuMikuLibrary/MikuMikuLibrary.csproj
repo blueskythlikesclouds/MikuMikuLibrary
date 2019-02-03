@@ -53,6 +53,7 @@
     <Compile Include="Archives\Farc\InternalEntry.cs" />
     <Compile Include="Archives\IArchive.cs" />
     <Compile Include="Archives\EntryStream.cs" />
+    <Compile Include="Cryptography\DivafileDecryptor.cs" />
     <Compile Include="Databases\AetDatabase.cs" />
     <Compile Include="Databases\MotionDatabase.cs" />
     <Compile Include="Databases\ObjectDatabase.cs" />

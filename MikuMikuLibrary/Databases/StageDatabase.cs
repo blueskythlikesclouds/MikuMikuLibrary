@@ -26,20 +26,20 @@ namespace MikuMikuLibrary.Databases
         // Section 1
         public string Name { get; set; }
         public string Auth3DName { get; set; }
-        public short ObjectID1 { get; set; }
-        public short ObjectIDFlag1 { get; set; }
-        public short ObjectGroundID { get; set; }
-        public short ObjectGroundIDFlag { get; set; }
-        public short ObjectID3 { get; set; }
-        public short ObjectIDFlag3 { get; set; }
-        public short ObjectSkyID { get; set; }
-        public short ObjectSkyIDFlag { get; set; }
-        public short ObjectID5 { get; set; }
-        public short ObjectIDFlag5 { get; set; }
-        public short ObjectReflectID { get; set; }
-        public short ObjectReflectIDFlag { get; set; }
-        public short ObjectID7 { get; set; }
-        public short ObjectIDFlag7 { get; set; }
+        public short ObjectId1 { get; set; }
+        public short ObjectIdFlag1 { get; set; }
+        public short ObjectGroundId { get; set; }
+        public short ObjectGroundIdFlag { get; set; }
+        public short ObjectId3 { get; set; }
+        public short ObjectIdFlag3 { get; set; }
+        public short ObjectSkyId { get; set; }
+        public short ObjectSkyIdFlag { get; set; }
+        public short ObjectId5 { get; set; }
+        public short ObjectIdFlag5 { get; set; }
+        public short ObjectReflectId { get; set; }
+        public short ObjectReflectIdFlag { get; set; }
+        public short ObjectId7 { get; set; }
+        public short ObjectIdFlag7 { get; set; }
         public int LensFlareScaleX { get; set; }
         public int LensFlareScaleY { get; set; }
         public int LensFlareScaleZ { get; set; }
@@ -93,26 +93,26 @@ namespace MikuMikuLibrary.Databases
         public int Field19 { get; set; }
 
         // Section 4
-        public List<int> Auth3DIDs { get; }
+        public List<int> Auth3DIds { get; }
 
         internal void ReadFirst( EndianBinaryReader reader, BinaryFormat format )
         {
             Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Auth3DName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            ObjectID1 = reader.ReadInt16();
-            ObjectIDFlag1 = reader.ReadInt16();
-            ObjectGroundID = reader.ReadInt16();
-            ObjectGroundIDFlag = reader.ReadInt16();
-            ObjectID3 = reader.ReadInt16();
-            ObjectIDFlag3 = reader.ReadInt16();
-            ObjectSkyID = reader.ReadInt16();
-            ObjectSkyIDFlag = reader.ReadInt16();
-            ObjectID5 = reader.ReadInt16();
-            ObjectIDFlag5 = reader.ReadInt16();
-            ObjectReflectID = reader.ReadInt16();
-            ObjectReflectIDFlag = reader.ReadInt16();
-            ObjectID7 = reader.ReadInt16();
-            ObjectIDFlag7 = reader.ReadInt16();
+            ObjectId1 = reader.ReadInt16();
+            ObjectIdFlag1 = reader.ReadInt16();
+            ObjectGroundId = reader.ReadInt16();
+            ObjectGroundIdFlag = reader.ReadInt16();
+            ObjectId3 = reader.ReadInt16();
+            ObjectIdFlag3 = reader.ReadInt16();
+            ObjectSkyId = reader.ReadInt16();
+            ObjectSkyIdFlag = reader.ReadInt16();
+            ObjectId5 = reader.ReadInt16();
+            ObjectIdFlag5 = reader.ReadInt16();
+            ObjectReflectId = reader.ReadInt16();
+            ObjectReflectIdFlag = reader.ReadInt16();
+            ObjectId7 = reader.ReadInt16();
+            ObjectIdFlag7 = reader.ReadInt16();
             LensFlareScaleX = reader.ReadInt32();
             LensFlareScaleY = reader.ReadInt32();
             LensFlareScaleZ = reader.ReadInt32();
@@ -145,20 +145,20 @@ namespace MikuMikuLibrary.Databases
         {
             writer.AddStringToStringTable( Name );
             writer.AddStringToStringTable( Auth3DName );
-            writer.Write( ObjectID1 );
-            writer.Write( ObjectIDFlag1 );
-            writer.Write( ObjectGroundID );
-            writer.Write( ObjectGroundIDFlag );
-            writer.Write( ObjectID3 );
-            writer.Write( ObjectIDFlag3 );
-            writer.Write( ObjectSkyID );
-            writer.Write( ObjectSkyIDFlag );
-            writer.Write( ObjectID5 );
-            writer.Write( ObjectIDFlag5 );
-            writer.Write( ObjectReflectID );
-            writer.Write( ObjectReflectIDFlag );
-            writer.Write( ObjectID7 );
-            writer.Write( ObjectIDFlag7 );
+            writer.Write( ObjectId1 );
+            writer.Write( ObjectIdFlag1 );
+            writer.Write( ObjectGroundId );
+            writer.Write( ObjectGroundIdFlag );
+            writer.Write( ObjectId3 );
+            writer.Write( ObjectIdFlag3 );
+            writer.Write( ObjectSkyId );
+            writer.Write( ObjectSkyIdFlag );
+            writer.Write( ObjectId5 );
+            writer.Write( ObjectIdFlag5 );
+            writer.Write( ObjectReflectId );
+            writer.Write( ObjectReflectIdFlag );
+            writer.Write( ObjectId7 );
+            writer.Write( ObjectIdFlag7 );
             writer.Write( LensFlareScaleX );
             writer.Write( LensFlareScaleY );
             writer.Write( LensFlareScaleZ );
@@ -259,7 +259,7 @@ namespace MikuMikuLibrary.Databases
             {
                 int id;
                 while ( ( id = reader.ReadInt32() ) >= 0 )
-                    Auth3DIDs.Add( id );
+                    Auth3DIds.Add( id );
             } );
         }
 
@@ -267,7 +267,7 @@ namespace MikuMikuLibrary.Databases
         {
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var id in Auth3DIDs )
+                foreach ( var id in Auth3DIds )
                     writer.Write( id );
 
                 writer.Write( -1 );
@@ -276,7 +276,7 @@ namespace MikuMikuLibrary.Databases
 
         public StageEntry()
         {
-            Auth3DIDs = new List<int>();
+            Auth3DIds = new List<int>();
         }
     }
 
@@ -295,7 +295,7 @@ namespace MikuMikuLibrary.Databases
             uint section3Offset = reader.ReadUInt32();
             uint section4Offset = reader.ReadUInt32();
 
-            Format = ( ( section2Offset - section1Offset ) / count ) != 108 ? BinaryFormat.FT : BinaryFormat.F;
+            Format = ( section2Offset - section1Offset ) / count != 108 ? BinaryFormat.FT : BinaryFormat.F;
 
             reader.ReadAtOffset( section1Offset, () =>
             {

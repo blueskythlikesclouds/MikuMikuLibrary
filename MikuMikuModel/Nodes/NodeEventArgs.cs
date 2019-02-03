@@ -28,12 +28,10 @@ namespace MikuMikuModel.Nodes
 
     public class NodeImportEventArgs : EventArgs
     {
-        public INode ImportedNode { get; }
         public string FilePath { get; }
 
-        public NodeImportEventArgs( INode importedNode, string filePath )
+        public NodeImportEventArgs( string filePath )
         {
-            ImportedNode = importedNode;
             FilePath = filePath;
         }
     }

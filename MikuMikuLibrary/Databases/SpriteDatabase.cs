@@ -2,28 +2,27 @@
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
     public class SpriteEntry
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public int Index { get; set; }
     }
 
     public class SpriteTextureEntry
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public int Index { get; set; }
     }
 
     public class SpriteSetEntry
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string FileName { get; set; }
         public List<SpriteEntry> Sprites { get; }
@@ -63,7 +62,7 @@ namespace MikuMikuLibrary.Databases
 
                     SpriteSets.Add( new SpriteSetEntry
                     {
-                        ID = id,
+                        Id = id,
                         Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated ),
                         FileName = reader.ReadStringAtOffset( fileNameOffset, StringBinaryFormat.NullTerminated )
                     } );
@@ -90,7 +89,7 @@ namespace MikuMikuLibrary.Databases
                     {
                         set.Textures.Add( new SpriteTextureEntry
                         {
-                            ID = id,
+                            Id = id,
                             Name = name,
                             Index = index,
                         } );
@@ -100,7 +99,7 @@ namespace MikuMikuLibrary.Databases
                     {
                         set.Sprites.Add( new SpriteEntry
                         {
-                            ID = id,
+                            Id = id,
                             Name = name,
                             Index = index,
                         } );
@@ -117,7 +116,7 @@ namespace MikuMikuLibrary.Databases
                 for ( int i = 0; i < SpriteSets.Count; i++ )
                 {
                     var spriteSetEntry = SpriteSets[ i ];
-                    writer.Write( spriteSetEntry.ID );
+                    writer.Write( spriteSetEntry.Id );
                     writer.AddStringToStringTable( spriteSetEntry.Name );
                     writer.AddStringToStringTable( spriteSetEntry.FileName );
                     writer.Write( i );
@@ -131,7 +130,7 @@ namespace MikuMikuLibrary.Databases
                     var spriteSetEntry = SpriteSets[ i ];
                     foreach ( var spriteEntry in spriteSetEntry.Sprites )
                     {
-                        writer.Write( spriteEntry.ID );
+                        writer.Write( spriteEntry.Id );
                         writer.AddStringToStringTable( spriteEntry.Name );
                         writer.Write( spriteEntry.Index | i << 16 );
 
@@ -141,7 +140,7 @@ namespace MikuMikuLibrary.Databases
 
                     foreach ( var textureEntry in spriteSetEntry.Textures )
                     {
-                        writer.Write( textureEntry.ID );
+                        writer.Write( textureEntry.Id );
                         writer.AddStringToStringTable( textureEntry.Name );
                         writer.Write( textureEntry.Index | ( i | 0x1000 ) << 16 );
 

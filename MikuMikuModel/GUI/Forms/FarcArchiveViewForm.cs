@@ -18,7 +18,18 @@ namespace MikuMikuModel.GUI.Forms
             get
             {
                 var node = ( mNodeTreeView.SelectedDataNode as ReferenceNode )?.Node;
+                node?.Populate();
+                return node;
+            }
+        }
 
+        public int NodeCount => mNodeTreeView.Nodes.Count;
+
+        public INode TopNode
+        {
+            get
+            {
+                var node = ( mNodeTreeView.TopDataNode as ReferenceNode )?.Node;
                 node?.Populate();
                 return node;
             }

@@ -13,7 +13,7 @@ using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.Nodes
 {
-    public delegate INode NodeImportHandler( string filePath );
+    public delegate void NodeImportHandler( string filePath );
     public delegate void NodeExportHandler( string filePath );
     public delegate T NodeReplaceHandler<out T>( string filePath );
 
@@ -86,6 +86,9 @@ namespace MikuMikuModel.Nodes
                 if ( mParent != null && value != null )
                     throw new InvalidOperationException( "Cannot set parent, node is already owned by one" );
 
+                if ( SourceConfiguration == null && value != null )
+                    SourceConfiguration = value.SourceConfiguration;
+
                 mParent = value;
             }
         }
@@ -114,7 +117,7 @@ namespace MikuMikuModel.Nodes
         public object Tag { get; set; }
 
         [Browsable( false )]
-        public Configuration Configuration { get; private set; }
+        public Configuration SourceConfiguration { get; set; }
 
         [Browsable( false )]
         public bool IsPopulated => mPopulated && !IsPopulating;
@@ -212,8 +215,8 @@ namespace MikuMikuModel.Nodes
             {
                 mName = name;
 
-                if ( sNameProperty != null && sNameProperty.CanWrite && InternalData != null )
-                    sNameProperty.SetValue( InternalData, mName );
+                if ( sNameProperty != null && sNameProperty.CanWrite && mData != null )
+                    sNameProperty.SetValue( mData, mName );
 
                 if ( string.IsNullOrEmpty( previousName ) )
                     return;
@@ -266,7 +269,11 @@ namespace MikuMikuModel.Nodes
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
-                OnImport( mImportHandlers[ module.ModelType ]( filePath ), filePath );
+
+                mImportHandlers[ module.ModelType ]( filePath );
+                OnImport( filePath );
+
+                mPopulated = false;
             }
         }
 
@@ -310,6 +317,7 @@ namespace MikuMikuModel.Nodes
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
+
                 mExportHandlers[ module.ModelType ]( filePath );
                 OnExport( filePath );
             }
@@ -369,17 +377,15 @@ namespace MikuMikuModel.Nodes
                 MessageBox.Show( "Node could not be replaced.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error );
             else
             {
-                Configuration configuration;
-
-                ConfigurationList.Instance.CurrentConfiguration =
-                    configuration = ConfigurationList.Instance.FindConfiguration( filePath );
+                ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
+                var configuration = ConfigurationList.Instance.CurrentConfiguration;
 
                 var obj = mReplaceHandlers[ module.ModelType ]( filePath );
                 if ( obj == null )
                     return;
 
                 Replace( obj );
-                Configuration = configuration;
+                SourceConfiguration = configuration;
             }
         }
 
@@ -479,8 +485,8 @@ namespace MikuMikuModel.Nodes
         protected virtual void OnRemove( INode removedNode ) =>
             Removed?.Invoke( this, new NodeRemoveEventArgs( removedNode ) );
 
-        protected virtual void OnImport( INode importedNode, string filePath ) =>
-            Imported?.Invoke( this, new NodeImportEventArgs( importedNode, filePath ) );
+        protected virtual void OnImport( string filePath ) =>
+            Imported?.Invoke( this, new NodeImportEventArgs( filePath ) );
 
         protected virtual void OnExport( string filePath ) =>
             Exported?.Invoke( this, new NodeExportEventArgs( filePath ) );
@@ -608,7 +614,7 @@ namespace MikuMikuModel.Nodes
             mExportHandlers = new Dictionary<Type, NodeExportHandler>();
             mReplaceHandlers = new Dictionary<Type, NodeReplaceHandler<T>>();
             mCustomHandlers = new List<ToolStripItem>();
-            Configuration = ConfigurationList.Instance.CurrentConfiguration;
+            SourceConfiguration = ConfigurationList.Instance.CurrentConfiguration;
 
             Initialize();
         }

@@ -10,13 +10,13 @@ namespace MikuMikuLibrary.Databases
     public class MotionEntry
     {
         public string Name { get; set; }
-        public int ID { get; set; }
+        public int Id { get; set; }
     }
 
     public class MotionSetEntry
     {
         public string Name { get; set; }
-        public int ID { get; set; }
+        public int Id { get; set; }
         public List<MotionEntry> Motions { get; }
 
         internal void Read( EndianBinaryReader reader )
@@ -24,7 +24,7 @@ namespace MikuMikuLibrary.Databases
             uint nameOffset = reader.ReadUInt32();
             uint motionNameOffsetsOffset = reader.ReadUInt32();
             int motionCount = reader.ReadInt32();
-            uint motionIDsOffset = reader.ReadUInt32();
+            uint motionIdsOffset = reader.ReadUInt32();
 
             Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
@@ -39,10 +39,10 @@ namespace MikuMikuLibrary.Databases
                 }
             } );
 
-            reader.ReadAtOffset( motionIDsOffset, () =>
+            reader.ReadAtOffset( motionIdsOffset, () =>
             {
                 foreach ( var motionEntry in Motions )
-                    motionEntry.ID = reader.ReadInt32();
+                    motionEntry.Id = reader.ReadInt32();
             } );
         }
 
@@ -58,7 +58,7 @@ namespace MikuMikuLibrary.Databases
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var motionEntry in Motions )
-                    writer.Write( motionEntry.ID );
+                    writer.Write( motionEntry.Id );
             } );
         }
 
@@ -79,7 +79,7 @@ namespace MikuMikuLibrary.Databases
         {
             int version = reader.ReadInt32();
             uint motionSetsOffset = reader.ReadUInt32();
-            uint motionSetIDsOffset = reader.ReadUInt32();
+            uint motionSetIdsOffset = reader.ReadUInt32();
             int motionSetCount = reader.ReadInt32();
             uint boneNameOffsetsOffset = reader.ReadUInt32();
             int boneNameCount = reader.ReadInt32();
@@ -95,10 +95,10 @@ namespace MikuMikuLibrary.Databases
                 }
             } );
 
-            reader.ReadAtOffset( motionSetIDsOffset, () =>
+            reader.ReadAtOffset( motionSetIdsOffset, () =>
             {
                 foreach ( var motionSetEntry in MotionSets )
-                    motionSetEntry.ID = reader.ReadInt32();
+                    motionSetEntry.Id = reader.ReadInt32();
             } );
 
             reader.ReadAtOffset( boneNameOffsetsOffset, () =>
@@ -120,7 +120,7 @@ namespace MikuMikuLibrary.Databases
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var motionSetEntry in MotionSets )
-                    writer.Write( motionSetEntry.ID );
+                    writer.Write( motionSetEntry.Id );
             } );
             writer.Write( MotionSets.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>

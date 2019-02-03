@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MikuMikuLibrary.Databases;
 
@@ -6,48 +7,78 @@ namespace MikuMikuLibrary.Motions
 {
     public class MotionController
     {
-        public string Name { get; set; }
-        public int FrameCount { get; set; }
+        public Motion Parent { get; }
         public List<KeyController> KeyControllers { get; }
 
-        public Motion ToMotion( SkeletonEntry skeletonEntry, MotionDatabase motionDatabase = null )
+        public void Update( SkeletonEntry skeletonEntry, MotionDatabase motionDatabase = null )
         {
-            var motion = new Motion { FrameCount = FrameCount };
+            Parent.KeySets.Clear();
+            Parent.BoneInfos.Clear();
+
+            foreach ( var keyController in KeyControllers )
             {
-                var keyControllers = motionDatabase != null
-                    ? ( IEnumerable<KeyController> ) KeyControllers.OrderBy( x =>
-                        motionDatabase.BoneNames.IndexOf( x.Name ) )
-                    : KeyControllers;
+                if ( motionDatabase != null && !motionDatabase.BoneNames.Contains( keyController.Name ) )
+                    continue;
 
-                foreach ( var keyController in keyControllers )
+                var boneEntry = skeletonEntry.GetBoneEntry( keyController.Name );
+                if ( boneEntry != null )
                 {
-                    var boneEntry = skeletonEntry.GetBoneEntry( keyController.Name );
-                    if ( boneEntry == null )
-                        continue;
-
-                    if ( boneEntry.Field00 >= 3 )
+                    if ( boneEntry.Type != BoneType.Rotation )
                     {
-                        motion.KeySets.Add( keyController.Position?.X ?? new KeySet() );
-                        motion.KeySets.Add( keyController.Position?.Y ?? new KeySet() );
-                        motion.KeySets.Add( keyController.Position?.Z ?? new KeySet() );
+                        Parent.KeySets.Add( keyController.Position?.X ?? new KeySet() );
+                        Parent.KeySets.Add( keyController.Position?.Y ?? new KeySet() );
+                        Parent.KeySets.Add( keyController.Position?.Z ?? new KeySet() );
                     }
 
-                    motion.KeySets.Add( keyController.Rotation?.X ?? new KeySet() );
-                    motion.KeySets.Add( keyController.Rotation?.Y ?? new KeySet() );
-                    motion.KeySets.Add( keyController.Rotation?.Z ?? new KeySet() );
-
-                    motion.BoneInfos.Add( new BoneInfo
+                    if ( boneEntry.Type != BoneType.Position )
                     {
-                        Name = keyController.Name,
-                        ID = motionDatabase?.BoneNames?.IndexOf( keyController.Name ) ?? -1,
-                    } );
+                        Parent.KeySets.Add( keyController.Rotation?.X ?? new KeySet() );
+                        Parent.KeySets.Add( keyController.Rotation?.Y ?? new KeySet() );
+                        Parent.KeySets.Add( keyController.Rotation?.Z ?? new KeySet() );
+                    }
                 }
+                else if ( !skeletonEntry.BoneNames2.Contains( keyController.Name ) )
+                {
+                    Parent.KeySets.Add( keyController.Position?.X ?? new KeySet() );
+                    Parent.KeySets.Add( keyController.Position?.Y ?? new KeySet() );
+                    Parent.KeySets.Add( keyController.Position?.Z ?? new KeySet() );
+                }
+
+                Parent.BoneInfos.Add( new BoneInfo
+                {
+                    Name = keyController.Name,
+                    Id = motionDatabase?.BoneNames?.IndexOf( keyController.Name ) ?? -1,
+                } );
             }
-            return motion;
+
+            Parent.KeySets.Add( new KeySet() );
         }
 
-        public MotionController()
+        public void Merge( MotionController other )
         {
+            foreach ( var keyController in other.KeyControllers )
+            {
+                var baseKeyController = KeyControllers.FirstOrDefault( x =>
+                    x.Name.Equals( keyController.Name, StringComparison.OrdinalIgnoreCase ) );
+
+                if ( baseKeyController == null )
+                    KeyControllers.Add( keyController );
+                else
+                    baseKeyController.Merge( keyController );
+            }
+
+            Parent.FrameCount = Math.Max( Parent.FrameCount, other.Parent.FrameCount );
+        }
+
+        public void Sort()
+        {
+            foreach ( var keyController in KeyControllers )
+                keyController.Sort();
+        }
+
+        public MotionController( Motion parent )
+        {
+            Parent = parent;
             KeyControllers = new List<KeyController>();
         }
     }

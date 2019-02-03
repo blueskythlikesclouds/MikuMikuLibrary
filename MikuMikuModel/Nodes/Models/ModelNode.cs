@@ -41,8 +41,8 @@ namespace MikuMikuModel.Nodes.Models
             }
         }
 
-        [DisplayName( "Texture IDs" )]
-        public List<int> TextureIDs => GetProperty<List<int>>();
+        [DisplayName( "Texture ids" )]
+        public List<int> TextureIds => GetProperty<List<int>>();
 
         protected override void Initialize()
         {
@@ -117,7 +117,7 @@ namespace MikuMikuModel.Nodes.Models
             {
                 string textureSetName = null;
 
-                var objectDatabase = Configuration?.ObjectDatabase;
+                var objectDatabase = SourceConfiguration?.ObjectDatabase;
                 var objectEntry = objectDatabase?.GetObjectByFileName( Name );
                 if ( objectEntry != null )
                     textureSetName = objectEntry.TextureFileName;
@@ -133,17 +133,17 @@ namespace MikuMikuModel.Nodes.Models
                     textureSetNode = Parent.FindNode<TextureSetNode>( textureSetName );
                 }
 
-                if ( textureSetNode != null && textureSetNode.Data.Textures.Count == Data.TextureIDs.Count )
+                if ( textureSetNode != null && textureSetNode.Data.Textures.Count == Data.TextureIds.Count )
                 {
-                    var textureDatabase = Configuration?.TextureDatabase;
+                    var textureDatabase = SourceConfiguration?.TextureDatabase;
 
                     textureSetNode.Populate();
-                    for ( int i = 0; i < Data.TextureIDs.Count; i++ )
+                    for ( int i = 0; i < Data.TextureIds.Count; i++ )
                     {
                         var texture = textureSetNode.Data.Textures[ i ];
-                        var textureEntry = textureDatabase?.GetTexture( Data.TextureIDs[ i ] );
+                        var textureEntry = textureDatabase?.GetTexture( Data.TextureIds[ i ] );
 
-                        texture.ID = Data.TextureIDs[ i ];
+                        texture.Id = Data.TextureIds[ i ];
                         texture.Name = textureEntry?.Name ?? texture.Name;
                     }
 
@@ -185,7 +185,7 @@ namespace MikuMikuModel.Nodes.Models
                     newMesh.Skin.ExData = oldMesh.Skin?.ExData;
 
                 newMesh.Name = oldMesh.Name;
-                newMesh.ID = oldMesh.ID;
+                newMesh.Id = oldMesh.Id;
             }
 
             if ( mTextureSetNode != null && Data.TextureSet != null )

@@ -68,7 +68,7 @@ namespace MikuMikuLibrary.Models
             IndexTables.Capacity = indexTableCount;
             for ( int i = 0; i < indexTableCount; i++ )
             {
-                reader.ReadAtOffset( indexTablesOffset + ( i * IndexTable.GetByteSize( section?.Format ?? BinaryFormat.DT ) ), () =>
+                reader.ReadAtOffset( indexTablesOffset + i * IndexTable.GetByteSize( section?.Format ?? BinaryFormat.DT ), () =>
                 {
                     var indexTable = new IndexTable();
                     indexTable.Read( reader, section );
@@ -188,7 +188,7 @@ namespace MikuMikuLibrary.Models
                     var vertexReader = section.VertexData.Reader;
                     for ( int i = 0; i < vertexCount; i++ )
                     {
-                        vertexReader.SeekBegin( section.VertexData.DataOffset + dataOffset + ( stride * i ) );
+                        vertexReader.SeekBegin( section.VertexData.DataOffset + dataOffset + stride * i );
                         Vertices[ i ] = vertexReader.ReadVector3();
                         Normals[ i ] = vertexReader.ReadVector3( VectorBinaryFormat.Int16 );
                         vertexReader.SeekCurrent( 2 );

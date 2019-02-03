@@ -26,6 +26,31 @@ namespace MikuMikuLibrary.Motions
             }
         }
 
+        public void Merge( KeySetVector other )
+        {
+            if ( X == null )
+                X = other.X;
+            else if ( other.X != null )
+                X.Merge( other.X );
+
+            if ( Y == null )
+                Y = other.Y;
+            else if ( other.Y != null )
+                Y.Merge( other.Y );
+
+            if ( Z == null )
+                Z = other.Z;
+            else if ( other.Z != null )
+                Z.Merge( other.Z );
+        }
+
+        public void Sort()
+        {
+            X?.Sort();
+            Y?.Sort();
+            Z?.Sort();
+        }
+
         public Vector3 Interpolate( float frame )
         {
             float x = X?.Interpolate( frame ) ?? 0;

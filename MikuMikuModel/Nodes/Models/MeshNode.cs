@@ -16,7 +16,7 @@ namespace MikuMikuModel.Nodes.Models
         public override Bitmap Image => 
             ResourceStore.LoadBitmap( "Icons/Mesh.png" );
 
-        public int ID
+        public int Id
         {
             get => GetProperty<int>();
             set => SetProperty( value );

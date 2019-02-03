@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.Textures
             }
             else
             {
-                var entry = textureDatabase.Textures.FirstOrDefault( x => x.ID == texture.ID );
+                var entry = textureDatabase.Textures.FirstOrDefault( x => x.Id == texture.Id );
                 if ( entry != null )
                     texture.Name = entry.Name;
                 else if ( empty )
@@ -56,22 +56,22 @@ namespace MikuMikuLibrary.Textures
             }
         }
 
-        public static void ReAssignTextureIDs( Model model, List<int> newTextureIDs )
+        public static void ReAssignTextureIDs( Model model, List<int> newTextureIds )
         {
-            var dictionary = new Dictionary<int, int>( model.TextureIDs.Count );
-            for ( int i = 0; i < model.TextureIDs.Count; i++ )
+            var dictionary = new Dictionary<int, int>( model.TextureIds.Count );
+            for ( int i = 0; i < model.TextureIds.Count; i++ )
             {
-                dictionary.Add( model.TextureIDs[ i ], newTextureIDs[ i ] );
-                model.TextureIDs[ i ] = newTextureIDs[ i ];
-                model.TextureSet.Textures[ i ].ID = newTextureIDs[ i ];
+                dictionary.Add( model.TextureIds[ i ], newTextureIds[ i ] );
+                model.TextureIds[ i ] = newTextureIds[ i ];
+                model.TextureSet.Textures[ i ].Id = newTextureIds[ i ];
             }
 
             foreach ( var materialTexture in model.Meshes.SelectMany( x => x.Materials ).SelectMany( x => x.MaterialTextures ) )
             {
-                if ( dictionary.TryGetValue( materialTexture.TextureID, out int id ) )
-                    materialTexture.TextureID = id;
+                if ( dictionary.TryGetValue( materialTexture.TextureId, out int id ) )
+                    materialTexture.TextureId = id;
                 else
-                    materialTexture.TextureID = -1;
+                    materialTexture.TextureId = -1;
             }
         }
 

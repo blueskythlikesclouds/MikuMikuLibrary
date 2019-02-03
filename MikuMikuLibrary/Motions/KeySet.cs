@@ -70,25 +70,66 @@ namespace MikuMikuLibrary.Motions
             }
         }
 
-        internal void Write( EndianBinaryWriter writer )
+        internal void Write( EndianBinaryWriter writer, bool isModern )
         {
             if ( Keys.Count == 1 )
                 writer.Write( Keys[ 0 ].Value );
 
             else if ( Keys.Count > 1 )
             {
-                writer.Write( ( ushort ) Keys.Count );
-                foreach ( var key in Keys )
-                    writer.Write( ( ushort ) key.Frame );
+                if ( isModern )
+                    WriteModern();
+                else
+                    WriteClassic();
 
-                writer.WriteAlignmentPadding( 4 );
-                foreach ( var key in Keys )
+                void WriteModern()
                 {
-                    writer.Write( key.Value );
+                    writer.Write( ( ushort ) Keys.Count );
+                    writer.Write( ( ushort ) 0 );
+
                     if ( IsInterpolated )
-                        writer.Write( key.Interpolation );
+                        foreach ( var key in Keys )
+                            writer.Write( key.Interpolation );
+
+                    writer.WriteAlignmentPadding( 4 );
+                    foreach ( var key in Keys )
+                        writer.Write( key.Value );
+
+                    writer.WriteAlignmentPadding( 4 );
+                    foreach ( var key in Keys )
+                        writer.Write( ( ushort ) key.Frame );
+
+                    writer.WriteAlignmentPadding( 4 );
+                }
+
+                void WriteClassic()
+                {
+                    writer.Write( ( ushort ) Keys.Count );
+                    foreach ( var key in Keys )
+                        writer.Write( ( ushort ) key.Frame );
+
+                    writer.WriteAlignmentPadding( 4 );
+                    foreach ( var key in Keys )
+                    {
+                        writer.Write( key.Value );
+                        if ( IsInterpolated )
+                            writer.Write( key.Interpolation );
+                    }
                 }
             }
+        }
+
+        public void Merge( KeySet other )
+        {
+            Keys.AddRange( other.Keys );
+
+            if ( other.IsInterpolated )
+                IsInterpolated = true;
+        }
+
+        public void Sort()
+        {
+            Keys.Sort( ( x, y ) => x.Frame.CompareTo( y.Frame ) );
         }
 
         public float Interpolate( float frame )

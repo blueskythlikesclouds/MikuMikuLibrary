@@ -12,6 +12,7 @@ namespace MikuMikuModel.Nodes.Materials
         public override NodeFlags Flags => NodeFlags.Add | NodeFlags.Rename;
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/Material.png" );
 
+        [DisplayName( "Shader name" )]
         public string Shader
         {
             get => GetProperty<string>();
@@ -50,7 +51,7 @@ namespace MikuMikuModel.Nodes.Materials
             set => SetProperty( value );
         }
 
-        [DisplayName( "Is alpha enabled" )]
+        [DisplayName( "Enable alpha" )]
         public bool IsAlphaEnabled
         {
             get => GetProperty<bool>();

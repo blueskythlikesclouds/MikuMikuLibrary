@@ -18,8 +18,8 @@ namespace MikuMikuModel.Modules.Models
                 : base.Match( fileName );
 
         public override bool Match( byte[] buffer ) =>
-            ( buffer[ 0 ] == 'M' && buffer[ 1 ] == 'O' && buffer[ 2 ] == 'S' && buffer[ 3 ] == 'D' ) ||
-            ( buffer[ 0 ] == 0 && buffer[ 1 ] == 0x25 && buffer[ 2 ] == 0x06 && buffer[ 3 ] == 0x05 );
+            buffer[ 0 ] == 'M' && buffer[ 1 ] == 'O' && buffer[ 2 ] == 'S' && buffer[ 3 ] == 'D' ||
+            buffer[ 0 ] == 0 && buffer[ 1 ] == 0x25 && buffer[ 2 ] == 0x06 && buffer[ 3 ] == 0x05;
 
         public override Model Import( string filePath )
         {

@@ -316,7 +316,7 @@ namespace MikuMikuLibrary.Textures.DDS
                             return true;
                         if ( halfByte && linepos == lineMax ) // reached last byte of the line. If only half a byte to check on that, abort and go on with loop.
                             continue;
-                        if ( ( ( b & 0xF0 ) >> 4 ) == transCol )
+                        if ( ( b & 0xF0 ) >> 4 == transCol )
                             return true;
                     }
                 }
@@ -607,7 +607,7 @@ namespace MikuMikuLibrary.Textures.DDS
                     uncompressedLine.Position = 0;
                 }
 
-                for ( var w = 0; w < width; w += ( isBCd ? 4 : 1 ) )
+                for ( var w = 0; w < width; w += isBCd ? 4 : 1 )
                 {
                     pixelWriter( compressedLine, uncompressedLine, width, height );
                     if ( isBCd && w != width - 4 && width > 4 && height > 4 )  // KFreon: Only do this if dimensions are big enough
@@ -657,7 +657,7 @@ namespace MikuMikuLibrary.Textures.DDS
         private static byte[] ReadDXTColour( int colour )
         {
             // Read RGB 5:6:5 data
-            var b = ( colour & 0x1F );
+            var b = colour & 0x1F;
             var g = ( colour & 0x7E0 ) >> 5;
             var r = ( colour & 0xF800 ) >> 11;
 
@@ -683,7 +683,7 @@ namespace MikuMikuLibrary.Textures.DDS
             var g1 = ( byte )( g >> 2 );
             var b1 = ( byte )( b >> 3 );
 
-            return ( r1 << 11 ) | ( g1 << 5 ) | ( b1 );
+            return ( r1 << 11 ) | ( g1 << 5 ) | b1;
         }
 
         /// <summary>
@@ -691,9 +691,9 @@ namespace MikuMikuLibrary.Textures.DDS
         /// </summary>
         /// <param name="colour0">First colour, usually the min.</param>
         /// <param name="colour1">Second colour, usually the max.</param>
-        /// <param name="isDXT1">True = for DXT1 texels. Changes how the internals are calculated.</param>
+        /// <param name="isDxt1">True = for DXT1 texels. Changes how the internals are calculated.</param>
         /// <returns>Texel palette.</returns>
-        private static int[] BuildRGBPalette( int colour0, int colour1, bool isDXT1 )
+        private static int[] BuildRGBPalette( int colour0, int colour1, bool isDxt1 )
         {
             var colours = new int[ 4 ];
 
@@ -735,9 +735,9 @@ namespace MikuMikuLibrary.Textures.DDS
         /// Decompresses a 3 channel (RGB) block.
         /// </summary>
         /// <param name="compressed">Compressed image data.</param>
-        /// <param name="isDXT1">True = DXT1, otherwise false.</param>
+        /// <param name="isDxt1">True = DXT1, otherwise false.</param>
         /// <returns>16 pixel BGRA channels.</returns>
-        private static List<byte[]> DecompressRGBBlock( Stream compressed, bool isDXT1 )
+        private static List<byte[]> DecompressRGBBlock( Stream compressed, bool isDxt1 )
         {
             var decompressedBlock = new int[ 16 ];
 
@@ -763,7 +763,7 @@ namespace MikuMikuLibrary.Textures.DDS
                     // Read min max colours
                     colour0 = ( ushort )reader.ReadInt16();
                     colour1 = ( ushort )reader.ReadInt16();
-                    colours = BuildRGBPalette( colour0, colour1, isDXT1 );
+                    colours = BuildRGBPalette( colour0, colour1, isDxt1 );
 
                     // Decompress pixels
                     pixels = reader.ReadBytes( 4 );
@@ -1178,9 +1178,9 @@ namespace MikuMikuLibrary.Textures.DDS
         private static uint Encode565( RGBColour colour )
         {
             var temp = new RGBColour();
-            temp.R = ( colour.R < 0f ) ? 0f : ( colour.R > 1f ) ? 1f : colour.R;
-            temp.G = ( colour.G < 0f ) ? 0f : ( colour.G > 1f ) ? 1f : colour.G;
-            temp.B = ( colour.B < 0f ) ? 0f : ( colour.B > 1f ) ? 1f : colour.B;
+            temp.R = colour.R < 0f ? 0f : colour.R > 1f ? 1f : colour.R;
+            temp.G = colour.G < 0f ? 0f : colour.G > 1f ? 1f : colour.G;
+            temp.B = colour.B < 0f ? 0f : colour.B > 1f ? 1f : colour.B;
 
             return ( uint )( temp.R * 31f + 0.5f ) << 11 | ( uint )( temp.G * 63f + 0.5f ) << 5 | ( uint )( temp.B * 31f + 0.5f );
         }
@@ -1356,7 +1356,7 @@ namespace MikuMikuLibrary.Textures.DDS
 
                 float fLen = dir.R * dir.R + dir.G * dir.G + dir.B * dir.B;
 
-                if ( fLen < ( 1f / 4096f ) )
+                if ( fLen < 1f / 4096f )
                     break;
 
                 float fScale = fsteps / fLen;
@@ -1420,9 +1420,9 @@ namespace MikuMikuLibrary.Textures.DDS
                     y.B += dY.B * f;
                 }
 
-                float fEpsilon = ( 0.25f / 64.0f ) * ( 0.25f / 64.0f );
-                if ( ( dX.R * dX.R < fEpsilon ) && ( dX.G * dX.G < fEpsilon ) && ( dX.B * dX.B < fEpsilon ) &&
-                    ( dY.R * dY.R < fEpsilon ) && ( dY.G * dY.G < fEpsilon ) && ( dY.B * dY.B < fEpsilon ) )
+                float fEpsilon = 0.25f / 64.0f * ( 0.25f / 64.0f );
+                if ( dX.R * dX.R < fEpsilon && dX.G * dX.G < fEpsilon && dX.B * dX.B < fEpsilon &&
+                    dY.R * dY.R < fEpsilon && dY.G * dY.G < fEpsilon && dY.B * dY.B < fEpsilon )
                 {
                     break;
                 }
@@ -1443,13 +1443,13 @@ namespace MikuMikuLibrary.Textures.DDS
         }
 
 
-        private static byte[] CompressRGBTexel( byte[] texel, bool isDXT1, float alphaRef )
+        private static byte[] CompressRGBTexel( byte[] texel, bool isDxt1, float alphaRef )
         {
             var dither = true;
             var uSteps = 4;
 
             // Determine if texel is fully and entirely transparent. If so, can set to white and continue.
-            if ( isDXT1 )
+            if ( isDxt1 )
             {
                 var uColourKey = 0;
 
@@ -1607,7 +1607,7 @@ namespace MikuMikuLibrary.Textures.DDS
             uint min = 0;
             uint max = 0;
 
-            if ( ( uSteps == 3 ) == ( wColourA <= wColourB ) )
+            if ( uSteps == 3 == wColourA <= wColourB )
             {
                 min = wColourA;
                 max = wColourB;
@@ -1628,22 +1628,22 @@ namespace MikuMikuLibrary.Textures.DDS
             {
                 psteps = sPsteps3;
 
-                step[ 2 ].R = step[ 0 ].R + ( 1f / 2f ) * ( step[ 1 ].R - step[ 0 ].R );
-                step[ 2 ].G = step[ 0 ].G + ( 1f / 2f ) * ( step[ 1 ].G - step[ 0 ].G );
-                step[ 2 ].B = step[ 0 ].B + ( 1f / 2f ) * ( step[ 1 ].B - step[ 0 ].B );
+                step[ 2 ].R = step[ 0 ].R + 1f / 2f * ( step[ 1 ].R - step[ 0 ].R );
+                step[ 2 ].G = step[ 0 ].G + 1f / 2f * ( step[ 1 ].G - step[ 0 ].G );
+                step[ 2 ].B = step[ 0 ].B + 1f / 2f * ( step[ 1 ].B - step[ 0 ].B );
             }
             else
             {
                 psteps = sPsteps4;
 
                 // "step" appears to be the palette as this is the interpolation
-                step[ 2 ].R = step[ 0 ].R + ( 1f / 3f ) * ( step[ 1 ].R - step[ 0 ].R );
-                step[ 2 ].G = step[ 0 ].G + ( 1f / 3f ) * ( step[ 1 ].G - step[ 0 ].G );
-                step[ 2 ].B = step[ 0 ].B + ( 1f / 3f ) * ( step[ 1 ].B - step[ 0 ].B );
+                step[ 2 ].R = step[ 0 ].R + 1f / 3f * ( step[ 1 ].R - step[ 0 ].R );
+                step[ 2 ].G = step[ 0 ].G + 1f / 3f * ( step[ 1 ].G - step[ 0 ].G );
+                step[ 2 ].B = step[ 0 ].B + 1f / 3f * ( step[ 1 ].B - step[ 0 ].B );
 
-                step[ 3 ].R = step[ 0 ].R + ( 2f / 3f ) * ( step[ 1 ].R - step[ 0 ].R );
-                step[ 3 ].G = step[ 0 ].G + ( 2f / 3f ) * ( step[ 1 ].G - step[ 0 ].G );
-                step[ 3 ].B = step[ 0 ].B + ( 2f / 3f ) * ( step[ 1 ].B - step[ 0 ].B );
+                step[ 3 ].R = step[ 0 ].R + 2f / 3f * ( step[ 1 ].R - step[ 0 ].R );
+                step[ 3 ].G = step[ 0 ].G + 2f / 3f * ( step[ 1 ].G - step[ 0 ].G );
+                step[ 3 ].B = step[ 0 ].B + 2f / 3f * ( step[ 1 ].B - step[ 0 ].B );
             }
 
 
@@ -1655,7 +1655,7 @@ namespace MikuMikuLibrary.Textures.DDS
             dir.B = step[ 1 ].B - step[ 0 ].B;
 
             int fsteps = uSteps - 1;
-            float fscale = ( wColourA != wColourB ) ? ( fsteps / ( dir.R * dir.R + dir.G * dir.G + dir.B * dir.B ) ) : 0.0f;
+            float fscale = wColourA != wColourB ? fsteps / ( dir.R * dir.R + dir.G * dir.G + dir.B * dir.B ) : 0.0f;
             dir.R *= fscale;
             dir.G *= fscale;
             dir.B *= fscale;
@@ -1670,7 +1670,7 @@ namespace MikuMikuLibrary.Textures.DDS
                 index = i / 4;
                 var current = ReadColourFromTexel( texel, i );
 
-                if ( ( uSteps == 3 ) && ( current.A < alphaRef ) )
+                if ( uSteps == 3 && current.A < alphaRef )
                 {
                     dw = ( uint )( ( 3 << 30 ) | ( dw >> 2 ) );
                     continue;

@@ -14,7 +14,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
             aiContext.SetConfig( new Ai.Configs.VertexCacheSizeConfig( 63 ) );
             aiContext.SetConfig( new Ai.Configs.MaxBoneCountConfig( 48 ) );
 
-            var postProcessSteps = ( Ai.PostProcessPreset.TargetRealTimeMaximumQuality | Ai.PostProcessSteps.SplitByBoneCount ) & ~( Ai.PostProcessSteps.FindInstances );
+            var postProcessSteps = ( Ai.PostProcessPreset.TargetRealTimeMaximumQuality | Ai.PostProcessSteps.SplitByBoneCount ) & ~Ai.PostProcessSteps.FindInstances;
 
             return aiContext.ImportFile( fileName, postProcessSteps );
         }

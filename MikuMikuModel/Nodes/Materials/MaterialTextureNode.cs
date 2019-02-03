@@ -11,8 +11,8 @@ namespace MikuMikuModel.Nodes.Materials
         public override NodeFlags Flags => NodeFlags.None;
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/MaterialTexture.png" );
 
-        [DisplayName( "Texture ID" )]
-        public int TextureID
+        [DisplayName( "Texture id" )]
+        public int TextureId
         {
             get => GetProperty<int>();
             set => SetProperty( value );

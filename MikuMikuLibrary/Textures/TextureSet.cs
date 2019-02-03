@@ -76,7 +76,7 @@ namespace MikuMikuLibrary.Textures
                 {
                     for ( int i = 0; i < Textures.Count; i++ )
                     {
-                        Textures[ i ].ID = textureDatabase.Textures[ i ].ID;
+                        Textures[ i ].Id = textureDatabase.Textures[ i ].Id;
                         Textures[ i ].Name = textureDatabase.Textures[ i ].Name;
                     }
                 }
@@ -107,8 +107,8 @@ namespace MikuMikuLibrary.Textures
                 {
                     textureDatabase.Textures.Add( new TextureEntry
                     {
-                        ID = texture.ID,
-                        Name = texture.Name ?? $"Texture{texture.ID}",
+                        Id = texture.Id,
+                        Name = texture.Name ?? $"Texture{texture.Id}",
                     } );
                 }
 

@@ -95,7 +95,7 @@ namespace MikuMikuLibrary.IO.Common
             get => mBaseOffsets.Count > 0 ? mBaseOffsets.Peek() : 0;
             set
             {
-                if ( ( mBaseOffsets.Count > 0 && mBaseOffsets.Peek() != value ) || mBaseOffsets.Count == 0 )
+                if ( mBaseOffsets.Count > 0 && mBaseOffsets.Peek() != value || mBaseOffsets.Count == 0 )
                     mBaseOffsets.Push( value );
             }
         }
@@ -120,7 +120,7 @@ namespace MikuMikuLibrary.IO.Common
         {
             int difference = AlignmentUtilities.GetAlignedDifference( Position, alignment );
 
-            int fourByte = ( filler << 24 | filler << 16 | filler << 8 | filler );
+            int fourByte = filler << 24 | filler << 16 | filler << 8 | filler;
 
             for ( int i = 0; i < difference / 4; i++ )
                 Write( fourByte );

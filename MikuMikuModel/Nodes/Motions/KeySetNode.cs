@@ -8,7 +8,7 @@ namespace MikuMikuModel.Nodes.Motions
     {
         public override NodeFlags Flags => NodeFlags.None;
 
-        [DisplayName( "Is interpolated" )]
+        [DisplayName( "Enable interpolation" )]
         public bool IsInterpolated
         {
             get => GetProperty<bool>();

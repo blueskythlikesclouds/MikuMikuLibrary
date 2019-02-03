@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Databases
 {
     public class TextureEntry
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
     }
 
@@ -32,7 +32,7 @@ namespace MikuMikuLibrary.Databases
                 for ( int i = 0; i < textureCount; i++ )
                 {
                     var textureEntry = new TextureEntry();
-                    textureEntry.ID = reader.ReadInt32();
+                    textureEntry.Id = reader.ReadInt32();
                     textureEntry.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     Textures.Add( textureEntry );
                 }
@@ -44,11 +44,11 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Textures.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                int i = Textures.Max( x => x.ID ) + 1;
+                int i = Textures.Max( x => x.Id ) + 1;
                 foreach ( var textureEntry in Textures )
                 {
-                    writer.Write( textureEntry.ID );
-                    writer.AddStringToStringTable( textureEntry.Name ?? ( i++ ).ToString() );
+                    writer.Write( textureEntry.Id );
+                    writer.AddStringToStringTable( textureEntry.Name ?? i++.ToString() );
                 }
             } );
         }
@@ -77,9 +77,9 @@ namespace MikuMikuLibrary.Databases
             return Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public TextureEntry GetTexture( int textureID )
+        public TextureEntry GetTexture( int textureId )
         {
-            return Textures.FirstOrDefault( x => x.ID.Equals( textureID ) );
+            return Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
         }
 
         public TextureDatabase()

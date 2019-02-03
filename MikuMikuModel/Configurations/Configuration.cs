@@ -76,6 +76,28 @@ namespace MikuMikuModel.Configurations
             Save( MotionDatabase );
         }
 
+        public void Clean()
+        {
+            Delete<ObjectDatabase>();
+            Delete<TextureDatabase>();
+            Delete<BoneDatabase>();
+            Delete<MotionDatabase>();
+
+            mObjectDatabase = null;
+            mTextureDatabase = null;
+            mBoneDatabase = null;
+            mMotionDatabase = null;
+        }
+
+        public void SaveTextureDatabase()
+        {
+            if ( mTextureDatabase == null || string.IsNullOrEmpty( TextureDatabaseFilePath ) )
+                return;
+
+            mTextureDatabase.Save( TextureDatabaseFilePath );
+            Save( TextureDatabase );
+        }
+
         public object Clone()
         {
             return new Configuration
@@ -136,6 +158,13 @@ namespace MikuMikuModel.Configurations
                 serializer.Serialize( writer, obj );
         }
 
+        private void Delete<T>()
+        {
+            string filePath = Path.Combine( BaseDirectory.FullName, $"{typeof( T ).Name}.xml" );
+            if ( File.Exists( filePath ) )
+                File.Delete( filePath );
+        }
+
         private void BackupFile( string filePath ) =>
             File.Copy( filePath, GetPath( Path.Combine( "Sources", Path.GetFileName( filePath ) ) ), true );
 
@@ -146,6 +175,8 @@ namespace MikuMikuModel.Configurations
             fileInfo.Directory?.Create();
             return fileInfo.FullName;
         }
+
+        public override string ToString() => Name;
 
         static Configuration() =>
             sSerializers = new Dictionary<Type, XmlSerializer>();

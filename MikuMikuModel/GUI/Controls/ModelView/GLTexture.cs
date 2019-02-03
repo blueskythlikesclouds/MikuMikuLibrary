@@ -7,12 +7,12 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 {
     public class GLTexture : IDisposable
     {
-        public int ID { get; }
+        public int Id { get; }
         public TextureTarget Target { get; }
 
         public void Bind()
         {
-            GL.BindTexture( Target, ID );
+            GL.BindTexture( Target, Id );
         }
 
         public void Dispose()
@@ -33,7 +33,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         protected void Dispose( bool disposing )
         {
-            GL.DeleteTexture( ID );
+            GL.DeleteTexture( Id );
         }
 
         ~GLTexture()
@@ -43,11 +43,11 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public GLTexture( Texture texture )
         {
-            ID = GL.GenTexture();
+            Id = GL.GenTexture();
             if ( texture.UsesDepth )
             {
                 Target = TextureTarget.TextureCubeMap;
-                GL.BindTexture( TextureTarget.TextureCubeMap, ID );
+                GL.BindTexture( TextureTarget.TextureCubeMap, Id );
 
                 GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int )TextureWrapMode.ClampToEdge );
                 GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int )TextureWrapMode.ClampToEdge );
@@ -74,7 +74,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             else
             {
                 Target = TextureTarget.Texture2D;
-                GL.BindTexture( TextureTarget.Texture2D, ID );
+                GL.BindTexture( TextureTarget.Texture2D, Id );
 
                 GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int )TextureWrapMode.Repeat );
                 GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int )TextureWrapMode.Repeat );

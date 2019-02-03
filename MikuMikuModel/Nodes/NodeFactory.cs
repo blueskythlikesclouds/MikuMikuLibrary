@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using MikuMikuModel.Configurations;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes.IO;
 
@@ -35,10 +36,11 @@ namespace MikuMikuModel.Nodes
         public static INode Create( string filePath, IEnumerable<Type> typesToMatch )
         {
             var module = ModuleImportUtilities.GetModule( filePath );
-            if ( module != null && NodeTypes.ContainsKey( module.ModelType ) )
-                return Create( module.ModelType, Path.GetFileName( filePath ), module.Import( filePath ) );
+            if ( module == null || !NodeTypes.ContainsKey( module.ModelType ) )
+                return new StreamNode( Path.GetFileName( filePath ), File.OpenRead( filePath ) );
 
-            return new StreamNode( Path.GetFileName( filePath ), File.OpenRead( filePath ) );
+            ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
+            return Create( module.ModelType, Path.GetFileName( filePath ), module.Import( filePath ) );
         }
 
         public static INode Create( string filePath ) => 

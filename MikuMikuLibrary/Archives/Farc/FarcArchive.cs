@@ -203,14 +203,14 @@ namespace MikuMikuLibrary.Archives.Farc
                         Handle = name,
                         Position = offset,
                         Length = fixedSize,
-                        IsCompressed = isCompressed && ( compressedSize != uncompressedSize ),
+                        IsCompressed = isCompressed && compressedSize != uncompressedSize,
                         IsEncrypted = isEncrypted,
                         IsFutureTone = Format == BinaryFormat.FT,
                     } );
 
                     // There's sometimes extra padding on some FARC files which
                     // causes this loop to throw an exception. This check fixes it.
-                    if ( Format == BinaryFormat.FT && ( --entryCount ) == 0 )
+                    if ( Format == BinaryFormat.FT && --entryCount == 0 )
                         break;
                 }
             }

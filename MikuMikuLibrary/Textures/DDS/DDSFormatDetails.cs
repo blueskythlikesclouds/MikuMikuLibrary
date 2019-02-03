@@ -179,7 +179,7 @@ namespace MikuMikuLibrary.Textures.DDS
             if ( IsBlockCompressed( format ) )
             {
                 int blockSize = GetBlockSize( format );
-                return Math.Max( 1, ( ( width + 3 ) / 4 ) ) * blockSize;
+                return Math.Max( 1, ( width + 3 ) / 4 ) * blockSize;
             }
 
             if ( format == DDSPixelFormatFourCC.R8G8_B8G8 || format == DDSPixelFormatFourCC.G8R8_G8B8 ||
@@ -194,7 +194,7 @@ namespace MikuMikuLibrary.Textures.DDS
 
         public static int CalculateLinearSize( int width, int height, DDSPixelFormatFourCC format )
         {
-            return ( ( width * height ) * GetBitsPerPixel( format ) ) / 8;
+            return width * height * GetBitsPerPixel( format ) / 8;
         }
     }
 }

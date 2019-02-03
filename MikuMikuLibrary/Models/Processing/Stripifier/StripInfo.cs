@@ -49,7 +49,7 @@ namespace NvTriStripDotNet
             if ( faceInfo == null )
                 return false;
 
-            return ( ExperimentId >= 0 ? faceInfo.TestStripId == StripId : faceInfo.StripId == StripId );
+            return ExperimentId >= 0 ? faceInfo.TestStripId == StripId : faceInfo.StripId == StripId;
         }
 
         /// <summary>
@@ -107,25 +107,25 @@ namespace NvTriStripDotNet
             {
                 if ( !bv0 )
                 {
-                    if ( ( faceVec[ i ].V0 == face.V0 ) ||
-                         ( faceVec[ i ].V1 == face.V0 ) ||
-                         ( faceVec[ i ].V2 == face.V0 ) )
+                    if ( faceVec[ i ].V0 == face.V0 ||
+                         faceVec[ i ].V1 == face.V0 ||
+                         faceVec[ i ].V2 == face.V0 )
                         bv0 = true;
                 }
 
                 if ( !bv1 )
                 {
-                    if ( ( faceVec[ i ].V0 == face.V1 ) ||
-                         ( faceVec[ i ].V1 == face.V1 ) ||
-                         ( faceVec[ i ].V2 == face.V1 ) )
+                    if ( faceVec[ i ].V0 == face.V1 ||
+                         faceVec[ i ].V1 == face.V1 ||
+                         faceVec[ i ].V2 == face.V1 )
                         bv1 = true;
                 }
 
                 if ( !bv2 )
                 {
-                    if ( ( faceVec[ i ].V0 == face.V2 ) ||
-                         ( faceVec[ i ].V1 == face.V2 ) ||
-                         ( faceVec[ i ].V2 == face.V2 ) )
+                    if ( faceVec[ i ].V0 == face.V2 ||
+                         faceVec[ i ].V1 == face.V2 ||
+                         faceVec[ i ].V2 == face.V2 )
                         bv2 = true;
                 }
 
@@ -149,7 +149,7 @@ namespace NvTriStripDotNet
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public bool IsMarked( FaceInfo faceInfo )
         {
-            return ( faceInfo.StripId >= 0 ) || ( IsExperiment() && faceInfo.ExperimentId == ExperimentId );
+            return faceInfo.StripId >= 0 || IsExperiment() && faceInfo.ExperimentId == ExperimentId;
         }
 
         /// <summary>
@@ -189,8 +189,8 @@ namespace NvTriStripDotNet
 
             MarkTriangle( StartInfo.StartFace );
 
-            int v0 = ( StartInfo.ToV1 ? StartInfo.StartEdge.V0 : StartInfo.StartEdge.V1 );
-            int v1 = ( StartInfo.ToV1 ? StartInfo.StartEdge.V1 : StartInfo.StartEdge.V0 );
+            int v0 = StartInfo.ToV1 ? StartInfo.StartEdge.V0 : StartInfo.StartEdge.V1;
+            int v1 = StartInfo.ToV1 ? StartInfo.StartEdge.V1 : StartInfo.StartEdge.V0;
 
             // easiest way to get v2 is to use this function which requires the
             // other indices to already be in the list.
@@ -214,12 +214,12 @@ namespace NvTriStripDotNet
 
                 var nextNextFace = Stripifier.FindOtherFace( edgeInfos, testnv0, testnv1, nextFace );
 
-                if ( ( nextNextFace == null ) || ( IsMarked( nextNextFace ) ) )
+                if ( nextNextFace == null || IsMarked( nextNextFace ) )
                 {
                     //uh, oh, we're following a dead end, try swapping
                     var testNextFace = Stripifier.FindOtherFace( edgeInfos, nv0, testnv1, nextFace );
 
-                    if ( ( ( testNextFace != null ) && !IsMarked( testNextFace ) ) )
+                    if ( testNextFace != null && !IsMarked( testNextFace ) )
                     {
                         //we only swap if it buys us something
 
@@ -284,11 +284,11 @@ namespace NvTriStripDotNet
 
                 var nextNextFace = Stripifier.FindOtherFace( edgeInfos, testnv0, testnv1, nextFace );
 
-                if ( ( nextNextFace == null ) || ( IsMarked( nextNextFace ) ) )
+                if ( nextNextFace == null || IsMarked( nextNextFace ) )
                 {
                     //uh, oh, we're following a dead end, try swapping
                     var testNextFace = Stripifier.FindOtherFace( edgeInfos, nv0, testnv1, nextFace );
-                    if ( ( ( testNextFace != null ) && !IsMarked( testNextFace ) ) )
+                    if ( testNextFace != null && !IsMarked( testNextFace ) )
                     {
                         //we only swap if it buys us something
 

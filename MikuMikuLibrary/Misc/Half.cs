@@ -193,7 +193,7 @@ namespace MikuMikuLibrary.Misc
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>true if half1 and half2 are equal; otherwise, false.</returns>
-        public static bool operator ==( Half half1, Half half2 ) { return ( !IsNaN( half1 ) && ( half1.Value == half2.Value ) ); }
+        public static bool operator ==( Half half1, Half half2 ) { return !IsNaN( half1 ) && half1.Value == half2.Value; }
         /// <summary>
         /// Returns a value indicating whether two instances of System.Half are not equal.
         /// </summary>
@@ -221,14 +221,14 @@ namespace MikuMikuLibrary.Misc
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>true if half1 is less than or equal to half2; otherwise, false.</returns>
-        public static bool operator <=( Half half1, Half half2 ) { return ( half1 == half2 ) || ( half1 < half2 ); }
+        public static bool operator <=( Half half1, Half half2 ) { return half1 == half2 || half1 < half2; }
         /// <summary>
         /// Returns a value indicating whether a specified System.Half is greater than or equal to another specified System.Half.
         /// </summary>
         /// <param name="half1">A System.Half.</param>
         /// <param name="half2">A System.Half.</param>
         /// <returns>true if half1 is greater than or equal to half2; otherwise, false.</returns>
-        public static bool operator >=( Half half1, Half half2 ) { return ( half1 == half2 ) || ( half1 > half2 ); }
+        public static bool operator >=( Half half1, Half half2 ) { return half1 == half2 || half1 > half2; }
         #endregion
 
         #region Type casting operators
@@ -397,7 +397,7 @@ namespace MikuMikuLibrary.Misc
         /// <returns>true if value is equal to this instance; otherwise, false.</returns>
         public bool Equals( Half other )
         {
-            return ( ( other == this ) || ( IsNaN( other ) && IsNaN( this ) ) );
+            return other == this || IsNaN( other ) && IsNaN( this );
         }
         /// <summary>
         /// Returns a value indicating whether this instance and a specified System.Object
@@ -411,7 +411,7 @@ namespace MikuMikuLibrary.Misc
             if ( obj is Half )
             {
                 Half half = ( Half )obj;
-                if ( ( half == this ) || ( IsNaN( half ) && IsNaN( this ) ) )
+                if ( half == this || IsNaN( half ) && IsNaN( this ) )
                 {
                     result = true;
                 }
@@ -531,7 +531,7 @@ namespace MikuMikuLibrary.Misc
         /// </returns>
         public static Half Max( Half value1, Half value2 )
         {
-            return ( value1 < value2 ) ? value2 : value1;
+            return value1 < value2 ? value2 : value1;
         }
         /// <summary>
         /// Returns the smaller of two half-precision floating-point numbers.
@@ -544,7 +544,7 @@ namespace MikuMikuLibrary.Misc
         /// </returns>
         public static Half Min( Half value1, Half value2 )
         {
-            return ( value1 < value2 ) ? value1 : value2;
+            return value1 < value2 ? value1 : value2;
         }
         #endregion
 
@@ -816,7 +816,7 @@ namespace MikuMikuLibrary.Misc
         }
         object IConvertible.ToType( Type conversionType, IFormatProvider provider )
         {
-            return ( ( ( float )this ) as IConvertible ).ToType( conversionType, provider );
+            return ( ( float )this as IConvertible ).ToType( conversionType, provider );
         }
         ushort IConvertible.ToUInt16( IFormatProvider provider )
         {

@@ -176,7 +176,7 @@ namespace NvTriStripDotNet
                 stripifier.CreateStrips( tempStrips, stripIndices, StitchStrips, ref numSeparateStrips, UseRestart, ( uint )RestartValue );
 
                 //if we're stitching strips together, we better get back only one strip from CreateStrips()
-                Debug.Assert( ( StitchStrips && ( numSeparateStrips == 1 ) ) || !StitchStrips );
+                Debug.Assert( StitchStrips && numSeparateStrips == 1 || !StitchStrips );
 
                 //convert to output format
                 numGroups = ( ushort )numSeparateStrips; //for the strips
