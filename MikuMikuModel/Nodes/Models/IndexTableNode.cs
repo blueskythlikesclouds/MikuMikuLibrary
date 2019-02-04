@@ -34,6 +34,13 @@ namespace MikuMikuModel.Nodes.Models
             get => GetProperty<int>();
             set => SetProperty( value );
         }
+        
+        [DisplayName( "Material texture uv indices" )]
+        public byte[] MaterialUVIndices
+        {
+            get => GetProperty<byte[]>();
+            set => SetProperty( value );
+        }
 
         [DisplayName( "Primitive type" )]
         public PrimitiveType PrimitiveType

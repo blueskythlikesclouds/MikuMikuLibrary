@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Numerics;
+using System.Windows.Forms;
 using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Models;
+using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Misc;
 
 namespace MikuMikuModel.Nodes.Models
@@ -10,6 +12,21 @@ namespace MikuMikuModel.Nodes.Models
     public class SubMeshNode : Node<SubMesh>
     {
         public override NodeFlags Flags => NodeFlags.Add | NodeFlags.Rename;
+
+        public override Control Control
+        {
+            get
+            {
+                var modelParent = FindParent<ModelNode>();
+                var meshParent = FindParent<MeshNode>();
+
+                if ( modelParent == null || meshParent == null )
+                    return null;
+
+                ModelViewControl.Instance.SetModel( Data, meshParent.Data, modelParent.Data.TextureSet );
+                return ModelViewControl.Instance;
+            }
+        }
 
         [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere

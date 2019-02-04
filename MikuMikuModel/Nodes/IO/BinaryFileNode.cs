@@ -2,6 +2,9 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
 using System.Windows.Forms;
 using MikuMikuLibrary.Archives.Farc;
 using MikuMikuLibrary.IO;

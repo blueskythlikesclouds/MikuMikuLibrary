@@ -15,7 +15,7 @@ namespace MikuMikuModel.Nodes.Motions
 {
     public class MotionSetNode : BinaryFileNode<MotionSet>
     {
-        private static XmlSerializer sMotionSetEntrySerializer;
+        private static readonly XmlSerializer sMotionSetEntrySerializer = new XmlSerializer( typeof( MotionSetEntry ) );
 
         public override NodeFlags Flags =>
             NodeFlags.Add | NodeFlags.Import | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
@@ -115,9 +115,6 @@ namespace MikuMikuModel.Nodes.Motions
                         Id = id++,
                     } );
                 }
-
-                if ( sMotionSetEntrySerializer == null )
-                    sMotionSetEntrySerializer = new XmlSerializer( typeof( MotionSetEntry ) );
 
                 using ( var stringWriter = new StringWriter() )
                 using ( var xmlWriter =

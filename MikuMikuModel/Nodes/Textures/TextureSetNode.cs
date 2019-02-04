@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.IO;
+using System.Windows.Forms;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Textures;
@@ -8,6 +10,7 @@ using MikuMikuModel.Nodes.Databases;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Misc;
 using MikuMikuModel.Resources;
+using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.Nodes.Textures
 {
@@ -23,9 +26,46 @@ namespace MikuMikuModel.Nodes.Textures
 
         protected override void Initialize()
         {
+            RegisterImportHandler<Texture>( filePath =>
+            {
+                var texture = TextureEncoder.Encode( filePath );
+                {
+                    texture.Id = Data.Textures.Max( x => x.Id ) + 1;
+                    texture.Name = Path.GetFileNameWithoutExtension( filePath );
+                }
+                Data.Textures.Add( texture );
+            } );
+            RegisterImportHandler<Bitmap>( filePath =>
+            {
+                var texture = TextureEncoder.Encode( filePath );
+                {
+                    texture.Id = Data.Textures.Max( x => x.Id ) + 1;
+                    texture.Name = Path.GetFileNameWithoutExtension( filePath );
+                }
+                Data.Textures.Add( texture );
+            } );
             RegisterExportHandler<TextureSet>( filePath => Data.Save( filePath ) );
             RegisterReplaceHandler<TextureSet>( BinaryFile.Load<TextureSet> );
+            RegisterCustomHandler( "Export All", () =>
+                {
+                    using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
+                    {
+                        folderBrowseDialog.Description = "Select a folder to save textures to.";
+                        folderBrowseDialog.UseDescriptionForTitle = true;
 
+                        if ( folderBrowseDialog.ShowDialog() != DialogResult.OK )
+                            return;
+
+                        foreach ( var texture in Data.Textures )
+                        {
+                            if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
+                                TextureDecoder.DecodeToPNG( texture, Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.png" ) );
+                            else
+                                TextureDecoder.DecodeToDDS( texture, Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.dds" ) );
+                        }
+                    }
+                }, Keys.Control | Keys.Shift | Keys.E );
+            
             base.Initialize();
         }
 

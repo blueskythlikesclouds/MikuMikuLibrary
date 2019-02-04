@@ -28,10 +28,10 @@ namespace MikuMikuModel.Nodes.Wrappers
             EndUpdate();
         }
 
-        protected override void OnNodeMouseClick( TreeNodeMouseClickEventArgs e )
+        protected override void OnAfterSelect( TreeViewEventArgs e )
         {
             PopulateNode( e.Node as NodeAsTreeNode );
-            base.OnNodeMouseClick( e );
+            base.OnAfterSelect( e );
         }
 
         protected override void OnAfterExpand( TreeViewEventArgs e )

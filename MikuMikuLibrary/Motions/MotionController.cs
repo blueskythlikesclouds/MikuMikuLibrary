@@ -14,12 +14,21 @@ namespace MikuMikuLibrary.Motions
         {
             Parent.KeySets.Clear();
             Parent.BoneInfos.Clear();
-
-            foreach ( var keyController in KeyControllers )
+            
+            var keyControllers = KeyControllers
+                .Where( x => motionDatabase == null || motionDatabase.BoneNames.Contains( x.Name ) )
+                .OrderBy( x => 
+                    {
+                        int index = skeletonEntry.BoneNames2.IndexOf( x.Name );
+                        if ( index == -1 )
+                            return int.MaxValue;
+                        
+                        return index;
+                    } )
+                .ThenBy( x => x.Name );
+                  
+            foreach ( var keyController in keyControllers )
             {
-                if ( motionDatabase != null && !motionDatabase.BoneNames.Contains( keyController.Name ) )
-                    continue;
-
                 var boneEntry = skeletonEntry.GetBoneEntry( keyController.Name );
                 if ( boneEntry != null )
                 {

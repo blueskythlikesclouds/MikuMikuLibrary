@@ -245,25 +245,23 @@ namespace MikuMikuLibrary.Models
                 int id = textureDatabase.Textures.Max( x => x.Id ) + 1;
                 var idDictionary = new Dictionary<int, int>( TextureSet.Textures.Count );
 
-                for ( int i = 0; i < TextureSet.Textures.Count; i++ )
+                foreach ( var texture in TextureSet.Textures )
                 {
-                    var texture = TextureSet.Textures[ i ];
                     var textureEntry = !string.IsNullOrEmpty( texture.Name )
                         ? textureDatabase.GetTexture( texture.Name )
                         : textureDatabase.GetTexture( texture.Id );
 
-                    if ( i >= TextureIds.Count || TextureIds[ i ] != textureEntry?.Id )
+                    if ( textureEntry == null )
                     {
-                        string name = texture.Name ?? $"Texture{id}";
-                        if ( !string.IsNullOrEmpty( texture.Name ) && textureEntry?.Name == texture.Name )
-                            name = $"{name}-{id}";
-
                         textureDatabase.Textures.Add(
                             textureEntry = new TextureEntry
                             {
-                                Name = name,
+                                Name = texture.Name,
                                 Id = id++
                             } );
+                            
+                        if ( string.IsNullOrEmpty( textureEntry.Name ) )
+                            textureEntry.Name = $"Unnamed {textureEntry.Id}";
                     }
                     idDictionary[ texture.Id ] = textureEntry.Id;
 

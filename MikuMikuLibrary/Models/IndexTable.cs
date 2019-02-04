@@ -48,6 +48,7 @@ namespace MikuMikuLibrary.Models
         public ushort[] Indices { get; set; }
         public ushort[] BoneIndices { get; set; }
         public int MaterialIndex { get; set; }
+        public byte[] MaterialUVIndices { get; set; }
         public PrimitiveType PrimitiveType { get; set; }
 
         // Modern Formats
@@ -59,7 +60,7 @@ namespace MikuMikuLibrary.Models
             reader.SeekCurrent( 4 );
             BoundingSphere = reader.ReadBoundingSphere();
             MaterialIndex = reader.ReadInt32();
-            reader.SeekCurrent( 8 );
+            MaterialUVIndices = reader.ReadBytes( 8 );
             int boneIndexCount = reader.ReadInt32();
             long boneIndicesOffset = reader.ReadOffset();
             uint field00 = reader.ReadUInt32();
@@ -103,13 +104,19 @@ namespace MikuMikuLibrary.Models
             writer.Write( 0 );
             writer.Write( BoundingSphere );
             writer.Write( MaterialIndex );
-            writer.WriteNulls( 8 );
+            
+            if ( MaterialUVIndices?.Length == 8 )
+                writer.Write( MaterialUVIndices );
+            else
+                writer.WriteNulls( 8 );
+                
             writer.Write( BoneIndices != null ? BoneIndices.Length : 0 );
             writer.ScheduleWriteOffsetIf( BoneIndices != null, 4, AlignmentMode.Left, () =>
             {
                 writer.Write( BoneIndices );
             } );
             writer.Write( BoneIndices != null ? 4 : 0 );
+            
             writer.Write( ( int )PrimitiveType );
             writer.Write( 1 );
             writer.Write( Indices.Length );
@@ -192,6 +199,7 @@ namespace MikuMikuLibrary.Models
 
         public IndexTable()
         {
+            MaterialUVIndices = new byte[ 8 ];
             PrimitiveType = PrimitiveType.Triangles;
         }
     }

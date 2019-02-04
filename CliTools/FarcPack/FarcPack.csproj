@@ -33,8 +33,8 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <AllowedReferenceRelatedFileExtensions>
-		.MikuMikuNiShiteAgeru
-	</AllowedReferenceRelatedFileExtensions>
+        .MikuMikuNiShiteAgeru
+    </AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

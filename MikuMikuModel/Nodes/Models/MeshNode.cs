@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Forms;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Maths;
 using MikuMikuLibrary.Models;
+using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Misc;
 using MikuMikuModel.Resources;
 
@@ -15,6 +17,19 @@ namespace MikuMikuModel.Nodes.Models
 
         public override Bitmap Image => 
             ResourceStore.LoadBitmap( "Icons/Mesh.png" );
+
+        public override Control Control
+        {
+            get
+            {
+                var modelParent = FindParent<ModelNode>();
+                if ( modelParent == null )
+                    return null;
+
+                ModelViewControl.Instance.SetModel( Data, modelParent.Data.TextureSet );
+                return ModelViewControl.Instance;
+            }
+        }
 
         public int Id
         {

@@ -48,6 +48,7 @@ namespace MikuMikuLibrary.Motions
                     ushort keyCount = reader.ReadUInt16();
                     ushort type = reader.ReadUInt16();
 
+                    Keys.Capacity = keyCount;
                     for ( int i = 0; i < keyCount; i++ )
                         Keys.Add( new Key() );
 
