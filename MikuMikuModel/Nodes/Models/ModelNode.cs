@@ -105,6 +105,71 @@ namespace MikuMikuModel.Nodes.Models
 
                 IsDirty = true;
             } );
+            RegisterCustomHandler( "Combine all meshes into one", () =>
+            {
+                if ( Data.Meshes.Count <= 1 )
+                    return;
+                    
+                var combinedMesh = new Mesh { Name = "Combined mesh" };
+                var indexMap = new Dictionary<int, int>();
+                
+                foreach ( var mesh in Data.Meshes )
+                {
+                    if ( mesh.Skin != null )
+                    {
+                        if ( combinedMesh.Skin == null )
+                        {
+                            combinedMesh.Skin = new Skin();
+                            combinedMesh.Skin.Bones.AddRange( mesh.Skin.Bones );
+                        }
+                        else
+                        {
+                            for ( int i = 0; i < mesh.Skin.Bones.Count; i++ )
+                            {
+                                var bone = mesh.Skin.Bones[ i ];
+                                var boneIndex = combinedMesh.Skin.Bones
+                                    .FindIndex( x => x.Name.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
+                                    
+                                if ( boneIndex == -1 )
+                                {
+                                    indexMap[ i ] = combinedMesh.Skin.Bones.Count;
+                                    combinedMesh.Skin.Bones.Add( bone );
+                                }
+                                else
+                                {
+                                    indexMap[ i ] = boneIndex;
+                                }
+                            }
+                            
+                            foreach ( var indexTable in mesh.SubMeshes.SelectMany( x => x.IndexTables ) )
+                            {
+                                if ( indexTable.BoneIndices?.Length >= 1 )
+                                {
+                                    for ( int i = 0; i < indexTable.BoneIndices.Length; i++ )
+                                        indexTable.BoneIndices[ i ] = ( ushort ) indexMap[ indexTable.BoneIndices[ i ] ];
+                                }
+                            }
+                        }
+                    }
+                    
+                    foreach ( var indexTable in mesh.SubMeshes.SelectMany( x => x.IndexTables ) )
+                        indexTable.MaterialIndex += combinedMesh.Materials.Count;
+                    
+                    combinedMesh.SubMeshes.AddRange( mesh.SubMeshes );
+                    combinedMesh.Materials.AddRange( mesh.Materials );
+                }
+                
+                Data.Meshes.Clear();
+                Data.Meshes.Add( combinedMesh );
+                
+                if ( IsPopulated )
+                {
+                    IsPopulated = false;
+                    Populate();
+                }
+                
+                IsDirty = true;
+            } );
 
             base.Initialize();
         }

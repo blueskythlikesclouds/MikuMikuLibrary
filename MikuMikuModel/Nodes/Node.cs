@@ -120,7 +120,15 @@ namespace MikuMikuModel.Nodes
         public Configuration SourceConfiguration { get; set; }
 
         [Browsable( false )]
-        public bool IsPopulated => mPopulated && !IsPopulating;
+        public bool IsPopulated
+        {
+            get => mPopulated && !IsPopulating;
+            protected set
+            {
+                if ( !IsPopulating )
+                    mPopulated = value;
+            }
+        }
         protected bool IsPopulating { get; private set; }
 
         [Browsable( false )]

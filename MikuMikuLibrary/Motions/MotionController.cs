@@ -15,17 +15,22 @@ namespace MikuMikuLibrary.Motions
             Parent.KeySets.Clear();
             Parent.BoneInfos.Clear();
             
-            var keyControllers = KeyControllers
-                .Where( x => motionDatabase == null || motionDatabase.BoneNames.Contains( x.Name ) )
-                .OrderBy( x => 
+            var keyControllers = skeletonEntry.BoneNames2
+                .Select( x => 
                     {
-                        int index = skeletonEntry.BoneNames2.IndexOf( x.Name );
-                        if ( index == -1 )
-                            return int.MaxValue;
-                        
-                        return index;
+                        var keyController = KeyControllers
+                            .FirstOrDefault( y => y.Name.Equals( x, StringComparison.OrdinalIgnoreCase ) );
+                            
+                        if ( keyController == null )
+                            keyController = new KeyController();
+                            
+                         keyController.Name = x;
+                         return keyController;
                     } )
-                .ThenBy( x => x.Name );
+                .Concat( KeyControllers
+                    .Where( x => !skeletonEntry.BoneNames2.Contains( x.Name ) )
+                    .OrderBy( x => x.Name ) )
+                .Where( x => motionDatabase == null || motionDatabase.BoneNames.Contains( x.Name ) );
                   
             foreach ( var keyController in keyControllers )
             {

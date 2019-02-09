@@ -143,8 +143,7 @@ namespace MikuMikuLibrary.Archives.Farc
                 mAlignment = reader.ReadInt32();
 
                 // Hacky way of checking Future Tone.
-                // There's a very low chance this isn't going
-                // to work, though.
+                // There's a very low chance this isn't going to work, though.
                 Format = isEncrypted && ( mAlignment & ( mAlignment - 1 ) ) != 0 ? BinaryFormat.FT : BinaryFormat.DT;
 
                 if ( Format == BinaryFormat.FT )
@@ -158,9 +157,6 @@ namespace MikuMikuLibrary.Archives.Farc
                     mAlignment = reader.ReadInt32();
                 }
 
-                // Since the first check worked only if the file was encrypted,
-                // we are going to one extra check here, since not all FARC files
-                // are necessarily encrypted. (see Len's lenitm FARCs from FT)
                 Format = reader.ReadInt32() == 1 ? BinaryFormat.FT : BinaryFormat.DT;
 
                 int entryCount = reader.ReadInt32();
@@ -202,8 +198,8 @@ namespace MikuMikuLibrary.Archives.Farc
                     {
                         Handle = name,
                         Position = offset,
-                        Length = fixedSize,
-                        IsCompressed = isCompressed && compressedSize != uncompressedSize,
+                        Length = uncompressedSize != 0 ? fixedSize : 0,
+                        IsCompressed = isCompressed && uncompressedSize != 0 && compressedSize != uncompressedSize,
                         IsEncrypted = isEncrypted,
                         IsFutureTone = Format == BinaryFormat.FT,
                     } );
@@ -225,15 +221,15 @@ namespace MikuMikuLibrary.Archives.Farc
                     uint offset = reader.ReadUInt32();
                     uint compressedSize = reader.ReadUInt32();
                     uint uncompressedSize = reader.ReadUInt32();
-
+                    
                     long fixedSize = Math.Min( compressedSize, reader.Length - offset );
 
                     mEntries.Add( name, new InternalEntry
                     {
                         Handle = name,
                         Position = offset,
-                        Length = fixedSize,
-                        IsCompressed = compressedSize != uncompressedSize,
+                        Length = uncompressedSize != 0 ? fixedSize : 0,
+                        IsCompressed = uncompressedSize != 0 && compressedSize != uncompressedSize,
                     } );
                 }
             }

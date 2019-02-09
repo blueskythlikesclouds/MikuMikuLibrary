@@ -24,7 +24,7 @@ namespace MikuMikuLibrary.IO.Common
             if ( position < 0 || position >= source.Length || position + length > source.Length )
                 throw new ArgumentOutOfRangeException( nameof( position ) );
 
-            if ( length <= 0 )
+            if ( length < 0 )
                 throw new ArgumentOutOfRangeException( nameof( length ) );
 
             mStream = source;

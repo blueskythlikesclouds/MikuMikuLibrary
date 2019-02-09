@@ -446,8 +446,9 @@ namespace MikuMikuModel.GUI.Controls
             GL.CullFace( CullFaceMode.Back );
             GL.Enable( EnableCap.CullFace );
             GL.Enable( EnableCap.DepthTest );
-            GL.Enable( EnableCap.PrimitiveRestartFixedIndex );
             GL.Enable( EnableCap.FramebufferSrgb );
+            GL.Enable( EnableCap.PrimitiveRestart );
+            GL.PrimitiveRestartIndex( 0xFFFF );
         }
     }
 }
