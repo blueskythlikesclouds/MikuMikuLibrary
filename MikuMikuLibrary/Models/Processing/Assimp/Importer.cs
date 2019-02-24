@@ -198,7 +198,7 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
 
                 if ( materialTexture.IsActive )
                 {
-                    materialTexture.Field01 = 23331040;
+                    materialTexture.Field01 = 0x2418C3;
                     materialTexture.Field06 = 1;
                     materialTexture.Field11 = 1;
                     materialTexture.Field16 = 1;
@@ -252,9 +252,9 @@ namespace MikuMikuLibrary.Models.Processing.Assimp
 
                     for ( int i = 0; i < aiMesh.Tangents.Count; i++ )
                     {
-                        Vector3 tangent = Vector3.TransformNormal( aiMesh.Tangents[ i ].ToNumerics(), transformation );
-                        Vector3 bitangent = Vector3.TransformNormal( aiMesh.BiTangents[ i ].ToNumerics(), transformation );
-                        int direction = Math.Sign( Vector3.Dot( bitangent, Vector3.Cross( subMesh.Normals[ vertexOffset + i ], tangent ) ) );
+                        Vector3 tangent = Vector3.Normalize( Vector3.TransformNormal( aiMesh.Tangents[ i ].ToNumerics(), transformation ) );
+                        Vector3 bitangent = Vector3.Normalize( Vector3.TransformNormal( aiMesh.BiTangents[ i ].ToNumerics(), transformation ) );
+                        int direction = Math.Sign( Vector3.Dot( bitangent, Vector3.Normalize( Vector3.Cross( subMesh.Normals[ vertexOffset + i ], tangent ) ) ) );
 
                         subMesh.Tangents[ vertexOffset + i ] = new Vector4( tangent, direction );
                     }

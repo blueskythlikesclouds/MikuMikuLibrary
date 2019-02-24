@@ -15,13 +15,14 @@ namespace MikuMikuLibrary.IO.Common
         private long mPosition;
         private long mLength;
         private readonly long mMaxLength;
+        private readonly bool mLeaveOpen;
 
-        public StreamView( Stream source, long position, long length )
+        public StreamView( Stream source, long position, long length, bool leaveOpen = true )
         {
             if ( source == null )
                 throw new ArgumentNullException( nameof( source ) );
 
-            if ( position < 0 || position >= source.Length || position + length > source.Length )
+            if ( position < 0 || ( source.CanSeek && ( position >= source.Length || position + length > source.Length ) ) )
                 throw new ArgumentOutOfRangeException( nameof( position ) );
 
             if ( length < 0 )
@@ -31,6 +32,7 @@ namespace MikuMikuLibrary.IO.Common
             mStreamPosition = position;
             mPosition = 0;
             mMaxLength = mLength = length;
+            mLeaveOpen = leaveOpen;
         }
 
         public override void Flush()
@@ -92,11 +94,17 @@ namespace MikuMikuLibrary.IO.Common
             if ( mPosition + count > mLength )
                 count = ( int )( mLength - mPosition );
 
-            SavePosition();
-            SetUnderlyingStreamPosition();
+            if ( mStream.CanSeek )
+            {
+                SavePosition();
+                SetUnderlyingStreamPosition();
+            }
+            
             int result = mStream.Read( buffer, offset, count );
             mPosition += count;
-            RestorePosition();
+            
+            if ( mStream.CanSeek )
+                RestorePosition();
 
             return result;
         }
@@ -108,12 +116,18 @@ namespace MikuMikuLibrary.IO.Common
 
             if ( mPosition + count > mLength )
                 throw new IOException( "Attempted to write past end of stream" );
-
-            SavePosition();
-            SetUnderlyingStreamPosition();
+            
+            if ( mStream.CanSeek )
+            {
+                SavePosition();
+                SetUnderlyingStreamPosition();
+            }
+            
             mStream.Write( buffer, offset, count );
             mPosition += count;
-            RestorePosition();
+            
+            if ( mStream.CanSeek )
+                RestorePosition();
         }
 
         public override bool CanRead
@@ -148,12 +162,18 @@ namespace MikuMikuLibrary.IO.Common
         {
             if ( EndOfStream )
                 return -1;
-
-            SavePosition();
-            SetUnderlyingStreamPosition();
+            
+            if ( mStream.CanSeek )
+            {
+                SavePosition();
+                SetUnderlyingStreamPosition();
+            }
+            
             int value = mStream.ReadByte();
             mPosition++;
-            RestorePosition();
+            
+            if ( mStream.CanSeek )
+                RestorePosition();
 
             return value;
         }
@@ -162,12 +182,18 @@ namespace MikuMikuLibrary.IO.Common
         {
             if ( EndOfStream )
                 throw new IOException( "Attempted to write past end of stream" );
-
-            SavePosition();
-            SetUnderlyingStreamPosition();
+            
+            if ( mStream.CanSeek )
+            {
+                SavePosition();
+                SetUnderlyingStreamPosition();
+            }
+            
             mStream.WriteByte( value );
             mPosition++;
-            RestorePosition();
+            
+            if ( mStream.CanSeek )
+                RestorePosition();
         }
 
         /*
@@ -252,6 +278,14 @@ namespace MikuMikuLibrary.IO.Common
         protected void RestorePosition()
         {
             mStream.Position = mSourcePositionCopy;
+        }
+        
+        protected override void Dispose( bool disposing )
+        {
+            if ( disposing && !mLeaveOpen )
+                mStream.Dispose();
+                
+            base.Dispose( disposing );
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,13 @@ namespace MikuMikuModel.Nodes.Archives
         public int Alignment
         {
             get => GetProperty<int>();
+            set => SetProperty( value );
+        }
+        
+        [DisplayName( "Enable compression" )]
+        public bool IsCompressed
+        {
+            get => GetProperty<bool>();
             set => SetProperty( value );
         }
 

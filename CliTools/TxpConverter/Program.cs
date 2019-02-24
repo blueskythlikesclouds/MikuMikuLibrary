@@ -78,7 +78,8 @@ namespace TxpConverter
                 textureSet.Save( destinationFileName );
             }
 
-            else if ( sourceFileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
+            else if ( sourceFileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) ||
+                sourceFileName.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
             {
                 destinationFileName = Path.ChangeExtension( destinationFileName, null );
 
@@ -88,11 +89,13 @@ namespace TxpConverter
                 for ( int i = 0; i < textureSet.Textures.Count; i++ )
                 {
                     var texture = textureSet.Textures[ i ];
+                    string name = string.IsNullOrEmpty( texture.Name ) ? $"{i}" : texture.Name;
+                    
                     if ( TextureFormatUtilities.IsCompressed( texture.Format ) )
-                        TextureDecoder.DecodeToDDS( texture, Path.Combine( destinationFileName, $"{i}.dds" ) );
+                        TextureDecoder.DecodeToDDS( texture, Path.Combine( destinationFileName, $"{name}.dds" ) );
 
                     else
-                        TextureDecoder.DecodeToPNG( texture, Path.Combine( destinationFileName, $"{i}.png" ) );
+                        TextureDecoder.DecodeToPNG( texture, Path.Combine( destinationFileName, $"{name}.png" ) );
                 }
             }
         }

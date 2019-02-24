@@ -13,50 +13,8 @@ using System.Text;
 
 namespace MikuMikuLibrary.IO.Common
 {
-    public enum AlignmentMode
-    {
-        None,
-        Left,
-        Center,
-        Right,
-    };
-
-    public enum OffsetMode
-    {
-        Offset,
-        Size,
-        OffsetAndSize,
-        SizeAndOffset,
-    };
-
     public class EndianBinaryWriter : BinaryWriter
     {
-        private class ScheduledWrite
-        {
-            public long BaseOffset;
-            public long FieldOffset;
-            public Action Action;
-            public OffsetMode OffsetMode;
-            public AlignmentMode AlignmentMode;
-            public int Alignment;
-            public byte AlignmentFillerByte;
-        }
-
-        private class StringTable
-        {
-            public long BaseOffset;
-            public Dictionary<string, List<long>> Strings;
-            public AlignmentMode AlignmentMode;
-            public int Alignment;
-            public StringBinaryFormat Format;
-            public int FixedLength;
-
-            public StringTable()
-            {
-                Strings = new Dictionary<string, List<long>>();
-            }
-        }
-
         private Endianness mEndianness;
         private bool mSwap;
         private Encoding mEncoding;
@@ -160,29 +118,56 @@ namespace MikuMikuLibrary.IO.Common
             }
             SeekBegin( current );
         }
+        
+        public void ScheduleWriteOffset( Func<long> action ) =>
+            ScheduleWriteOffset( 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
 
         public void ScheduleWriteOffset( Action action ) =>
             ScheduleWriteOffset( 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
 
+        public void ScheduleWriteOffset( OffsetMode offsetMode, Func<long> action ) =>
+            ScheduleWriteOffset( 0, 0, AlignmentMode.None, offsetMode, action );
+
         public void ScheduleWriteOffset( OffsetMode offsetMode, Action action ) =>
             ScheduleWriteOffset( 0, 0, AlignmentMode.None, offsetMode, action );
 
+        public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, Func<long> action ) =>
+            ScheduleWriteOffset( 0, alignment, alignmentMode, OffsetMode.Offset, action );
+
         public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, Action action ) =>
-            ScheduleWriteOffset( alignment, 0, alignmentMode, OffsetMode.Offset, action );
+            ScheduleWriteOffset( 0, alignment, alignmentMode, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Func<long> action ) =>
+            ScheduleWriteOffset( 0, alignment, alignmentMode, offsetMode, action );
 
         public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action ) =>
-            ScheduleWriteOffset( alignment, 0, alignmentMode, offsetMode, action );
+            ScheduleWriteOffset( 0, alignment, alignmentMode, offsetMode, action );
 
-        public void ScheduleWriteOffset( int alignment, byte alignmentFillerByte, AlignmentMode alignmentMode, Action action ) =>
-            ScheduleWriteOffset( alignment, alignmentFillerByte, alignmentMode, OffsetMode.Offset, action );
+        public void ScheduleWriteOffset( int priority, Func<long> action ) =>
+            ScheduleWriteOffset( priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
 
-        public void ScheduleWriteOffset( int alignment, byte alignmentFillerByte, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action )
+        public void ScheduleWriteOffset( int priority, Action action ) =>
+            ScheduleWriteOffset( priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffset( int priority, OffsetMode offsetMode, Func<long> action ) =>
+            ScheduleWriteOffset( priority, 0, AlignmentMode.None, offsetMode, action );
+
+        public void ScheduleWriteOffset( int priority, OffsetMode offsetMode, Action action ) =>
+            ScheduleWriteOffset( priority, 0, AlignmentMode.None, offsetMode, action );
+
+        public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode, Func<long> action ) =>
+            ScheduleWriteOffset( priority, alignment, alignmentMode, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode, Action action ) =>
+            ScheduleWriteOffset( priority, alignment, alignmentMode, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Func<long> action )
         {
             mScheduledWrites.AddLast( new ScheduledWrite
             {
                 FieldOffset = PrepareWriteOffset( offsetMode ),
+                Priority = priority,
                 Alignment = alignment,
-                AlignmentFillerByte = alignmentFillerByte,
                 AlignmentMode = alignmentMode,
                 OffsetMode = offsetMode,
                 Action = action,
@@ -190,50 +175,70 @@ namespace MikuMikuLibrary.IO.Common
             } );
         }
 
-        public void ScheduleWriteOffsetIf( bool condition, Action action )
+        public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action )
         {
-            if ( condition )
-                ScheduleWriteOffset( action );
-            else
-                PrepareWriteOffset( OffsetMode.Offset );
+            ScheduleWriteOffset( priority, alignment, alignmentMode, offsetMode, () =>
+            {
+                long current = Position;
+                action();
+                return current;
+            } );
         }
 
-        public void ScheduleWriteOffsetIf( bool condition, OffsetMode offsetMode, Action action )
+        public void ScheduleWriteOffsetIf( bool condition, Func<long> action ) =>
+            ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, Action action ) =>
+            ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, OffsetMode offsetMode, Func<long> action ) =>
+            ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, offsetMode, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, OffsetMode offsetMode, Action action ) =>
+            ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, offsetMode, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode, Func<long> action ) =>
+            ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode, Action action ) =>
+            ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Func<long> action ) =>
+            ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, offsetMode, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action ) =>
+            ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, offsetMode, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int priority, Func<long> action ) =>
+            ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int priority, Action action ) =>
+            ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int priority, OffsetMode offsetMode, Func<long> action ) =>
+            ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, offsetMode, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int priority, OffsetMode offsetMode, Action action ) =>
+            ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, offsetMode, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int priority, int alignment, AlignmentMode alignmentMode, Func<long> action ) =>
+            ScheduleWriteOffsetIf( condition, priority, alignment, alignmentMode, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int priority, int alignment, AlignmentMode alignmentMode, Action action ) =>
+            ScheduleWriteOffsetIf( condition, priority, alignment, alignmentMode, OffsetMode.Offset, action );
+
+        public void ScheduleWriteOffsetIf( bool condition, int priority, int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Func<long> action )
         {
             if ( condition )
-                ScheduleWriteOffset( offsetMode, action );
+                ScheduleWriteOffset( priority, alignment, alignmentMode, offsetMode, action );
             else
                 PrepareWriteOffset( offsetMode );
         }
 
-        public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode, Action action )
+        public void ScheduleWriteOffsetIf( bool condition, int priority, int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action )
         {
             if ( condition )
-                ScheduleWriteOffset( alignment, alignmentMode, action );
-            else
-                PrepareWriteOffset( OffsetMode.Offset );
-        }
-
-        public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action )
-        {
-            if ( condition )
-                ScheduleWriteOffset( alignment, alignmentMode, offsetMode, action );
-            else
-                PrepareWriteOffset( offsetMode );
-        }
-
-        public void ScheduleWriteOffsetIf( bool condition, int alignment, byte alignmentFillerByte, AlignmentMode alignmentMode, Action action )
-        {
-            if ( condition )
-                ScheduleWriteOffset( alignment, alignmentFillerByte, alignmentMode, action );
-            else
-                PrepareWriteOffset( OffsetMode.Offset );
-        }
-
-        public void ScheduleWriteOffsetIf( bool condition, int alignment, byte alignmentFillerByte, AlignmentMode alignmentMode, OffsetMode offsetMode, Action action )
-        {
-            if ( condition )
-                ScheduleWriteOffset( alignment, alignmentFillerByte, alignmentMode, offsetMode, action );
+                ScheduleWriteOffset( priority, alignment, alignmentMode, offsetMode, action );
             else
                 PrepareWriteOffset( offsetMode );
         }
@@ -266,32 +271,52 @@ namespace MikuMikuLibrary.IO.Common
             return offset;
         }
 
+        private void PerformScheduledWrites( LinkedListNode<ScheduledWrite> first, LinkedListNode<ScheduledWrite> last, long baseOffset )
+        {
+            int priority = 0;
+            bool increment;
+            
+            do
+            {
+                increment = false;
+            
+                for ( var current = first; current != null && current != last.Next; current = current.Next )
+                {
+                    var scheduledWrite = current.Value;
+            
+                    if ( scheduledWrite.Priority == priority )
+                        PerformScheduledWrite( current, baseOffset );
+                        
+                    else if ( scheduledWrite.Priority > priority )
+                        increment = true;
+                }
+                
+                priority++;
+            } while ( increment );
+        }
+
         private void PerformScheduledWrite( LinkedListNode<ScheduledWrite> scheduledWriteNode, long baseOffset )
         {
             var scheduledWrite = scheduledWriteNode.Value;
 
             if ( scheduledWrite.AlignmentMode == AlignmentMode.Left || scheduledWrite.AlignmentMode == AlignmentMode.Center )
-                WriteAlignmentPadding( scheduledWrite.Alignment, scheduledWrite.AlignmentFillerByte );
+                WriteAlignmentPadding( scheduledWrite.Alignment );
 
             var first = mScheduledWrites.Last;
 
-            long startOffset = Position;
-            {
-                scheduledWrite.Action();
-            }
+            long startOffset = scheduledWrite.Action();
             long endOffset = Position;
 
             var last = mScheduledWrites.Last;
 
-            if ( scheduledWrite.AlignmentMode == AlignmentMode.Left || scheduledWrite.AlignmentMode == AlignmentMode.Center )
-                WriteAlignmentPadding( scheduledWrite.Alignment, scheduledWrite.AlignmentFillerByte );
+            if ( scheduledWrite.AlignmentMode == AlignmentMode.Right || scheduledWrite.AlignmentMode == AlignmentMode.Center )
+                WriteAlignmentPadding( scheduledWrite.Alignment );
 
             if ( scheduledWrite.BaseOffset > 0 )
                 baseOffset = scheduledWrite.BaseOffset;
-
-            for ( var current = first.Next; current != null && current != last.Next; current = current.Next )
-                PerformScheduledWrite( current, baseOffset );
-
+            
+            PerformScheduledWrites( first.Next, last, baseOffset );
+            
             mOffsetPositions.Add( scheduledWrite.FieldOffset );
 
             WriteAtOffset( scheduledWrite.FieldOffset, () =>
@@ -326,8 +351,7 @@ namespace MikuMikuLibrary.IO.Common
             var first = mScheduledWrites.First;
             var last = mScheduledWrites.Last;
 
-            for ( var current = first; current != null && current != last.Next; current = current.Next )
-                PerformScheduledWrite( current, 0 );
+            PerformScheduledWrites( first, last, 0 );
 
             mScheduledWrites.Clear();
         }
@@ -422,7 +446,7 @@ namespace MikuMikuLibrary.IO.Common
 
             var position = PrepareWriteOffset( OffsetMode.Offset );
 
-            if ( !string.IsNullOrEmpty( value ) )
+            if ( value != null )
             {
                 if ( stringTable.Strings.TryGetValue( value, out List<long> positions ) )
                     positions.Add( position );
@@ -861,5 +885,47 @@ namespace MikuMikuLibrary.IO.Common
             mStringTables = new Stack<StringTable>();
             mOffsetPositions = new List<long>();
         }
+        
+        private class ScheduledWrite
+        {
+            public long BaseOffset;
+            public long FieldOffset;
+            public Func<long> Action;
+            public int Priority;
+            public OffsetMode OffsetMode;
+            public AlignmentMode AlignmentMode;
+            public int Alignment;
+        }
+
+        private class StringTable
+        {
+            public long BaseOffset;
+            public Dictionary<string, List<long>> Strings;
+            public AlignmentMode AlignmentMode;
+            public int Alignment;
+            public StringBinaryFormat Format;
+            public int FixedLength;
+
+            public StringTable()
+            {
+                Strings = new Dictionary<string, List<long>>();
+            }
+        }
     }
+    
+    public enum AlignmentMode
+    {
+        None,
+        Left,
+        Center,
+        Right,
+    };
+
+    public enum OffsetMode
+    {
+        Offset,
+        Size,
+        OffsetAndSize,
+        SizeAndOffset,
+    };
 }

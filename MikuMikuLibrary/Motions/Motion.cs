@@ -186,6 +186,9 @@ namespace MikuMikuLibrary.Motions
             int index = 0;
             foreach ( var boneInfo in BoneInfos )
             {
+                if ( motionDatabase != null && boneInfo.Id >= motionDatabase.BoneNames.Count )
+                    break;
+            
                 boneInfo.Name = boneInfo.Name ?? motionDatabase?.BoneNames[ boneInfo.Id ] ??
                                 throw new ArgumentNullException( nameof( motionDatabase ) );
 

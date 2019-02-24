@@ -135,23 +135,32 @@ namespace MikuMikuLibrary.Motions
 
         public float Interpolate( float frame )
         {
-            if ( Keys.Count <= 1 )
-                return Keys.Count != 1 ? 0 : Keys[ 0 ].Value;
+            if ( Keys.Count == 0 )
+                return 0;
+        
+            if ( Keys.Count == 1 )
+                return Keys[ 0 ].Value;
 
             Key previous = null;
             Key next = null;
 
             foreach ( var key in Keys )
             {
-                previous = next;
-                next = key;
-
                 if ( Math.Abs( key.Frame - frame ) < 0.000001 )
                     return key.Value;
+            
+                previous = next;
+                next = key;
 
                 if ( frame < next.Frame )
                     break;
             }
+            
+            if ( previous != null && next == null )
+                return previous.Value;
+                
+            if ( previous == null && next != null )
+                return next.Value;
 
             float factor = ( frame - Keys[ Keys.Count - 1 ].Frame ) /
                            ( next.Frame - Keys[ Keys.Count - 1 ].Frame );

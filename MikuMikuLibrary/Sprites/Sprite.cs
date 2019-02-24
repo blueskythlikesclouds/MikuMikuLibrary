@@ -9,10 +9,10 @@ namespace MikuMikuLibrary.Sprites
         public int Field01 { get; set; }
         public int TextureIndex { get; set; }
         public float Field02 { get; set; }
-        public float Field03 { get; set; }
-        public float Field04 { get; set; }
-        public float Field05 { get; set; }
-        public float Field06 { get; set; }
+        public float NdcX { get; set; }
+        public float NdcY { get; set; }
+        public float NdcWidth { get; set; }
+        public float NdcHeight { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Width { get; set; }
@@ -22,10 +22,10 @@ namespace MikuMikuLibrary.Sprites
         {
             TextureIndex = reader.ReadInt32();
             Field02 = reader.ReadSingle();
-            Field03 = reader.ReadSingle();
-            Field04 = reader.ReadSingle();
-            Field05 = reader.ReadSingle();
-            Field06 = reader.ReadSingle();
+            NdcX = reader.ReadSingle();
+            NdcY = reader.ReadSingle();
+            NdcWidth = reader.ReadSingle();
+            NdcHeight = reader.ReadSingle();
             X = reader.ReadSingle();
             Y = reader.ReadSingle();
             Width = reader.ReadSingle();
@@ -36,10 +36,10 @@ namespace MikuMikuLibrary.Sprites
         {
             writer.Write( TextureIndex );
             writer.Write( Field02 );
-            writer.Write( Field03 );
-            writer.Write( Field04 );
-            writer.Write( Field05 );
-            writer.Write( Field06 );
+            writer.Write( NdcX );
+            writer.Write( NdcY );
+            writer.Write( NdcWidth );
+            writer.Write( NdcHeight );
             writer.Write( X );
             writer.Write( Y );
             writer.Write( Width );

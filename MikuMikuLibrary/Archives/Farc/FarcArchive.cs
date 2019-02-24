@@ -15,7 +15,7 @@ namespace MikuMikuLibrary.Archives.Farc
     {
         private readonly Dictionary<string, InternalEntry> mEntries;
         private int mAlignment;
-
+        
         public override BinaryFileFlags Flags =>
             BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.UsesSourceStream;
 
@@ -37,7 +37,9 @@ namespace MikuMikuLibrary.Archives.Farc
                     mAlignment = value;
             }
         }
-
+        
+        public bool IsCompressed { get; set; }
+        
         public void Add( string handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
         {
             if ( mEntries.TryGetValue( handle, out var entry ) )
@@ -137,10 +139,12 @@ namespace MikuMikuLibrary.Archives.Farc
             if ( signature == "FARC" )
             {
                 int flags = reader.ReadInt32();
-                bool isCompressed = ( flags & ( 1 << 1 ) ) != 0;
-                bool isEncrypted = ( flags & ( 1 << 2 ) ) != 0;
+                bool isCompressed = ( flags & 2 ) != 0;
+                bool isEncrypted = ( flags & 4 ) != 0;
                 int padding = reader.ReadInt32();
                 mAlignment = reader.ReadInt32();
+                
+                IsCompressed = isCompressed;
 
                 // Hacky way of checking Future Tone.
                 // There's a very low chance this isn't going to work, though.
@@ -173,8 +177,8 @@ namespace MikuMikuLibrary.Archives.Farc
                     if ( Format == BinaryFormat.FT )
                     {
                         flags = reader.ReadInt32();
-                        isCompressed = ( flags & ( 1 << 1 ) ) != 0;
-                        isEncrypted = ( flags & ( 1 << 2 ) ) != 0;
+                        isCompressed = ( flags & 2 ) != 0;
+                        isEncrypted = ( flags & 4 ) != 0;
                     }
 
                     long fixedSize = 0;
@@ -198,8 +202,10 @@ namespace MikuMikuLibrary.Archives.Farc
                     {
                         Handle = name,
                         Position = offset,
-                        Length = uncompressedSize != 0 ? fixedSize : 0,
-                        IsCompressed = isCompressed && uncompressedSize != 0 && compressedSize != uncompressedSize,
+                        UnpackedLength = uncompressedSize,
+                        CompressedLength = Math.Min( compressedSize, originalStream.Length - offset ),
+                        Length = fixedSize,
+                        IsCompressed = isCompressed && compressedSize != uncompressedSize,
                         IsEncrypted = isEncrypted,
                         IsFutureTone = Format == BinaryFormat.FT,
                     } );
@@ -214,7 +220,7 @@ namespace MikuMikuLibrary.Archives.Farc
             else if ( signature == "FArC" )
             {
                 mAlignment = reader.ReadInt32();
-
+                
                 while ( reader.Position < headerSize )
                 {
                     string name = reader.ReadString( StringBinaryFormat.NullTerminated );
@@ -228,10 +234,14 @@ namespace MikuMikuLibrary.Archives.Farc
                     {
                         Handle = name,
                         Position = offset,
-                        Length = uncompressedSize != 0 ? fixedSize : 0,
-                        IsCompressed = uncompressedSize != 0 && compressedSize != uncompressedSize,
+                        UnpackedLength = uncompressedSize,
+                        CompressedLength = fixedSize,
+                        Length = fixedSize,
+                        IsCompressed = compressedSize != uncompressedSize,
                     } );
                 }
+                
+                IsCompressed = true;
             }
 
             else if ( signature == "FArc" )
@@ -250,49 +260,70 @@ namespace MikuMikuLibrary.Archives.Farc
                     {
                         Handle = name,
                         Position = offset,
+                        UnpackedLength = fixedSize,
                         Length = fixedSize,
                     } );
                 }
+                
+                IsCompressed = false;
             }
         }
 
         public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
-            writer.Write( "FArc", StringBinaryFormat.FixedLength, 4 );
+            writer.Write( IsCompressed ? "FArC" : "FArc", StringBinaryFormat.FixedLength, 4 );
             writer.ScheduleWriteOffset( OffsetMode.Size, () =>
             {
                 writer.Write( mAlignment );
-
+                
                 foreach ( var entry in mEntries.Values.OrderBy( x => x.Handle ) )
                 {
                     writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
-                    writer.ScheduleWriteOffset( mAlignment, 0x78, AlignmentMode.Center, OffsetMode.OffsetAndSize, () =>
+                    writer.ScheduleWriteOffset( OffsetMode.OffsetAndSize, () =>
                     {
+                        writer.WriteAlignmentPadding( mAlignment, 0x78 );
+                    
                         long position = writer.Position;
 
-                        var entryStream = entry.Open( mStream );
-                        if ( entryStream.CanSeek )
-                            entryStream.Position = 0;
-
-                        entryStream.CopyTo( writer.BaseStream );
-
+                        entry.CopyTo( writer.BaseStream, mStream, IsCompressed );
+                        
                         entry.Position = position;
                         entry.Length = writer.Position - position;
-                        entry.IsCompressed = entry.IsEncrypted = entry.IsFutureTone = false;
+                        
+                        entry.IsCompressed = IsCompressed;
+                        if ( IsCompressed )
+                        {
+                            entry.CompressedLength = entry.Length;
+                        }
+                        else
+                        {
+                            entry.CompressedLength = -1;
+                            entry.UnpackedLength = entry.Length;
+                        }
+                            
+                        entry.IsEncrypted = false;
+                        entry.IsFutureTone = false;
 
                         if ( entry.Stream != null )
                         {
+                            entry.UnpackedLength = entry.Stream.Length;
+                        
                             if ( entry.OwnsStream )
                                 entry.Stream.Dispose();
 
                             entry.Stream = null;
                             entry.OwnsStream = false;
                         }
-
-                        entryStream.Close();
+                        
+                        return position;
                     } );
+                    if ( IsCompressed )
+                        writer.Write( ( uint )( entry.Stream?.Length ?? entry.UnpackedLength ) );
                 }
             } );
+            
+            writer.PerformScheduledWrites();
+            writer.WriteAlignmentPadding( mAlignment, 0x78 );
         }
 
         protected override void Dispose( bool disposing )

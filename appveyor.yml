@@ -7,14 +7,21 @@ before_build:
 build:
     project: MikuMikuLibrary.sln
 
+after_build:
+    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on MikuMikuModel.7z ./MikuMikuModel/bin/Release/*
+    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on MikuMikuLibrary.7z ./MikuMikuLibrary/bin/Release/*
+    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on DatabaseConverter.7z ./CliTools/DatabaseConverter/bin/Release/*
+    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on FarcPack.7z ./CliTools/FarcPack/bin/Release/*
+    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on TxpConverter.7z ./CliTools/TxpConverter/bin/Release/*
+
 artifacts:
-    - path: MikuMikuModel/bin/Release
+    - path: MikuMikuModel.7z
       name: MikuMikuModel
-    - path: MikuMikuLibrary/bin/Release
+    - path: MikuMikuLibrary.7z
       name: MikuMikuLibrary
-    - path: CliTools/DatabaseConverter/bin/Release
+    - path: DatabaseConverter.7z
       name: DatabaseConverter
-    - path: CliTools/FarcPack/bin/Release
+    - path: FarcPack.7z
       name: FarcPack
-    - path: CliTools/TxpConverter/bin/Release
+    - path: TxpConverter.7z
       name: TxpConverter

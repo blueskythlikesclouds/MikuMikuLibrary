@@ -3,6 +3,7 @@ using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Maths;
+using System;
 using System.Collections.Generic;
 
 namespace MikuMikuLibrary.Models
@@ -78,16 +79,16 @@ namespace MikuMikuLibrary.Models
                 writer.Write( SubMeshes.Count );
                 writer.Write( Materials.Count );
                 writer.Write( BoundingSphere );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteSubMeshes );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMaterials );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteSubMeshes );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteMaterials );
             }
             else
             {
                 writer.Write( BoundingSphere );
                 writer.Write( SubMeshes.Count );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteSubMeshes );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteSubMeshes );
                 writer.Write( Materials.Count );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMaterials );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteMaterials );
             }
 
             writer.WriteNulls( section?.Format == BinaryFormat.X ? 0x40 : 0x28 );

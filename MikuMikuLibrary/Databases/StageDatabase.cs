@@ -3,6 +3,7 @@ using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -23,9 +24,8 @@ namespace MikuMikuLibrary.Databases
             Stars = 20,
         }
 
-        // Section 1
         public string Name { get; set; }
-        public string Auth3DName { get; set; }
+        public string Auth3dName { get; set; }
         public short ObjectId1 { get; set; }
         public short ObjectIdFlag1 { get; set; }
         public short ObjectGroundId { get; set; }
@@ -60,10 +60,7 @@ namespace MikuMikuLibrary.Databases
         public float RingRectangleWidth { get; set; }
         public float RingRectangleHeight { get; set; }
         public float RingRingHeight { get; set; }
-        // Future Tone Exclusive
         public float RingOutHeight { get; set; }
-
-        // Section 2
         public int Field11 { get; set; }
         public int Field12 { get; set; }
         public int Field13 { get; set; }
@@ -88,17 +85,13 @@ namespace MikuMikuLibrary.Databases
         public StageEffect StageEffect14 { get; set; }
         public StageEffect StageEffect15 { get; set; }
         public StageEffect StageEffect16 { get; set; }
-
-        // Section 3
-        public int Field19 { get; set; }
-
-        // Section 4
-        public List<int> Auth3DIds { get; }
-
-        internal void ReadFirst( EndianBinaryReader reader, BinaryFormat format )
+        public int Id { get; set; }
+        public List<int> Auth3dIds { get; }
+        
+        internal void Read( EndianBinaryReader reader, BinaryFormat format )
         {
             Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            Auth3DName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Auth3dName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             ObjectId1 = reader.ReadInt16();
             ObjectIdFlag1 = reader.ReadInt16();
             ObjectGroundId = reader.ReadInt16();
@@ -119,32 +112,32 @@ namespace MikuMikuLibrary.Databases
             Field00 = reader.ReadSingle();
             Field01 = reader.ReadInt32();
             Field02 = reader.ReadInt32();
-            Field03 = reader.ReadInt32();
+            if ( format > BinaryFormat.DT )
+                Field03 = reader.ReadInt32();
             CollisionFilePath = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Field04 = reader.ReadInt32();
             Field05 = reader.ReadInt32();
-            reader.ReadAtOffset( reader.ReadUInt32(), () =>
+            reader.ReadOffset( () =>
             {
                 Field06 = reader.ReadInt32();
                 Field07 = reader.ReadInt32();
                 Field08 = reader.ReadInt32();
             } );
             Field09 = reader.ReadInt32();
-            Field10 = reader.ReadInt32();
+            if ( format == BinaryFormat.FT )
+                Field10 = reader.ReadInt32();
             RingRectangleX = reader.ReadSingle();
             RingRectangleY = reader.ReadSingle();
             RingRectangleWidth = reader.ReadSingle();
             RingRectangleHeight = reader.ReadSingle();
             RingRingHeight = reader.ReadSingle();
-
-            if ( format == BinaryFormat.FT )
-                RingOutHeight = reader.ReadSingle();
+            RingOutHeight = reader.ReadSingle();
         }
 
-        internal void WriteFirst( EndianBinaryWriter writer, BinaryFormat format )
+        internal void Write( EndianBinaryWriter writer, BinaryFormat format )
         {
             writer.AddStringToStringTable( Name );
-            writer.AddStringToStringTable( Auth3DName );
+            writer.AddStringToStringTable( Auth3dName );
             writer.Write( ObjectId1 );
             writer.Write( ObjectIdFlag1 );
             writer.Write( ObjectGroundId );
@@ -165,7 +158,8 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Field00 );
             writer.Write( Field01 );
             writer.Write( Field02 );
-            writer.Write( Field03 );
+            if ( format > BinaryFormat.DT )
+                writer.Write( Field03 );
             writer.AddStringToStringTable( CollisionFilePath );
             writer.Write( Field04 );
             writer.Write( Field05 );
@@ -176,18 +170,17 @@ namespace MikuMikuLibrary.Databases
                 writer.Write( Field08 );
             } );
             writer.Write( Field09 );
-            writer.Write( Field10 );
+            if ( format == BinaryFormat.FT )
+                writer.Write( Field10 );
             writer.Write( RingRectangleX );
             writer.Write( RingRectangleY );
             writer.Write( RingRectangleWidth );
             writer.Write( RingRectangleHeight );
             writer.Write( RingRingHeight );
-
-            if ( format == BinaryFormat.FT )
-                writer.Write( RingOutHeight );
+            writer.Write( RingOutHeight );
         }
 
-        internal void ReadSecond( EndianBinaryReader reader )
+        internal void ReadStageEffects( EndianBinaryReader reader )
         {
             Field11 = reader.ReadInt32();
             Field12 = reader.ReadInt32();
@@ -215,7 +208,7 @@ namespace MikuMikuLibrary.Databases
             StageEffect16 = ( StageEffect )reader.ReadInt32();
         }
 
-        internal void WriteSecond( EndianBinaryWriter writer )
+        internal void WriteStageEffects( EndianBinaryWriter writer )
         {
             writer.Write( Field11 );
             writer.Write( Field12 );
@@ -243,31 +236,26 @@ namespace MikuMikuLibrary.Databases
             writer.Write( ( int )StageEffect16 );
         }
 
-        internal void ReadThird( EndianBinaryReader reader )
+        internal void ReadAuth3dIds( EndianBinaryReader reader, int count )
         {
-            Field19 = reader.ReadInt32();
-        }
-
-        internal void WriteThird( EndianBinaryWriter writer )
-        {
-            writer.Write( Field19 );
-        }
-
-        internal void ReadFourth( EndianBinaryReader reader )
-        {
-            reader.ReadAtOffset( reader.ReadUInt32(), () =>
+            Id = reader.ReadInt32();
+            
+            reader.ReadOffset( () =>
             {
-                int id;
-                while ( ( id = reader.ReadInt32() ) >= 0 )
-                    Auth3DIds.Add( id );
+                Auth3dIds.Capacity = count;
+                for ( int i = 0; i < count; i++ )
+                    Auth3dIds.Add( reader.ReadInt32() );
+                    
+                Auth3dIds.Remove( -1 );
             } );
         }
 
-        internal void WriteFourth( EndianBinaryWriter writer )
+        internal void WriteAuth3dIds( EndianBinaryWriter writer )
         {
+            writer.Write( Id );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var id in Auth3DIds )
+                foreach ( var id in Auth3dIds )
                     writer.Write( id );
 
                 writer.Write( -1 );
@@ -276,7 +264,7 @@ namespace MikuMikuLibrary.Databases
 
         public StageEntry()
         {
-            Auth3DIds = new List<int>();
+            Auth3dIds = new List<int>();
         }
     }
 
@@ -285,49 +273,55 @@ namespace MikuMikuLibrary.Databases
         public override BinaryFileFlags Flags => BinaryFileFlags.Load | BinaryFileFlags.Save;
 
         public List<StageEntry> Stages { get; }
-        public bool IsFutureTone { get; set; }
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             int count = reader.ReadInt32();
-            uint section1Offset = reader.ReadUInt32();
-            uint section2Offset = reader.ReadUInt32();
-            uint section3Offset = reader.ReadUInt32();
-            uint section4Offset = reader.ReadUInt32();
-
-            Format = ( section2Offset - section1Offset ) / count != 108 ? BinaryFormat.FT : BinaryFormat.F;
-
-            reader.ReadAtOffset( section1Offset, () =>
+            long stagesOffset = reader.ReadOffset();
+            long stageEffectsOffset = reader.ReadOffset();
+            long auth3dIdCountsOffset = reader.ReadOffset();
+            long auth3dIdsOffset = reader.ReadOffset();
+            
+            if ( reader.ReadBoolean() )
+            {
+                Format = ( BinaryFormat ) reader.ReadByte();
+            }
+            else
+            {
+                long entrySize = ( stageEffectsOffset - stagesOffset ) / count;
+                Format = entrySize == 104 ? BinaryFormat.DT :
+                         entrySize == 108 ? BinaryFormat.F :
+                         entrySize >= 112 ? BinaryFormat.FT :
+                         throw new InvalidDataException();
+            }
+                     
+            reader.ReadAtOffset( stagesOffset, () =>
             {
                 Stages.Capacity = count;
                 for ( int i = 0; i < count; i++ )
                 {
                     var stageEntry = new StageEntry();
-                    stageEntry.ReadFirst( reader, Format );
+                    {
+                        stageEntry.Read( reader, Format );
+                    }
                     Stages.Add( stageEntry );
                 }
             } );
 
-            reader.ReadAtOffset( section2Offset, () =>
+            reader.ReadAtOffset( stageEffectsOffset, () =>
             {
                 foreach ( var stageEntry in Stages )
-                    stageEntry.ReadSecond( reader );
+                    stageEntry.ReadStageEffects( reader );
             } );
-
-            reader.ReadAtOffset( section3Offset, () =>
+            
+            reader.ReadAtOffset( auth3dIdCountsOffset, () =>
             {
-                foreach ( var stageEntry in Stages )
-                    stageEntry.ReadThird( reader );
-            } );
-
-            reader.ReadAtOffset( section4Offset, () =>
-            {
-                for ( int i = 0; i < Stages.Count; i++ )
+                var auth3dIdCounts = reader.ReadInt32s( count );
+                reader.ReadAtOffset( auth3dIdsOffset, () =>
                 {
-                    int index = reader.ReadInt32();
-                    Debug.Assert( i == index );
-                    Stages[ index ].ReadFourth( reader );
-                }
+                    for ( int i = 0; i < count; i++ )
+                        Stages[ i ].ReadAuth3dIds( reader, auth3dIdCounts[ i ] );
+                } );
             } );
         }
 
@@ -337,26 +331,27 @@ namespace MikuMikuLibrary.Databases
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
-                    stageEntry.WriteFirst( writer, Format );
+                    stageEntry.Write( writer, Format );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
-                    stageEntry.WriteSecond( writer );
+                    stageEntry.WriteStageEffects( writer );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var stageEntry in Stages )
-                    stageEntry.WriteThird( writer );
+                    writer.Write( stageEntry.Auth3dIds.Count + 1 );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                for ( int i = 0; i < Stages.Count; i++ )
-                {
-                    writer.Write( i );
-                    Stages[ i ].WriteFourth( writer );
-                }
+                foreach ( var stageEntry in Stages )
+                    stageEntry.WriteAuth3dIds( writer );
             } );
+            
+            // HACK: We store the format in the reserved part of header.
+            writer.Write( true );
+            writer.Write( ( byte ) Format );
         }
 
         public StageDatabase()

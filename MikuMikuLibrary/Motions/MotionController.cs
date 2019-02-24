@@ -28,9 +28,11 @@ namespace MikuMikuLibrary.Motions
                          return keyController;
                     } )
                 .Concat( KeyControllers
-                    .Where( x => !skeletonEntry.BoneNames2.Contains( x.Name ) )
+                    .Where( x =>
+                        x.Name.Equals( "gblctr", StringComparison.OrdinalIgnoreCase ) ||
+                        x.Name.Equals( "kg_ya_ex", StringComparison.OrdinalIgnoreCase ) )
                     .OrderBy( x => x.Name ) )
-                .Where( x => motionDatabase == null || motionDatabase.BoneNames.Contains( x.Name ) );
+                .Where( x => motionDatabase == null || motionDatabase.BoneNames.Contains( x.Name, StringComparer.OrdinalIgnoreCase ) );
                   
             foreach ( var keyController in keyControllers )
             {

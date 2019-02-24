@@ -2,6 +2,7 @@
 using MikuMikuLibrary.Archives.Farc;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace FarcPack
 {
@@ -18,14 +19,28 @@ namespace FarcPack
 
             string sourceFileName = null;
             string destinationFileName = null;
+            
+            bool compress = false;
+            int alignment = 16;
 
-            foreach ( var arg in args )
+            for ( int i = 0; i < args.Length; i++ )
             {
-                if ( sourceFileName == null )
+                string arg = args[ i ];
+            
+                if ( EqualsAny( "-c", "--compress" ) )
+                    compress = true;
+                    
+                else if ( EqualsAny( "-a", "--alignment" ) )
+                    alignment = int.Parse( args[ ++i ] );
+            
+                else if ( sourceFileName == null )
                     sourceFileName = arg;
 
                 else if ( destinationFileName == null )
                     destinationFileName = arg;
+                    
+                bool EqualsAny( params string[] strings ) =>
+                    strings.Contains( arg, StringComparer.OrdinalIgnoreCase );
             }
 
             if ( destinationFileName == null )
@@ -36,6 +51,9 @@ namespace FarcPack
                 destinationFileName = Path.ChangeExtension( destinationFileName, "farc" );
 
                 var farcArchive = new FarcArchive();
+                farcArchive.IsCompressed = compress;
+                farcArchive.Alignment = alignment;
+                
                 foreach ( var filePath in Directory.EnumerateFiles( sourceFileName ) )
                     farcArchive.Add( Path.GetFileName( filePath ), filePath );
 

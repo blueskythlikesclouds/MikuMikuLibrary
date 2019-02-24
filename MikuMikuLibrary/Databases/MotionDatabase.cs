@@ -46,19 +46,27 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        internal void Write( EndianBinaryWriter writer )
+        internal void Write( EndianBinaryWriter writer, bool first, bool last )
         {
+            int alignment = first ? 16 : 4;
+        
             writer.AddStringToStringTable( Name );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( alignment, AlignmentMode.Left, () =>
             {
                 foreach ( var motionEntry in Motions )
                     writer.AddStringToStringTable( motionEntry.Name );
+                
+                if ( last )
+                    writer.WriteOffset( 0 );
             } );
             writer.Write( Motions.Count );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 1, alignment, AlignmentMode.Left, () =>
             {
                 foreach ( var motionEntry in Motions )
                     writer.Write( motionEntry.Id );
+                    
+                if ( last )
+                    writer.Write( 0 );
             } );
         }
 
@@ -115,7 +123,14 @@ namespace MikuMikuLibrary.Databases
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var motionSetEntry in MotionSets )
-                    motionSetEntry.Write( writer );
+                {
+                    bool first = motionSetEntry == MotionSets[ 0 ];
+                    bool last = motionSetEntry == MotionSets[ MotionSets.Count - 1 ];
+                    
+                    motionSetEntry.Write( writer, first, last );
+                }
+                
+                writer.WriteNulls( 16 );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
@@ -123,9 +138,9 @@ namespace MikuMikuLibrary.Databases
                     writer.Write( motionSetEntry.Id );
             } );
             writer.Write( MotionSets.Count );
-            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
-                foreach ( var boneName in BoneNames )
+                foreach ( string boneName in BoneNames )
                     writer.AddStringToStringTable( boneName );
             } );
             writer.Write( BoneNames.Count );

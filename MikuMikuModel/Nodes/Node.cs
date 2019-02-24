@@ -22,9 +22,6 @@ namespace MikuMikuModel.Nodes
         private static readonly PropertyInfo sNameProperty =
             typeof( T ).GetProperty( "Name", typeof( string ) );
 
-        private static readonly FieldInfo[] sFieldInfos =
-            typeof( T ).GetFields( BindingFlags.Instance | BindingFlags.NonPublic );
-
         private static readonly Dictionary<string, PropertyInfo> sPropertyInfos =
             new Dictionary<string, PropertyInfo>( StringComparer.OrdinalIgnoreCase );
 

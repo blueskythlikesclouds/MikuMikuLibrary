@@ -58,26 +58,30 @@ namespace MikuMikuModel.Nodes.Sprites
             get => GetProperty<float>();
             set => SetProperty( value );
         }
-
-        public float Field03
+        
+        [DisplayName( "Normalized X" )]
+        public float NdcX
         {
             get => GetProperty<float>();
             set => SetProperty( value );
         }
 
-        public float Field04
+        [DisplayName( "Normalized Y" )]
+        public float NdcY
         {
             get => GetProperty<float>();
             set => SetProperty( value );
         }
 
-        public float Field05
+        [DisplayName( "Normalized width" )]
+        public float NdcWidth
         {
             get => GetProperty<float>();
             set => SetProperty( value );
         }
 
-        public float Field06
+        [DisplayName( "Normalized height" )]
+        public float NdcHeight
         {
             get => GetProperty<float>();
             set => SetProperty( value );

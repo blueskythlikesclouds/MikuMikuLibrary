@@ -126,8 +126,19 @@ This tool allows you to unpack and pack FARC files.
 ~~~~~
 Usage
 ~~~~~
-FarcPack [source] [destination]
+FarcPack [options] [source] [destination]
 
-Destination is optional, which makes it possible to do drag and drop onto the executable.</value>
+~~~~~~
+Options
+~~~~~~~
+-c or --compress: Compress archive (disabled by default)
+-a or --alignment: Alignment value (16 by default)
+
+~~~~~~~
+Example
+~~~~~~~
+FarcPack -c -a 16 mikitm mikitm.farc
+
+Destination is optional, which makes it possible to do a drag and drop onto the executable.</value>
   </data>
 </root>
