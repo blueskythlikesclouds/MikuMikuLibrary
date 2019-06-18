@@ -20,7 +20,7 @@ namespace MikuMikuLibrary.IO.Common
         private Encoding mEncoding;
         private Stack<long> mOffsets;
         private Stack<long> mBaseOffsets;
-        private LinkedList<ScheduledWrite> mScheduledWrites;
+        private List<ScheduledWrite> mScheduledWrites;
         private Stack<StringTable> mStringTables;
         private List<long> mOffsetPositions;
 
@@ -167,7 +167,7 @@ namespace MikuMikuLibrary.IO.Common
         public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode,
             OffsetMode offsetMode, Func<long> action )
         {
-            mScheduledWrites.AddLast( new ScheduledWrite
+            mScheduledWrites.Add( new ScheduledWrite
             {
                 FieldOffset = PrepareWriteOffset( offsetMode ),
                 Priority = priority,
@@ -284,8 +284,7 @@ namespace MikuMikuLibrary.IO.Common
             return offset;
         }
 
-        private void PerformScheduledWrites( LinkedListNode<ScheduledWrite> first, LinkedListNode<ScheduledWrite> last,
-            long baseOffset )
+        private void PerformScheduledWrites( int first, int last, long baseOffset )
         {
             int priority = 0;
             bool increment;
@@ -294,12 +293,12 @@ namespace MikuMikuLibrary.IO.Common
             {
                 increment = false;
 
-                for ( var current = first; current != null && current != last.Next; current = current.Next )
+                for ( int current = first; current != mScheduledWrites.Count && current != last + 1; current++ )
                 {
-                    var scheduledWrite = current.Value;
+                    var scheduledWrite = mScheduledWrites[ current ];
 
                     if ( scheduledWrite.Priority == priority )
-                        PerformScheduledWrite( current, baseOffset );
+                        PerformScheduledWrite( scheduledWrite, baseOffset );
 
                     else if ( scheduledWrite.Priority > priority )
                         increment = true;
@@ -309,20 +308,18 @@ namespace MikuMikuLibrary.IO.Common
             } while ( increment );
         }
 
-        private void PerformScheduledWrite( LinkedListNode<ScheduledWrite> scheduledWriteNode, long baseOffset )
+        private void PerformScheduledWrite( ScheduledWrite scheduledWrite, long baseOffset )
         {
-            var scheduledWrite = scheduledWriteNode.Value;
-
             if ( scheduledWrite.AlignmentMode == AlignmentMode.Left ||
                  scheduledWrite.AlignmentMode == AlignmentMode.Center )
                 WriteAlignmentPadding( scheduledWrite.Alignment );
 
-            var first = mScheduledWrites.Last;
+            int first = mScheduledWrites.Count - 1;
 
             long startOffset = scheduledWrite.Action();
             long endOffset = Position;
 
-            var last = mScheduledWrites.Last;
+            int last = mScheduledWrites.Count - 1;
 
             if ( scheduledWrite.AlignmentMode == AlignmentMode.Right ||
                  scheduledWrite.AlignmentMode == AlignmentMode.Center )
@@ -331,7 +328,7 @@ namespace MikuMikuLibrary.IO.Common
             if ( scheduledWrite.BaseOffset > 0 )
                 baseOffset = scheduledWrite.BaseOffset;
 
-            PerformScheduledWrites( first.Next, last, baseOffset );
+            PerformScheduledWrites( first + 1, last, baseOffset );
 
             mOffsetPositions.Add( scheduledWrite.FieldOffset );
 
@@ -364,17 +361,14 @@ namespace MikuMikuLibrary.IO.Common
             if ( mScheduledWrites.Count == 0 )
                 return;
 
-            var first = mScheduledWrites.First;
-            var last = mScheduledWrites.Last;
-
-            PerformScheduledWrites( first, last, 0 );
+            PerformScheduledWrites( 0, mScheduledWrites.Count - 1, 0 );
 
             mScheduledWrites.Clear();
         }
 
         public void PerformScheduledWritesReversed()
         {
-            mScheduledWrites = new LinkedList<ScheduledWrite>( mScheduledWrites.Reverse() );
+            mScheduledWrites.Reverse();
             PerformScheduledWrites();
         }
 
@@ -900,7 +894,7 @@ namespace MikuMikuLibrary.IO.Common
             mEncoding = encoding;
             mOffsets = new Stack<long>();
             mBaseOffsets = new Stack<long>();
-            mScheduledWrites = new LinkedList<ScheduledWrite>();
+            mScheduledWrites = new List<ScheduledWrite>();
             mStringTables = new Stack<StringTable>();
             mOffsetPositions = new List<long>();
         }
