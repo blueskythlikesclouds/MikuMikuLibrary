@@ -10,10 +10,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using MikuMikuModel.Resources.Styles;
 using Object = MikuMikuLibrary.Objects.Object;
 using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
 using Vector3 = OpenTK.Vector3;
-using Vector4 = OpenTK.Vector4;
 
 namespace MikuMikuModel.GUI.Controls
 {
@@ -62,6 +62,9 @@ namespace MikuMikuModel.GUI.Controls
 
         private int mGridVertexArrayId;
         private GLBuffer<Vector3> mGridVertexBuffer;
+
+        private Color4 mBackgroundColor = Color4.LightGray;
+        private Color4 mGridColor = new Color4( 0.1f, 0.1f, 0.1f, 1 );
 
         private bool CanRender => mDefaultShader != null && mGridShader != null;
 
@@ -190,6 +193,11 @@ namespace MikuMikuModel.GUI.Controls
                 Invalidate();
             };
 
+            if ( StyleSet.CurrentStyle != null )
+                ApplyStyle( StyleSet.CurrentStyle );
+
+            StyleSet.StyleChanged += OnStyleChanged;
+
             base.OnLoad( e );
         }
 
@@ -215,6 +223,26 @@ namespace MikuMikuModel.GUI.Controls
             GL.EnableVertexAttribArray( 0 );
         }
 
+        private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
+        {
+            ApplyStyle( eventArgs.Style );
+        }
+
+        private void ApplyStyle( Style style )
+        {
+            mBackgroundColor = style != null
+                ? new Color4( style.ViewportBackground.R, style.ViewportBackground.G, style.ViewportBackground.B,
+                    style.ViewportBackground.A )
+                : Color4.LightGray;
+
+            mGridColor = style != null
+                ? new Color4( style.ViewportForeground.R, style.ViewportForeground.G, style.ViewportForeground.B,
+                    style.ViewportForeground.A )
+                : new Color4( 0.1f, 0.1f, 0.1f, 1 );
+
+            mShouldRedraw = true;
+        }
+
         private void DrawModel( ref Matrix4 view, ref Matrix4 projection )
         {
             mDefaultShader.Use();
@@ -231,7 +259,7 @@ namespace MikuMikuModel.GUI.Controls
             mGridShader.Use();
             mGridShader.SetUniform( "view", view );
             mGridShader.SetUniform( "projection", projection );
-            mGridShader.SetUniform( "color", new Vector4( 0.15f, 0.15f, 0.15f, 1f ) );
+            mGridShader.SetUniform( "color", mGridColor );
 
             GL.BindVertexArray( mGridVertexArrayId );
             GL.DrawArrays( PrimitiveType.Lines, 0, mGridVertexBuffer.Length );
@@ -250,7 +278,7 @@ namespace MikuMikuModel.GUI.Controls
 
             mShouldRedraw = false;
 
-            GL.ClearColor( Color4.LightGray );
+            GL.ClearColor( mBackgroundColor );
             GL.Clear( ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit );
 
             if ( mComputeProjectionMatrix )
@@ -281,6 +309,7 @@ namespace MikuMikuModel.GUI.Controls
                     mCamPosition -= ( dirRight * deltaX + dirUp * deltaY ) * cameraSpeed;
                     break;
                 }
+
                 case MouseButtons.Right:
                     mCamRotation.X += deltaX * 0.1f;
                     mCamRotation.Y -= deltaY * 0.1f;
@@ -414,6 +443,7 @@ namespace MikuMikuModel.GUI.Controls
                 mGridShader?.Dispose();
                 mModel?.Dispose();
                 mGridVertexBuffer?.Dispose();
+                StyleSet.StyleChanged -= OnStyleChanged;
             }
 
             GL.DeleteVertexArray( mGridVertexArrayId );

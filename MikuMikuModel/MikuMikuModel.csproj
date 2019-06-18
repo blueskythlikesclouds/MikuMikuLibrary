@@ -77,6 +77,9 @@
     <Compile Include="GUI\Forms\FarcArchiveViewForm.Designer.cs">
       <DependentUpon>FarcArchiveViewForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Resources\Styles\Style.cs" />
+    <Compile Include="Resources\Styles\StyleColorTable.cs" />
+    <Compile Include="Resources\Styles\StyleSet.cs" />
     <Compile Include="Modules\Archives\FarcArchiveModule.cs" />
     <Compile Include="Modules\Databases\BoneDatabaseModule.cs" />
     <Compile Include="Modules\Databases\MotionDatabaseModule.cs" />
@@ -173,6 +176,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\ResourceStore.cs" />
+    <Compile Include="Resources\Styles\StyleToolStripRenderer.cs" />
     <EmbeddedResource Include="GUI\Controls\ModelViewControl.resx">
       <DependentUpon>ModelViewControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -221,6 +225,9 @@
   <ItemGroup>
     <Content Include="MikuPoke.ico" />
     <Content Include="Resources\Icons\Motion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Styles\Dark.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\Icons\TextureSet.png">

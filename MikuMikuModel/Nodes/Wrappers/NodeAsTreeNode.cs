@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Forms;
+using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.Nodes.Wrappers
 {
     public class NodeAsTreeNode : TreeNode, IDisposable
     {
-        public static ImageList ImageList { get; } = new ImageList();
+        public static ImageList ImageList { get; } = new ImageList { ColorDepth = ColorDepth.Depth32Bit };
 
         public INode Node { get; }
 
@@ -24,8 +25,20 @@ namespace MikuMikuModel.Nodes.Wrappers
             set => Node.Name = value;
         }
 
-        public override ContextMenuStrip ContextMenuStrip =>
-            HideContextMenuStrip ? null : Node.ContextMenuStrip;
+        public override ContextMenuStrip ContextMenuStrip
+        {
+            get
+            {
+                if ( HideContextMenuStrip )
+                    return null;
+
+                var contextMenuStrip = Node.ContextMenuStrip;
+                if ( contextMenuStrip != null )
+                    contextMenuStrip.Renderer = StyleSet.CurrentStyle?.ToolStripRenderer;
+
+                return contextMenuStrip;
+            }
+        }
 
         private void OnNodeMoved( object sender, NodeMoveEventArgs args )
         {

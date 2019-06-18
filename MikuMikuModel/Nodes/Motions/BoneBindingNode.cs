@@ -1,5 +1,4 @@
-﻿using System;
-using MikuMikuLibrary.Motions;
+﻿using MikuMikuLibrary.Motions;
 
 namespace MikuMikuModel.Nodes.Motions
 {

@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Controls
 {
@@ -21,6 +22,9 @@ namespace MikuMikuModel.GUI.Controls
         private Bitmap mYcbcrBitmap;
         private int mMipMapIndex;
         private int mLevelIndex;
+
+        private Color mOriginalForeColor;
+        private Color mOriginalBackColor;
 
         public int CurrentMipMapIndex
         {
@@ -124,6 +128,32 @@ namespace MikuMikuModel.GUI.Controls
             }
 
             mYcbcrBitmap?.Dispose();
+        }
+
+        protected override void OnLoad( EventArgs eventArgs )
+        {
+            mOriginalForeColor = mStatusStrip.ForeColor;
+            mOriginalBackColor = mStatusStrip.BackColor;
+
+            if ( StyleSet.CurrentStyle != null )
+                ApplyStyle( StyleSet.CurrentStyle );
+
+            StyleSet.StyleChanged += OnStyleChanged;
+
+            base.OnLoad( eventArgs );
+        }
+
+        private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
+        {
+            ApplyStyle( eventArgs.Style );
+        }
+
+        private void ApplyStyle( Style style )
+        {
+            mStatusStrip.BackColor = style?.Background ?? mOriginalBackColor;
+            mStatusStrip.ForeColor = style?.Foreground ?? mOriginalForeColor;
+
+            Refresh();
         }
 
         protected override bool ProcessCmdKey( ref Message msg, Keys keyData )

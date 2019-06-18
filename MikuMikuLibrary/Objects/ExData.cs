@@ -245,7 +245,7 @@ namespace MikuMikuLibrary.Objects
 
     public abstract class ExNode
     {
-        internal static readonly IReadOnlyDictionary<string, Func<ExNode>> sNodeFactory =
+        internal static readonly IReadOnlyDictionary<string, Func<ExNode>> NodeFactory =
             new Dictionary<string, Func<ExNode>>
             {
                 { "OSG", () => new ExOsageNode() },
@@ -356,7 +356,7 @@ namespace MikuMikuLibrary.Objects
 
                     reader.ReadAtOffset( nodeOffset, () =>
                     {
-                        if ( !ExNode.sNodeFactory.TryGetValue( nodeSignature, out var nodeConstructor ) )
+                        if ( !ExNode.NodeFactory.TryGetValue( nodeSignature, out var nodeConstructor ) )
                             return;
 
                         var node = nodeConstructor();
