@@ -1,32 +1,12 @@
 ﻿using System.ComponentModel;
-using System.Numerics;
-using System.Windows.Forms;
-using MikuMikuLibrary.Maths;
-using MikuMikuLibrary.Misc;
-using MikuMikuLibrary.Models;
-using MikuMikuModel.GUI.Controls;
-using MikuMikuModel.Nodes.Misc;
+using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Objects;
 
 namespace MikuMikuModel.Nodes.Models
 {
     public class SubMeshNode : Node<SubMesh>
     {
-        public override NodeFlags Flags => NodeFlags.Add | NodeFlags.Rename;
-
-        public override Control Control
-        {
-            get
-            {
-                var modelParent = FindParent<ModelNode>();
-                var meshParent = FindParent<MeshNode>();
-
-                if ( modelParent == null || meshParent == null )
-                    return null;
-
-                ModelViewControl.Instance.SetModel( Data, meshParent.Data, modelParent.Data.TextureSet );
-                return ModelViewControl.Instance;
-            }
-        }
+        public override NodeFlags Flags => NodeFlags.None;
 
         [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
@@ -35,48 +15,50 @@ namespace MikuMikuModel.Nodes.Models
             set => SetProperty( value );
         }
 
-        public Vector3[] Vertices
+        public ushort[] Indices
         {
-            get => GetProperty<Vector3[]>();
+            get => GetProperty<ushort[]>();
             set => SetProperty( value );
         }
 
-        public Vector3[] Normals
+        [DisplayName( "Bone indices" )]
+        public ushort[] BoneIndices
         {
-            get => GetProperty<Vector3[]>();
+            get => GetProperty<ushort[]>();
             set => SetProperty( value );
         }
 
-        public Vector4[] Tangents
+        [DisplayName( "Material index" )]
+        public int MaterialIndex
         {
-            get => GetProperty<Vector4[]>();
+            get => GetProperty<int>();
             set => SetProperty( value );
         }
 
-        [DisplayName( "UV channel 1" )]
-        public Vector2[] UVChannel1
+        [DisplayName( "Material texture uv indices" )]
+        public byte[] MaterialUVIndices
         {
-            get => GetProperty<Vector2[]>();
+            get => GetProperty<byte[]>();
             set => SetProperty( value );
         }
 
-        [DisplayName( "UV channel 2" )]
-        public Vector2[] UVChannel2
+        [DisplayName( "Primitive type" )]
+        public PrimitiveType PrimitiveType
         {
-            get => GetProperty<Vector2[]>();
+            get => GetProperty<PrimitiveType>();
             set => SetProperty( value );
         }
 
-        public Color[] Colors
+        [DisplayName( "Bounding box" )]
+        public BoundingBox BoundingBox
         {
-            get => GetProperty<Color[]>();
+            get => GetProperty<BoundingBox>();
             set => SetProperty( value );
         }
 
-        [DisplayName( "Bone weights" )]
-        public BoneWeight[] BoneWeights
+        public int Field00
         {
-            get => GetProperty<BoneWeight[]>();
+            get => GetProperty<int>();
             set => SetProperty( value );
         }
 
@@ -86,7 +68,6 @@ namespace MikuMikuModel.Nodes.Models
 
         protected override void PopulateCore()
         {
-            Nodes.Add( new ListNode<IndexTable>( "Index tables", Data.IndexTables ) );
         }
 
         protected override void SynchronizeCore()

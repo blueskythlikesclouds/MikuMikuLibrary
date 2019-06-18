@@ -8,37 +8,50 @@ namespace DatabaseConverter
 {
     class Program
     {
-        static BinaryFile GetDatabaseInstance( string fileName )
+        class DatabaseInfo
         {
-            fileName = Path.GetFileNameWithoutExtension( fileName ).ToLowerInvariant().Replace( "_", "" );
+            public Type Type;
+            public string ClassicFileName;
+            public string ModernFileExtension;
 
-            if ( fileName.StartsWith( "mdata" ) )
-                fileName = fileName.Substring( 5 );
-
-            switch ( fileName )
+            public DatabaseInfo( Type type, string classicFileName, string modernFileExtension )
             {
-                case "aetdb":
-                    return new AetDatabase();
-                case "bonedata":
-                    return new BoneDatabase();
-                //case "editdb":
-                //    return new EditDatabase()
-                case "motdb":
-                    return new MotionDatabase();
-                case "objdb":
-                    return new ObjectDatabase();
-                case "sprdb":
-                    return new SpriteDatabase();
-                case "stagedata":
-                    return new StageDatabase();
-                case "strarray":
-                case "stringarray":
-                    return new StringArray();
-                case "texdb":
-                    return new TextureDatabase();
-                default:
-                    throw new ArgumentException( "Database type could not be detected", nameof( fileName ) );
+                Type = type;
+                ClassicFileName = classicFileName;
+                ModernFileExtension = modernFileExtension;
             }
+        }
+
+        private static readonly DatabaseInfo[] sDatabaseInfos = new DatabaseInfo[]
+        {
+            new DatabaseInfo( typeof( AetDatabase ), "aetdb", "aei" ),
+            new DatabaseInfo( typeof( BoneDatabase ), "bonedata", "bon" ),
+            new DatabaseInfo( typeof( MotionDatabase ), "motdb", null ),
+            new DatabaseInfo( typeof( ObjectDatabase ), "objdb", "osi" ),
+            new DatabaseInfo( typeof( SpriteDatabase ), "sprdb", "spi" ),
+            new DatabaseInfo( typeof( StageDatabase ), "stagedata", null ),
+            new DatabaseInfo( typeof( StringArray ), "strarray", "str" ),
+            new DatabaseInfo( typeof( StringArray ), "stringarray", "str" )
+        };
+
+        static DatabaseInfo GetDatabaseInfo( string fileName )
+        {
+            if ( fileName.EndsWith( ".xml" ) )
+                fileName = Path.ChangeExtension( fileName, null );
+
+            string extension = Path.GetExtension( fileName ).Trim( '.' );
+
+            fileName = Path.GetFileNameWithoutExtension( fileName ).Replace( "_", "" );
+            if ( fileName.StartsWith( "mdata", StringComparison.OrdinalIgnoreCase ) )
+                fileName = fileName.Substring( 6 );
+
+            foreach ( var databaseInfo in sDatabaseInfos )
+                if ( ( !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) &&
+                       databaseInfo.ModernFileExtension.Equals( extension, StringComparison.OrdinalIgnoreCase ) ) ||
+                     databaseInfo.ClassicFileName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) )
+                    return databaseInfo;
+
+            return null;
         }
 
         static void Main( string[] args )
@@ -65,29 +78,45 @@ namespace DatabaseConverter
             if ( destinationFileName == null )
                 destinationFileName = sourceFileName;
 
-            if ( sourceFileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
+            var databaseInfo = GetDatabaseInfo( sourceFileName );
+            if ( databaseInfo != null )
             {
-                destinationFileName = Path.ChangeExtension( destinationFileName, "xml" );
+                if ( sourceFileName.EndsWith( "xml", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    var serializer = new XmlSerializer( databaseInfo.Type );
 
-                var database = GetDatabaseInstance( sourceFileName );
-                database.Load( sourceFileName );
+                    IBinaryFile database;
+                    using ( var source = File.OpenText( sourceFileName ) )
+                        database = ( IBinaryFile ) serializer.Deserialize( source );
 
-                var serializer = new XmlSerializer( database.GetType() );
-                using ( var destination = File.CreateText( destinationFileName ) )
-                    serializer.Serialize( destination, database );
+                    if ( BinaryFormatUtilities.IsModern( database.Format ) &&
+                         !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) )
+                        destinationFileName =
+                            Path.ChangeExtension( destinationFileName, null );
+                    else
+                        destinationFileName = Path.ChangeExtension( destinationFileName, "bin" );
+
+                    database.Save( destinationFileName );
+                }
+                else
+                {
+                    var database = ( IBinaryFile ) Activator.CreateInstance( databaseInfo.Type );
+                    database.Load( sourceFileName );
+
+                    if ( BinaryFormatUtilities.IsModern( database.Format ) )
+                        destinationFileName =
+                            Path.ChangeExtension( destinationFileName, databaseInfo.ModernFileExtension ) + ".xml";
+                    else
+                        destinationFileName = Path.ChangeExtension( destinationFileName, "xml" );
+
+                    var serializer = new XmlSerializer( databaseInfo.Type );
+
+                    using ( var destination = File.CreateText( destinationFileName ) )
+                        serializer.Serialize( destination, database );
+                }
             }
-            else if ( sourceFileName.EndsWith( ".xml", StringComparison.OrdinalIgnoreCase ) )
-            {
-                destinationFileName = Path.ChangeExtension( destinationFileName, "bin" );
-
-                var database = GetDatabaseInstance( sourceFileName );
-
-                var serializer = new XmlSerializer( database.GetType() );
-                using ( var source = File.OpenText( sourceFileName ) )
-                    database = ( BinaryFile )serializer.Deserialize( source );
-
-                database.Save( destinationFileName );
-            }
+            else
+                throw new InvalidDataException( "Database type could not be detected" );
         }
     }
 }

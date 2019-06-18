@@ -1,40 +1,31 @@
 ﻿using System.ComponentModel;
-using System.Drawing;
+using System.Numerics;
 using System.Windows.Forms;
-using MikuMikuLibrary.Materials;
-using MikuMikuLibrary.Maths;
-using MikuMikuLibrary.Models;
+using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Misc;
+using MikuMikuLibrary.Objects;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Misc;
-using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Nodes.Models
 {
     public class MeshNode : Node<Mesh>
     {
-        public override NodeFlags Flags =>
-            NodeFlags.Import | NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
-
-        public override Bitmap Image => 
-            ResourceStore.LoadBitmap( "Icons/Mesh.png" );
+        public override NodeFlags Flags => NodeFlags.Add | NodeFlags.Rename;
 
         public override Control Control
         {
             get
             {
-                var modelParent = FindParent<ModelNode>();
-                if ( modelParent == null )
+                var objectSetParent = FindParent<ObjectSetNode>();
+                var objectParent = FindParent<ObjectNode>();
+
+                if ( objectSetParent == null || objectParent == null )
                     return null;
 
-                ModelViewControl.Instance.SetModel( Data, modelParent.Data.TextureSet );
+                ModelViewControl.Instance.SetModel( Data, objectParent.Data, objectSetParent.Data.TextureSet );
                 return ModelViewControl.Instance;
             }
-        }
-
-        public int Id
-        {
-            get => GetProperty<int>();
-            set => SetProperty( value );
         }
 
         [DisplayName( "Bounding sphere" )]
@@ -44,17 +35,58 @@ namespace MikuMikuModel.Nodes.Models
             set => SetProperty( value );
         }
 
+        public Vector3[] Vertices
+        {
+            get => GetProperty<Vector3[]>();
+            set => SetProperty( value );
+        }
+
+        public Vector3[] Normals
+        {
+            get => GetProperty<Vector3[]>();
+            set => SetProperty( value );
+        }
+
+        public Vector4[] Tangents
+        {
+            get => GetProperty<Vector4[]>();
+            set => SetProperty( value );
+        }
+
+        [DisplayName( "UV channel 1" )]
+        public Vector2[] UVChannel1
+        {
+            get => GetProperty<Vector2[]>();
+            set => SetProperty( value );
+        }
+
+        [DisplayName( "UV channel 2" )]
+        public Vector2[] UVChannel2
+        {
+            get => GetProperty<Vector2[]>();
+            set => SetProperty( value );
+        }
+
+        public Color[] Colors
+        {
+            get => GetProperty<Color[]>();
+            set => SetProperty( value );
+        }
+
+        [DisplayName( "Bone weights" )]
+        public BoneWeight[] BoneWeights
+        {
+            get => GetProperty<BoneWeight[]>();
+            set => SetProperty( value );
+        }
+
         protected override void Initialize()
         {
         }
 
         protected override void PopulateCore()
         {
-            Nodes.Add( new ListNode<SubMesh>( "Submeshes", Data.SubMeshes, x => x.Name ) );
-            Nodes.Add( new ListNode<Material>( "Materials", Data.Materials, x => x.Name ) );
-
-            if ( Data.Skin != null )
-                Nodes.Add( new SkinNode( "Skin", Data.Skin ) );
+            Nodes.Add( new ListNode<SubMesh>( "Submeshes", Data.SubMeshes ) );
         }
 
         protected override void SynchronizeCore()
@@ -64,5 +96,5 @@ namespace MikuMikuModel.Nodes.Models
         public MeshNode( string name, Mesh data ) : base( name, data )
         {
         }
-    }   
+    }
 }

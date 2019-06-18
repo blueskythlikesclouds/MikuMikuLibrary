@@ -9,7 +9,7 @@ namespace MikuMikuModel.Nodes.Databases
 {
     public class TextureDatabaseNode : BinaryFileNode<TextureDatabase>
     {
-        public override NodeFlags Flags => 
+        public override NodeFlags Flags =>
             NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
 
         protected override void Initialize()
@@ -22,7 +22,7 @@ namespace MikuMikuModel.Nodes.Databases
 
         protected override void PopulateCore()
         {
-            Nodes.Add( new ListNode<TextureEntry>( "Textures", Data.Textures, x => x.Name ) );
+            Nodes.Add( new ListNode<TextureInfo>( "Textures", Data.Textures, x => x.Name ) );
         }
 
         protected override void SynchronizeCore()
@@ -38,7 +38,7 @@ namespace MikuMikuModel.Nodes.Databases
         }
     }
 
-    public class TextureEntryNode : Node<TextureEntry>
+    public class TextureInfoNode : Node<TextureInfo>
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
@@ -60,7 +60,7 @@ namespace MikuMikuModel.Nodes.Databases
         {
         }
 
-        public TextureEntryNode( string name, TextureEntry data ) : base( name, data )
+        public TextureInfoNode( string name, TextureInfo data ) : base( name, data )
         {
         }
     }

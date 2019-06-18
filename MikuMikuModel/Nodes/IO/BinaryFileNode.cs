@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Windows.Forms;
-using MikuMikuLibrary.Archives.Farc;
+using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.IO;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Forms;
@@ -81,8 +81,8 @@ namespace MikuMikuModel.Nodes.IO
 
         public virtual Stream GetStream() => new DynamicStream( this );
 
-        protected virtual void Load( T data, Stream source ) => 
-            data.Load( source ); 
+        protected virtual void Load( T data, Stream source ) =>
+            data.Load( source );
 
         private void InitializeSubscription( INode node, bool unsubscribe )
         {
@@ -188,9 +188,10 @@ namespace MikuMikuModel.Nodes.IO
                     farcArchiveViewForm.Text = "Select a node to replace with.";
 
                     if ( farcArchiveViewForm.NodeCount == 0 )
-                        MessageBox.Show( "This archive has no entries that you could replace the node with.", "Miku Miku Model",
+                        MessageBox.Show( "This archive has no entries that you could replace the node with.",
+                            "Miku Miku Model",
                             MessageBoxButtons.OK, MessageBoxIcon.Information );
-                        
+
                     else if ( farcArchiveViewForm.NodeCount == 1 )
                         return ( T ) farcArchiveViewForm.TopNode.Data;
 

@@ -65,6 +65,7 @@ namespace MikuMikuLibrary.IO
                 var stream = source;
 
                 var bytes = new byte[ 4 ];
+
                 string ReadSignature()
                 {
                     stream.Read( bytes, 0, bytes.Length );
@@ -101,12 +102,13 @@ namespace MikuMikuLibrary.IO
 
                                     if ( siblingSection is EndOfFileSection )
                                         break;
-                                    if ( section.SectionInfo.SubSectionInfos.TryGetValue( sectionInfo, out var subSectionInfo ) )
+                                    if ( section.SectionInfo.SubSectionInfos.TryGetValue( sectionInfo,
+                                        out var subSectionInfo ) )
                                         subSectionInfo.ProcessPropertyForReading( siblingSection, section );
                                 }
                             }
 
-                            section.ProcessDataObject();
+                            section.ProcessData();
                         }
 
                         return true;
@@ -184,7 +186,7 @@ namespace MikuMikuLibrary.IO
                 {
                     section.Write( destination );
 
-                    foreach ( var subSection in section.Sections.Where( x => x.SectionInfo.IsBinaryFileType ) )
+                    foreach ( var subSection in section.Sections.Where( x => x.SectionInfo.IsBinaryFile ) )
                         subSection.Write( destination );
 
                     using ( var eofSection = new EndOfFileSection( SectionMode.Write, this ) )

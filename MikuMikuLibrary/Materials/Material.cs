@@ -17,7 +17,7 @@ namespace MikuMikuLibrary.Materials
         public MaterialTexture Specular { get; }
         public MaterialTexture ToonCurve { get; }
         public MaterialTexture Reflection { get; }
-        public MaterialTexture SpecularPower { get; }
+        public MaterialTexture Tangent { get; }
         public MaterialTexture Texture08 { get; }
         public int Field01 { get; set; }
         public int Field02 { get; set; }
@@ -69,7 +69,7 @@ namespace MikuMikuLibrary.Materials
                 yield return Specular;
                 yield return ToonCurve;
                 yield return Reflection;
-                yield return SpecularPower;
+                yield return Tangent;
                 yield return Texture08;
             }
         }
@@ -88,7 +88,7 @@ namespace MikuMikuLibrary.Materials
             Specular.Read( reader );
             ToonCurve.Read( reader );
             Reflection.Read( reader );
-            SpecularPower.Read( reader );
+            Tangent.Read( reader );
             Texture08.Read( reader );
             Field01 = reader.ReadInt32();
             Field02 = reader.ReadInt32();
@@ -132,7 +132,7 @@ namespace MikuMikuLibrary.Materials
             Specular.Write( writer );
             ToonCurve.Write( writer );
             Reflection.Write( writer );
-            SpecularPower.Write( writer );
+            Tangent.Write( writer );
             Texture08.Write( writer );
             writer.Write( Field01 );
             writer.Write( Field02 );
@@ -173,7 +173,7 @@ namespace MikuMikuLibrary.Materials
             Specular = new MaterialTexture();
             ToonCurve = new MaterialTexture();
             Reflection = new MaterialTexture();
-            SpecularPower = new MaterialTexture();
+            Tangent = new MaterialTexture();
             Texture08 = new MaterialTexture();
         }
     }

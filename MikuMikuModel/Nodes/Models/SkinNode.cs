@@ -1,4 +1,4 @@
-﻿using MikuMikuLibrary.Models;
+﻿using MikuMikuLibrary.Objects;
 using MikuMikuModel.Nodes.Misc;
 
 namespace MikuMikuModel.Nodes.Models
@@ -13,7 +13,7 @@ namespace MikuMikuModel.Nodes.Models
 
         protected override void PopulateCore()
         {
-            Nodes.Add( new ListNode<Bone>( "Bones", Data.Bones, x => x.Name ) );
+            Nodes.Add( new ListNode<BoneInfo>( "Bones", Data.Bones, x => x.Name ) );
 
             if ( Data.ExData != null )
                 Nodes.Add( new ExDataNode( "Ex data", Data.ExData ) );

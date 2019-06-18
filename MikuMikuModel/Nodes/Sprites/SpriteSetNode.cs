@@ -44,19 +44,20 @@ namespace MikuMikuModel.Nodes.Sprites
         {
             if ( Parent != null && Name.EndsWith( ".spr", StringComparison.OrdinalIgnoreCase ) )
             {
-                var spriteDatabaseNode = 
+                var spriteDatabaseNode =
                     Parent.FindNode<SpriteDatabaseNode>( Path.ChangeExtension( Name, "spi" ) );
 
                 if ( spriteDatabaseNode != null )
                 {
-                    var spriteSetEntry = spriteDatabaseNode.Data.SpriteSets[ 0 ];
-                    foreach ( var spriteEntry in spriteSetEntry.Sprites )
-                        Data.Sprites[ spriteEntry.Index ].Name = spriteEntry.Name;
+                    var spriteSetInfo = spriteDatabaseNode.Data.SpriteSets[ 0 ];
+                    foreach ( var spriteInfo in spriteSetInfo.Sprites )
+                        Data.Sprites[ spriteInfo.Index ].Name = spriteInfo.Name;
 
-                    foreach ( var textureEntry in spriteSetEntry.Textures )
-                        Data.TextureSet.Textures[ textureEntry.Index ].Name = textureEntry.Name;
+                    foreach ( var textureInfo in spriteSetInfo.Textures )
+                        Data.TextureSet.Textures[ textureInfo.Index ].Name = textureInfo.Name;
                 }
             }
+
             Nodes.Add( new ListNode<Sprite>( "Sprites", Data.Sprites, x => x.Name ) );
             Nodes.Add( mTextureSetNode = new TextureSetNode( "Texture Set", Data.TextureSet ) );
         }

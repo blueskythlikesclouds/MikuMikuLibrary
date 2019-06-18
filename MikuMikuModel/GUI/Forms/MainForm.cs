@@ -273,6 +273,7 @@ namespace MikuMikuModel.GUI.Forms
                 mNodeTreeView.TopDataNode.DisposeData();
                 mNodeTreeView.TopDataNode.Dispose();
             }
+
             mNodeTreeView.Nodes.Clear();
 
             mPropertyGrid.SelectedObject = null;
@@ -350,21 +351,21 @@ namespace MikuMikuModel.GUI.Forms
             {
                 string baseFilePath = Path.ChangeExtension( filePath, null );
 
-                string outputFilePath = ModuleExportUtilities.SelectModuleExport<Motion>( 
+                string outputFilePath = ModuleExportUtilities.SelectModuleExport<Motion>(
                     "Select a file to export to.",
                     Path.GetFileName( $"{baseFilePath}_combined.mot" ) );
 
                 if ( string.IsNullOrEmpty( outputFilePath ) )
                     return;
 
-                var skeletonEntry = configuration.BoneDatabase.Skeletons[ 0 ];
+                var skeleton = configuration.BoneDatabase.Skeletons[ 0 ];
 
                 var rootMotion = new Motion();
                 {
-                    rootMotion.Load( filePath, skeletonEntry );
+                    rootMotion.Load( filePath, skeleton );
                 }
 
-                var rootController = rootMotion.GetController();
+                var rootController = rootMotion.Bind();
                 for ( int i = 1;; i++ )
                 {
                     string divFilePath = $"{baseFilePath}_div_{i}.mot";
@@ -373,14 +374,14 @@ namespace MikuMikuModel.GUI.Forms
 
                     var divMotion = new Motion();
                     {
-                        divMotion.Load( divFilePath, skeletonEntry );
+                        divMotion.Load( divFilePath, skeleton );
                     }
 
-                    var divController = divMotion.GetController();
+                    var divController = divMotion.Bind();
                     rootController.Merge( divController );
                 }
 
-                rootMotion.Save( outputFilePath, skeletonEntry );
+                rootMotion.Save( outputFilePath, skeleton );
             }
         }
 

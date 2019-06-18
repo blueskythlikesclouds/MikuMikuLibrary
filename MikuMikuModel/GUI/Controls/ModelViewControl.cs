@@ -1,5 +1,5 @@
-﻿using MikuMikuLibrary.Maths;
-using MikuMikuLibrary.Models;
+﻿using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Objects;
 using MikuMikuLibrary.Textures;
 using MikuMikuModel.GUI.Controls.ModelView;
 using OpenTK;
@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using Object = MikuMikuLibrary.Objects.Object;
 using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
 using Vector3 = OpenTK.Vector3;
 using Vector4 = OpenTK.Vector4;
@@ -64,51 +65,51 @@ namespace MikuMikuModel.GUI.Controls
 
         private bool CanRender => mDefaultShader != null && mGridShader != null;
 
-        public void SetModel( Model model, TextureSet textureSet )
+        public void SetModel( ObjectSet objectSet, TextureSet textureSet )
         {
             if ( !CanRender )
                 return;
 
             Reset();
 
-            mModel = new GLModel( model, textureSet );
+            mModel = new GLObjectSet( objectSet, textureSet );
 
             var boundingSphere = new BoundingSphere();
-            foreach ( var mesh in model.Meshes )
+            foreach ( var mesh in objectSet.Objects )
                 boundingSphere.Merge( mesh.BoundingSphere );
 
             SetCamera( boundingSphere );
         }
 
-        public void SetModel( Mesh mesh, TextureSet textureSet )
+        public void SetModel( Object obj, TextureSet textureSet )
         {
             if ( !CanRender )
                 return;
 
             Reset();
-            mModel = new GLMesh( mesh, new Dictionary<int, GLTexture>(), textureSet );
-            SetCamera( mesh.BoundingSphere );
+            mModel = new GLObject( obj, new Dictionary<int, GLTexture>(), textureSet );
+            SetCamera( obj.BoundingSphere );
         }
 
-        public void SetModel( SubMesh subMesh, Mesh mesh, TextureSet textureSet )
+        public void SetModel( Mesh mesh, Object obj, TextureSet textureSet )
         {
             if ( !CanRender )
                 return;
 
             Reset();
 
-            var materials = new List<GLMaterial>( new GLMaterial[ mesh.Materials.Count ] );
+            var materials = new List<GLMaterial>( new GLMaterial[ obj.Materials.Count ] );
             var dictionary = new Dictionary<int, GLTexture>();
 
-            foreach ( var indexTable in subMesh.IndexTables )
+            foreach ( var subMesh in mesh.SubMeshes )
             {
-                if ( materials[ indexTable.MaterialIndex ] == null )
-                    materials[ indexTable.MaterialIndex ] = new GLMaterial( mesh.Materials[ indexTable.MaterialIndex ],
+                if ( materials[ subMesh.MaterialIndex ] == null )
+                    materials[ subMesh.MaterialIndex ] = new GLMaterial( obj.Materials[ subMesh.MaterialIndex ],
                         dictionary, textureSet );
             }
 
-            mModel = new GLSubMesh( subMesh, materials );
-            SetCamera( subMesh.BoundingSphere );
+            mModel = new GLMesh( mesh, materials );
+            SetCamera( mesh.BoundingSphere );
         }
 
         private void SetCamera( BoundingSphere boundingSphere )
@@ -169,7 +170,7 @@ namespace MikuMikuModel.GUI.Controls
                 mShouldRedraw = true;
         }
 
-        private void GetViewMatrix( out Matrix4 view ) => 
+        private void GetViewMatrix( out Matrix4 view ) =>
             view = Matrix4.LookAt( mCamPosition, mCamPosition + mCamDirection, sCamUp );
 
         private void GetProjectionMatrix( out Matrix4 projection ) =>
@@ -431,7 +432,7 @@ namespace MikuMikuModel.GUI.Controls
             MakeCurrent();
 
             mGridShader = GLShaderProgram.Create( "Grid" );
-            mDefaultShader = GLShaderProgram.Create( "Default" ) ?? 
+            mDefaultShader = GLShaderProgram.Create( "Default" ) ??
                              GLShaderProgram.Create( "DefaultBasic" );
 
             if ( !CanRender )

@@ -98,7 +98,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         protected void Dispose( bool disposing )
         {
-            if ( disposing ) { }
+            if ( disposing )
+            {
+            }
 
             GL.DeleteProgram( Id );
         }
@@ -144,7 +146,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             GL.GetShader( shader, ShaderParameter.CompileStatus, out int compileStatus );
             if ( compileStatus == 0 )
             {
-                Debug.WriteLine( $"Shader compile failed for {shaderType}, error message: {GL.GetShaderInfoLog( shader )}" );
+                Debug.WriteLine(
+                    $"Shader compile failed for {shaderType}, error message: {GL.GetShaderInfoLog( shader )}" );
                 GL.DeleteShader( shader );
                 return -1;
             }

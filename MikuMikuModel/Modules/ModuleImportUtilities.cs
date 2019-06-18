@@ -8,7 +8,8 @@ namespace MikuMikuModel.Modules
 {
     public static class ModuleImportUtilities
     {
-        public static IFormatModule GetModule( IEnumerable<IFormatModule> modulesToMatch, string fileName, Func<Stream> streamGetter )
+        public static IFormatModule GetModule( IEnumerable<IFormatModule> modulesToMatch, string fileName,
+            Func<Stream> streamGetter )
         {
             fileName = Path.GetFileName( fileName );
             string extension = Path.GetExtension( fileName ).Trim( '.' );
@@ -79,7 +80,8 @@ namespace MikuMikuModel.Modules
             return null;
         }
 
-        public static string[] SelectModuleImportMultiselect<T>( string title = "Select file(s) to import.", string filePath = null )
+        public static string[] SelectModuleImportMultiselect<T>( string title = "Select file(s) to import.",
+            string filePath = null )
         {
             using ( var dialog = new OpenFileDialog() )
             {
@@ -100,7 +102,8 @@ namespace MikuMikuModel.Modules
             return null;
         }
 
-        public static string SelectModuleImport( IEnumerable<Type> modelTypes, string title = "Select a file to import from.", string filePath = null )
+        public static string SelectModuleImport( IEnumerable<Type> modelTypes,
+            string title = "Select a file to import from.", string filePath = null )
         {
             using ( var dialog = new OpenFileDialog() )
             {

@@ -55,11 +55,15 @@ namespace MikuMikuModel.Modules
         protected abstract void ExportCore( T model, Stream destination, string fileName );
 
         #region Explicit IFormatModule Implementation
+
         object IFormatModule.Import( string filePath ) => Import( filePath );
         object IFormatModule.Import( Stream source, string fileName ) => Import( source, fileName );
 
         void IFormatModule.Export( object model, string filePath ) => Export( ( T ) model, filePath );
-        void IFormatModule.Export( object model, Stream destination, string fileName ) => Export( ( T ) model, destination, fileName );
+
+        void IFormatModule.Export( object model, Stream destination, string fileName ) =>
+            Export( ( T ) model, destination, fileName );
+
         #endregion
     }
 }

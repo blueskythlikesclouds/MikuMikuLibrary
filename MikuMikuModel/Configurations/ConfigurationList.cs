@@ -67,7 +67,8 @@ namespace MikuMikuModel.Configurations
 
         public Configuration FindConfiguration( string referenceFilePath )
         {
-            var directoryPath = Path.GetFullPath( Path.GetDirectoryName( referenceFilePath ) ) + Path.DirectorySeparatorChar;
+            var directoryPath = Path.GetFullPath( Path.GetDirectoryName( referenceFilePath ) ) +
+                                Path.DirectorySeparatorChar;
             foreach ( var configuration in Configurations )
             {
                 bool result = false;
@@ -104,7 +105,7 @@ namespace MikuMikuModel.Configurations
             clone.Configurations.Capacity = Configurations.Count;
 
             foreach ( var configuration in Configurations )
-                clone.Configurations.Add( ( Configuration )configuration.Clone() );
+                clone.Configurations.Add( ( Configuration ) configuration.Clone() );
 
             return clone;
         }

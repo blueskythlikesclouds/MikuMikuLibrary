@@ -15,7 +15,7 @@ namespace MikuMikuModel.Nodes.Motions
 {
     public class MotionSetNode : BinaryFileNode<MotionSet>
     {
-        private static readonly XmlSerializer sMotionSetEntrySerializer = new XmlSerializer( typeof( MotionSetEntry ) );
+        private static readonly XmlSerializer sMotionSetInfoSerializer = new XmlSerializer( typeof( MotionSetInfo ) );
 
         public override NodeFlags Flags =>
             NodeFlags.Add | NodeFlags.Import | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
@@ -98,18 +98,18 @@ namespace MikuMikuModel.Nodes.Motions
                 if ( id < 0 )
                     return;
 
-                var motionSetEntry = new MotionSetEntry
+                var motionSetInfo = new MotionSetInfo
                 {
                     Id = 39,
                     Name = Path.GetFileNameWithoutExtension( Name ),
                 };
 
-                if ( motionSetEntry.Name.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
-                    motionSetEntry.Name = motionSetEntry.Name.Remove( 0, 4 );
+                if ( motionSetInfo.Name.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
+                    motionSetInfo.Name = motionSetInfo.Name.Remove( 0, 4 );
 
                 foreach ( var motion in Data.Motions )
                 {
-                    motionSetEntry.Motions.Add( new MotionEntry
+                    motionSetInfo.Motions.Add( new MotionInfo
                     {
                         Name = motion.Name,
                         Id = id++,
@@ -121,7 +121,7 @@ namespace MikuMikuModel.Nodes.Motions
                     XmlWriter.Create( stringWriter,
                         new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true } ) )
                 {
-                    sMotionSetEntrySerializer.Serialize( xmlWriter, motionSetEntry,
+                    sMotionSetInfoSerializer.Serialize( xmlWriter, motionSetInfo,
                         new XmlSerializerNamespaces( new[] { XmlQualifiedName.Empty } ) );
 
                     Clipboard.SetText( stringWriter.ToString() );
@@ -145,12 +145,12 @@ namespace MikuMikuModel.Nodes.Motions
                 if ( motionSetName.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
                     motionSetName = motionSetName.Substring( 4 );
 
-                var motionSetEntry = motionDatabase.GetMotionSet( motionSetName );
-                if ( motionSetEntry != null && Data.Motions.Count == motionSetEntry.Motions.Count )
-                    for ( int i = 0; i < motionSetEntry.Motions.Count; i++ )
+                var motionSetInfo = motionDatabase.GetMotionSetInfo( motionSetName );
+                if ( motionSetInfo != null && Data.Motions.Count == motionSetInfo.Motions.Count )
+                    for ( int i = 0; i < motionSetInfo.Motions.Count; i++ )
                     {
-                        Data.Motions[ i ].Name = motionSetEntry.Motions[ i ].Name;
-                        Data.Motions[ i ].Id = motionSetEntry.Motions[ i ].Id;
+                        Data.Motions[ i ].Name = motionSetInfo.Motions[ i ].Name;
+                        Data.Motions[ i ].Id = motionSetInfo.Motions[ i ].Id;
                     }
             }
 

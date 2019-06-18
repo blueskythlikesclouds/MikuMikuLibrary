@@ -5,6 +5,6 @@
         None,
         Static,
         Linear,
-        Interpolated,
+        Tangent,
     }
 }

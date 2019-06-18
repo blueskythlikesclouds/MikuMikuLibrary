@@ -7,7 +7,7 @@ namespace MikuMikuLibrary.Motions
     public class KeySet
     {
         public List<Key> Keys { get; }
-        public bool IsInterpolated { get; set; }
+        public bool HasTangents { get; set; }
 
         internal KeySetType Type { get; set; }
 
@@ -18,7 +18,7 @@ namespace MikuMikuLibrary.Motions
 
             else if ( Type != KeySetType.None )
             {
-                IsInterpolated = Type == KeySetType.Interpolated;
+                HasTangents = Type == KeySetType.Tangent;
 
                 if ( isModern )
                     ReadModern();
@@ -38,8 +38,8 @@ namespace MikuMikuLibrary.Motions
                     foreach ( var key in Keys )
                     {
                         key.Value = reader.ReadSingle();
-                        if ( IsInterpolated )
-                            key.Interpolation = reader.ReadSingle();
+                        if ( HasTangents )
+                            key.Tangent = reader.ReadSingle();
                     }
                 }
 
@@ -52,9 +52,9 @@ namespace MikuMikuLibrary.Motions
                     for ( int i = 0; i < keyCount; i++ )
                         Keys.Add( new Key() );
 
-                    if ( IsInterpolated )
+                    if ( HasTangents )
                         foreach ( var key in Keys )
-                            key.Interpolation = reader.ReadSingle();
+                            key.Tangent = reader.ReadSingle();
 
                     reader.Align( 4 );
                     foreach ( var key in Keys )
@@ -88,9 +88,9 @@ namespace MikuMikuLibrary.Motions
                     writer.Write( ( ushort ) Keys.Count );
                     writer.Write( ( ushort ) 0 );
 
-                    if ( IsInterpolated )
+                    if ( HasTangents )
                         foreach ( var key in Keys )
-                            writer.Write( key.Interpolation );
+                            writer.Write( key.Tangent );
 
                     writer.WriteAlignmentPadding( 4 );
                     foreach ( var key in Keys )
@@ -113,8 +113,8 @@ namespace MikuMikuLibrary.Motions
                     foreach ( var key in Keys )
                     {
                         writer.Write( key.Value );
-                        if ( IsInterpolated )
-                            writer.Write( key.Interpolation );
+                        if ( HasTangents )
+                            writer.Write( key.Tangent );
                     }
                 }
             }
@@ -124,8 +124,8 @@ namespace MikuMikuLibrary.Motions
         {
             Keys.AddRange( other.Keys );
 
-            if ( other.IsInterpolated )
-                IsInterpolated = true;
+            if ( other.HasTangents )
+                HasTangents = true;
         }
 
         public void Sort()
@@ -137,7 +137,7 @@ namespace MikuMikuLibrary.Motions
         {
             if ( Keys.Count == 0 )
                 return 0;
-        
+
             if ( Keys.Count == 1 )
                 return Keys[ 0 ].Value;
 
@@ -148,30 +148,30 @@ namespace MikuMikuLibrary.Motions
             {
                 if ( Math.Abs( key.Frame - frame ) < 0.000001 )
                     return key.Value;
-            
+
                 previous = next;
                 next = key;
 
                 if ( frame < next.Frame )
                     break;
             }
-            
+
             if ( previous != null && next == null )
                 return previous.Value;
-                
+
             if ( previous == null && next != null )
                 return next.Value;
 
             float factor = ( frame - Keys[ Keys.Count - 1 ].Frame ) /
                            ( next.Frame - Keys[ Keys.Count - 1 ].Frame );
 
-            if ( IsInterpolated )
+            if ( HasTangents )
                 return ( ( factor - 1.0f ) * 2.0f - 1.0f ) * ( factor * factor ) * ( previous.Value - next.Value ) +
-                       ( ( factor - 1.0f ) * previous.Interpolation + factor * next.Interpolation ) *
+                       ( ( factor - 1.0f ) * previous.Tangent + factor * next.Tangent ) *
                        ( factor - 1.0f ) * ( frame - Keys[ Keys.Count - 1 ].Frame ) + previous.Value;
 
             return ( factor * 2.0f - 3.0f ) * ( factor * factor ) * ( previous.Value - next.Value ) + previous.Value;
-        }   
+        }
 
         public KeySet()
         {

@@ -7,7 +7,7 @@ namespace MikuMikuLibrary.Textures
 {
     public partial class Texture
     {
-        private SubTexture[,] mSubTextures;
+        private SubTexture[ , ] mSubTextures;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -50,22 +50,19 @@ namespace MikuMikuLibrary.Textures
 
             int subTextureCount = reader.ReadInt32();
             int info = reader.ReadInt32();
-            
+
             int mipMapCount = info & 0xFF;
             int depth = ( info >> 8 ) & 0xFF;
 
             if ( depth == 1 && mipMapCount != subTextureCount )
-                mipMapCount = ( byte )subTextureCount;
+                mipMapCount = ( byte ) subTextureCount;
 
             mSubTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )
             {
                 for ( int j = 0; j < mipMapCount; j++ )
                 {
-                    reader.ReadOffset( () =>
-                    {
-                        mSubTextures[ i, j ] = new SubTexture( reader );
-                    } );
+                    reader.ReadOffset( () => { mSubTextures[ i, j ] = new SubTexture( reader ); } );
                 }
             }
 
@@ -78,18 +75,16 @@ namespace MikuMikuLibrary.Textures
             writer.Write( UsesDepth ? 0x05505854 : 0x04505854 );
             writer.Write( MipMapCount * Depth );
             writer.Write( MipMapCount | ( Depth << 8 ) | 0x01010000 );
-            
+
             for ( int i = 0; i < Depth; i++ )
             {
                 for ( int j = 0; j < MipMapCount; j++ )
                 {
                     var subTexture = mSubTextures[ i, j ];
-                    writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
-                    {
-                        subTexture.Write( writer );
-                    } );
+                    writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { subTexture.Write( writer ); } );
                 }
             }
+
             writer.PopBaseOffset();
         }
 

@@ -7,14 +7,21 @@ namespace MikuMikuLibrary.IO.Sections
 {
     public static class SectionRegistry
     {
-        private static readonly Dictionary<Type, SectionInfo> sSectionInfosBySectionType = new Dictionary<Type, SectionInfo>();
-        private static readonly Dictionary<string, SectionInfo> sSectionInfosBySignature = new Dictionary<string, SectionInfo>();
-        private static readonly Dictionary<Type, SectionInfo> sSingleSectionInfosByDataType = new Dictionary<Type, SectionInfo>();
+        private static readonly Dictionary<Type, SectionInfo> sSectionInfosBySectionType =
+            new Dictionary<Type, SectionInfo>();
+
+        private static readonly Dictionary<string, SectionInfo> sSectionInfosBySignature =
+            new Dictionary<string, SectionInfo>();
+
+        private static readonly Dictionary<Type, SectionInfo> sSingleSectionInfosByDataType =
+            new Dictionary<Type, SectionInfo>();
 
         public static IEnumerable<SectionInfo> SectionInfos => sSectionInfosBySectionType.Values;
         public static IReadOnlyDictionary<Type, SectionInfo> SectionInfosBySectionType => sSectionInfosBySectionType;
         public static IReadOnlyDictionary<string, SectionInfo> SectionInfosBySignature => sSectionInfosBySignature;
-        public static IReadOnlyDictionary<Type, SectionInfo> SingleSectionInfosByDataType => sSingleSectionInfosByDataType;
+
+        public static IReadOnlyDictionary<Type, SectionInfo> SingleSectionInfosByDataType =>
+            sSingleSectionInfosByDataType;
 
         public static SectionInfo GetOrRegisterSectionInfo( Type sectionType )
         {

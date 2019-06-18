@@ -2,51 +2,117 @@
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
+    public class StringEntry
+    {
+        public string Value { get; set; }
+        public int Id { get; set; }
+    }
+
     public class StringArray : BinaryFile
     {
-        public override BinaryFileFlags Flags => BinaryFileFlags.Load | BinaryFileFlags.Save;
+        public override BinaryFileFlags Flags =>
+            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
-        public List<string> Strings { get; }
+        public List<StringEntry> Strings { get; }
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
-            var offsets = new List<long>();
+            if ( section != null )
+                ReadModern();
+            else
+                ReadClassic();
 
-            // Try to determine endianness (apparently DT uses big endian string arrays)
-            uint stringOffset = reader.ReadUInt32();
-            if ( stringOffset >= reader.Length )
+            void ReadClassic()
             {
-                reader.Endianness = Endianness.BigEndian;
-                stringOffset = EndiannessSwapUtilities.Swap( stringOffset );
+                var offsets = new List<long>();
+
+                // Try to determine endianness (apparently DT uses big endian string arrays)
+                uint stringOffset = reader.ReadUInt32();
+                if ( stringOffset >= reader.Length )
+                {
+                    reader.Endianness = Endianness.BigEndian;
+                    stringOffset = EndiannessSwapUtilities.Swap( stringOffset );
+                }
+
+                Endianness = reader.Endianness;
+
+                do
+                {
+                    offsets.Add( stringOffset );
+                    stringOffset = reader.ReadUInt32();
+                } while ( reader.Position < offsets[ 0 ] && stringOffset != 0 );
+
+                Strings.Capacity = offsets.Count;
+                for ( int i = 0; i < offsets.Count; i++ )
+                {
+                    long offset = offsets[ i ];
+                    reader.SeekBegin( offset );
+
+                    string value = reader.ReadString( StringBinaryFormat.NullTerminated );
+                    if ( !string.IsNullOrEmpty( value ) )
+                        Strings.Add( new StringEntry { Value = value, Id = i } );
+                }
             }
 
-            Endianness = reader.Endianness;
-
-            do
+            void ReadModern()
             {
-                offsets.Add( stringOffset );
-                stringOffset = reader.ReadUInt32();
-            } while ( reader.Position < offsets[ 0 ] && stringOffset != 0 );
+                int count = reader.ReadInt32();
 
-            foreach ( var offset in offsets )
-            {
-                reader.SeekBegin( offset );
-                Strings.Add( reader.ReadString( StringBinaryFormat.NullTerminated ) );
+                reader.ReadOffset( () =>
+                {
+                    Strings.Capacity = count;
+                    for ( int i = 0; i < count; i++ )
+                        Strings.Add( new StringEntry
+                        {
+                            Value = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ),
+                            Id = reader.ReadInt32()
+                        } );
+                } );
             }
         }
 
         public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
-            foreach ( var str in Strings )
-                writer.AddStringToStringTable( str );
+            if ( section != null )
+                WriteModern();
+            else
+                WriteClassic();
+
+            void WriteClassic()
+            {
+                int previousId = 0;
+
+                foreach ( var stringEntry in Strings.OrderBy( x => x.Id ) )
+                {
+                    for ( int i = 0; i < stringEntry.Id - previousId - 1; i++ )
+                        writer.AddStringToStringTable( string.Empty );
+                    previousId = stringEntry.Id;
+
+                    writer.AddStringToStringTable( stringEntry.Value );
+                }
+            }
+
+            void WriteModern()
+            {
+                writer.Write( Strings.Count );
+                writer.ScheduleWriteOffset( 64, AlignmentMode.Left, () =>
+                {
+                    foreach ( var stringEntry in Strings )
+                    {
+                        writer.AddStringToStringTable( stringEntry.Value );
+                        writer.Write( stringEntry.Id );
+                    }
+                } );
+            }
         }
 
         public StringArray()
         {
-            Strings = new List<string>();
+            Strings = new List<StringEntry>();
         }
     }
 }

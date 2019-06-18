@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
-    public class TextureEntry
+    public class TextureInfo
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -18,7 +18,7 @@ namespace MikuMikuLibrary.Databases
         public override BinaryFileFlags Flags =>
             BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
-        public List<TextureEntry> Textures { get; }
+        public List<TextureInfo> Textures { get; }
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
@@ -31,10 +31,11 @@ namespace MikuMikuLibrary.Databases
 
                 for ( int i = 0; i < textureCount; i++ )
                 {
-                    var textureEntry = new TextureEntry();
-                    textureEntry.Id = reader.ReadInt32();
-                    textureEntry.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-                    Textures.Add( textureEntry );
+                    Textures.Add( new TextureInfo
+                    {
+                        Id = reader.ReadInt32(),
+                        Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
+                    } );
                 }
             } );
         }
@@ -44,11 +45,10 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Textures.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                int i = Textures.Max( x => x.Id ) + 1;
-                foreach ( var textureEntry in Textures )
+                foreach ( var textureInfo in Textures )
                 {
-                    writer.Write( textureEntry.Id );
-                    writer.AddStringToStringTable( textureEntry.Name ?? i++.ToString() );
+                    writer.Write( textureInfo.Id );
+                    writer.AddStringToStringTable( textureInfo.Name ?? string.Empty );
                 }
             } );
         }
@@ -56,14 +56,16 @@ namespace MikuMikuLibrary.Databases
         public override void Save( string filePath )
         {
             // Assume it's being exported for F2nd PS3
-            if ( BinaryFormatUtilities.IsClassic( Format ) && filePath.EndsWith( ".txi", StringComparison.OrdinalIgnoreCase ) )
+            if ( BinaryFormatUtilities.IsClassic( Format ) &&
+                 filePath.EndsWith( ".txi", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.F2nd;
                 Endianness = Endianness.BigEndian;
             }
 
             // Or reverse
-            else if ( BinaryFormatUtilities.IsModern( Format ) && filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
+            else if ( BinaryFormatUtilities.IsModern( Format ) &&
+                      filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.DT;
                 Endianness = Endianness.LittleEndian;
@@ -72,19 +74,15 @@ namespace MikuMikuLibrary.Databases
             base.Save( filePath );
         }
 
-        public TextureEntry GetTexture( string textureName )
-        {
-            return Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
-        }
+        public TextureInfo GetTextureInfo( string textureName ) =>
+            Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
 
-        public TextureEntry GetTexture( int textureId )
-        {
-            return Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
-        }
+        public TextureInfo GetTextureInfo( int textureId ) =>
+            Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
 
         public TextureDatabase()
         {
-            Textures = new List<TextureEntry>();
+            Textures = new List<TextureInfo>();
         }
     }
 }

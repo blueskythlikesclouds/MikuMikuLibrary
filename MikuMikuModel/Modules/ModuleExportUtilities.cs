@@ -15,7 +15,7 @@ namespace MikuMikuModel.Modules
 
             var moduleList = modulesToMatch
                 .Where( x =>
-                    x.Flags.HasFlag( FormatModuleFlags.Import ) &&
+                    x.Flags.HasFlag( FormatModuleFlags.Export ) &&
                     ( x.Extensions.Contains( "*" ) ||
                       x.Extensions.Contains( extension, StringComparer.OrdinalIgnoreCase ) ) )
                 .ToList();
@@ -29,7 +29,8 @@ namespace MikuMikuModel.Modules
         public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string fileName ) =>
             GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName );
 
-        public static string SelectModuleExport<T>( string title = "Select a file to export to.", string filePath = null )
+        public static string SelectModuleExport<T>( string title = "Select a file to export to.",
+            string filePath = null )
         {
             using ( var dialog = new SaveFileDialog() )
             {
@@ -49,7 +50,8 @@ namespace MikuMikuModel.Modules
             return null;
         }
 
-        public static string SelectModuleExport( IEnumerable<Type> modelTypes, string title = "Select a file to export to.", string filePath = null )
+        public static string SelectModuleExport( IEnumerable<Type> modelTypes,
+            string title = "Select a file to export to.", string filePath = null )
         {
             using ( var dialog = new SaveFileDialog() )
             {

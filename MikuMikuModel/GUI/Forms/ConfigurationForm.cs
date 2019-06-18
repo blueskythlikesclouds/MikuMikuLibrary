@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using MikuMikuLibrary.Archives.Farc;
+using MikuMikuLibrary.Archives;
 using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.GUI.Forms
@@ -237,8 +237,8 @@ namespace MikuMikuModel.GUI.Forms
 
                 if ( string.IsNullOrEmpty( SelectedConfiguration.BoneDatabaseFilePath ) )
                     SelectedConfiguration.BoneDatabaseFilePath =
-                        PickPath( "rom/bone_data.bin", "bone_data.bin", "data/bone_data.bon", 
-                                  "bone_data.bon" );
+                        PickPath( "rom/bone_data.bin", "bone_data.bin", "data/bone_data.bon",
+                            "bone_data.bon" );
 
                 if ( string.IsNullOrEmpty( SelectedConfiguration.MotionDatabaseFilePath ) )
                     SelectedConfiguration.MotionDatabaseFilePath =

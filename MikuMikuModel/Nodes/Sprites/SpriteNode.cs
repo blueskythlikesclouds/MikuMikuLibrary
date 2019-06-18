@@ -58,7 +58,7 @@ namespace MikuMikuModel.Nodes.Sprites
             get => GetProperty<float>();
             set => SetProperty( value );
         }
-        
+
         [DisplayName( "Normalized X" )]
         public float NdcX
         {

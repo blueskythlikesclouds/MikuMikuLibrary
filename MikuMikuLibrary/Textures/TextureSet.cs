@@ -2,6 +2,7 @@
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using MikuMikuLibrary.IO.Sections.Textures;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,10 +36,7 @@ namespace MikuMikuLibrary.Textures
             Textures.Capacity = textureCount;
             for ( int i = 0; i < textureCount; i++ )
             {
-                reader.ReadOffset( () =>
-                {
-                    Textures.Add( new Texture( reader ) );
-                } );
+                reader.ReadOffset( () => { Textures.Add( new Texture( reader ) ); } );
             }
 
             reader.PopBaseOffset();
@@ -54,10 +52,7 @@ namespace MikuMikuLibrary.Textures
 
             foreach ( var texture in Textures )
             {
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
-                {
-                    texture.Write( writer );
-                } );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { texture.Write( writer ); } );
             }
 
             writer.PopBaseOffset();
@@ -86,14 +81,16 @@ namespace MikuMikuLibrary.Textures
         public override void Save( string filePath )
         {
             // Assume it's being exported for F2nd PS3
-            if ( BinaryFormatUtilities.IsClassic( Format ) && filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
+            if ( BinaryFormatUtilities.IsClassic( Format ) &&
+                 filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.F2nd;
                 Endianness = Endianness.BigEndian;
             }
 
             // Or reverse
-            else if ( BinaryFormatUtilities.IsModern( Format ) && filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
+            else if ( BinaryFormatUtilities.IsModern( Format ) &&
+                      filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.DT;
                 Endianness = Endianness.LittleEndian;
@@ -105,7 +102,7 @@ namespace MikuMikuLibrary.Textures
                 var textureDatabase = new TextureDatabase();
                 foreach ( var texture in Textures )
                 {
-                    textureDatabase.Textures.Add( new TextureEntry
+                    textureDatabase.Textures.Add( new TextureInfo
                     {
                         Id = texture.Id,
                         Name = texture.Name ?? $"Texture{texture.Id}",

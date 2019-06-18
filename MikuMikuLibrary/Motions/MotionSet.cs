@@ -6,6 +6,7 @@ using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using MikuMikuLibrary.Skeletons;
 
 namespace MikuMikuLibrary.Motions
 {
@@ -42,21 +43,21 @@ namespace MikuMikuLibrary.Motions
             writer.WriteNulls( 16 );
         }
 
-        public void Load( Stream source, SkeletonEntry skeletonEntry, MotionDatabase motionDatabase, bool leaveOpen = false )
+        public void Load( Stream source, Skeleton skeleton, MotionDatabase motionDatabase, bool leaveOpen = false )
         {
             Load( source, leaveOpen );
 
-            if ( skeletonEntry == null || motionDatabase == null )
+            if ( skeleton == null || motionDatabase == null )
                 return;
 
             foreach ( var motion in Motions )
-                motion.GetController( skeletonEntry, motionDatabase );
+                motion.Bind( skeleton, motionDatabase );
         }
 
-        public void Load( string filePath, SkeletonEntry skeletonEntry, MotionDatabase motionDatabase )
+        public void Load( string filePath, Skeleton skeleton, MotionDatabase motionDatabase )
         {
             using ( var stream = File.OpenRead( filePath ) )
-                Load( stream, skeletonEntry, motionDatabase );
+                Load( stream, skeleton, motionDatabase );
 
             if ( motionDatabase == null )
                 return;
@@ -65,32 +66,32 @@ namespace MikuMikuLibrary.Motions
             if ( motionSetName.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
                 motionSetName = motionSetName.Substring( 4 );
 
-            var motionSetEntry = motionDatabase.GetMotionSet( motionSetName );
-            if ( motionSetEntry == null || Motions.Count != motionSetEntry.Motions.Count )
+            var motionSetInfo = motionDatabase.GetMotionSetInfo( motionSetName );
+            if ( motionSetInfo == null || Motions.Count != motionSetInfo.Motions.Count )
                 return;
 
-            for ( int i = 0; i < motionSetEntry.Motions.Count; i++ )
+            for ( int i = 0; i < motionSetInfo.Motions.Count; i++ )
             {
-                Motions[ i ].Name = motionSetEntry.Motions[ i ].Name;
-                Motions[ i ].Id = motionSetEntry.Motions[ i ].Id;
+                Motions[ i ].Name = motionSetInfo.Motions[ i ].Name;
+                Motions[ i ].Id = motionSetInfo.Motions[ i ].Id;
             }
         }
 
-        public void Save( Stream destination, SkeletonEntry skeletonEntry, MotionDatabase motionDatabase, bool leaveOpen = false )
+        public void Save( Stream destination, Skeleton skeleton, MotionDatabase motionDatabase, bool leaveOpen = false )
         {
-            if ( skeletonEntry != null && motionDatabase != null )
+            if ( skeleton != null && motionDatabase != null )
             {
-                foreach ( var motion in Motions.Where( x => x.HasController ) )
-                    motion.GetController().Update( skeletonEntry, motionDatabase );
+                foreach ( var motion in Motions.Where( x => x.HasBinding ) )
+                    motion.Bind().Unbind( skeleton, motionDatabase );
             }
 
             Save( destination, leaveOpen );
         }
 
-        public void Save( string filePath, SkeletonEntry skeletonEntry, MotionDatabase motionDatabase )
+        public void Save( string filePath, Skeleton skeleton, MotionDatabase motionDatabase )
         {
             using ( var stream = File.Create( filePath ) )
-                Save( stream, skeletonEntry, motionDatabase );
+                Save( stream, skeleton, motionDatabase );
         }
 
         public MotionSet()

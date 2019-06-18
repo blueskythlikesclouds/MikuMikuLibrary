@@ -24,7 +24,7 @@ namespace MikuMikuModel.Nodes.Wrappers
             set => Node.Name = value;
         }
 
-        public override ContextMenuStrip ContextMenuStrip => 
+        public override ContextMenuStrip ContextMenuStrip =>
             HideContextMenuStrip ? null : Node.ContextMenuStrip;
 
         private void OnNodeMoved( object sender, NodeMoveEventArgs args )

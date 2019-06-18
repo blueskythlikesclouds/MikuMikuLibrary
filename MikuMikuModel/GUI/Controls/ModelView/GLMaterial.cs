@@ -15,7 +15,6 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public GLTexture Normal { get; }
         public GLTexture Specular { get; }
         public GLTexture Reflection { get; }
-        public GLTexture SpecularPower { get; }
         public Vector4 DiffuseColor { get; }
         public Vector4 AmbientColor { get; }
         public Vector4 SpecularColor { get; }
@@ -31,7 +30,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             shaderProgram.SetUniform( "specularPower", Shininess );
 
             int textureIndex = 0;
-            void ActivateTexture( GLTexture texture, string uniformName, TextureTarget target = TextureTarget.Texture2D )
+
+            void ActivateTexture( GLTexture texture, string uniformName,
+                TextureTarget target = TextureTarget.Texture2D )
             {
                 GL.ActiveTexture( TextureUnit.Texture0 + textureIndex );
                 GL.BindTexture( target, texture?.Id ?? 0 );
@@ -44,7 +45,6 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             ActivateTexture( Normal, "normalTexture" );
             ActivateTexture( Specular, "specularTexture" );
             ActivateTexture( Reflection, "reflectionTexture", TextureTarget.TextureCubeMap );
-            ActivateTexture( SpecularPower, "specularPowerTexture" );
         }
 
         public void Dispose()
@@ -54,7 +54,6 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Normal?.Dispose();
             Specular?.Dispose();
             Reflection?.Dispose();
-            SpecularPower?.Dispose();
         }
 
         public GLMaterial( Material material, Dictionary<int, GLTexture> textures, TextureSet textureSet )
@@ -67,15 +66,18 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Normal = GetTexture( material.Normal );
             Specular = GetTexture( material.Specular );
             Reflection = GetTexture( material.Reflection );
-            SpecularPower = GetTexture( material.SpecularPower );
 
             if ( material.Shader.Equals( "EYEBALL", StringComparison.OrdinalIgnoreCase ) )
                 DiffuseColor = Vector4.One;
             else
-                DiffuseColor = new Vector4( material.DiffuseColor.R, material.DiffuseColor.G, material.DiffuseColor.B, material.DiffuseColor.A );
-            AmbientColor = new Vector4( material.AmbientColor.R, material.AmbientColor.G, material.AmbientColor.B, material.AmbientColor.A );
-            SpecularColor = new Vector4( material.SpecularColor.R, material.SpecularColor.G, material.SpecularColor.B, material.SpecularColor.A );
-            EmissionColor = new Vector4( material.EmissionColor.R, material.EmissionColor.G, material.EmissionColor.B, material.EmissionColor.A );
+                DiffuseColor = new Vector4( material.DiffuseColor.R, material.DiffuseColor.G, material.DiffuseColor.B,
+                    material.DiffuseColor.A );
+            AmbientColor = new Vector4( material.AmbientColor.R, material.AmbientColor.G, material.AmbientColor.B,
+                material.AmbientColor.A );
+            SpecularColor = new Vector4( material.SpecularColor.R, material.SpecularColor.G, material.SpecularColor.B,
+                material.SpecularColor.A );
+            EmissionColor = new Vector4( material.EmissionColor.R, material.EmissionColor.G, material.EmissionColor.B,
+                material.EmissionColor.A );
             Shininess = material.Shininess;
 
             GLTexture GetTexture( MaterialTexture materialTexture )
@@ -87,7 +89,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                     return texture;
                 else
                 {
-                    var textureToUpload = textureSet.Textures.FirstOrDefault( x => x.Id.Equals( materialTexture.TextureId ) );
+                    var textureToUpload =
+                        textureSet.Textures.FirstOrDefault( x => x.Id.Equals( materialTexture.TextureId ) );
                     if ( textureToUpload == null )
                         return null;
 

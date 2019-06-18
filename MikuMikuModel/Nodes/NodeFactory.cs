@@ -21,7 +21,8 @@ namespace MikuMikuModel.Nodes
                 return null;
 
             object[] args = { name, data };
-            return Activator.CreateInstance( nodeType, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, args, null ) as INode;
+            return Activator.CreateInstance( nodeType,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, args, null ) as INode;
         }
 
         public static INode Create<T>( string name, T data )
@@ -30,7 +31,8 @@ namespace MikuMikuModel.Nodes
                 return null;
 
             object[] args = { name, data };
-            return Activator.CreateInstance( nodeType, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, args, null ) as INode;
+            return Activator.CreateInstance( nodeType,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, args, null ) as INode;
         }
 
         public static INode Create( string filePath, IEnumerable<Type> typesToMatch )
@@ -43,7 +45,7 @@ namespace MikuMikuModel.Nodes
             return Create( module.ModelType, Path.GetFileName( filePath ), module.Import( filePath ) );
         }
 
-        public static INode Create( string filePath ) => 
+        public static INode Create( string filePath ) =>
             Create( filePath, FormatModuleRegistry.ModelTypes );
 
         static NodeFactory()

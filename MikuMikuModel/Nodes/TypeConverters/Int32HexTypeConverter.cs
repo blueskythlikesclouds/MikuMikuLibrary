@@ -10,7 +10,7 @@ namespace MikuMikuModel.Nodes.TypeConverters
             sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
 
         public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) =>
-             sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
 
         public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
         {
@@ -25,7 +25,8 @@ namespace MikuMikuModel.Nodes.TypeConverters
             return base.ConvertFrom( context, culture, value );
         }
 
-        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType )
+        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value,
+            Type destinationType )
         {
             if ( value is int && destinationType == typeof( string ) )
                 return string.Format( "0x{0:X8}", value );
@@ -40,7 +41,7 @@ namespace MikuMikuModel.Nodes.TypeConverters
             sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
 
         public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) =>
-             sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
 
         public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
         {
@@ -55,7 +56,8 @@ namespace MikuMikuModel.Nodes.TypeConverters
             return base.ConvertFrom( context, culture, value );
         }
 
-        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType )
+        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value,
+            Type destinationType )
         {
             if ( value is uint && destinationType == typeof( string ) )
                 return string.Format( "0x{0:X8}", value );

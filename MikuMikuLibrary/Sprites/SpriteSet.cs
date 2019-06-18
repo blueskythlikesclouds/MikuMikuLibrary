@@ -28,10 +28,8 @@ namespace MikuMikuLibrary.Sprites
             long spriteNamesOffset = reader.ReadOffset();
             long spriteUnknownsOffset = reader.ReadOffset();
 
-            reader.ReadAtOffsetIf( section == null, texturesOffset, () =>
-            {
-                TextureSet.Load( reader.BaseStream, true );
-            } );
+            reader.ReadAtOffsetIf( section == null, texturesOffset,
+                () => { TextureSet.Load( reader.BaseStream, true ); } );
 
             Sprites.Capacity = spriteCount;
             reader.ReadAtOffset( spritesOffset, () =>
@@ -66,7 +64,8 @@ namespace MikuMikuLibrary.Sprites
         public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( 0 );
-            writer.ScheduleWriteOffsetIf( section == null, 1, 16, AlignmentMode.Left, () => TextureSet.Save( writer.BaseStream, true ) );
+            writer.ScheduleWriteOffsetIf( section == null, 1, 16, AlignmentMode.Left,
+                () => TextureSet.Save( writer.BaseStream, true ) );
             writer.Write( TextureSet.Textures.Count );
             writer.Write( Sprites.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
@@ -88,7 +87,7 @@ namespace MikuMikuLibrary.Sprites
             {
                 foreach ( var sprite in Sprites )
                     sprite.WriteSecond( writer );
-                    
+
                 writer.PopStringTablesReversed();
             } );
         }
@@ -105,13 +104,13 @@ namespace MikuMikuLibrary.Sprites
                 return;
 
             var spriteDatabase = BinaryFile.Load<SpriteDatabase>( spriteDatabaseFilePath );
-            var spriteSetEntry = spriteDatabase.SpriteSets[ 0 ];
+            var spriteSetInfo = spriteDatabase.SpriteSets[ 0 ];
 
-            foreach ( var spriteEntry in spriteSetEntry.Sprites )
-                Sprites[ spriteEntry.Index ].Name = spriteEntry.Name;
+            foreach ( var spriteInfo in spriteSetInfo.Sprites )
+                Sprites[ spriteInfo.Index ].Name = spriteInfo.Name;
 
-            foreach ( var textureEntry in spriteSetEntry.Textures )
-                TextureSet.Textures[ textureEntry.Index ].Name = textureEntry.Name;
+            foreach ( var textureInfo in spriteSetInfo.Textures )
+                TextureSet.Textures[ textureInfo.Index ].Name = textureInfo.Name;
         }
 
         public SpriteSet()

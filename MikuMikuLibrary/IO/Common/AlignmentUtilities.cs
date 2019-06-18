@@ -23,7 +23,7 @@ namespace MikuMikuLibrary.IO.Common
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public static int GetAlignedDifference( long value, int alignment )
         {
-            return ( int )( ( ( value + ( alignment - 1 ) ) & ~( alignment - 1 ) ) - value );
+            return ( int ) ( ( ( value + ( alignment - 1 ) ) & ~( alignment - 1 ) ) - value );
         }
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]

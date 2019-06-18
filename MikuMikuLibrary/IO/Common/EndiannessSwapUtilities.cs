@@ -22,7 +22,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public static short Swap( short value )
         {
-            return ( short )( ( value << 8 ) | ( ( value >> 8 ) & 0xFF ) );
+            return ( short ) ( ( value << 8 ) | ( ( value >> 8 ) & 0xFF ) );
         }
 
         public static void Swap( ref short value )
@@ -32,7 +32,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public static ushort Swap( ushort value )
         {
-            return ( ushort )( ( value << 8 ) | ( value >> 8 ) );
+            return ( ushort ) ( ( value << 8 ) | ( value >> 8 ) );
         }
 
         public static void Swap( ref ushort value )
@@ -42,7 +42,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public static int Swap( int value )
         {
-            value = ( int )( ( value << 8 ) & 0xFF00FF00 ) | ( ( value >> 8 ) & 0xFF00FF );
+            value = ( int ) ( ( value << 8 ) & 0xFF00FF00 ) | ( ( value >> 8 ) & 0xFF00FF );
             return ( value << 16 ) | ( ( value >> 16 ) & 0xFFFF );
         }
 
@@ -64,9 +64,11 @@ namespace MikuMikuLibrary.IO.Common
 
         public static long Swap( long value )
         {
-            value = ( long )( ( ( ulong )( value << 8 ) & 0xFF00FF00FF00FF00UL ) | ( ( ulong )( value >> 8 ) & 0x00FF00FF00FF00FFUL ) );
-            value = ( long )( ( ( ulong )( value << 16 ) & 0xFFFF0000FFFF0000UL ) | ( ( ulong )( value >> 16 ) & 0x0000FFFF0000FFFFUL ) );
-            return ( long )( ( ulong )( value << 32 ) | ( ( ulong )( value >> 32 ) & 0xFFFFFFFFUL ) );
+            value = ( long ) ( ( ( ulong ) ( value << 8 ) & 0xFF00FF00FF00FF00UL ) |
+                               ( ( ulong ) ( value >> 8 ) & 0x00FF00FF00FF00FFUL ) );
+            value = ( long ) ( ( ( ulong ) ( value << 16 ) & 0xFFFF0000FFFF0000UL ) |
+                               ( ( ulong ) ( value >> 16 ) & 0x0000FFFF0000FFFFUL ) );
+            return ( long ) ( ( ulong ) ( value << 32 ) | ( ( ulong ) ( value >> 32 ) & 0xFFFFFFFFUL ) );
         }
 
         public static void Swap( ref long value )
@@ -114,11 +116,11 @@ namespace MikuMikuLibrary.IO.Common
         {
             ulong* pData = stackalloc ulong[ 2 ];
 
-            *pData = Swap( *( ulong* )&value );
+            *pData = Swap( *( ulong* ) &value );
             pData++;
-            *pData = Swap( *( ( ulong* )&value + 16 ) );
+            *pData = Swap( *( ( ulong* ) &value + 16 ) );
 
-            return *( decimal* )pData;
+            return *( decimal* ) pData;
         }
 
         public static void Swap( ref decimal value )
@@ -130,7 +132,7 @@ namespace MikuMikuLibrary.IO.Common
         {
             if ( type.IsArray )
             {
-                var array = ( Array )obj;
+                var array = ( Array ) obj;
                 var elemType = type.GetElementType();
 
                 for ( int i = 0; i < array.Length; i++ )
@@ -163,7 +165,7 @@ namespace MikuMikuLibrary.IO.Common
             }
             else if ( type.IsPrimitive )
             {
-                return Swap( ( dynamic )obj );
+                return Swap( ( dynamic ) obj );
                 //return SwapEndiannessPrimitive(type, obj);
             }
             else if ( type.IsValueType )
@@ -258,7 +260,7 @@ namespace MikuMikuLibrary.IO.Common
         {
             object temp = obj;
             temp = Swap( temp, typeof( T ) );
-            return ( T )temp;
+            return ( T ) temp;
         }
 
         public static void Swap<T>( ref T obj )

@@ -7,17 +7,17 @@ using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
-    public class MotionEntry
+    public class MotionInfo
     {
         public string Name { get; set; }
         public int Id { get; set; }
     }
 
-    public class MotionSetEntry
+    public class MotionSetInfo
     {
         public string Name { get; set; }
         public int Id { get; set; }
-        public List<MotionEntry> Motions { get; }
+        public List<MotionInfo> Motions { get; }
 
         internal void Read( EndianBinaryReader reader )
         {
@@ -33,46 +33,39 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < motionCount; i++ )
                 {
-                    var motionEntry = new MotionEntry();
-                    motionEntry.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-                    Motions.Add( motionEntry );
+                    Motions.Add( new MotionInfo
+                    {
+                        Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
+                    } );
                 }
             } );
 
             reader.ReadAtOffset( motionIdsOffset, () =>
             {
-                foreach ( var motionEntry in Motions )
-                    motionEntry.Id = reader.ReadInt32();
+                foreach ( var motionInfo in Motions )
+                    motionInfo.Id = reader.ReadInt32();
             } );
         }
 
-        internal void Write( EndianBinaryWriter writer, bool first, bool last )
+        internal void Write( EndianBinaryWriter writer )
         {
-            int alignment = first ? 16 : 4;
-        
             writer.AddStringToStringTable( Name );
-            writer.ScheduleWriteOffset( alignment, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var motionEntry in Motions )
-                    writer.AddStringToStringTable( motionEntry.Name );
-                
-                if ( last )
-                    writer.WriteOffset( 0 );
+                foreach ( var motionInfo in Motions )
+                    writer.AddStringToStringTable( motionInfo.Name );
             } );
             writer.Write( Motions.Count );
-            writer.ScheduleWriteOffset( 1, alignment, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 1, 4, AlignmentMode.Left, () =>
             {
-                foreach ( var motionEntry in Motions )
-                    writer.Write( motionEntry.Id );
-                    
-                if ( last )
-                    writer.Write( 0 );
+                foreach ( var motionInfo in Motions )
+                    writer.Write( motionInfo.Id );
             } );
         }
 
-        public MotionSetEntry()
+        public MotionSetInfo()
         {
-            Motions = new List<MotionEntry>();
+            Motions = new List<MotionInfo>();
         }
     }
 
@@ -80,7 +73,7 @@ namespace MikuMikuLibrary.Databases
     {
         public override BinaryFileFlags Flags => BinaryFileFlags.Load | BinaryFileFlags.Save;
 
-        public List<MotionSetEntry> MotionSets { get; }
+        public List<MotionSetInfo> MotionSets { get; }
         public List<string> BoneNames { get; }
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
@@ -97,16 +90,16 @@ namespace MikuMikuLibrary.Databases
                 MotionSets.Capacity = motionSetCount;
                 for ( int i = 0; i < motionSetCount; i++ )
                 {
-                    var motionSetEntry = new MotionSetEntry();
-                    motionSetEntry.Read( reader );
-                    MotionSets.Add( motionSetEntry );
+                    var motionSetInfo = new MotionSetInfo();
+                    motionSetInfo.Read( reader );
+                    MotionSets.Add( motionSetInfo );
                 }
             } );
 
             reader.ReadAtOffset( motionSetIdsOffset, () =>
             {
-                foreach ( var motionSetEntry in MotionSets )
-                    motionSetEntry.Id = reader.ReadInt32();
+                foreach ( var motionSetInfo in MotionSets )
+                    motionSetInfo.Id = reader.ReadInt32();
             } );
 
             reader.ReadAtOffset( boneNameOffsetsOffset, () =>
@@ -122,20 +115,15 @@ namespace MikuMikuLibrary.Databases
             writer.Write( 1 );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var motionSetEntry in MotionSets )
-                {
-                    bool first = motionSetEntry == MotionSets[ 0 ];
-                    bool last = motionSetEntry == MotionSets[ MotionSets.Count - 1 ];
-                    
-                    motionSetEntry.Write( writer, first, last );
-                }
-                
+                foreach ( var motionSetInfo in MotionSets )
+                    motionSetInfo.Write( writer );
+
                 writer.WriteNulls( 16 );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var motionSetEntry in MotionSets )
-                    writer.Write( motionSetEntry.Id );
+                foreach ( var motionSetInfo in MotionSets )
+                    writer.Write( motionSetInfo.Id );
             } );
             writer.Write( MotionSets.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
@@ -147,12 +135,12 @@ namespace MikuMikuLibrary.Databases
             writer.WriteAlignmentPadding( 64 );
         }
 
-        public MotionSetEntry GetMotionSet( string name ) =>
+        public MotionSetInfo GetMotionSetInfo( string name ) =>
             MotionSets.FirstOrDefault( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
 
         public MotionDatabase()
         {
-            MotionSets = new List<MotionSetEntry>();
+            MotionSets = new List<MotionSetInfo>();
             BoneNames = new List<string>();
         }
     }

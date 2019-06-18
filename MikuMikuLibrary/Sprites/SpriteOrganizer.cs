@@ -26,8 +26,8 @@ namespace MikuMikuLibrary.Sprites
             }
             else
             {
-                int spriteWidth = ( int )sprite.Width + 1;
-                int spriteHeight = ( int )sprite.Height + 1;
+                int spriteWidth = ( int ) sprite.Width + 1;
+                int spriteHeight = ( int ) sprite.Height + 1;
 
                 if ( Sprite != null )
                     return null;
@@ -183,7 +183,8 @@ namespace MikuMikuLibrary.Sprites
 
         private static IEnumerable<PackSpritesReturnData> OrganizeSprites( List<Sprite> sprites, int maxSize )
         {
-            maxSize = Math.Max( maxSize, ( int )Math.Max( sprites.Max( x => x.Width ), sprites.Max( x => x.Height ) ) );
+            maxSize = Math.Max( maxSize,
+                ( int ) Math.Max( sprites.Max( x => x.Width ), sprites.Max( x => x.Height ) ) );
 
             var spritesToOrganize = new List<Sprite>( sprites );
             while ( spritesToOrganize.Count != 0 )
@@ -204,8 +205,8 @@ namespace MikuMikuLibrary.Sprites
                 List<Sprite> sortedSprites = spritesToOrganize.OrderByDescending( x => x.Width * x.Height ).ToList();
                 foreach ( var sprite in sortedSprites )
                 {
-                    int spriteWidth = ( int )sprite.Width;
-                    int spriteHeight = ( int )sprite.Height;
+                    int spriteWidth = ( int ) sprite.Width;
+                    int spriteHeight = ( int ) sprite.Height;
                     int spritePixelCount = spriteWidth * spriteHeight;
 
                     bool adding = true;
@@ -274,7 +275,8 @@ namespace MikuMikuLibrary.Sprites
                     }
                 }
 
-                var organizedSpriteData = OrganizeSprites( textureWidth, textureHeight, maxSize, spritesToOrganizeForThisTurn );
+                var organizedSpriteData =
+                    OrganizeSprites( textureWidth, textureHeight, maxSize, spritesToOrganizeForThisTurn );
                 spritesToOrganize.AddRange( organizedSpriteData.UnorganizedSprites );
 
                 yield return organizedSpriteData;

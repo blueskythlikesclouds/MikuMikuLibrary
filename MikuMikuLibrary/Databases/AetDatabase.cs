@@ -2,29 +2,28 @@
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
-    public class AetEntry
+    public class AetInfo
     {
-        public ushort Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
-        public ushort Index { get; set; }
+        public int Index { get; set; }
     }
 
-    public class AetSetEntry
+    public class AetSetInfo
     {
-        public ushort Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string FileName { get; set; }
-        public ushort SpriteSetId { get; set; }
-        public List<AetEntry> Aets { get; }
+        public int SpriteSetId { get; set; }
+        public List<AetInfo> Aets { get; }
 
-        public AetSetEntry()
+        public AetSetInfo()
         {
-            Aets = new List<AetEntry>();
+            Aets = new List<AetInfo>();
         }
     }
 
@@ -33,7 +32,7 @@ namespace MikuMikuLibrary.Databases
         public override BinaryFileFlags Flags =>
             BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
-        public List<AetSetEntry> AetSets { get; }
+        public List<AetSetInfo> AetSets { get; }
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
@@ -47,20 +46,13 @@ namespace MikuMikuLibrary.Databases
                 AetSets.Capacity = aetSetCount;
                 for ( int i = 0; i < aetSetCount; i++ )
                 {
-                    ushort id = reader.ReadUInt16();
-                    reader.SeekCurrent( 2 );
-
+                    int id = reader.ReadInt32();
                     string name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     string fileName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+                    int index = reader.ReadInt32();
+                    int spriteSetId = reader.ReadInt32();
 
-                    ushort index = reader.ReadUInt16();
-                    reader.SeekCurrent( 2 );
-                    Debug.Assert( index == i );
-
-                    ushort spriteSetId = reader.ReadUInt16();
-                    reader.SeekCurrent( 2 );
-
-                    AetSets.Add( new AetSetEntry
+                    AetSets.Add( new AetSetInfo
                     {
                         Id = id,
                         Name = name,
@@ -74,22 +66,21 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < aetCount; i++ )
                 {
-                    ushort id = reader.ReadUInt16();
-                    reader.SeekCurrent( 2 );
-
+                    int id = reader.ReadInt32();
                     string name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
-                    ushort index = reader.ReadUInt16();
-                    ushort setIndex = reader.ReadUInt16();
+                    int info = reader.ReadInt32();
+                    int index = info & 0xFFFF;
+                    int setIndex = ( info >> 16 ) & 0xFFFF;
 
-                    var aetEntry = new AetEntry
+                    var aetInfo = new AetInfo
                     {
                         Id = id,
                         Name = name,
                         Index = index,
                     };
 
-                    AetSets[ setIndex ].Aets.Add( aetEntry );
+                    AetSets[ setIndex ].Aets.Add( aetInfo );
                 }
             } );
         }
@@ -101,15 +92,12 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < AetSets.Count; i++ )
                 {
-                    var aetSetEntry = AetSets[ i ];
-                    writer.Write( aetSetEntry.Id );
-                    writer.WriteNulls( 2 );
-                    writer.AddStringToStringTable( aetSetEntry.Name );
-                    writer.AddStringToStringTable( aetSetEntry.FileName );
-                    writer.Write( ( ushort )i );
-                    writer.WriteNulls( 2 );
-                    writer.Write( aetSetEntry.SpriteSetId );
-                    writer.WriteNulls( 2 );
+                    var aetSetInfo = AetSets[ i ];
+                    writer.Write( aetSetInfo.Id );
+                    writer.AddStringToStringTable( aetSetInfo.Name );
+                    writer.AddStringToStringTable( aetSetInfo.FileName );
+                    writer.Write( i );
+                    writer.Write( aetSetInfo.SpriteSetId );
                 }
             } );
             writer.Write( AetSets.Sum( x => x.Aets.Count ) );
@@ -117,14 +105,12 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < AetSets.Count; i++ )
                 {
-                    var aetSetEntry = AetSets[ i ];
-                    foreach ( var aetEntry in aetSetEntry.Aets )
+                    var aetSetInfo = AetSets[ i ];
+                    foreach ( var aetInfo in aetSetInfo.Aets )
                     {
-                        writer.Write( aetEntry.Id );
-                        writer.WriteNulls( 2 );
-                        writer.AddStringToStringTable( aetEntry.Name );
-                        writer.Write( aetEntry.Index );
-                        writer.Write( ( ushort )i );
+                        writer.Write( aetInfo.Id );
+                        writer.AddStringToStringTable( aetInfo.Name );
+                        writer.Write( i << 16 | aetInfo.Index );
                     }
                 }
             } );
@@ -132,7 +118,7 @@ namespace MikuMikuLibrary.Databases
 
         public AetDatabase()
         {
-            AetSets = new List<AetSetEntry>();
+            AetSets = new List<AetSetInfo>();
         }
     }
 }

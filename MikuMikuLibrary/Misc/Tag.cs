@@ -31,8 +31,8 @@ namespace MikuMikuLibrary.Misc
                 tag.Key = s.Substring( 1, firstIndex - 1 );
                 tag.Values.AddRange(
                     s.Substring( firstIndex + 1, secondIndex - firstIndex - 1 )
-                    .Split( new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries )
-                    .Select( x => x.Trim() ) );
+                        .Split( new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries )
+                        .Select( x => x.Trim() ) );
             }
 
             else
@@ -69,7 +69,7 @@ namespace MikuMikuLibrary.Misc
 
             var converter = TypeDescriptor.GetConverter( typeof( T ) );
             if ( converter.CanConvertFrom( typeof( string ) ) )
-                return ( T )Convert.ChangeType( Values[ valueIndex ], typeof( T ), CultureInfo.InvariantCulture );
+                return ( T ) Convert.ChangeType( Values[ valueIndex ], typeof( T ), CultureInfo.InvariantCulture );
 
             return defaultValue;
         }

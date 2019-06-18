@@ -20,7 +20,7 @@ namespace MikuMikuLibrary.Textures
 
             Width = reader.ReadInt32();
             Height = reader.ReadInt32();
-            Format = ( TextureFormat )reader.ReadInt32();
+            Format = ( TextureFormat ) reader.ReadInt32();
             Id = reader.ReadInt32();
 
             int dataSize = reader.ReadInt32();
@@ -32,7 +32,7 @@ namespace MikuMikuLibrary.Textures
             writer.Write( 0x02505854 );
             writer.Write( Width );
             writer.Write( Height );
-            writer.Write( ( int )Format );
+            writer.Write( ( int ) Format );
             writer.Write( Id );
             writer.Write( Data.Length );
             writer.Write( Data );

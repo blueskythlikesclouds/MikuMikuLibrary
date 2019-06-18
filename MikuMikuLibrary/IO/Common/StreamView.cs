@@ -22,7 +22,8 @@ namespace MikuMikuLibrary.IO.Common
             if ( source == null )
                 throw new ArgumentNullException( nameof( source ) );
 
-            if ( position < 0 || ( source.CanSeek && ( position >= source.Length || position + length > source.Length ) ) )
+            if ( position < 0 ||
+                 ( source.CanSeek && ( position >= source.Length || position + length > source.Length ) ) )
                 throw new ArgumentOutOfRangeException( nameof( position ) );
 
             if ( length < 0 )
@@ -45,28 +46,28 @@ namespace MikuMikuLibrary.IO.Common
             switch ( origin )
             {
                 case SeekOrigin.Begin:
-                    {
-                        if ( offset > mLength || offset > mStream.Length )
-                            throw new ArgumentOutOfRangeException( nameof( offset ) );
+                {
+                    if ( offset > mLength || offset > mStream.Length )
+                        throw new ArgumentOutOfRangeException( nameof( offset ) );
 
-                        mPosition = offset;
-                    }
+                    mPosition = offset;
+                }
                     break;
                 case SeekOrigin.Current:
-                    {
-                        if ( mPosition + offset > mLength || mPosition + offset > mStream.Length )
-                            throw new ArgumentOutOfRangeException( nameof( offset ) );
+                {
+                    if ( mPosition + offset > mLength || mPosition + offset > mStream.Length )
+                        throw new ArgumentOutOfRangeException( nameof( offset ) );
 
-                        mPosition += offset;
-                    }
+                    mPosition += offset;
+                }
                     break;
                 case SeekOrigin.End:
-                    {
-                        if ( offset < mLength || offset > 0 )
-                            throw new ArgumentOutOfRangeException( nameof( offset ) );
+                {
+                    if ( offset < mLength || offset > 0 )
+                        throw new ArgumentOutOfRangeException( nameof( offset ) );
 
-                        mPosition = mStreamPosition + mLength - offset;
-                    }
+                    mPosition = mStreamPosition + mLength - offset;
+                }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException( nameof( origin ) );
@@ -92,17 +93,17 @@ namespace MikuMikuLibrary.IO.Common
                 return 0;
 
             if ( mPosition + count > mLength )
-                count = ( int )( mLength - mPosition );
+                count = ( int ) ( mLength - mPosition );
 
             if ( mStream.CanSeek )
             {
                 SavePosition();
                 SetUnderlyingStreamPosition();
             }
-            
+
             int result = mStream.Read( buffer, offset, count );
             mPosition += count;
-            
+
             if ( mStream.CanSeek )
                 RestorePosition();
 
@@ -116,16 +117,16 @@ namespace MikuMikuLibrary.IO.Common
 
             if ( mPosition + count > mLength )
                 throw new IOException( "Attempted to write past end of stream" );
-            
+
             if ( mStream.CanSeek )
             {
                 SavePosition();
                 SetUnderlyingStreamPosition();
             }
-            
+
             mStream.Write( buffer, offset, count );
             mPosition += count;
-            
+
             if ( mStream.CanSeek )
                 RestorePosition();
         }
@@ -162,16 +163,16 @@ namespace MikuMikuLibrary.IO.Common
         {
             if ( EndOfStream )
                 return -1;
-            
+
             if ( mStream.CanSeek )
             {
                 SavePosition();
                 SetUnderlyingStreamPosition();
             }
-            
+
             int value = mStream.ReadByte();
             mPosition++;
-            
+
             if ( mStream.CanSeek )
                 RestorePosition();
 
@@ -182,16 +183,16 @@ namespace MikuMikuLibrary.IO.Common
         {
             if ( EndOfStream )
                 throw new IOException( "Attempted to write past end of stream" );
-            
+
             if ( mStream.CanSeek )
             {
                 SavePosition();
                 SetUnderlyingStreamPosition();
             }
-            
+
             mStream.WriteByte( value );
             mPosition++;
-            
+
             if ( mStream.CanSeek )
                 RestorePosition();
         }
@@ -279,12 +280,12 @@ namespace MikuMikuLibrary.IO.Common
         {
             mStream.Position = mSourcePositionCopy;
         }
-        
+
         protected override void Dispose( bool disposing )
         {
             if ( disposing && !mLeaveOpen )
                 mStream.Dispose();
-                
+
             base.Dispose( disposing );
         }
     }

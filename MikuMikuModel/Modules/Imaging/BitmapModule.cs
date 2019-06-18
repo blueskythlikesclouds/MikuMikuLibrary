@@ -11,8 +11,8 @@ namespace MikuMikuModel.Modules.Imaging
         public override string Name => "Bitmap";
         public override string[] Extensions => new[] { "png", "jpg", "jpeg", "gif", "bmp" };
 
-        protected override Bitmap ImportCore( Stream source, string fileName ) => 
-            ( Bitmap )Image.FromStream( source );
+        protected override Bitmap ImportCore( Stream source, string fileName ) =>
+            ( Bitmap ) Image.FromStream( source );
 
         protected override void ExportCore( Bitmap model, Stream destination, string fileName )
         {

@@ -18,8 +18,7 @@ namespace MikuMikuModel.Nodes.Materials
             set => SetProperty( value );
         }
 
-        [DisplayName( "Is active" )]
-        public bool IsActive => GetProperty<bool>();
+        [DisplayName( "Is active" )] public bool IsActive => GetProperty<bool>();
 
         [TypeConverter( typeof( Int32HexTypeConverter ) )]
         public int Field00

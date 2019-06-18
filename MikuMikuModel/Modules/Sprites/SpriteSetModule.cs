@@ -20,7 +20,7 @@ namespace MikuMikuModel.Modules.Sprites
             buffer[ 0 ] == 'S' && buffer[ 1 ] == 'P' && buffer[ 2 ] == 'R' && buffer[ 3 ] == 'C' ||
             buffer[ 0 ] == 0 && buffer[ 1 ] == 0 && buffer[ 2 ] == 0 && buffer[ 3 ] == 0;
 
-        public override SpriteSet Import( string filePath ) => 
+        public override SpriteSet Import( string filePath ) =>
             BinaryFile.Load<SpriteSet>( filePath );
 
         protected override SpriteSet ImportCore( Stream source, string fileName ) =>

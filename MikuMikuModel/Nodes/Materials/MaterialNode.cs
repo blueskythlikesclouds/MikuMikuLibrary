@@ -223,7 +223,7 @@ namespace MikuMikuModel.Nodes.Materials
             Nodes.Add( new MaterialTextureNode( "Specular", Data.Specular ) );
             Nodes.Add( new MaterialTextureNode( "Toon curve", Data.ToonCurve ) );
             Nodes.Add( new MaterialTextureNode( "Reflection", Data.Reflection ) );
-            Nodes.Add( new MaterialTextureNode( "Specular power", Data.SpecularPower ) );
+            Nodes.Add( new MaterialTextureNode( "Tangent", Data.Tangent ) );
             Nodes.Add( new MaterialTextureNode( "Unknown slot", Data.Texture08 ) );
         }
 
