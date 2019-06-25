@@ -62,6 +62,9 @@ namespace MikuMikuModel.GUI.Forms
             mRenameButton.Enabled = false;
             mCloneButton.Enabled = false;
             mReloadButton.Enabled = false;
+            if ( File.Exists("Resources/AllowNullConfig.txt") )
+                checkBoxAllowNullConfig.Checked = true;
+            else checkBoxAllowNullConfig.Checked = false;
 
             base.OnLoad( e );
         }
@@ -301,6 +304,13 @@ namespace MikuMikuModel.GUI.Forms
         {
             SelectedConfiguration.MotionDatabaseFilePath = mMotionDatabasePathTextBox.Text;
             SelectedConfiguration.MotionDatabase = null;
+        }
+
+        private void CheckBoxAllowNullConfig_CheckedChanged(object sender, EventArgs e)
+        {
+            if ( checkBoxAllowNullConfig.Checked == true )
+                File.Create("Resources/AllowNullConfig.txt").Close();
+            else File.Delete("Resources/AllowNullConfig.txt");
         }
     }
 }

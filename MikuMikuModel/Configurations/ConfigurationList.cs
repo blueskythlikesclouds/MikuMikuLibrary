@@ -88,7 +88,8 @@ namespace MikuMikuModel.Configurations
                     Path.GetFullPath( Path.GetDirectoryName( path ) ) + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase );
 
-            MessageBox.Show("Invalid configuration!", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if( File.Exists("Resources/AllowNullConfig.txt") == false )
+                MessageBox.Show("Invalid configuration!", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return null;
         }
 
