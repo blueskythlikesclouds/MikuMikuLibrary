@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using System.Windows.Forms;
 using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Configurations
@@ -87,6 +88,7 @@ namespace MikuMikuModel.Configurations
                     Path.GetFullPath( Path.GetDirectoryName( path ) ) + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase );
 
+            MessageBox.Show("Invalid configuration!", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return null;
         }
 
