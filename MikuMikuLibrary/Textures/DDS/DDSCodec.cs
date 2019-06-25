@@ -654,19 +654,15 @@ namespace MikuMikuLibrary.Textures.DDS
         /// </summary>
         /// <param name="colour">Colour to convert to RGB</param>
         /// <returns>RGB bytes</returns>
-        private static byte[] ReadDXTColour( int colour )
+        private static byte[] ReadDXTColour( int color )
         {
-            // Read RGB 5:6:5 data
-            var b = colour & 0x1F;
-            var g = ( colour & 0x7E0 ) >> 5;
-            var r = ( colour & 0xF800 ) >> 11;
-
-
-            // Expand to 8 bit data
-            var testr = ( byte )( r << 3 );
-            var testg = ( byte )( g << 2 );
-            var testb = ( byte )( b << 3 );
-            return new byte[ 3 ] { testr, testg, testb };
+            int temp = ( color >> 11 ) * 255 + 16;
+            byte r = ( byte ) ( ( temp / 32 + temp ) / 32 );
+            temp = ( ( color & 0x07E0 ) >> 5 ) * 255 + 32;
+            byte g = ( byte ) ( ( temp / 64 + temp ) / 64 );
+            temp = ( color & 0x001F ) * 255 + 16;
+            byte b = ( byte ) ( ( temp / 32 + temp ) / 32 );
+            return new byte[ 3 ] { r, g, b };
         }
 
         /// <summary>

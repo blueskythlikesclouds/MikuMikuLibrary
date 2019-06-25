@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using MikuMikuLibrary.Models;
+using MikuMikuLibrary.Objects;
 
 namespace MikuMikuModel.Nodes.Models
 {
@@ -8,20 +8,15 @@ namespace MikuMikuModel.Nodes.Models
     {
         public override NodeFlags Flags => NodeFlags.None;
 
-        [DisplayName( "Osage bones" )]
-        public List<ExOsageBoneEntry> OsageBones => GetProperty<List<ExOsageBoneEntry>>();
+        [DisplayName( "Osage bones" )] public List<ExOsageBone> OsageBones => GetProperty<List<ExOsageBone>>();
 
-        [DisplayName( "Osage names" )]
-        public List<string> OsageNames => GetProperty<List<string>>();
+        [DisplayName( "Osage names" )] public List<string> OsageNames => GetProperty<List<string>>();
 
-        [DisplayName( "Ex blocks" )]
-        public List<ExBlock> ExBlocks => GetProperty<List<ExBlock>>();
+        [DisplayName( "Nodes" )] public List<ExNode> ExNodes => GetProperty<List<ExNode>>( "Nodes" );
 
-        [DisplayName( "Bone names" )]
-        public List<string> BoneNames => GetProperty<List<string>>();
+        [DisplayName( "Bone names" )] public List<string> BoneNames => GetProperty<List<string>>();
 
-        [DisplayName( "Entries" )]
-        public List<ExEntry> Entries => GetProperty<List<ExEntry>>();
+        [DisplayName( "Entries" )] public List<ExEntry> Entries => GetProperty<List<ExEntry>>();
 
         protected override void Initialize()
         {

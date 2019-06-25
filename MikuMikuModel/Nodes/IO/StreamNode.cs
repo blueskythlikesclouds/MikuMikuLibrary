@@ -9,7 +9,7 @@ namespace MikuMikuModel.Nodes.IO
         public override NodeFlags Flags =>
             NodeFlags.Export | NodeFlags.Move | NodeFlags.Remove | NodeFlags.Rename | NodeFlags.Replace;
 
-        public override Bitmap Image => 
+        public override Bitmap Image =>
             ResourceStore.LoadBitmap( "Icons/File.png" );
 
         protected override void Initialize()

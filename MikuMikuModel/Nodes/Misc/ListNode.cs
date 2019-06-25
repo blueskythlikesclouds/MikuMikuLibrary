@@ -20,27 +20,30 @@ namespace MikuMikuModel.Nodes.Misc
         {
             RegisterCustomHandler( "Replace substring in node names", () =>
             {
-                using ( var inputDialog1 = new InputDialog 
+                using ( var inputDialog1 = new InputDialog
                     { WindowTitle = "Type the substring to be replaced." } )
                 {
                     while ( inputDialog1.ShowDialog() == DialogResult.OK )
                     {
                         if ( string.IsNullOrEmpty( inputDialog1.Input ) )
                         {
-                            MessageBox.Show( "Please enter a valid substring.", "Miku Miku Model", 
+                            MessageBox.Show( "Please enter a valid substring.", "Miku Miku Model",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error );
                         }
                         else
                         {
-                            using ( var inputDialog2 = new InputDialog 
-                                { WindowTitle = $"Type the substring to replace all occurrences of {inputDialog1.Input}" } )
+                            using ( var inputDialog2 = new InputDialog
+                            {
+                                WindowTitle = $"Type the substring to replace all occurrences of {inputDialog1.Input}"
+                            } )
                             {
                                 if ( inputDialog2.ShowDialog() != DialogResult.OK )
                                     break;
-                                
+
                                 foreach ( var node in Nodes )
                                     node.Rename( node.Name.Replace( inputDialog1.Input, inputDialog2.Input ) );
                             }
+
                             break;
                         }
                     }

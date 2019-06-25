@@ -18,25 +18,41 @@ namespace MikuMikuModel.Nodes.Sprites
         public float X
         {
             get => GetProperty<float>();
-            set => SetProperty( value );
+            set
+            {
+                SetProperty( value );
+                CalculateNdcValues();
+            }
         }
 
         public float Y
         {
             get => GetProperty<float>();
-            set => SetProperty( value );
+            set
+            {
+                SetProperty( value );
+                CalculateNdcValues();
+            }
         }
 
         public float Width
         {
             get => GetProperty<float>();
-            set => SetProperty( value );
+            set
+            {
+                SetProperty( value );
+                CalculateNdcValues();
+            }
         }
 
         public float Height
         {
             get => GetProperty<float>();
-            set => SetProperty( value );
+            set
+            {
+                SetProperty( value );
+                CalculateNdcValues();
+            }
         }
 
         [TypeConverter( typeof( Int32HexTypeConverter ) )]
@@ -58,33 +74,21 @@ namespace MikuMikuModel.Nodes.Sprites
             get => GetProperty<float>();
             set => SetProperty( value );
         }
-        
-        [DisplayName( "Normalized X" )]
-        public float NdcX
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
 
-        [DisplayName( "Normalized Y" )]
-        public float NdcY
+        private void CalculateNdcValues()
         {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
+            var spriteSetNode = FindParent<SpriteSetNode>();
+            var spriteSet = spriteSetNode.Data;
 
-        [DisplayName( "Normalized width" )]
-        public float NdcWidth
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
+            if ( Data.TextureIndex >= spriteSet.TextureSet.Textures.Count )
+                return;
 
-        [DisplayName( "Normalized height" )]
-        public float NdcHeight
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
+            var texture = spriteSet.TextureSet.Textures[ Data.TextureIndex ];
+
+            Data.NdcX = Data.X / texture.Width;
+            Data.NdcY = Data.Y / texture.Height;
+            Data.NdcWidth = Data.Width / texture.Width;
+            Data.NdcHeight = Data.Height / texture.Height;
         }
 
         protected override void Initialize()

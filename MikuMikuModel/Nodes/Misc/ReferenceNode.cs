@@ -31,7 +31,7 @@ namespace MikuMikuModel.Nodes.Misc
             remove => Node.PropertyChanged -= value;
         }
 
-        public NodeFlags Flags => 
+        public NodeFlags Flags =>
             Node.Flags & ~( mUsesCustomName ? NodeFlags.Rename : NodeFlags.None );
 
         public object Data => Node.Data;

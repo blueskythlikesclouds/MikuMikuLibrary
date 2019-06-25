@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 using MikuMikuLibrary.Archives;
-using MikuMikuLibrary.Archives.Farc;
 using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Configurations
@@ -113,10 +112,10 @@ namespace MikuMikuModel.Configurations
         public bool Equals( Configuration other )
         {
             return other.Name == Name &&
-                other.ObjectDatabaseFilePath == ObjectDatabaseFilePath &&
-                other.TextureDatabaseFilePath == TextureDatabaseFilePath &&
-                other.BoneDatabaseFilePath == BoneDatabaseFilePath &&
-                other.MotionDatabaseFilePath == MotionDatabaseFilePath;
+                   other.ObjectDatabaseFilePath == ObjectDatabaseFilePath &&
+                   other.TextureDatabaseFilePath == TextureDatabaseFilePath &&
+                   other.BoneDatabaseFilePath == BoneDatabaseFilePath &&
+                   other.MotionDatabaseFilePath == MotionDatabaseFilePath;
         }
 
         private static XmlSerializer GetSerializer<T>()

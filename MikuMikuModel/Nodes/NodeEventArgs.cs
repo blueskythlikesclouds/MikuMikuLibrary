@@ -48,7 +48,7 @@ namespace MikuMikuModel.Nodes
     {
         public object PreviousData { get; }
 
-        public NodeReplaceEventArgs( object previousData ) => 
+        public NodeReplaceEventArgs( object previousData ) =>
             PreviousData = previousData;
     }
 

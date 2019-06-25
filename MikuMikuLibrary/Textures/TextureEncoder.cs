@@ -52,7 +52,7 @@ namespace MikuMikuLibrary.Textures
             Texture texture;
 
             if ( generateMipMaps && TextureFormatUtilities.IsCompressed( format ) )
-                texture = new Texture( width, height, format, 1, ( int )Math.Log( Math.Max( width, height ), 2 ) + 1 );
+                texture = new Texture( width, height, format, 1, ( int ) Math.Log( Math.Max( width, height ), 2 ) + 1 );
 
             else
                 texture = new Texture( width, height, format );
@@ -132,7 +132,7 @@ namespace MikuMikuLibrary.Textures
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb );
 
                 fixed ( byte* ptr = subTexture.Data )
-                    BGRtoRGB( ( byte* )bitmapData.Scan0, ptr, subTexture.Data.Length );
+                    BGRtoRGB( ( byte* ) bitmapData.Scan0, ptr, subTexture.Data.Length );
 
                 bitmap.UnlockBits( bitmapData );
             }
@@ -141,13 +141,14 @@ namespace MikuMikuLibrary.Textures
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
 
                 fixed ( byte* ptr = subTexture.Data )
-                    Int32RGBAToByte( ( int* )bitmapData.Scan0, ptr, subTexture.Data.Length );
+                    Int32RGBAToByte( ( int* ) bitmapData.Scan0, ptr, subTexture.Data.Length );
 
                 bitmap.UnlockBits( bitmapData );
             }
             else
             {
-                var compressedPixels = DDSCodec.CompressPixelData( bitmap, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
+                var compressedPixels =
+                    DDSCodec.CompressPixelData( bitmap, TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
                 Array.Copy( compressedPixels, subTexture.Data, subTexture.Data.Length );
             }
 
@@ -164,7 +165,8 @@ namespace MikuMikuLibrary.Textures
             }
 
             using ( var bitmap = new Bitmap( sourceFileName ) )
-                return Encode( bitmap, DDSCodec.HasTransparency( bitmap ) ? TextureFormat.DXT5 : TextureFormat.DXT1, true );
+                return Encode( bitmap, DDSCodec.HasTransparency( bitmap ) ? TextureFormat.DXT5 : TextureFormat.DXT1,
+                    true );
         }
 
         private static unsafe void Int32RGBAToByte( int* source, byte* destination, int length )

@@ -77,19 +77,22 @@
     <Compile Include="GUI\Forms\FarcArchiveViewForm.Designer.cs">
       <DependentUpon>FarcArchiveViewForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Resources\Styles\Style.cs" />
+    <Compile Include="Resources\Styles\StyleColorTable.cs" />
+    <Compile Include="Resources\Styles\StyleSet.cs" />
     <Compile Include="Modules\Archives\FarcArchiveModule.cs" />
     <Compile Include="Modules\Databases\BoneDatabaseModule.cs" />
     <Compile Include="Modules\Databases\MotionDatabaseModule.cs" />
     <Compile Include="Modules\Databases\ObjectDatabaseModule.cs" />
-    <Compile Include="Modules\Databases\SpriteSetModule.cs" />
+    <Compile Include="Modules\Databases\SpriteDatabaseModule.cs" />
     <Compile Include="Modules\Databases\TextureDatabaseModule.cs" />
     <Compile Include="Modules\FormatModule.cs" />
     <Compile Include="Modules\FormatModuleRegistry.cs" />
     <Compile Include="Modules\IFormatModule.cs" />
     <Compile Include="Modules\Imaging\BitmapModule.cs" />
     <Compile Include="Modules\IO\StreamModule.cs" />
-    <Compile Include="Modules\Models\AssimpSceneModule.cs" />
-    <Compile Include="Modules\Models\ModelModule.cs" />
+    <Compile Include="Modules\Objects\AssimpSceneModule.cs" />
+    <Compile Include="Modules\Objects\ObjectSetModule.cs" />
     <Compile Include="Modules\ModuleExportUtilities.cs" />
     <Compile Include="Modules\ModuleFilterGenerator.cs" />
     <Compile Include="Modules\ModuleImportUtilities.cs" />
@@ -110,17 +113,17 @@
     <Compile Include="Nodes\Materials\MaterialTextureNode.cs" />
     <Compile Include="Nodes\Misc\ListNode.cs" />
     <Compile Include="Nodes\Misc\ReferenceNode.cs" />
-    <Compile Include="Nodes\Models\BoneNode.cs" />
+    <Compile Include="Nodes\Models\BoneInfoNode.cs" />
     <Compile Include="Nodes\Models\ExDataNode.cs" />
-    <Compile Include="Nodes\Models\IndexTableNode.cs" />
-    <Compile Include="Nodes\Models\MeshNode.cs" />
-    <Compile Include="Nodes\Models\ModelNode.cs" />
-    <Compile Include="Nodes\Models\SkinNode.cs" />
     <Compile Include="Nodes\Models\SubMeshNode.cs" />
-    <Compile Include="Nodes\Motions\KeyControllerNode.cs" />
+    <Compile Include="Nodes\Models\ObjectNode.cs" />
+    <Compile Include="Nodes\Models\ObjectSetNode.cs" />
+    <Compile Include="Nodes\Models\SkinNode.cs" />
+    <Compile Include="Nodes\Models\MeshNode.cs" />
+    <Compile Include="Nodes\Motions\BoneBindingNode.cs" />
     <Compile Include="Nodes\Motions\KeySetNode.cs" />
-    <Compile Include="Nodes\Motions\KeySetVectorNode.cs" />
-    <Compile Include="Nodes\Motions\MotionControllerNode.cs" />
+    <Compile Include="Nodes\Motions\KeyBindingNode.cs" />
+    <Compile Include="Nodes\Motions\MotionBindingNode.cs" />
     <Compile Include="Nodes\Motions\MotionNode.cs" />
     <Compile Include="Nodes\Motions\MotionSetNode.cs" />
     <Compile Include="Nodes\Node.cs" />
@@ -141,12 +144,12 @@
       <DependentUpon>ModelViewControl.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\Controls\ModelView\GLBuffer.cs" />
-    <Compile Include="GUI\Controls\ModelView\GLIndexTable.cs" />
-    <Compile Include="GUI\Controls\ModelView\GLMaterial.cs" />
-    <Compile Include="GUI\Controls\ModelView\GLMesh.cs" />
-    <Compile Include="GUI\Controls\ModelView\GLModel.cs" />
-    <Compile Include="GUI\Controls\ModelView\GLShaderProgram.cs" />
     <Compile Include="GUI\Controls\ModelView\GLSubMesh.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLMaterial.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLObject.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLObjectSet.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLShaderProgram.cs" />
+    <Compile Include="GUI\Controls\ModelView\GLMesh.cs" />
     <Compile Include="GUI\Controls\ModelView\GLTexture.cs" />
     <Compile Include="GUI\Controls\ModelView\IGLDraw.cs" />
     <Compile Include="GUI\Controls\TextureViewControl.cs">
@@ -173,6 +176,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\ResourceStore.cs" />
+    <Compile Include="Resources\Styles\StyleToolStripRenderer.cs" />
     <EmbeddedResource Include="GUI\Controls\ModelViewControl.resx">
       <DependentUpon>ModelViewControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -223,6 +227,9 @@
     <Content Include="Resources\Icons\Motion.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Styles\Dark.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\Icons\TextureSet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -235,10 +242,10 @@
     <None Include="Resources\Icons\Material.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Icons\Model.png">
+    <None Include="Resources\Icons\ObjectSet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Icons\Mesh.png">
+    <None Include="Resources\Icons\Object.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\Icons\File.png">

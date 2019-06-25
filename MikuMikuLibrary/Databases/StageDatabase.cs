@@ -2,13 +2,30 @@
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace MikuMikuLibrary.Databases
 {
+    public struct StageObjectInfo
+    {
+        public short Id { get; set; }
+        public short SetId { get; set; }
+
+        internal void Read( EndianBinaryReader reader )
+        {
+            Id = reader.ReadInt16();
+            SetId = reader.ReadInt16();
+        }
+
+        internal void Write( EndianBinaryWriter writer )
+        {
+            writer.Write( Id );
+            writer.Write( SetId );
+        }
+    }
+
     // Most of the fields were tested & documented by Stewie1.0
-    public class StageEntry
+    public class Stage
     {
         public enum StageEffect
         {
@@ -26,20 +43,7 @@ namespace MikuMikuLibrary.Databases
 
         public string Name { get; set; }
         public string Auth3dName { get; set; }
-        public short ObjectId1 { get; set; }
-        public short ObjectIdFlag1 { get; set; }
-        public short ObjectGroundId { get; set; }
-        public short ObjectGroundIdFlag { get; set; }
-        public short ObjectId3 { get; set; }
-        public short ObjectIdFlag3 { get; set; }
-        public short ObjectSkyId { get; set; }
-        public short ObjectSkyIdFlag { get; set; }
-        public short ObjectId5 { get; set; }
-        public short ObjectIdFlag5 { get; set; }
-        public short ObjectReflectId { get; set; }
-        public short ObjectReflectIdFlag { get; set; }
-        public short ObjectId7 { get; set; }
-        public short ObjectIdFlag7 { get; set; }
+        public StageObjectInfo[] Objects { get; set; }
         public int LensFlareScaleX { get; set; }
         public int LensFlareScaleY { get; set; }
         public int LensFlareScaleZ { get; set; }
@@ -69,43 +73,16 @@ namespace MikuMikuLibrary.Databases
         public int Field16 { get; set; }
         public int Field17 { get; set; }
         public int Field18 { get; set; }
-        public StageEffect StageEffect1 { get; set; }
-        public StageEffect StageEffect2 { get; set; }
-        public StageEffect StageEffect3 { get; set; }
-        public StageEffect StageEffect4 { get; set; }
-        public StageEffect StageEffect5 { get; set; }
-        public StageEffect StageEffect6 { get; set; }
-        public StageEffect StageEffect7 { get; set; }
-        public StageEffect StageEffect8 { get; set; }
-        public StageEffect StageEffect9 { get; set; }
-        public StageEffect StageEffect10 { get; set; }
-        public StageEffect StageEffect11 { get; set; }
-        public StageEffect StageEffect12 { get; set; }
-        public StageEffect StageEffect13 { get; set; }
-        public StageEffect StageEffect14 { get; set; }
-        public StageEffect StageEffect15 { get; set; }
-        public StageEffect StageEffect16 { get; set; }
+        public StageEffect[] StageEffects { get; set; }
         public int Id { get; set; }
         public List<int> Auth3dIds { get; }
-        
+
         internal void Read( EndianBinaryReader reader, BinaryFormat format )
         {
             Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Auth3dName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            ObjectId1 = reader.ReadInt16();
-            ObjectIdFlag1 = reader.ReadInt16();
-            ObjectGroundId = reader.ReadInt16();
-            ObjectGroundIdFlag = reader.ReadInt16();
-            ObjectId3 = reader.ReadInt16();
-            ObjectIdFlag3 = reader.ReadInt16();
-            ObjectSkyId = reader.ReadInt16();
-            ObjectSkyIdFlag = reader.ReadInt16();
-            ObjectId5 = reader.ReadInt16();
-            ObjectIdFlag5 = reader.ReadInt16();
-            ObjectReflectId = reader.ReadInt16();
-            ObjectReflectIdFlag = reader.ReadInt16();
-            ObjectId7 = reader.ReadInt16();
-            ObjectIdFlag7 = reader.ReadInt16();
+            for ( int i = 0; i < 7; i++ )
+                Objects[ i ].Read( reader );
             LensFlareScaleX = reader.ReadInt32();
             LensFlareScaleY = reader.ReadInt32();
             LensFlareScaleZ = reader.ReadInt32();
@@ -138,20 +115,8 @@ namespace MikuMikuLibrary.Databases
         {
             writer.AddStringToStringTable( Name );
             writer.AddStringToStringTable( Auth3dName );
-            writer.Write( ObjectId1 );
-            writer.Write( ObjectIdFlag1 );
-            writer.Write( ObjectGroundId );
-            writer.Write( ObjectGroundIdFlag );
-            writer.Write( ObjectId3 );
-            writer.Write( ObjectIdFlag3 );
-            writer.Write( ObjectSkyId );
-            writer.Write( ObjectSkyIdFlag );
-            writer.Write( ObjectId5 );
-            writer.Write( ObjectIdFlag5 );
-            writer.Write( ObjectReflectId );
-            writer.Write( ObjectReflectIdFlag );
-            writer.Write( ObjectId7 );
-            writer.Write( ObjectIdFlag7 );
+            foreach ( var objectInfo in Objects )
+                objectInfo.Write( writer );
             writer.Write( LensFlareScaleX );
             writer.Write( LensFlareScaleY );
             writer.Write( LensFlareScaleZ );
@@ -163,12 +128,13 @@ namespace MikuMikuLibrary.Databases
             writer.AddStringToStringTable( CollisionFilePath );
             writer.Write( Field04 );
             writer.Write( Field05 );
-            writer.ScheduleWriteOffsetIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentMode.Left, () =>
-            {
-                writer.Write( Field06 );
-                writer.Write( Field07 );
-                writer.Write( Field08 );
-            } );
+            writer.ScheduleWriteOffsetIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentMode.Left,
+                () =>
+                {
+                    writer.Write( Field06 );
+                    writer.Write( Field07 );
+                    writer.Write( Field08 );
+                } );
             writer.Write( Field09 );
             if ( format == BinaryFormat.FT )
                 writer.Write( Field10 );
@@ -190,22 +156,8 @@ namespace MikuMikuLibrary.Databases
             Field16 = reader.ReadInt32();
             Field17 = reader.ReadInt32();
             Field18 = reader.ReadInt32();
-            StageEffect1 = ( StageEffect )reader.ReadInt32();
-            StageEffect2 = ( StageEffect )reader.ReadInt32();
-            StageEffect3 = ( StageEffect )reader.ReadInt32();
-            StageEffect4 = ( StageEffect )reader.ReadInt32();
-            StageEffect5 = ( StageEffect )reader.ReadInt32();
-            StageEffect6 = ( StageEffect )reader.ReadInt32();
-            StageEffect7 = ( StageEffect )reader.ReadInt32();
-            StageEffect8 = ( StageEffect )reader.ReadInt32();
-            StageEffect9 = ( StageEffect )reader.ReadInt32();
-            StageEffect10 = ( StageEffect )reader.ReadInt32();
-            StageEffect11 = ( StageEffect )reader.ReadInt32();
-            StageEffect12 = ( StageEffect )reader.ReadInt32();
-            StageEffect13 = ( StageEffect )reader.ReadInt32();
-            StageEffect14 = ( StageEffect )reader.ReadInt32();
-            StageEffect15 = ( StageEffect )reader.ReadInt32();
-            StageEffect16 = ( StageEffect )reader.ReadInt32();
+            for ( int i = 0; i < 16; i++ )
+                StageEffects[ i ] = ( StageEffect ) reader.ReadInt32();
         }
 
         internal void WriteStageEffects( EndianBinaryWriter writer )
@@ -218,34 +170,20 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Field16 );
             writer.Write( Field17 );
             writer.Write( Field18 );
-            writer.Write( ( int )StageEffect1 );
-            writer.Write( ( int )StageEffect2 );
-            writer.Write( ( int )StageEffect3 );
-            writer.Write( ( int )StageEffect4 );
-            writer.Write( ( int )StageEffect5 );
-            writer.Write( ( int )StageEffect6 );
-            writer.Write( ( int )StageEffect7 );
-            writer.Write( ( int )StageEffect8 );
-            writer.Write( ( int )StageEffect9 );
-            writer.Write( ( int )StageEffect10 );
-            writer.Write( ( int )StageEffect11 );
-            writer.Write( ( int )StageEffect12 );
-            writer.Write( ( int )StageEffect13 );
-            writer.Write( ( int )StageEffect14 );
-            writer.Write( ( int )StageEffect15 );
-            writer.Write( ( int )StageEffect16 );
+            foreach ( StageEffect stageEffect in StageEffects )
+                writer.Write( ( int ) stageEffect );
         }
 
         internal void ReadAuth3dIds( EndianBinaryReader reader, int count )
         {
             Id = reader.ReadInt32();
-            
+
             reader.ReadOffset( () =>
             {
                 Auth3dIds.Capacity = count;
                 for ( int i = 0; i < count; i++ )
                     Auth3dIds.Add( reader.ReadInt32() );
-                    
+
                 Auth3dIds.Remove( -1 );
             } );
         }
@@ -262,8 +200,10 @@ namespace MikuMikuLibrary.Databases
             } );
         }
 
-        public StageEntry()
+        public Stage()
         {
+            Objects = new StageObjectInfo[ 7 ];
+            StageEffects = new StageEffect[ 16 ];
             Auth3dIds = new List<int>();
         }
     }
@@ -272,7 +212,7 @@ namespace MikuMikuLibrary.Databases
     {
         public override BinaryFileFlags Flags => BinaryFileFlags.Load | BinaryFileFlags.Save;
 
-        public List<StageEntry> Stages { get; }
+        public List<Stage> Stages { get; }
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
@@ -281,39 +221,39 @@ namespace MikuMikuLibrary.Databases
             long stageEffectsOffset = reader.ReadOffset();
             long auth3dIdCountsOffset = reader.ReadOffset();
             long auth3dIdsOffset = reader.ReadOffset();
-            
+
             if ( reader.ReadBoolean() )
             {
                 Format = ( BinaryFormat ) reader.ReadByte();
             }
             else
             {
-                long entrySize = ( stageEffectsOffset - stagesOffset ) / count;
-                Format = entrySize == 104 ? BinaryFormat.DT :
-                         entrySize == 108 ? BinaryFormat.F :
-                         entrySize >= 112 ? BinaryFormat.FT :
-                         throw new InvalidDataException();
+                long size = ( stageEffectsOffset - stagesOffset ) / count;
+                Format = size == 104 ? BinaryFormat.DT :
+                    size == 108 ? BinaryFormat.F :
+                    size >= 112 ? BinaryFormat.FT :
+                    throw new InvalidDataException();
             }
-                     
+
             reader.ReadAtOffset( stagesOffset, () =>
             {
                 Stages.Capacity = count;
                 for ( int i = 0; i < count; i++ )
                 {
-                    var stageEntry = new StageEntry();
+                    var stage = new Stage();
                     {
-                        stageEntry.Read( reader, Format );
+                        stage.Read( reader, Format );
                     }
-                    Stages.Add( stageEntry );
+                    Stages.Add( stage );
                 }
             } );
 
             reader.ReadAtOffset( stageEffectsOffset, () =>
             {
-                foreach ( var stageEntry in Stages )
-                    stageEntry.ReadStageEffects( reader );
+                foreach ( var stage in Stages )
+                    stage.ReadStageEffects( reader );
             } );
-            
+
             reader.ReadAtOffset( auth3dIdCountsOffset, () =>
             {
                 var auth3dIdCounts = reader.ReadInt32s( count );
@@ -330,25 +270,25 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Stages.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var stageEntry in Stages )
-                    stageEntry.Write( writer, Format );
+                foreach ( var stage in Stages )
+                    stage.Write( writer, Format );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var stageEntry in Stages )
-                    stageEntry.WriteStageEffects( writer );
+                foreach ( var stage in Stages )
+                    stage.WriteStageEffects( writer );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var stageEntry in Stages )
-                    writer.Write( stageEntry.Auth3dIds.Count + 1 );
+                foreach ( var stage in Stages )
+                    writer.Write( stage.Auth3dIds.Count + 1 );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var stageEntry in Stages )
-                    stageEntry.WriteAuth3dIds( writer );
+                foreach ( var stage in Stages )
+                    stage.WriteAuth3dIds( writer );
             } );
-            
+
             // HACK: We store the format in the reserved part of header.
             writer.Write( true );
             writer.Write( ( byte ) Format );
@@ -356,7 +296,7 @@ namespace MikuMikuLibrary.Databases
 
         public StageDatabase()
         {
-            Stages = new List<StageEntry>();
+            Stages = new List<Stage>();
         }
     }
 }

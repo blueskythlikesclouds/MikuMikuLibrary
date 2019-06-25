@@ -54,14 +54,14 @@ namespace MikuMikuModel.Nodes.Motions
 
         protected override void PopulateCore()
         {
-            if ( !Data.HasController )
+            if ( !Data.HasBinding )
             {
-                var skeletonEntry = SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ];
+                var skeleton = SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ];
                 var motionDatabase = SourceConfiguration?.MotionDatabase;
 
                 try
                 {
-                    Data.GetController( skeletonEntry, motionDatabase );
+                    Data.Bind( skeleton, motionDatabase );
                 }
                 catch ( ArgumentNullException )
                 {
@@ -69,9 +69,9 @@ namespace MikuMikuModel.Nodes.Motions
                 }
             }
 
-            if ( Data.HasController )
+            if ( Data.HasBinding )
             {
-                Nodes.Add( new MotionControllerNode( "Controller", Data.GetController() ) );
+                Nodes.Add( new MotionBindingNode( "Binding", Data.Bind() ) );
             }
             else
             {

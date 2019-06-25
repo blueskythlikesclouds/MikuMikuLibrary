@@ -26,7 +26,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         protected void Dispose( bool disposing )
         {
-            if ( disposing ) { }
+            if ( disposing )
+            {
+            }
 
             GL.DeleteBuffer( Id );
         }

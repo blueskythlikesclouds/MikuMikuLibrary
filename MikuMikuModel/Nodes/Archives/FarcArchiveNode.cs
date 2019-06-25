@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using MikuMikuLibrary.Archives;
-using MikuMikuLibrary.Archives.Farc;
 using MikuMikuLibrary.IO;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes.IO;
@@ -26,7 +25,7 @@ namespace MikuMikuModel.Nodes.Archives
             get => GetProperty<int>();
             set => SetProperty( value );
         }
-        
+
         [DisplayName( "Enable compression" )]
         public bool IsCompressed
         {
@@ -40,23 +39,24 @@ namespace MikuMikuModel.Nodes.Archives
             RegisterExportHandler<FarcArchive>( filePath => Data.Save( filePath ) );
             RegisterReplaceHandler<FarcArchive>( BinaryFile.Load<FarcArchive> );
             RegisterCustomHandler( "Export All", () =>
-            {
-                using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
                 {
-                    folderBrowseDialog.Description = "Select a folder to export entries to.";
-                    folderBrowseDialog.UseDescriptionForTitle = true;
-
-                    if ( folderBrowseDialog.ShowDialog() != DialogResult.OK )
-                        return;
-
-                    foreach ( string handle in Data.Entries )
+                    using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
                     {
-                        using ( var source = Data.Open( handle, EntryStreamMode.OriginalStream ) )
-                        using ( var destination = File.Create( Path.Combine( folderBrowseDialog.SelectedPath, handle ) ) )
-                            source.CopyTo( destination );
+                        folderBrowseDialog.Description = "Select a folder to export entries to.";
+                        folderBrowseDialog.UseDescriptionForTitle = true;
+
+                        if ( folderBrowseDialog.ShowDialog() != DialogResult.OK )
+                            return;
+
+                        foreach ( string handle in Data.Entries )
+                        {
+                            using ( var source = Data.Open( handle, EntryStreamMode.OriginalStream ) )
+                            using ( var destination =
+                                File.Create( Path.Combine( folderBrowseDialog.SelectedPath, handle ) ) )
+                                source.CopyTo( destination );
+                        }
                     }
-                }
-            }, Keys.Control | Keys.Shift | Keys.E );
+                }, Keys.Control | Keys.Shift | Keys.E );
         }
 
         protected override void PopulateCore()

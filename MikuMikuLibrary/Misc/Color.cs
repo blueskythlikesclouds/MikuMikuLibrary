@@ -11,7 +11,10 @@ namespace MikuMikuLibrary.Misc
 
         public Color( float r, float g, float b, float a )
         {
-            R = r; G = g; B = b; A = a;
+            R = r;
+            G = g;
+            B = b;
+            A = a;
         }
 
         public override int GetHashCode()

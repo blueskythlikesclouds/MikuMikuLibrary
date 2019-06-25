@@ -14,7 +14,9 @@ using Ookii.Dialogs.WinForms;
 namespace MikuMikuModel.Nodes
 {
     public delegate void NodeImportHandler( string filePath );
+
     public delegate void NodeExportHandler( string filePath );
+
     public delegate T NodeReplaceHandler<out T>( string filePath );
 
     public abstract class Node<T> : INode where T : class
@@ -42,8 +44,8 @@ namespace MikuMikuModel.Nodes
 
         private ContextMenuStrip mContextMenuStrip;
 
-        private bool mPendingSynchronization;
-        private bool mPopulated;
+        private bool mIsPendingSynchronization;
+        private bool mIsPopulated;
 
         private readonly Dictionary<Type, NodeImportHandler> mImportHandlers;
         private readonly Dictionary<Type, NodeExportHandler> mExportHandlers;
@@ -56,8 +58,7 @@ namespace MikuMikuModel.Nodes
 
         protected virtual T InternalData => mData;
 
-        [Browsable( false )]
-        public abstract NodeFlags Flags { get; }
+        [Browsable( false )] public abstract NodeFlags Flags { get; }
 
         [Browsable( false )]
         public T Data
@@ -71,8 +72,7 @@ namespace MikuMikuModel.Nodes
 
         object INode.Data => Data;
 
-        [Browsable( false )]
-        public Type DataType => typeof( T );
+        [Browsable( false )] public Type DataType => typeof( T );
 
         [Browsable( false )]
         public INode Parent
@@ -90,8 +90,7 @@ namespace MikuMikuModel.Nodes
             }
         }
 
-        [Browsable( false )]
-        public IList<INode> Nodes => mNodes;
+        [Browsable( false )] public IList<INode> Nodes => mNodes;
 
         public string Name
         {
@@ -107,37 +106,36 @@ namespace MikuMikuModel.Nodes
         public ContextMenuStrip ContextMenuStrip =>
             mContextMenuStrip ?? ( mContextMenuStrip = CreateContextMenuStrip() );
 
-        [Browsable( false )]
-        public virtual Control Control { get; }
+        [Browsable( false )] public virtual Control Control { get; }
 
-        [Browsable( false )]
-        public object Tag { get; set; }
+        [Browsable( false )] public object Tag { get; set; }
 
-        [Browsable( false )]
-        public Configuration SourceConfiguration { get; set; }
+        [Browsable( false )] public Configuration SourceConfiguration { get; set; }
 
         [Browsable( false )]
         public bool IsPopulated
         {
-            get => mPopulated && !IsPopulating;
+            get => mIsPopulated && !IsPopulating;
             protected set
             {
                 if ( !IsPopulating )
-                    mPopulated = value;
+                    mIsPopulated = value;
             }
         }
+
         protected bool IsPopulating { get; private set; }
 
         [Browsable( false )]
         public bool IsPendingSynchronization
         {
-            get => mPendingSynchronization && !IsSynchronizing;
+            get => mIsPendingSynchronization && !IsSynchronizing;
             protected set
             {
                 if ( !IsPopulating )
-                    mPendingSynchronization = value;
+                    mIsPendingSynchronization = value;
             }
         }
+
         protected bool IsSynchronizing { get; private set; }
 
         public event EventHandler<NodeRenameEventArgs> Renamed;
@@ -160,7 +158,7 @@ namespace MikuMikuModel.Nodes
                 PopulateCore();
             }
             IsPopulating = false;
-            mPopulated = true;
+            mIsPopulated = true;
         }
 
         public void Synchronize()
@@ -170,7 +168,8 @@ namespace MikuMikuModel.Nodes
                 foreach ( var node in mNodes )
                     node.Synchronize();
             }
-            if ( IsSynchronizing || !mPendingSynchronization )
+
+            if ( IsSynchronizing || !mIsPendingSynchronization )
                 return;
 
             IsSynchronizing = true;
@@ -178,7 +177,7 @@ namespace MikuMikuModel.Nodes
                 SynchronizeCore();
             }
             IsSynchronizing = false;
-            mPendingSynchronization = false;
+            mIsPendingSynchronization = false;
         }
 
         public TNode FindParent<TNode>() where TNode : INode
@@ -270,7 +269,8 @@ namespace MikuMikuModel.Nodes
 
             var module = ModuleImportUtilities.GetModule( mImportHandlers.Keys, filePath );
             if ( module == null )
-                MessageBox.Show( "File could not be imported.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                MessageBox.Show( "File could not be imported.", "Miku Miku Model", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error );
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
@@ -278,7 +278,7 @@ namespace MikuMikuModel.Nodes
                 mImportHandlers[ module.ModelType ]( filePath );
                 OnImport( filePath );
 
-                mPopulated = false;
+                mIsPopulated = false;
             }
         }
 
@@ -318,7 +318,8 @@ namespace MikuMikuModel.Nodes
 
             var module = ModuleExportUtilities.GetModule( mExportHandlers.Keys, filePath );
             if ( module == null )
-                MessageBox.Show( "Node could not be exported.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                MessageBox.Show( "Node could not be exported.", "Miku Miku Model", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error );
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
@@ -363,8 +364,8 @@ namespace MikuMikuModel.Nodes
             var previousData = Data;
             {
                 mData = data;
-                mPopulated = false;
-                mPendingSynchronization = false;
+                mIsPopulated = false;
+                mIsPendingSynchronization = false;
 
                 OnReplace( previousData );
             }
@@ -379,7 +380,8 @@ namespace MikuMikuModel.Nodes
 
             var module = ModuleImportUtilities.GetModule( mReplaceHandlers.Keys, filePath );
             if ( module == null )
-                MessageBox.Show( "Node could not be replaced.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                MessageBox.Show( "Node could not be replaced.", "Miku Miku Model", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error );
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
@@ -530,37 +532,44 @@ namespace MikuMikuModel.Nodes
             if ( Flags.HasFlag( NodeFlags.Import ) && mImportHandlers.Count > 0 )
             {
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
-                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Import", null, CreateEventHandler( () => Import() ), Keys.Control | Keys.I ) );
+                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Import", null, CreateEventHandler( () => Import() ),
+                    Keys.Control | Keys.I ) );
             }
 
             if ( Flags.HasFlag( NodeFlags.Export ) && mExportHandlers.Count > 0 )
             {
-                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Export", null, CreateEventHandler( () => Export() ), Keys.Control | Keys.E ) );
+                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Export", null, CreateEventHandler( () => Export() ),
+                    Keys.Control | Keys.E ) );
             }
 
             if ( Flags.HasFlag( NodeFlags.Replace ) && mReplaceHandlers.Count > 0 )
             {
-                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Replace", null, CreateEventHandler( () => Replace() ), Keys.Control | Keys.R ) );
+                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Replace", null,
+                    CreateEventHandler( () => Replace() ), Keys.Control | Keys.R ) );
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
             }
 
             if ( mParent != null && mParent.Flags.HasFlag( NodeFlags.Move ) )
             {
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
-                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Move Up", null, CreateEventHandler( MoveUp ), Keys.Control | Keys.Up ) );
-                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Move Down", null, CreateEventHandler( MoveDown ), Keys.Control | Keys.Down ) );
+                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Move Up", null, CreateEventHandler( MoveUp ),
+                    Keys.Control | Keys.Up ) );
+                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Move Down", null, CreateEventHandler( MoveDown ),
+                    Keys.Control | Keys.Down ) );
             }
 
             if ( mParent != null && mParent.Flags.HasFlag( NodeFlags.Remove ) )
             {
-                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Remove", null, CreateEventHandler( Remove ), Keys.Control | Keys.Delete ) );
+                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Remove", null, CreateEventHandler( Remove ),
+                    Keys.Control | Keys.Delete ) );
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
             }
 
             if ( Flags.HasFlag( NodeFlags.Rename ) )
             {
                 ContextMenuStrip.Items.Add( new ToolStripSeparator() );
-                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Rename", null, CreateEventHandler( Rename ), Keys.Control | Keys.N ) );
+                ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Rename", null, CreateEventHandler( Rename ),
+                    Keys.Control | Keys.N ) );
             }
 
             // Remove start/end/duplicate separators

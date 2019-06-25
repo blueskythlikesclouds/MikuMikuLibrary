@@ -24,7 +24,8 @@ namespace MikuMikuLibrary.Exceptions
         }
 
         public InvalidSignatureException( int readSignature, IEnumerable<int> expectedSignatures )
-            : this( readSignature.ToString( INT_SIGNATURE_FORMAT ), expectedSignatures.Select( x => x.ToString( INT_SIGNATURE_FORMAT ) ) )
+            : this( readSignature.ToString( INT_SIGNATURE_FORMAT ),
+                expectedSignatures.Select( x => x.ToString( INT_SIGNATURE_FORMAT ) ) )
         {
         }
     }

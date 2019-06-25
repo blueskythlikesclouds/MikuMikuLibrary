@@ -37,7 +37,7 @@ namespace MikuMikuLibrary.Sprites
                     new RectangleF( sprite.X, sprite.Y, sprite.Width, sprite.Height ), sourceBitmap.PixelFormat );
                 sprites.Add( sprite, bitmap );
             }
-            
+
             foreach ( var bitmap in bitmaps )
                 bitmap.Dispose();
 

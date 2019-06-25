@@ -23,7 +23,8 @@ namespace MikuMikuLibrary.Cryptography
             IV = new byte[ 16 ],
         };
 
-        public static void ReadHeader( Stream source, bool skipSignature, out uint encryptedSize, out uint unencryptedSize )
+        public static void ReadHeader( Stream source, bool skipSignature, out uint encryptedSize,
+            out uint unencryptedSize )
         {
             var header = new byte[ skipSignature ? 8 : 16 ];
             source.Read( header, 0, header.Length );
@@ -41,7 +42,8 @@ namespace MikuMikuLibrary.Cryptography
             unencryptedSize = BitConverter.ToUInt32( header, offset + 4 );
         }
 
-        public static CryptoStream CreateDecryptorStream( Stream source, bool readHeader = true, bool skipSignature = false )
+        public static CryptoStream CreateDecryptorStream( Stream source, bool readHeader = true,
+            bool skipSignature = false )
         {
             var decryptor = sAesManaged.CreateDecryptor();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Misc;
 using MikuMikuModel.Nodes.Wrappers;
+using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Forms
 {
@@ -22,6 +24,8 @@ namespace MikuMikuModel.GUI.Forms
         private readonly StringBuilder mStringBuilder = new StringBuilder();
 
         private string mCurrentlyOpenFilePath;
+
+        private OriginalStyle mOriginalStyle;
 
         /// <summary>
         ///     Returns true when cancel is selected
@@ -87,22 +91,6 @@ namespace MikuMikuModel.GUI.Forms
 
             Reset();
             return true;
-        }
-
-        /// <summary>
-        ///     Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose( bool disposing )
-        {
-            if ( disposing )
-            {
-                mComponents?.Dispose();
-                ModelViewControl.DisposeInstance();
-                TextureViewControl.DisposeInstance();
-            }
-
-            base.Dispose( disposing );
         }
 
         private void OnAbout( object sender, EventArgs e )
@@ -273,6 +261,7 @@ namespace MikuMikuModel.GUI.Forms
                 mNodeTreeView.TopDataNode.DisposeData();
                 mNodeTreeView.TopDataNode.Dispose();
             }
+
             mNodeTreeView.Nodes.Clear();
 
             mPropertyGrid.SelectedObject = null;
@@ -350,21 +339,21 @@ namespace MikuMikuModel.GUI.Forms
             {
                 string baseFilePath = Path.ChangeExtension( filePath, null );
 
-                string outputFilePath = ModuleExportUtilities.SelectModuleExport<Motion>( 
+                string outputFilePath = ModuleExportUtilities.SelectModuleExport<Motion>(
                     "Select a file to export to.",
                     Path.GetFileName( $"{baseFilePath}_combined.mot" ) );
 
                 if ( string.IsNullOrEmpty( outputFilePath ) )
                     return;
 
-                var skeletonEntry = configuration.BoneDatabase.Skeletons[ 0 ];
+                var skeleton = configuration.BoneDatabase.Skeletons[ 0 ];
 
                 var rootMotion = new Motion();
                 {
-                    rootMotion.Load( filePath, skeletonEntry );
+                    rootMotion.Load( filePath, skeleton );
                 }
 
-                var rootController = rootMotion.GetController();
+                var rootController = rootMotion.Bind();
                 for ( int i = 1;; i++ )
                 {
                     string divFilePath = $"{baseFilePath}_div_{i}.mot";
@@ -373,15 +362,131 @@ namespace MikuMikuModel.GUI.Forms
 
                     var divMotion = new Motion();
                     {
-                        divMotion.Load( divFilePath, skeletonEntry );
+                        divMotion.Load( divFilePath, skeleton );
                     }
 
-                    var divController = divMotion.GetController();
+                    var divController = divMotion.Bind();
                     rootController.Merge( divController );
                 }
 
-                rootMotion.Save( outputFilePath, skeletonEntry );
+                rootMotion.Save( outputFilePath, skeleton );
             }
+        }
+
+        private void StoreOriginalStyle()
+        {
+            if ( mOriginalStyle != null )
+                return;
+
+            mOriginalStyle = new OriginalStyle
+            {
+                ForeColor = base.ForeColor,
+                BackColor = base.BackColor,
+
+                TreeViewBackColor = mNodeTreeView.BackColor,
+                TreeViewForeColor = mNodeTreeView.ForeColor,
+                TreeViewLineColor = mNodeTreeView.LineColor,
+
+                PropertyGridLineColor = mPropertyGrid.LineColor,
+                PropertyGridSelectedItemWithFocusBackColor = mPropertyGrid.SelectedItemWithFocusBackColor,
+                PropertyGridViewBackColor = mPropertyGrid.ViewBackColor,
+                PropertyGridViewForeColor = mPropertyGrid.ViewForeColor
+            };
+        }
+
+        private void RestoreOriginalStyle()
+        {
+            if ( mOriginalStyle == null )
+                return;
+
+            mMenuStrip.Renderer = null;
+
+            base.BackColor = mOriginalStyle.BackColor;
+            base.ForeColor = mOriginalStyle.ForeColor;
+
+            mNodeTreeView.BackColor = mOriginalStyle.TreeViewBackColor;
+            mNodeTreeView.ForeColor = mOriginalStyle.TreeViewForeColor;
+            mNodeTreeView.LineColor = mOriginalStyle.TreeViewLineColor;
+
+            mPropertyGrid.LineColor = mOriginalStyle.PropertyGridLineColor;
+            mPropertyGrid.SelectedItemWithFocusBackColor = mOriginalStyle.PropertyGridSelectedItemWithFocusBackColor;
+            mPropertyGrid.ViewBackColor = mOriginalStyle.PropertyGridViewBackColor;
+            mPropertyGrid.ViewForeColor = mOriginalStyle.PropertyGridViewForeColor;
+
+            Refresh();
+        }
+
+        protected override void OnLoad( EventArgs eventArgs )
+        {
+            StoreOriginalStyle();
+
+            if ( StyleSet.CurrentStyle != null )
+                ApplyStyle( StyleSet.CurrentStyle );
+
+            StyleSet.StyleChanged += OnStyleChanged;
+
+            InitializeStylesToolStripMenuItem();
+
+            base.OnLoad( eventArgs );
+        }
+
+        private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
+        {
+            ApplyStyle( eventArgs.Style );
+        }
+
+        private void ApplyStyle( Style style )
+        {
+            if ( style == null )
+            {
+                RestoreOriginalStyle();
+                return;
+            }
+
+            mMenuStrip.Renderer = style.ToolStripRenderer;
+
+            base.BackColor = style.Background;
+            base.ForeColor = style.Foreground;
+
+            mNodeTreeView.BackColor = style.Background;
+            mNodeTreeView.ForeColor = style.Foreground;
+            mNodeTreeView.LineColor = style.SeparatorLight;
+
+            mPropertyGrid.LineColor = style.Border;
+            mPropertyGrid.SelectedItemWithFocusBackColor = style.Border;
+            mPropertyGrid.ViewBackColor = style.Background;
+            mPropertyGrid.ViewForeColor = style.Foreground;
+
+            Refresh();
+        }
+
+        private void InitializeStylesToolStripMenuItem()
+        {
+            mStylesToolStripMenuItem.DropDownItems.Add( "Default", null, ( s, e ) => StyleSet.CurrentStyle = null );
+
+            if ( StyleSet.Styles.Count != 0 )
+                mStylesToolStripMenuItem.DropDownItems.Add( new ToolStripSeparator() );
+
+            foreach ( var style in StyleSet.Styles )
+                mStylesToolStripMenuItem.DropDownItems.Add( style.Name, null,
+                    ( s, e ) => StyleSet.CurrentStyle = style );
+        }
+
+        /// <summary>
+        ///     Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                mComponents?.Dispose();
+                ModelViewControl.DisposeInstance();
+                TextureViewControl.DisposeInstance();
+                StyleSet.StyleChanged -= OnStyleChanged;
+            }
+
+            base.Dispose( disposing );
         }
 
         public MainForm()
@@ -393,6 +498,19 @@ namespace MikuMikuModel.GUI.Forms
 #if DEBUG
             mPropertyGrid.BrowsableAttributes = new AttributeCollection();
 #endif
+        }
+
+        private class OriginalStyle
+        {
+            public Color BackColor;
+            public Color ForeColor;
+            public Color TreeViewBackColor;
+            public Color TreeViewForeColor;
+            public Color TreeViewLineColor;
+            public Color PropertyGridLineColor;
+            public Color PropertyGridSelectedItemWithFocusBackColor;
+            public Color PropertyGridViewBackColor;
+            public Color PropertyGridViewForeColor;
         }
     }
 }

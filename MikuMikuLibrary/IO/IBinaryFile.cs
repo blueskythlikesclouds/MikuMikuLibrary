@@ -23,9 +23,9 @@ namespace MikuMikuLibrary.IO
     [Flags]
     public enum BinaryFileFlags
     {
-        Load = 1,
-        Save = 2,
-        HasSectionFormat = 4,
-        UsesSourceStream = 8,
+        Load = 1 << 0,
+        Save = 1 << 1,
+        HasSectionFormat = 1 << 2,
+        UsesSourceStream = 1 << 3,
     }
 }

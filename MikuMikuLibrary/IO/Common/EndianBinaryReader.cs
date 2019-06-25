@@ -3,7 +3,7 @@
 //===============================================================//
 
 using MikuMikuLibrary.Exceptions;
-using MikuMikuLibrary.Maths;
+using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Misc;
 using System;
 using System.Collections.Generic;
@@ -76,7 +76,8 @@ namespace MikuMikuLibrary.IO.Common
         public long PeekBaseOffset() => mBaseOffsets.Peek();
         public long PopBaseOffset() => mBaseOffsets.Pop();
 
-        public void Align( int alignment ) => SeekCurrent( AlignmentUtilities.GetAlignedDifference( Position, alignment ) );
+        public void Align( int alignment ) =>
+            SeekCurrent( AlignmentUtilities.GetAlignedDifference( Position, alignment ) );
 
         public long ReadOffset()
         {
@@ -474,50 +475,50 @@ namespace MikuMikuLibrary.IO.Common
             switch ( format )
             {
                 case StringBinaryFormat.NullTerminated:
-                    {
-                        char b;
-                        while ( ( b = ReadChar() ) != 0 )
-                            mStringBuilder.Append( b );
-                    }
+                {
+                    char b;
+                    while ( ( b = ReadChar() ) != 0 )
+                        mStringBuilder.Append( b );
+                }
                     break;
 
                 case StringBinaryFormat.FixedLength:
-                    {
-                        if ( fixedLength == -1 )
-                            throw new ArgumentException( "Invalid fixed length specified" );
+                {
+                    if ( fixedLength == -1 )
+                        throw new ArgumentException( "Invalid fixed length specified" );
 
-                        char b;
-                        for ( int i = 0; i < fixedLength; i++ )
-                        {
-                            b = ReadChar();
-                            if ( b != 0 )
-                                mStringBuilder.Append( b );
-                        }
+                    char b;
+                    for ( int i = 0; i < fixedLength; i++ )
+                    {
+                        b = ReadChar();
+                        if ( b != 0 )
+                            mStringBuilder.Append( b );
                     }
+                }
                     break;
 
                 case StringBinaryFormat.PrefixedLength8:
-                    {
-                        byte length = ReadByte();
-                        for ( int i = 0; i < length; i++ )
-                            mStringBuilder.Append( ReadChar() );
-                    }
+                {
+                    byte length = ReadByte();
+                    for ( int i = 0; i < length; i++ )
+                        mStringBuilder.Append( ReadChar() );
+                }
                     break;
 
                 case StringBinaryFormat.PrefixedLength16:
-                    {
-                        ushort length = ReadUInt16();
-                        for ( int i = 0; i < length; i++ )
-                            mStringBuilder.Append( ReadChar() );
-                    }
+                {
+                    ushort length = ReadUInt16();
+                    for ( int i = 0; i < length; i++ )
+                        mStringBuilder.Append( ReadChar() );
+                }
                     break;
 
                 case StringBinaryFormat.PrefixedLength32:
-                    {
-                        uint length = ReadUInt32();
-                        for ( int i = 0; i < length; i++ )
-                            mStringBuilder.Append( ReadChar() );
-                    }
+                {
+                    uint length = ReadUInt32();
+                    for ( int i = 0; i < length; i++ )
+                        mStringBuilder.Append( ReadChar() );
+                }
                     break;
 
                 default:
@@ -655,7 +656,8 @@ namespace MikuMikuLibrary.IO.Common
                     return new Vector4( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
 
                 case VectorBinaryFormat.Int16:
-                    return new Vector4( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
+                    return new Vector4( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f,
+                        ReadInt16() / 32768f );
 
                 default:
                     throw new ArgumentException( nameof( format ) );
@@ -674,10 +676,10 @@ namespace MikuMikuLibrary.IO.Common
         public Matrix4x4 ReadMatrix4x4()
         {
             return new Matrix4x4(
-                 ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
-                 ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
-                 ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
-                 ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
+                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
+                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
+                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
+                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
         }
 
         public Matrix4x4[] ReadMatrix4x4s( int count )
@@ -705,7 +707,8 @@ namespace MikuMikuLibrary.IO.Common
                     return new Color( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
 
                 case VectorBinaryFormat.Int16:
-                    return new Color( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
+                    return new Color( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f,
+                        ReadInt16() / 32768f );
 
                 default:
                     throw new ArgumentException( nameof( format ) );
@@ -835,7 +838,8 @@ namespace MikuMikuLibrary.IO.Common
             Init( encoding, endianness, AddressSpace.Int32 );
         }
 
-        public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness, AddressSpace addressSpace )
+        public EndianBinaryReader( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness,
+            AddressSpace addressSpace )
             : base( input, encoding, leaveOpen )
         {
             Init( encoding, endianness, addressSpace );

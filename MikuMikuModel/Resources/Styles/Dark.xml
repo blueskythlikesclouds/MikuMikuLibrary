@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Style>
+  <Name>Dark</Name>
+  <Text R="241" G="241" B="241" A="255" />
+  <SelectedText R="241" G="241" B="241" A="255" />
+  <Foreground R="241" G="241" B="241" A="255" />
+  <Background R="37" G="37" B="38" A="255" />
+  <BaseBackground R="30" G="30" B="30" A="255" />
+  <Border R="45" G="45" B="48" A="255" />
+  <ToolStripDropDownBackground R="27" G="27" B="28" A="255" />
+  <MenuItemSelected R="51" G="51" B="52" A="255" />
+  <MenuBorder R="255" G="255" B="255" A="0" />
+  <MenuItemBorder R="255" G="255" B="255" A="0" />
+  <CheckBackground R="27" G="27" B="28" A="255" />
+  <MenuStripGradientBegin R="45" G="45" B="48" A="255" />
+  <MenuStripGradientEnd R="45" G="45" B="48" A="255" />
+  <MenuItemSelectedGradientBegin R="62" G="62" B="64" A="255" />
+  <MenuItemSelectedGradientEnd R="62" G="62" B="64" A="255" />
+  <MenuItemPressedGradientBegin R="27" G="27" B="28" A="255" />
+  <MenuItemPressedGradientEnd R="27" G="27" B="28" A="255" />
+  <ImageMarginGradientBegin R="27" G="27" B="28" A="255" />
+  <ImageMarginGradientMiddle R="27" G="27" B="28" A="255" />
+  <ImageMarginGradientEnd R="27" G="27" B="28" A="255" />
+  <SeparatorDark R="51" G="51" B="55" A="255" />
+  <SeparatorLight R="214" G="241" B="241" A="255" />
+  <ViewportBackground R="0" G="0" B="0" A="255" />
+  <ViewportForeground R="78" G="78" B="78" A="255" />
+</Style>

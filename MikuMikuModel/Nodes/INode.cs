@@ -34,7 +34,7 @@ namespace MikuMikuModel.Nodes
         event EventHandler<NodeImportEventArgs> Imported;
         event EventHandler<NodeExportEventArgs> Exported;
         event EventHandler<NodeReplaceEventArgs> Replaced;
-        event EventHandler<NodeMoveEventArgs> Moved; 
+        event EventHandler<NodeMoveEventArgs> Moved;
 
         void Populate();
         void Synchronize();

@@ -49,11 +49,11 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 Target = TextureTarget.TextureCubeMap;
                 GL.BindTexture( TextureTarget.TextureCubeMap, Id );
 
-                GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int )TextureWrapMode.ClampToEdge );
-                GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int )TextureWrapMode.ClampToEdge );
-                GL.TexParameter( Target, TextureParameterName.TextureWrapR, ( int )TextureWrapMode.ClampToEdge );
-                GL.TexParameter( Target, TextureParameterName.TextureMagFilter, ( int )TextureMagFilter.Linear );
-                GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int )TextureMinFilter.Linear );
+                GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int ) TextureWrapMode.ClampToEdge );
+                GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int ) TextureWrapMode.ClampToEdge );
+                GL.TexParameter( Target, TextureParameterName.TextureWrapR, ( int ) TextureWrapMode.ClampToEdge );
+                GL.TexParameter( Target, TextureParameterName.TextureMagFilter, ( int ) TextureMagFilter.Linear );
+                GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.Linear );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
                 var format = GetGLInternalFormat( texture.Format );
@@ -64,7 +64,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                     for ( int j = 0; j < texture.MipMapCount; j++ )
                     {
                         GL.CompressedTexImage2D(
-                            TextureTarget.TextureCubeMapPositiveX + i, j, format, texture[ index, j ].Width, texture[ index, j ].Height, 0, texture[ index, j ].Data.Length, texture[ index, j ].Data );
+                            TextureTarget.TextureCubeMapPositiveX + i, j, format, texture[ index, j ].Width,
+                            texture[ index, j ].Height, 0, texture[ index, j ].Data.Length, texture[ index, j ].Data );
                     }
 
                     i++;
@@ -76,17 +77,19 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 Target = TextureTarget.Texture2D;
                 GL.BindTexture( TextureTarget.Texture2D, Id );
 
-                GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int )TextureWrapMode.Repeat );
-                GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int )TextureWrapMode.Repeat );
-                GL.TexParameter( Target, TextureParameterName.TextureMagFilter, ( int )TextureMagFilter.Linear );
-                GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int )TextureMinFilter.LinearMipmapLinear );
+                GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int ) TextureWrapMode.Repeat );
+                GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int ) TextureWrapMode.Repeat );
+                GL.TexParameter( Target, TextureParameterName.TextureMagFilter, ( int ) TextureMagFilter.Linear );
+                GL.TexParameter( Target, TextureParameterName.TextureMinFilter,
+                    ( int ) TextureMinFilter.LinearMipmapLinear );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
                 var format = GetGLInternalFormat( texture.Format );
                 for ( int i = 0; i < texture.MipMapCount; i++ )
                 {
                     GL.CompressedTexImage2D(
-                        TextureTarget.Texture2D, i, format, texture[ i ].Width, texture[ i ].Height, 0, texture[ i ].Data.Length, texture[ i ].Data );
+                        TextureTarget.Texture2D, i, format, texture[ i ].Width, texture[ i ].Height, 0,
+                        texture[ i ].Data.Length, texture[ i ].Data );
                 }
             }
 

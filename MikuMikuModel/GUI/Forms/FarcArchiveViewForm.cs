@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Windows.Forms;
-using MikuMikuLibrary.Archives.Farc;
+using MikuMikuLibrary.Archives;
 using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.Misc;

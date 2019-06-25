@@ -19,6 +19,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mMainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.mRightSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.mNodeTreeView = new MikuMikuModel.Nodes.Wrappers.NodeTreeView();
             this.mPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.mMenuStrip = new System.Windows.Forms.MenuStrip();
             this.mFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -29,12 +30,12 @@
             this.mToolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mConfigurationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mToolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mCombineMotsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
-            this.mNodeTreeView = new MikuMikuModel.Nodes.Wrappers.NodeTreeView();
+            this.mStylesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
             this.mMainSplitContainer.Panel2.SuspendLayout();
             this.mMainSplitContainer.SuspendLayout();
@@ -79,6 +80,19 @@
             this.mRightSplitContainer.SplitterDistance = 181;
             this.mRightSplitContainer.TabIndex = 0;
             // 
+            // mNodeTreeView
+            // 
+            this.mNodeTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mNodeTreeView.HideSelection = false;
+            this.mNodeTreeView.ImageIndex = 0;
+            this.mNodeTreeView.Location = new System.Drawing.Point(0, 0);
+            this.mNodeTreeView.Name = "mNodeTreeView";
+            this.mNodeTreeView.SelectedImageIndex = 0;
+            this.mNodeTreeView.SelectedNode = null;
+            this.mNodeTreeView.Size = new System.Drawing.Size(260, 181);
+            this.mNodeTreeView.TabIndex = 0;
+            this.mNodeTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.OnAfterSelect);
+            // 
             // mPropertyGrid
             // 
             this.mPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -98,6 +112,7 @@
             this.mConfigurationsToolStripMenuItem,
             this.mToolsToolStripMenuItem,
             this.mHelpToolStripMenuItem,
+            this.mStylesToolStripMenuItem,
             this.mAboutToolStripMenuItem});
             this.mMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mMenuStrip.Name = "mMenuStrip";
@@ -173,19 +188,12 @@
             this.mConfigurationsToolStripMenuItem.Text = "Configurations";
             this.mConfigurationsToolStripMenuItem.Click += new System.EventHandler(this.OnConfigurations);
             // 
-            // mHelpToolStripMenuItem
-            // 
-            this.mHelpToolStripMenuItem.Name = "mHelpToolStripMenuItem";
-            this.mHelpToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
-            this.mHelpToolStripMenuItem.Text = "Help";
-            this.mHelpToolStripMenuItem.Click += new System.EventHandler(this.OnHelp);
-            // 
             // mToolsToolStripMenuItem
             // 
             this.mToolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mCombineMotsFileToolStripMenuItem});
             this.mToolsToolStripMenuItem.Name = "mToolsToolStripMenuItem";
-            this.mToolsToolStripMenuItem.Size = new System.Drawing.Size(47, 21);
+            this.mToolsToolStripMenuItem.Size = new System.Drawing.Size(46, 21);
             this.mToolsToolStripMenuItem.Text = "Tools";
             // 
             // mCombineMotsFileToolStripMenuItem
@@ -194,6 +202,13 @@
             this.mCombineMotsFileToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
             this.mCombineMotsFileToolStripMenuItem.Text = "Combine divided .mot files into one";
             this.mCombineMotsFileToolStripMenuItem.Click += new System.EventHandler(this.OnCombineMotions);
+            // 
+            // mHelpToolStripMenuItem
+            // 
+            this.mHelpToolStripMenuItem.Name = "mHelpToolStripMenuItem";
+            this.mHelpToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
+            this.mHelpToolStripMenuItem.Text = "Help";
+            this.mHelpToolStripMenuItem.Click += new System.EventHandler(this.OnHelp);
             // 
             // mAboutToolStripMenuItem
             // 
@@ -211,18 +226,11 @@
             this.mPanel.Size = new System.Drawing.Size(736, 25);
             this.mPanel.TabIndex = 1;
             // 
-            // mNodeTreeView
+            // mStylesToolStripMenuItem
             // 
-            this.mNodeTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mNodeTreeView.HideSelection = false;
-            this.mNodeTreeView.ImageIndex = 0;
-            this.mNodeTreeView.Location = new System.Drawing.Point(0, 0);
-            this.mNodeTreeView.Name = "mNodeTreeView";
-            this.mNodeTreeView.SelectedImageIndex = 0;
-            this.mNodeTreeView.SelectedNode = null;
-            this.mNodeTreeView.Size = new System.Drawing.Size(260, 181);
-            this.mNodeTreeView.TabIndex = 0;
-            this.mNodeTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.OnAfterSelect);
+            this.mStylesToolStripMenuItem.Name = "mStylesToolStripMenuItem";
+            this.mStylesToolStripMenuItem.Size = new System.Drawing.Size(49, 21);
+            this.mStylesToolStripMenuItem.Text = "Styles";
             // 
             // MainForm
             // 
@@ -271,5 +279,6 @@
         private System.ComponentModel.IContainer components;
         private System.Windows.Forms.ToolStripMenuItem mToolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mCombineMotsFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mStylesToolStripMenuItem;
     }
 }

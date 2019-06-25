@@ -11,7 +11,7 @@ namespace MikuMikuLibrary.IO.Sections
         EndianBinaryReader Reader { get; }
         Stream BaseStream { get; }
         EndianBinaryWriter Writer { get; }
-        object DataObject { get; }
+        object Data { get; }
         long DataOffset { get; }
         long DataSize { get; }
         Type DataType { get; }
@@ -24,14 +24,18 @@ namespace MikuMikuLibrary.IO.Sections
         long SectionSize { get; }
         string Signature { get; }
 
-        void ProcessDataObject();
+        void ProcessData();
         void Read( Stream source );
         void Read( Stream source, bool skipSignature );
         void Write( Stream destination );
         void Write( Stream destination, int depth );
     }
 
-    public enum SectionMode { Read, Write };
+    public enum SectionMode
+    {
+        Read,
+        Write
+    };
 
     [Flags]
     public enum SectionFlags

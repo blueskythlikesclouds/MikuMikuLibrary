@@ -9,15 +9,15 @@ namespace MikuMikuLibrary.IO.Sections
         public override Endianness Endianness => Endianness.LittleEndian;
         public override AddressSpace AddressSpace => AddressSpace.Int32;
 
-        protected override void Read( object dataObject, EndianBinaryReader reader, long length )
+        protected override void Read( object data, EndianBinaryReader reader, long length )
         {
         }
 
-        protected override void Write( object dataObject, EndianBinaryWriter writer )
+        protected override void Write( object data, EndianBinaryWriter writer )
         {
         }
 
-        public EndOfFileSection( SectionMode mode, object dataObject = null ) : base( mode, dataObject )
+        public EndOfFileSection( SectionMode mode, object data = null ) : base( mode, data )
         {
         }
     }

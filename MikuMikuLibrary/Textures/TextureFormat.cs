@@ -70,7 +70,8 @@ namespace MikuMikuLibrary.Textures
                     return width * height * 2;
 
                 default:
-                    return Math.Max( 1, ( width + 3 ) / 4 ) * Math.Max( 1, ( height + 3 ) / 4 ) * GetBlockSize( format );
+                    return Math.Max( 1, ( width + 3 ) / 4 ) * Math.Max( 1, ( height + 3 ) / 4 ) *
+                           GetBlockSize( format );
             }
         }
     }

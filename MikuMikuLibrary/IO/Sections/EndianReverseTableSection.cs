@@ -7,15 +7,15 @@ namespace MikuMikuLibrary.IO.Sections
     {
         public override SectionFlags Flags => SectionFlags.None;
 
-        protected override void Read( object dataObject, EndianBinaryReader reader, long length )
+        protected override void Read( object data, EndianBinaryReader reader, long length )
         {
         }
 
-        protected override void Write( object dataObject, EndianBinaryWriter writer )
+        protected override void Write( object data, EndianBinaryWriter writer )
         {
         }
 
-        public EndianReverseTableSection( SectionMode mode, object dataObject = null ) : base( mode, dataObject )
+        public EndianReverseTableSection( SectionMode mode, object data = null ) : base( mode, data )
         {
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Text;
-using MikuMikuLibrary.Archives.Farc;
+using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.IO;
 
 namespace MikuMikuModel.Modules.Archives
@@ -17,7 +17,7 @@ namespace MikuMikuModel.Modules.Archives
             return signature == "FArc" || signature == "FArC" || signature == "FARC";
         }
 
-        public override FarcArchive Import( string filePath ) => 
+        public override FarcArchive Import( string filePath ) =>
             BinaryFile.Load<FarcArchive>( filePath );
 
         protected override FarcArchive ImportCore( Stream source, string fileName ) =>

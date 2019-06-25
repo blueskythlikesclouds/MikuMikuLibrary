@@ -1,5 +1,4 @@
 ﻿using MikuMikuLibrary.Archives;
-using MikuMikuLibrary.Archives.Farc;
 using System;
 using System.IO;
 using System.Linq;
