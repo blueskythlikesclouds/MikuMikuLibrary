@@ -19,7 +19,7 @@ namespace FarcPack.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -69,9 +69,20 @@ namespace FarcPack.Properties {
         ///~~~~~
         ///Usage
         ///~~~~~
-        ///FarcPack [source] [destination]
+        ///FarcPack [options] [source] [destination]
         ///
-        ///Destination is optional, which makes it possible to do drag and drop onto the executable..
+        ///~~~~~~
+        ///Options
+        ///~~~~~~~
+        ///-c or --compress: Compress archive (disabled by default)
+        ///-a or --alignment: Alignment value (16 by default)
+        ///
+        ///~~~~~~~
+        ///Example
+        ///~~~~~~~
+        ///FarcPack -c -a 16 mikitm mikitm.farc
+        ///
+        ///Destination is optional, which makes it possible to do a drag and drop onto the executable..
         /// </summary>
         internal static string HelpText {
             get {

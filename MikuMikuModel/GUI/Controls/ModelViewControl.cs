@@ -29,7 +29,7 @@ namespace MikuMikuModel.GUI.Controls
         }
 
         private const Keys SPEED_UP_KEY = Keys.Shift;
-        private const Keys SLOW_DOWN_KEY = Keys.Control;
+        private const Keys SLOW_DOWN_KEY = Keys.Alt;
 
         private const float CAMERA_SPEED = 0.1f;
         private const float CAMERA_SPEED_FAST = 0.8f;
@@ -57,7 +57,7 @@ namespace MikuMikuModel.GUI.Controls
         private bool mComputeProjectionMatrix = true;
         private bool mFocused = true;
 
-        private bool mLeft, mRight, mUp, mDown;
+        private bool mLeft, mRight, mUp, mDown, mFront, mBack;
         private bool mShouldRedraw = true;
 
         private int mGridVertexArrayId;
@@ -159,9 +159,9 @@ namespace MikuMikuModel.GUI.Controls
             float cameraSpeed = ( ModifierKeys & SPEED_UP_KEY ) != 0 ? CAMERA_SPEED_FAST :
                 ( ModifierKeys & SLOW_DOWN_KEY ) != 0 ? CAMERA_SPEED_SLOW : CAMERA_SPEED;
 
-            if ( mUp && !mDown )
+            if ( mFront && !mBack )
                 mCamPosition += mCamDirection * cameraSpeed;
-            else if ( mDown && !mUp )
+            else if ( mBack && !mFront )
                 mCamPosition -= mCamDirection * cameraSpeed;
 
             if ( mLeft && !mRight )
@@ -169,8 +169,12 @@ namespace MikuMikuModel.GUI.Controls
             else if ( mRight && !mLeft )
                 mCamPosition += Vector3.Normalize( Vector3.Cross( mCamDirection, sCamUp ) ) * cameraSpeed;
 
-            if ( mLeft || mRight || mUp || mDown )
-                mShouldRedraw = true;
+            if ( mUp && !mDown )
+                mCamPosition += Vector3.UnitY * cameraSpeed / 2;
+            else if ( !mUp && mDown )
+                mCamPosition -= Vector3.UnitY * cameraSpeed / 2;
+
+            mShouldRedraw |= mLeft | mRight | mUp | mDown | mFront | mBack;
         }
 
         private void GetViewMatrix( out Matrix4 view ) =>
@@ -342,7 +346,7 @@ namespace MikuMikuModel.GUI.Controls
             switch ( e.KeyCode )
             {
                 case Keys.W:
-                    mUp = true;
+                    mFront = true;
                     break;
 
                 case Keys.A:
@@ -350,11 +354,19 @@ namespace MikuMikuModel.GUI.Controls
                     break;
 
                 case Keys.S:
-                    mDown = true;
+                    mBack = true;
                     break;
 
                 case Keys.D:
                     mRight = true;
+                    break;
+
+                case Keys.Space:
+                    mUp = true;
+                    break;
+
+                case Keys.ControlKey:
+                    mDown = true;
                     break;
 
                 default:
@@ -375,7 +387,7 @@ namespace MikuMikuModel.GUI.Controls
             switch ( e.KeyCode )
             {
                 case Keys.W:
-                    mUp = false;
+                    mFront = false;
                     break;
 
                 case Keys.A:
@@ -383,11 +395,19 @@ namespace MikuMikuModel.GUI.Controls
                     break;
 
                 case Keys.S:
-                    mDown = false;
+                    mBack = false;
                     break;
 
                 case Keys.D:
                     mRight = false;
+                    break;
+
+                case Keys.Space:
+                    mUp = false;
+                    break;
+
+                case Keys.ControlKey:
+                    mDown = false;
                     break;
 
                 default:
@@ -411,8 +431,7 @@ namespace MikuMikuModel.GUI.Controls
         protected override void OnLostFocus( EventArgs e )
         {
             mTimer.Stop();
-            mUp = mLeft = mDown = mRight = false;
-            mFocused = false;
+            mFocused = mFront = mLeft = mUp = mDown = mBack = mRight = false;
             base.OnLostFocus( e );
         }
 

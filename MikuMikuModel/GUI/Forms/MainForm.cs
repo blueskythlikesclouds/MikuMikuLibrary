@@ -23,6 +23,8 @@ namespace MikuMikuModel.GUI.Forms
     {
         private readonly StringBuilder mStringBuilder = new StringBuilder();
 
+        private Control mControl;
+
         private string mCurrentlyOpenFilePath;
 
         private OriginalStyle mOriginalStyle;
@@ -68,6 +70,9 @@ namespace MikuMikuModel.GUI.Forms
 
         protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
         {
+            if ( mControl != null && mControl.Focused )
+                return false;
+
             foreach ( var menuItem in mMenuStrip.Items )
                 if ( CheckKeyPressRecursively( menuItem, keyData ) )
                     return true;
@@ -117,11 +122,10 @@ namespace MikuMikuModel.GUI.Forms
             // Set the control on the left to the node's control
             mMainSplitContainer.Panel1.Controls.Clear();
 
-            Control control;
-            if ( ( control = mNodeTreeView.ControlOfSelectedDataNode ) != null )
+            if ( ( mControl = mNodeTreeView.ControlOfSelectedDataNode ) != null )
             {
-                control.Dock = DockStyle.Fill;
-                mMainSplitContainer.Panel1.Controls.Add( control );
+                mControl.Dock = DockStyle.Fill;
+                mMainSplitContainer.Panel1.Controls.Add( mControl );
             }
         }
 
