@@ -2,13 +2,34 @@
 
 namespace MikuMikuLibrary.Sprites
 {
+    public enum ResolutionMode
+    {
+        QVGA,
+        VGA,
+        SVGA,
+        XGA,
+        Mode4,
+        Mode5,
+        UXGA,
+        WVGA,
+        Mode8,
+        WXGA,
+        Mode10,
+        WUXGA,
+        WQXGA,
+        HDTV720,
+        HDTV1080,
+        Mode15,
+        Mode16,
+        Mode17,
+        Custom
+    }
+
     public class Sprite
     {
         public string Name { get; set; }
-        public int Field00 { get; set; }
-        public int Field01 { get; set; }
+        public ResolutionMode ResolutionMode { get; set; }
         public int TextureIndex { get; set; }
-        public float Field02 { get; set; }
         public float NdcX { get; set; }
         public float NdcY { get; set; }
         public float NdcWidth { get; set; }
@@ -18,10 +39,10 @@ namespace MikuMikuLibrary.Sprites
         public float Width { get; set; }
         public float Height { get; set; }
 
-        internal void ReadFirst( EndianBinaryReader reader )
+        internal void Read( EndianBinaryReader reader )
         {
             TextureIndex = reader.ReadInt32();
-            Field02 = reader.ReadSingle();
+            reader.SeekCurrent( 4 );
             NdcX = reader.ReadSingle();
             NdcY = reader.ReadSingle();
             NdcWidth = reader.ReadSingle();
@@ -32,10 +53,10 @@ namespace MikuMikuLibrary.Sprites
             Height = reader.ReadSingle();
         }
 
-        internal void WriteFirst( EndianBinaryWriter writer )
+        internal void Write( EndianBinaryWriter writer )
         {
             writer.Write( TextureIndex );
-            writer.Write( Field02 );
+            writer.Write( 0 );
             writer.Write( NdcX );
             writer.Write( NdcY );
             writer.Write( NdcWidth );
@@ -46,16 +67,16 @@ namespace MikuMikuLibrary.Sprites
             writer.Write( Height );
         }
 
-        internal void ReadSecond( EndianBinaryReader reader )
+        internal void ReadMode( EndianBinaryReader reader )
         {
-            Field00 = reader.ReadInt32();
-            Field01 = reader.ReadInt32();
+            reader.SeekCurrent( 4 );
+            ResolutionMode = ( ResolutionMode ) reader.ReadInt32();
         }
 
-        internal void WriteSecond( EndianBinaryWriter writer )
+        internal void WriteMode( EndianBinaryWriter writer )
         {
-            writer.Write( Field00 );
-            writer.Write( Field01 );
+            writer.Write( 0 );
+            writer.Write( ( int ) ResolutionMode );
         }
     }
 }

@@ -26,7 +26,7 @@ namespace MikuMikuLibrary.Sprites
             long spritesOffset = reader.ReadOffset();
             long textureNamesOffset = reader.ReadOffset();
             long spriteNamesOffset = reader.ReadOffset();
-            long spriteUnknownsOffset = reader.ReadOffset();
+            long spriteModesOffset = reader.ReadOffset();
 
             reader.ReadAtOffsetIf( section == null, texturesOffset,
                 () => { TextureSet.Load( reader.BaseStream, true ); } );
@@ -37,7 +37,7 @@ namespace MikuMikuLibrary.Sprites
                 for ( int i = 0; i < spriteCount; i++ )
                 {
                     var sprite = new Sprite();
-                    sprite.ReadFirst( reader );
+                    sprite.Read( reader );
                     Sprites.Add( sprite );
                 }
             } );
@@ -54,10 +54,10 @@ namespace MikuMikuLibrary.Sprites
                     sprite.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
-            reader.ReadAtOffset( spriteUnknownsOffset, () =>
+            reader.ReadAtOffset( spriteModesOffset, () =>
             {
                 foreach ( var sprite in Sprites )
-                    sprite.ReadSecond( reader );
+                    sprite.ReadMode( reader );
             } );
         }
 
@@ -71,7 +71,7 @@ namespace MikuMikuLibrary.Sprites
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var sprite in Sprites )
-                    sprite.WriteFirst( writer );
+                    sprite.Write( writer );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
@@ -86,7 +86,7 @@ namespace MikuMikuLibrary.Sprites
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
                 foreach ( var sprite in Sprites )
-                    sprite.WriteSecond( writer );
+                    sprite.WriteMode( writer );
 
                 writer.PopStringTablesReversed();
             } );

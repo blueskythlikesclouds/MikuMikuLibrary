@@ -15,6 +15,13 @@ namespace MikuMikuModel.Nodes.Sprites
             set => SetProperty( value );
         }
 
+        [DisplayName( "Resolution mode" )]
+        public ResolutionMode ResolutionMode
+        {
+            get => GetProperty<ResolutionMode>();
+            set => SetProperty( value );
+        }
+
         public float X
         {
             get => GetProperty<float>();
@@ -53,26 +60,6 @@ namespace MikuMikuModel.Nodes.Sprites
                 SetProperty( value );
                 CalculateNdcValues();
             }
-        }
-
-        [TypeConverter( typeof( Int32HexTypeConverter ) )]
-        public int Field00
-        {
-            get => GetProperty<int>();
-            set => SetProperty( value );
-        }
-
-        [TypeConverter( typeof( Int32HexTypeConverter ) )]
-        public int Field01
-        {
-            get => GetProperty<int>();
-            set => SetProperty( value );
-        }
-
-        public float Field02
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
         }
 
         private void CalculateNdcValues()

@@ -64,7 +64,7 @@ namespace MikuMikuModel.Nodes.Sprites
 
         protected override void SynchronizeCore()
         {
-            if ( Data.TextureSet == mTextureSetNode.Data )
+            if ( mTextureSetNode == null || Data.TextureSet == mTextureSetNode.Data )
                 return;
 
             Data.TextureSet.Textures.Clear();
