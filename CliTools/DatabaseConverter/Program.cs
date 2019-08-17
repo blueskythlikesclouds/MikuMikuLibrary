@@ -31,7 +31,8 @@ namespace DatabaseConverter
             new DatabaseInfo( typeof( SpriteDatabase ), "sprdb", "spi" ),
             new DatabaseInfo( typeof( StageDatabase ), "stagedata", null ),
             new DatabaseInfo( typeof( StringArray ), "strarray", "str" ),
-            new DatabaseInfo( typeof( StringArray ), "stringarray", "str" )
+            new DatabaseInfo( typeof( StringArray ), "stringarray", "str" ),
+            new DatabaseInfo( typeof( TextureDatabase ), "texdb", "txi" )
         };
 
         static DatabaseInfo GetDatabaseInfo( string fileName )
@@ -43,7 +44,7 @@ namespace DatabaseConverter
 
             fileName = Path.GetFileNameWithoutExtension( fileName ).Replace( "_", "" );
             if ( fileName.StartsWith( "mdata", StringComparison.OrdinalIgnoreCase ) )
-                fileName = fileName.Substring( 6 );
+                fileName = fileName.Substring( 5 );
 
             foreach ( var databaseInfo in sDatabaseInfos )
                 if ( ( !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) &&
