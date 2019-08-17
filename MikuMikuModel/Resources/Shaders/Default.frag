@@ -60,11 +60,11 @@ void main()
 	vec4 ambient = ambientColor;
 	if ( hasAmbientTexture && hasTexCoord && !hasTexCoord2 )
 	{
-		ambient *= pow( texture2D( ambientTexture, texCoord ), gamma );
+		ambient *= pow( texture( ambientTexture, texCoord ), gamma );
 	}
 	else if ( hasDiffuseTexture && hasTexCoord && !hasTexCoord2 )
 	{
-		ambient *= pow( texture2D( diffuseTexture, texCoord ), gamma ) * 0.3;
+		ambient *= pow( texture( diffuseTexture, texCoord ), gamma ) * 0.3;
 	}
 
 	//
@@ -74,7 +74,7 @@ void main()
 
 	if ( hasDiffuseTexture && hasTexCoord ) 
 	{
-		diffuse *= pow( texture2D( diffuseTexture, texCoord ), gamma );
+		diffuse *= pow( texture( diffuseTexture, texCoord ), gamma );
 	}
 
 	if ( hasColor )
@@ -86,7 +86,7 @@ void main()
 	{
 		if ( hasTangent && hasNormalTexture && hasTexCoord )
 		{
-			nrm = 2 * texture2D( normalTexture, texCoord ).rgb - 1;
+			nrm = 2 * texture( normalTexture, texCoord ).rgb - 1;
 
 			// Calculate the Z axis as it doesn't exist in ATI2 textures.
 			nrm.z = sqrt( 1 - ( nrm.x * nrm.x ) - ( nrm.y * nrm.y ) );
@@ -107,13 +107,13 @@ void main()
 	{
 		if ( hasSpecularTexture && hasTexCoord )
 		{
-			specular *= texture2D( specularTexture, texCoord );
+			specular *= texture( specularTexture, texCoord );
 		}
 
 		vec4 power = vec4( specularPower );
 		if ( hasSpecularPowerTexture && hasTexCoord )
 		{
-			power *= texture2D( specularPowerTexture, texCoord );
+			power *= texture( specularPowerTexture, texCoord );
 		}
 
 		if ( dot( nrm, lightDirection ) > 0 )
@@ -147,7 +147,7 @@ void main()
 	// 
 	if ( hasAmbientTexture && hasTexCoord2 )
 	{
-		color *= pow( texture2D( ambientTexture, texCoord2 ), gamma );
+		color *= pow( texture( ambientTexture, texCoord2 ), gamma );
 	}
 
 	if ( color.a < 0.1 )

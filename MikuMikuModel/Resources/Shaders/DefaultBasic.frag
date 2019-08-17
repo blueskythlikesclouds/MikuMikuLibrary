@@ -27,7 +27,7 @@ void main()
 
 	if ( hasDiffuseTexture && hasTexCoord ) 
 	{
-		diffuse *= pow( texture2D( diffuseTexture, texCoord ), gamma );
+		diffuse *= pow( texture( diffuseTexture, texCoord ), gamma );
 	}
 
 	if ( hasNormal )
