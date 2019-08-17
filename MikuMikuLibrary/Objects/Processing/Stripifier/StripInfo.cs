@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace NvTriStripDotNet
 {
     /// <summary>
-    /// This is a summary of a strip that has been built.
+    ///     This is a summary of a strip that has been built.
     /// </summary>
     internal class StripInfo
     {
@@ -21,20 +21,7 @@ namespace NvTriStripDotNet
         public int DegenerateCount;
 
         /// <summary>
-        /// A little information about the creation of the triangle strips.
-        /// </summary>
-        public StripInfo( StripStartInfo startInfo, int stripId, int experimentId = -1 )
-        {
-            StartInfo = startInfo;
-            StripId = stripId;
-            ExperimentId = experimentId;
-            WasVisited = false;
-            DegenerateCount = 0;
-            Faces = new List<FaceInfo>();
-        }
-
-        /// <summary>
-        /// This is an experiment if the experiment id is >= 0.
+        ///     This is an experiment if the experiment id is >= 0.
         /// </summary>
         /// <returns></returns>
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -53,7 +40,7 @@ namespace NvTriStripDotNet
         }
 
         /// <summary>
-        /// Returns true if the input face and the current strip share an edge.
+        ///     Returns true if the input face and the current strip share an edge.
         /// </summary>
         /// <returns></returns>
         public bool SharesEdge( FaceInfo faceInfo, List<EdgeInfo> edgeInfos )
@@ -80,7 +67,7 @@ namespace NvTriStripDotNet
         }
 
         /// <summary>
-        /// Combines the two input face vectors and puts the result into m_faces.
+        ///     Combines the two input face vectors and puts the result into m_faces.
         /// </summary>
         public void Combine( List<FaceInfo> forward, List<FaceInfo> backward )
         {
@@ -91,43 +78,37 @@ namespace NvTriStripDotNet
 
             // add forward faces
             numFaces = forward.Count;
-            for ( var i = 0; i < numFaces; i++ )
+            for ( int i = 0; i < numFaces; i++ )
                 Faces.Add( forward[ i ] );
         }
 
         /// <summary>
-        /// returns true if the face is "unique", i.e. has a vertex which doesn't exist in the faceVec.
+        ///     returns true if the face is "unique", i.e. has a vertex which doesn't exist in the faceVec.
         /// </summary>
         public bool Unique( List<FaceInfo> faceVec, FaceInfo face )
         {
             bool bv0, bv1, bv2; //bools to indicate whether a vertex is in the faceVec or not
             bv0 = bv1 = bv2 = false;
 
-            for ( var i = 0; i < faceVec.Count; i++ )
+            for ( int i = 0; i < faceVec.Count; i++ )
             {
                 if ( !bv0 )
-                {
                     if ( faceVec[ i ].V0 == face.V0 ||
                          faceVec[ i ].V1 == face.V0 ||
                          faceVec[ i ].V2 == face.V0 )
                         bv0 = true;
-                }
 
                 if ( !bv1 )
-                {
                     if ( faceVec[ i ].V0 == face.V1 ||
                          faceVec[ i ].V1 == face.V1 ||
                          faceVec[ i ].V2 == face.V1 )
                         bv1 = true;
-                }
 
                 if ( !bv2 )
-                {
                     if ( faceVec[ i ].V0 == face.V2 ||
                          faceVec[ i ].V1 == face.V2 ||
                          faceVec[ i ].V2 == face.V2 )
                         bv2 = true;
-                }
 
                 //the face is not unique, all it's vertices exist in the face vector
                 if ( bv0 && bv1 && bv2 )
@@ -139,10 +120,10 @@ namespace NvTriStripDotNet
         }
 
         /// <summary>
-        /// If either the faceInfo has a real strip index because it is
-        /// already assign to a committed strip OR it is assigned in an
-        /// experiment and the experiment index is the one we are building
-        /// for, then it is marked and unavailable
+        ///     If either the faceInfo has a real strip index because it is
+        ///     already assign to a committed strip OR it is assigned in an
+        ///     experiment and the experiment index is the one we are building
+        ///     for, then it is marked and unavailable
         /// </summary>
         /// <param name="faceInfo"></param>
         /// <returns></returns>
@@ -153,7 +134,7 @@ namespace NvTriStripDotNet
         }
 
         /// <summary>
-        ///  Marks the face with the current strip ID.
+        ///     Marks the face with the current strip ID.
         /// </summary>
         /// <param name="faceInfo"></param>
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -175,7 +156,7 @@ namespace NvTriStripDotNet
         }
 
         /// <summary>
-        /// Builds a strip forward as far as we can go, then builds backwards, and joins the two lists.
+        ///     Builds a strip forward as far as we can go, then builds backwards, and joins the two lists.
         /// </summary>
         public void Build( List<EdgeInfo> edgeInfos, List<FaceInfo> faceInfos )
         {
@@ -194,10 +175,10 @@ namespace NvTriStripDotNet
 
             // easiest way to get v2 is to use this function which requires the
             // other indices to already be in the list.
-            scratchIndices.Add( ( ushort )v0 );
-            scratchIndices.Add( ( ushort )v1 );
+            scratchIndices.Add( ( ushort ) v0 );
+            scratchIndices.Add( ( ushort ) v1 );
             int v2 = Stripifier.GetNextIndex( scratchIndices, StartInfo.StartFace );
-            scratchIndices.Add( ( ushort )v2 );
+            scratchIndices.Add( ( ushort ) v2 );
 
             //
             // build the forward list
@@ -229,12 +210,11 @@ namespace NvTriStripDotNet
                         forwardFaces.Add( tempFace );
                         MarkTriangle( tempFace );
 
-                        scratchIndices.Add( ( ushort )nv0 );
+                        scratchIndices.Add( ( ushort ) nv0 );
                         testnv0 = nv0;
 
                         ++DegenerateCount;
                     }
-
                 }
 
                 // add this to the strip
@@ -245,29 +225,28 @@ namespace NvTriStripDotNet
                 // add the index
                 //nv0 = nv1;
                 //nv1 = Stripifier.GetNextIndex(scratchIndices, nextFace);
-                scratchIndices.Add( ( ushort )testnv1 );
+                scratchIndices.Add( ( ushort ) testnv1 );
 
                 // and get the next face
                 nv0 = testnv0;
                 nv1 = testnv1;
 
                 nextFace = Stripifier.FindOtherFace( edgeInfos, nv0, nv1, nextFace );
-
             }
 
             // tempAllFaces is going to be forwardFaces + backwardFaces
             // it's used for Unique()
             var tempAllFaces = new List<FaceInfo>();
-            for ( var i = 0; i < forwardFaces.Count; i++ )
+            for ( int i = 0; i < forwardFaces.Count; i++ )
                 tempAllFaces.Add( forwardFaces[ i ] );
 
             //
             // reset the indices for building the strip backwards and do so
             //
             scratchIndices.Clear();
-            scratchIndices.Add( ( ushort )v2 );
-            scratchIndices.Add( ( ushort )v1 );
-            scratchIndices.Add( ( ushort )v0 );
+            scratchIndices.Add( ( ushort ) v2 );
+            scratchIndices.Add( ( ushort ) v1 );
+            scratchIndices.Add( ( ushort ) v0 );
             nv0 = v1;
             nv1 = v0;
             nextFace = Stripifier.FindOtherFace( edgeInfos, nv0, nv1, StartInfo.StartFace );
@@ -297,12 +276,11 @@ namespace NvTriStripDotNet
 
                         backwardFaces.Add( tempFace );
                         MarkTriangle( tempFace );
-                        scratchIndices.Add( ( ushort )nv0 );
+                        scratchIndices.Add( ( ushort ) nv0 );
                         testnv0 = nv0;
 
                         ++DegenerateCount;
                     }
-
                 }
 
                 // add this to the strip
@@ -316,7 +294,7 @@ namespace NvTriStripDotNet
                 // add the index
                 //nv0 = nv1;
                 //nv1 = Stripifier.GetNextIndex(scratchIndices, nextFace);
-                scratchIndices.Add( ( ushort )testnv1 );
+                scratchIndices.Add( ( ushort ) testnv1 );
 
                 // and get the next face
                 nv0 = testnv0;
@@ -326,6 +304,19 @@ namespace NvTriStripDotNet
 
             // Combine the forward and backwards stripification lists and put into our own face vector
             Combine( forwardFaces, backwardFaces );
+        }
+
+        /// <summary>
+        ///     A little information about the creation of the triangle strips.
+        /// </summary>
+        public StripInfo( StripStartInfo startInfo, int stripId, int experimentId = -1 )
+        {
+            StartInfo = startInfo;
+            StripId = stripId;
+            ExperimentId = experimentId;
+            WasVisited = false;
+            DegenerateCount = 0;
+            Faces = new List<FaceInfo>();
         }
     }
 }

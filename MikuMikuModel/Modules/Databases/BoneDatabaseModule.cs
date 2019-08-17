@@ -11,14 +11,20 @@ namespace MikuMikuModel.Modules.Databases
         public override string Name => "Bone Database";
         public override string[] Extensions => new[] { "bin", "bon" };
 
-        public override bool Match( string fileName ) =>
-            base.Match( fileName ) && Path.GetFileNameWithoutExtension( fileName )
-                .Equals( "bone_data", StringComparison.OrdinalIgnoreCase );
+        public override bool Match( string fileName )
+        {
+            return base.Match( fileName ) && Path.GetFileNameWithoutExtension( fileName )
+                       .Equals( "bone_data", StringComparison.OrdinalIgnoreCase );
+        }
 
-        protected override BoneDatabase ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<BoneDatabase>( source, true );
+        protected override BoneDatabase ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<BoneDatabase>( source, true );
+        }
 
-        protected override void ExportCore( BoneDatabase model, Stream destination, string fileName ) =>
+        protected override void ExportCore( BoneDatabase model, Stream destination, string fileName )
+        {
             model.Save( destination, true );
+        }
     }
 }

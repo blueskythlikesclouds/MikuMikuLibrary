@@ -11,6 +11,17 @@ namespace MikuMikuModel.Modules
         public abstract string Name { get; }
         public abstract string[] Extensions { get; }
 
+        public virtual bool Match( string fileName )
+        {
+            return Extensions.Contains( "*" ) || Extensions.Contains( Path.GetExtension( fileName ).Trim( '.' ),
+                       StringComparer.OrdinalIgnoreCase );
+        }
+
+        public virtual bool Match( byte[] buffer )
+        {
+            return true;
+        }
+
         public virtual T Import( Stream source, string fileName = null )
         {
             if ( !Flags.HasFlag( FormatModuleFlags.Import ) )
@@ -25,7 +36,9 @@ namespace MikuMikuModel.Modules
                 throw new NotSupportedException( "FormatModule can't import" );
 
             using ( var stream = File.OpenRead( filePath ) )
+            {
                 return ImportCore( stream, Path.GetFileName( filePath ) );
+            }
         }
 
         public virtual void Export( T model, Stream destination, string fileName = null )
@@ -42,27 +55,35 @@ namespace MikuMikuModel.Modules
                 throw new NotSupportedException( "FormatModule can't export" );
 
             using ( var stream = File.Create( filePath ) )
+            {
                 ExportCore( model, stream, Path.GetFileName( filePath ) );
+            }
         }
-
-        public virtual bool Match( string fileName ) =>
-            Extensions.Contains( "*" ) || Extensions.Contains( Path.GetExtension( fileName ).Trim( '.' ),
-                StringComparer.OrdinalIgnoreCase );
-
-        public virtual bool Match( byte[] buffer ) => true;
 
         protected abstract T ImportCore( Stream source, string fileName );
         protected abstract void ExportCore( T model, Stream destination, string fileName );
 
         #region Explicit IFormatModule Implementation
 
-        object IFormatModule.Import( string filePath ) => Import( filePath );
-        object IFormatModule.Import( Stream source, string fileName ) => Import( source, fileName );
+        object IFormatModule.Import( string filePath )
+        {
+            return Import( filePath );
+        }
 
-        void IFormatModule.Export( object model, string filePath ) => Export( ( T ) model, filePath );
+        object IFormatModule.Import( Stream source, string fileName )
+        {
+            return Import( source, fileName );
+        }
 
-        void IFormatModule.Export( object model, Stream destination, string fileName ) =>
+        void IFormatModule.Export( object model, string filePath )
+        {
+            Export( ( T ) model, filePath );
+        }
+
+        void IFormatModule.Export( object model, Stream destination, string fileName )
+        {
             Export( ( T ) model, destination, fileName );
+        }
 
         #endregion
     }

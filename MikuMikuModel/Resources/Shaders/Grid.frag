@@ -1,10 +1,10 @@
 #version 330
 
-out vec4 outColor;
+out vec4 oColor;
 
-uniform vec4 color;
+uniform vec4 uColor;
 
 void main()
 {
-	outColor = color;
+    oColor = uColor;
 }

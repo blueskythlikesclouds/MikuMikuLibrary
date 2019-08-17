@@ -11,14 +11,20 @@ namespace MikuMikuModel.Modules.Databases
         public override string Name => "Motion Database";
         public override string[] Extensions => new[] { "bin" };
 
-        public override bool Match( string fileName ) =>
-            base.Match( fileName ) && Path.GetFileNameWithoutExtension( fileName )
-                .Equals( "mot_db", StringComparison.OrdinalIgnoreCase );
+        public override bool Match( string fileName )
+        {
+            return base.Match( fileName ) && Path.GetFileNameWithoutExtension( fileName )
+                       .Equals( "mot_db", StringComparison.OrdinalIgnoreCase );
+        }
 
-        protected override MotionDatabase ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<MotionDatabase>( source, true );
+        protected override MotionDatabase ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<MotionDatabase>( source, true );
+        }
 
-        protected override void ExportCore( MotionDatabase model, Stream destination, string fileName ) =>
+        protected override void ExportCore( MotionDatabase model, Stream destination, string fileName )
+        {
             model.Save( destination, true );
+        }
     }
 }

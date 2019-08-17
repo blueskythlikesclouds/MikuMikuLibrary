@@ -11,6 +11,6 @@ namespace MikuMikuLibrary.IO.Common
         FixedLength,
         PrefixedLength8,
         PrefixedLength16,
-        PrefixedLength32,
+        PrefixedLength32
     }
 }

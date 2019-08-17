@@ -24,7 +24,6 @@ namespace MikuMikuModel.Nodes.Misc
                     { WindowTitle = "Type the substring to be replaced." } )
                 {
                     while ( inputDialog1.ShowDialog() == DialogResult.OK )
-                    {
                         if ( string.IsNullOrEmpty( inputDialog1.Input ) )
                         {
                             MessageBox.Show( "Please enter a valid substring.", "Miku Miku Model",
@@ -46,7 +45,6 @@ namespace MikuMikuModel.Nodes.Misc
 
                             break;
                         }
-                    }
                 }
             } );
         }

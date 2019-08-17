@@ -1,33 +1,22 @@
-﻿using MikuMikuLibrary.Geometry;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Objects;
 using MikuMikuLibrary.Textures;
 using MikuMikuModel.GUI.Controls.ModelView;
+using MikuMikuModel.Resources.Styles;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
-using MikuMikuModel.Resources.Styles;
 using Object = MikuMikuLibrary.Objects.Object;
 using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
-using Vector3 = OpenTK.Vector3;
 
 namespace MikuMikuModel.GUI.Controls
 {
     public partial class ModelViewControl : GLControl
     {
-        private static ModelViewControl sInstance;
-
-        public static ModelViewControl Instance => sInstance ?? ( sInstance = new ModelViewControl() );
-
-        public static void DisposeInstance()
-        {
-            sInstance?.Dispose();
-        }
-
         private const Keys SPEED_UP_KEY = Keys.Shift;
         private const Keys SLOW_DOWN_KEY = Keys.Alt;
 
@@ -38,35 +27,43 @@ namespace MikuMikuModel.GUI.Controls
         private const float WHEEL_CAMERA_SPEED = 0.005f;
         private const float WHEEL_CAMERA_SPEED_FAST = 0.04f;
         private const float WHEEL_CAMERA_SPEED_SLOW = 0.00125f;
+        private static ModelViewControl sInstance;
 
         private static readonly Vector3 sCamUp = Vector3.UnitY;
         private static readonly float sFieldOfView = MathHelper.DegreesToRadians( 65 );
-
-        private Timer mTimer;
-        private IGLDraw mModel;
         private readonly GLShaderProgram mDefaultShader;
         private readonly GLShaderProgram mGridShader;
 
+        private Color4 mBackgroundColor = Color4.LightGray;
+        private Vector3 mCamDirection = new Vector3( 0, 0, -1 );
+
         private Vector3 mCamPosition = Vector3.Zero;
         private Vector3 mCamRotation = new Vector3( -90, 0, 0 );
-        private Vector3 mCamDirection = new Vector3( 0, 0, -1 );
-        private Point mPreviousMousePosition;
-
-        private Matrix4 mViewMatrix;
-        private Matrix4 mProjectionMatrix;
         private bool mComputeProjectionMatrix = true;
         private bool mFocused = true;
-
-        private bool mLeft, mRight, mUp, mDown, mFront, mBack;
-        private bool mShouldRedraw = true;
+        private Color4 mGridColor = new Color4( 0.1f, 0.1f, 0.1f, 1 );
 
         private int mGridVertexArrayId;
         private GLBuffer<Vector3> mGridVertexBuffer;
 
-        private Color4 mBackgroundColor = Color4.LightGray;
-        private Color4 mGridColor = new Color4( 0.1f, 0.1f, 0.1f, 1 );
+        private bool mLeft, mRight, mUp, mDown, mFront, mBack;
+        private IDrawable mModel;
+        private Point mPreviousMousePosition;
+        private Matrix4 mProjectionMatrix;
+        private bool mShouldRedraw = true;
+
+        private Timer mTimer;
+
+        private Matrix4 mViewMatrix;
+
+        public static ModelViewControl Instance => sInstance ?? ( sInstance = new ModelViewControl() );
 
         private bool CanRender => mDefaultShader != null && mGridShader != null;
+
+        public static void DisposeInstance()
+        {
+            sInstance?.Dispose();
+        }
 
         public void SetModel( ObjectSet objectSet, TextureSet textureSet )
         {
@@ -105,11 +102,9 @@ namespace MikuMikuModel.GUI.Controls
             var dictionary = new Dictionary<int, GLTexture>();
 
             foreach ( var subMesh in mesh.SubMeshes )
-            {
                 if ( materials[ subMesh.MaterialIndex ] == null )
                     materials[ subMesh.MaterialIndex ] = new GLMaterial( obj.Materials[ subMesh.MaterialIndex ],
                         dictionary, textureSet );
-            }
 
             mModel = new GLMesh( mesh, materials );
             SetCamera( mesh.BoundingSphere );
@@ -177,11 +172,15 @@ namespace MikuMikuModel.GUI.Controls
             mShouldRedraw |= mLeft | mRight | mUp | mDown | mFront | mBack;
         }
 
-        private void GetViewMatrix( out Matrix4 view ) =>
+        private void GetViewMatrix( out Matrix4 view )
+        {
             view = Matrix4.LookAt( mCamPosition, mCamPosition + mCamDirection, sCamUp );
+        }
 
-        private void GetProjectionMatrix( out Matrix4 projection ) =>
+        private void GetProjectionMatrix( out Matrix4 projection )
+        {
             projection = Matrix4.CreatePerspectiveFieldOfView( sFieldOfView, ( float ) Width / Height, 0.1f, 1000000f );
+        }
 
         protected override void OnLoad( EventArgs e )
         {
@@ -220,7 +219,7 @@ namespace MikuMikuModel.GUI.Controls
             mGridVertexArrayId = GL.GenVertexArray();
             GL.BindVertexArray( mGridVertexArrayId );
 
-            mGridVertexBuffer = new GLBuffer<Vector3>( BufferTarget.ArrayBuffer, vertices.ToArray(), 12,
+            mGridVertexBuffer = new GLBuffer<Vector3>( BufferTarget.ArrayBuffer, vertices.ToArray(),
                 BufferUsageHint.StaticDraw );
 
             GL.VertexAttribPointer( 0, 3, VertexAttribPointerType.Float, false, mGridVertexBuffer.Stride, 0 );
@@ -250,10 +249,10 @@ namespace MikuMikuModel.GUI.Controls
         private void DrawModel( ref Matrix4 view, ref Matrix4 projection )
         {
             mDefaultShader.Use();
-            mDefaultShader.SetUniform( "view", view );
-            mDefaultShader.SetUniform( "projection", projection );
-            mDefaultShader.SetUniform( "viewPosition", mCamPosition );
-            mDefaultShader.SetUniform( "lightPosition", mCamPosition );
+            mDefaultShader.SetUniform( "uView", view );
+            mDefaultShader.SetUniform( "uProjection", projection );
+            mDefaultShader.SetUniform( "uViewPosition", mCamPosition );
+            mDefaultShader.SetUniform( "uLightPosition", mCamPosition );
 
             mModel.Draw( mDefaultShader );
         }
@@ -261,9 +260,9 @@ namespace MikuMikuModel.GUI.Controls
         private void DrawGrid( ref Matrix4 view, ref Matrix4 projection )
         {
             mGridShader.Use();
-            mGridShader.SetUniform( "view", view );
-            mGridShader.SetUniform( "projection", projection );
-            mGridShader.SetUniform( "color", mGridColor );
+            mGridShader.SetUniform( "uView", view );
+            mGridShader.SetUniform( "uProjection", projection );
+            mGridShader.SetUniform( "uColor", mGridColor );
 
             GL.BindVertexArray( mGridVertexArrayId );
             GL.DrawArrays( PrimitiveType.Lines, 0, mGridVertexBuffer.Length );
@@ -448,7 +447,7 @@ namespace MikuMikuModel.GUI.Controls
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose( bool disposing )
@@ -481,12 +480,12 @@ namespace MikuMikuModel.GUI.Controls
             MakeCurrent();
 
             mGridShader = GLShaderProgram.Create( "Grid" );
-            mDefaultShader = GLShaderProgram.Create( "Default" ) ??
-                             GLShaderProgram.Create( "DefaultBasic" );
+            mDefaultShader = GLShaderProgram.Create( "Default" );
 
             if ( !CanRender )
             {
-                Debug.WriteLine( "Shader compilation failed. GL rendering will be disabled." );
+                MessageBox.Show( "Shader compilation failed. GL rendering will be disabled.", "Miku Miku Model",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error );
 
                 Visible = false;
                 return;
@@ -496,7 +495,6 @@ namespace MikuMikuModel.GUI.Controls
             GL.CullFace( CullFaceMode.Back );
             GL.Enable( EnableCap.CullFace );
             GL.Enable( EnableCap.DepthTest );
-            GL.Enable( EnableCap.FramebufferSrgb );
             GL.Enable( EnableCap.PrimitiveRestart );
             GL.PrimitiveRestartIndex( 0xFFFF );
         }

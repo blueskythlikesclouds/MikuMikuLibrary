@@ -25,10 +25,14 @@ namespace MikuMikuModel.Modules.Databases
             return base.Match( fileName );
         }
 
-        protected override ObjectDatabase ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<ObjectDatabase>( source, true );
+        protected override ObjectDatabase ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<ObjectDatabase>( source, true );
+        }
 
-        protected override void ExportCore( ObjectDatabase model, Stream destination, string fileName ) =>
+        protected override void ExportCore( ObjectDatabase model, Stream destination, string fileName )
+        {
             model.Save( destination, true );
+        }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -32,12 +32,10 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( motionNameOffsetsOffset, () =>
             {
                 for ( int i = 0; i < motionCount; i++ )
-                {
                     Motions.Add( new MotionInfo
                     {
                         Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
                     } );
-                }
             } );
 
             reader.ReadAtOffset( motionIdsOffset, () =>
@@ -135,8 +133,10 @@ namespace MikuMikuLibrary.Databases
             writer.WriteAlignmentPadding( 64 );
         }
 
-        public MotionSetInfo GetMotionSetInfo( string name ) =>
-            MotionSets.FirstOrDefault( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
+        public MotionSetInfo GetMotionSetInfo( string name )
+        {
+            return MotionSets.FirstOrDefault( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
+        }
 
         public MotionDatabase()
         {

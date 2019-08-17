@@ -1,19 +1,15 @@
-﻿using MikuMikuLibrary.Textures;
+﻿using System;
+using MikuMikuLibrary.Textures;
 using OpenTK.Graphics.OpenGL;
-using System;
-using System.Collections.Generic;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
     public class GLTexture : IDisposable
     {
+        private static readonly int[] sCubeMapIndices = { 0, 1, 2, 3, 5, 4 };
+
         public int Id { get; }
         public TextureTarget Target { get; }
-
-        public void Bind()
-        {
-            GL.BindTexture( Target, Id );
-        }
 
         public void Dispose()
         {
@@ -21,14 +17,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             GC.SuppressFinalize( this );
         }
 
-        private static IEnumerable<int> CubeMapToDDSCubeMap()
+        public void Bind()
         {
-            yield return 0;
-            yield return 1;
-            yield return 2;
-            yield return 3;
-            yield return 5;
-            yield return 4;
+            GL.BindTexture( Target, Id );
         }
 
         protected void Dispose( bool disposing )
@@ -58,18 +49,11 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
                 var format = GetGLInternalFormat( texture.Format );
 
-                int i = 0;
-                foreach ( var index in CubeMapToDDSCubeMap() )
-                {
-                    for ( int j = 0; j < texture.MipMapCount; j++ )
-                    {
-                        GL.CompressedTexImage2D(
-                            TextureTarget.TextureCubeMapPositiveX + i, j, format, texture[ index, j ].Width,
-                            texture[ index, j ].Height, 0, texture[ index, j ].Data.Length, texture[ index, j ].Data );
-                    }
-
-                    i++;
-                }
+                for ( int i = 0; i < sCubeMapIndices.Length; i++ )
+                for ( int j = 0; j < texture.MipMapCount; j++ )
+                    GL.CompressedTexImage2D( TextureTarget.TextureCubeMapPositiveX + sCubeMapIndices[ i ], j, format,
+                        texture[ i, j ].Width, texture[ i, j ].Height, 0, texture[ i, j ].Data.Length,
+                        texture[ i, j ].Data );
             }
 
             else
@@ -86,11 +70,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
                 var format = GetGLInternalFormat( texture.Format );
                 for ( int i = 0; i < texture.MipMapCount; i++ )
-                {
                     GL.CompressedTexImage2D(
                         TextureTarget.Texture2D, i, format, texture[ i ].Width, texture[ i ].Height, 0,
                         texture[ i ].Data.Length, texture[ i ].Data );
-                }
             }
 
             InternalFormat GetGLInternalFormat( TextureFormat textureFormat )

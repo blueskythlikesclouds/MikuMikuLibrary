@@ -2,21 +2,20 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
-using MikuMikuLibrary.Geometry;
-using MikuMikuLibrary.Misc;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Misc;
 
 namespace MikuMikuLibrary.IO.Common
 {
     public class EndianBinaryWriter : BinaryWriter
     {
         private Endianness mEndianness;
-        private bool mSwap;
         private Encoding mEncoding;
         private Stack<long> mOffsets;
         private Stack<long> mBaseOffsets;
@@ -29,14 +28,14 @@ namespace MikuMikuLibrary.IO.Common
             get => mEndianness;
             set
             {
-                mSwap = value != EndiannessSwapUtilities.SystemEndianness;
+                SwapBytes = value != EndiannessSwapUtilities.SystemEndianness;
                 mEndianness = value;
             }
         }
 
         public AddressSpace AddressSpace { get; set; }
 
-        public bool SwapBytes => mSwap;
+        public bool SwapBytes { get; private set; }
 
         public long Position
         {
@@ -58,27 +57,76 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
-        public void Seek( long offset, SeekOrigin origin ) => BaseStream.Seek( offset, origin );
-        public void SeekBegin( long offset ) => BaseStream.Seek( offset, SeekOrigin.Begin );
-        public void SeekCurrent( long offset ) => BaseStream.Seek( offset, SeekOrigin.Current );
-        public void SeekEnd( long offset ) => BaseStream.Seek( offset, SeekOrigin.End );
+        public void Seek( long offset, SeekOrigin origin )
+        {
+            BaseStream.Seek( offset, origin );
+        }
 
-        public void PushOffset( long offset ) => mOffsets.Push( offset );
-        public void PushOffset() => mOffsets.Push( Position );
-        public long PeekOffset() => mOffsets.Peek();
-        public long PopOffset() => mOffsets.Pop();
-        public long SeekBeginToPoppedOffset() => BaseStream.Seek( mOffsets.Pop(), SeekOrigin.Begin );
+        public void SeekBegin( long offset )
+        {
+            BaseStream.Seek( offset, SeekOrigin.Begin );
+        }
 
-        public void PushBaseOffset( long offset ) => mBaseOffsets.Push( offset );
-        public void PushBaseOffset() => mBaseOffsets.Push( Position );
-        public long PeekBaseOffset() => mBaseOffsets.Peek();
-        public long PopBaseOffset() => mBaseOffsets.Pop();
+        public void SeekCurrent( long offset )
+        {
+            BaseStream.Seek( offset, SeekOrigin.Current );
+        }
+
+        public void SeekEnd( long offset )
+        {
+            BaseStream.Seek( offset, SeekOrigin.End );
+        }
+
+        public void PushOffset( long offset )
+        {
+            mOffsets.Push( offset );
+        }
+
+        public void PushOffset()
+        {
+            mOffsets.Push( Position );
+        }
+
+        public long PeekOffset()
+        {
+            return mOffsets.Peek();
+        }
+
+        public long PopOffset()
+        {
+            return mOffsets.Pop();
+        }
+
+        public long SeekBeginToPoppedOffset()
+        {
+            return BaseStream.Seek( mOffsets.Pop(), SeekOrigin.Begin );
+        }
+
+        public void PushBaseOffset( long offset )
+        {
+            mBaseOffsets.Push( offset );
+        }
+
+        public void PushBaseOffset()
+        {
+            mBaseOffsets.Push( Position );
+        }
+
+        public long PeekBaseOffset()
+        {
+            return mBaseOffsets.Peek();
+        }
+
+        public long PopBaseOffset()
+        {
+            return mBaseOffsets.Pop();
+        }
 
         public void WriteAlignmentPadding( int alignment, byte filler = 0 )
         {
             int difference = AlignmentUtilities.GetAlignedDifference( Position, alignment );
 
-            int fourByte = filler << 24 | filler << 16 | filler << 8 | filler;
+            int fourByte = ( filler << 24 ) | ( filler << 16 ) | ( filler << 8 ) | filler;
 
             for ( int i = 0; i < difference / 4; i++ )
                 Write( fourByte );
@@ -90,7 +138,7 @@ namespace MikuMikuLibrary.IO.Common
         public void WriteNulls( int count )
         {
             for ( int i = 0; i < count / 4; i++ )
-                Write( ( int ) 0 );
+                Write( 0 );
 
             for ( int i = 0; i < count % 4; i++ )
                 Write( ( byte ) 0 );
@@ -119,50 +167,78 @@ namespace MikuMikuLibrary.IO.Common
             SeekBegin( current );
         }
 
-        public void ScheduleWriteOffset( Func<long> action ) =>
+        public void ScheduleWriteOffset( Func<long> action )
+        {
             ScheduleWriteOffset( 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffset( Action action ) =>
+        public void ScheduleWriteOffset( Action action )
+        {
             ScheduleWriteOffset( 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffset( OffsetMode offsetMode, Func<long> action ) =>
+        public void ScheduleWriteOffset( OffsetMode offsetMode, Func<long> action )
+        {
             ScheduleWriteOffset( 0, 0, AlignmentMode.None, offsetMode, action );
+        }
 
-        public void ScheduleWriteOffset( OffsetMode offsetMode, Action action ) =>
+        public void ScheduleWriteOffset( OffsetMode offsetMode, Action action )
+        {
             ScheduleWriteOffset( 0, 0, AlignmentMode.None, offsetMode, action );
+        }
 
-        public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, Func<long> action ) =>
+        public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, Func<long> action )
+        {
             ScheduleWriteOffset( 0, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, Action action ) =>
+        public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, Action action )
+        {
             ScheduleWriteOffset( 0, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
         public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode,
-            Func<long> action ) =>
+            Func<long> action )
+        {
             ScheduleWriteOffset( 0, alignment, alignmentMode, offsetMode, action );
+        }
 
         public void ScheduleWriteOffset( int alignment, AlignmentMode alignmentMode, OffsetMode offsetMode,
-            Action action ) =>
+            Action action )
+        {
             ScheduleWriteOffset( 0, alignment, alignmentMode, offsetMode, action );
+        }
 
-        public void ScheduleWriteOffset( int priority, Func<long> action ) =>
+        public void ScheduleWriteOffset( int priority, Func<long> action )
+        {
             ScheduleWriteOffset( priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffset( int priority, Action action ) =>
+        public void ScheduleWriteOffset( int priority, Action action )
+        {
             ScheduleWriteOffset( priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffset( int priority, OffsetMode offsetMode, Func<long> action ) =>
+        public void ScheduleWriteOffset( int priority, OffsetMode offsetMode, Func<long> action )
+        {
             ScheduleWriteOffset( priority, 0, AlignmentMode.None, offsetMode, action );
+        }
 
-        public void ScheduleWriteOffset( int priority, OffsetMode offsetMode, Action action ) =>
+        public void ScheduleWriteOffset( int priority, OffsetMode offsetMode, Action action )
+        {
             ScheduleWriteOffset( priority, 0, AlignmentMode.None, offsetMode, action );
+        }
 
         public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode,
-            Func<long> action ) =>
+            Func<long> action )
+        {
             ScheduleWriteOffset( priority, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode, Action action ) =>
+        public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode, Action action )
+        {
             ScheduleWriteOffset( priority, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
         public void ScheduleWriteOffset( int priority, int alignment, AlignmentMode alignmentMode,
             OffsetMode offsetMode, Func<long> action )
@@ -175,7 +251,7 @@ namespace MikuMikuLibrary.IO.Common
                 AlignmentMode = alignmentMode,
                 OffsetMode = offsetMode,
                 Action = action,
-                BaseOffset = BaseOffset,
+                BaseOffset = BaseOffset
             } );
         }
 
@@ -190,53 +266,81 @@ namespace MikuMikuLibrary.IO.Common
             } );
         }
 
-        public void ScheduleWriteOffsetIf( bool condition, Func<long> action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, Func<long> action )
+        {
             ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffsetIf( bool condition, Action action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, Action action )
+        {
             ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffsetIf( bool condition, OffsetMode offsetMode, Func<long> action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, OffsetMode offsetMode, Func<long> action )
+        {
             ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, offsetMode, action );
+        }
 
-        public void ScheduleWriteOffsetIf( bool condition, OffsetMode offsetMode, Action action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, OffsetMode offsetMode, Action action )
+        {
             ScheduleWriteOffsetIf( condition, 0, 0, AlignmentMode.None, offsetMode, action );
+        }
 
         public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode,
-            Func<long> action ) =>
+            Func<long> action )
+        {
             ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
         public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode,
-            Action action ) =>
+            Action action )
+        {
             ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
         public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode,
-            OffsetMode offsetMode, Func<long> action ) =>
+            OffsetMode offsetMode, Func<long> action )
+        {
             ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, offsetMode, action );
+        }
 
         public void ScheduleWriteOffsetIf( bool condition, int alignment, AlignmentMode alignmentMode,
-            OffsetMode offsetMode, Action action ) =>
+            OffsetMode offsetMode, Action action )
+        {
             ScheduleWriteOffsetIf( condition, 0, alignment, alignmentMode, offsetMode, action );
+        }
 
-        public void ScheduleWriteOffsetIf( bool condition, int priority, Func<long> action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, int priority, Func<long> action )
+        {
             ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffsetIf( bool condition, int priority, Action action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, int priority, Action action )
+        {
             ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, OffsetMode.Offset, action );
+        }
 
-        public void ScheduleWriteOffsetIf( bool condition, int priority, OffsetMode offsetMode, Func<long> action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, int priority, OffsetMode offsetMode, Func<long> action )
+        {
             ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, offsetMode, action );
+        }
 
-        public void ScheduleWriteOffsetIf( bool condition, int priority, OffsetMode offsetMode, Action action ) =>
+        public void ScheduleWriteOffsetIf( bool condition, int priority, OffsetMode offsetMode, Action action )
+        {
             ScheduleWriteOffsetIf( condition, priority, 0, AlignmentMode.None, offsetMode, action );
+        }
 
         public void ScheduleWriteOffsetIf( bool condition, int priority, int alignment, AlignmentMode alignmentMode,
-            Func<long> action ) =>
+            Func<long> action )
+        {
             ScheduleWriteOffsetIf( condition, priority, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
         public void ScheduleWriteOffsetIf( bool condition, int priority, int alignment, AlignmentMode alignmentMode,
-            Action action ) =>
+            Action action )
+        {
             ScheduleWriteOffsetIf( condition, priority, alignment, alignmentMode, OffsetMode.Offset, action );
+        }
 
         public void ScheduleWriteOffsetIf( bool condition, int priority, int alignment, AlignmentMode alignmentMode,
             OffsetMode offsetMode, Func<long> action )
@@ -372,8 +476,10 @@ namespace MikuMikuLibrary.IO.Common
             PerformScheduledWrites();
         }
 
-        public void PushStringTable( StringBinaryFormat format, int fixedLength = -1 ) =>
+        public void PushStringTable( StringBinaryFormat format, int fixedLength = -1 )
+        {
             PushStringTable( 0, AlignmentMode.None, format, fixedLength );
+        }
 
         public void PushStringTable( int alignment, AlignmentMode alignmentMode, StringBinaryFormat format,
             int fixedLength = -1 )
@@ -385,7 +491,7 @@ namespace MikuMikuLibrary.IO.Common
                 AlignmentMode = alignmentMode,
                 Alignment = alignment,
                 Format = format,
-                FixedLength = fixedLength,
+                FixedLength = fixedLength
             } );
         }
 
@@ -396,9 +502,7 @@ namespace MikuMikuLibrary.IO.Common
 
             if ( stringTable.AlignmentMode == AlignmentMode.Left ||
                  stringTable.AlignmentMode == AlignmentMode.Center )
-            {
                 WriteAlignmentPadding( stringTable.Alignment );
-            }
 
             foreach ( var keyValuePair in stringTable.Strings.OrderBy( x => x.Value[ 0 ] ) )
             {
@@ -406,7 +510,7 @@ namespace MikuMikuLibrary.IO.Common
                 Write( keyValuePair.Key, stringTable.Format, stringTable.FixedLength );
                 long endOffset = Position;
 
-                foreach ( var offset in keyValuePair.Value )
+                foreach ( long offset in keyValuePair.Value )
                 {
                     SeekBegin( offset );
                     WriteOffset( stringOffset - stringTable.BaseOffset );
@@ -418,9 +522,7 @@ namespace MikuMikuLibrary.IO.Common
 
             if ( stringTable.AlignmentMode == AlignmentMode.Right ||
                  stringTable.AlignmentMode == AlignmentMode.Center )
-            {
                 WriteAlignmentPadding( stringTable.Alignment );
-            }
         }
 
         public void PopStringTable()
@@ -437,10 +539,13 @@ namespace MikuMikuLibrary.IO.Common
         public void PopStringTablesReversed()
         {
             if ( mStringTables.Count == 0 )
-                return;
+            {
+            }
 
             else if ( mStringTables.Count == 1 )
+            {
                 PopStringTable();
+            }
 
             else
             {
@@ -455,12 +560,14 @@ namespace MikuMikuLibrary.IO.Common
         {
             var stringTable = mStringTables.Peek();
 
-            var position = PrepareWriteOffset( OffsetMode.Offset );
+            long position = PrepareWriteOffset( OffsetMode.Offset );
 
             if ( value != null )
             {
-                if ( stringTable.Strings.TryGetValue( value, out List<long> positions ) )
+                if ( stringTable.Strings.TryGetValue( value, out var positions ) )
+                {
                     positions.Add( position );
+                }
                 else
                 {
                     var offsets = new List<long>();
@@ -484,84 +591,84 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( short value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( short[] values )
         {
-            foreach ( var value in values )
+            foreach ( short value in values )
                 Write( value );
         }
 
         public override void Write( ushort value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( ushort[] values )
         {
-            foreach ( var value in values )
+            foreach ( ushort value in values )
                 Write( value );
         }
 
         public override void Write( int value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( int[] values )
         {
-            foreach ( var value in values )
+            foreach ( int value in values )
                 Write( value );
         }
 
         public override void Write( uint value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( uint[] values )
         {
-            foreach ( var value in values )
+            foreach ( uint value in values )
                 Write( value );
         }
 
         public override void Write( long value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( long[] values )
         {
-            foreach ( var value in values )
+            foreach ( long value in values )
                 Write( value );
         }
 
         public override void Write( ulong value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( ulong[] values )
         {
-            foreach ( var value in values )
+            foreach ( ulong value in values )
                 Write( value );
         }
 
         public override void Write( float value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( float[] values )
         {
-            foreach ( var value in values )
+            foreach ( float value in values )
                 Write( value );
         }
 
         public void Write( Half value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value.Value ) : value.Value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value.Value ) : value.Value );
         }
 
         public void Write( Half[] values )
@@ -572,12 +679,12 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( decimal value )
         {
-            base.Write( mSwap ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
         }
 
         public void Write( decimal[] values )
         {
-            foreach ( var value in values )
+            foreach ( decimal value in values )
                 Write( value );
         }
 
@@ -850,6 +957,18 @@ namespace MikuMikuLibrary.IO.Common
             base.Dispose( disposing );
         }
 
+        private void Init( Encoding encoding, Endianness endianness, AddressSpace addressSpace )
+        {
+            Endianness = endianness;
+            AddressSpace = addressSpace;
+            mEncoding = encoding;
+            mOffsets = new Stack<long>();
+            mBaseOffsets = new Stack<long>();
+            mScheduledWrites = new List<ScheduledWrite>();
+            mStringTables = new Stack<StringTable>();
+            mOffsetPositions = new List<long>();
+        }
+
         public EndianBinaryWriter( Stream input, Endianness endianness )
             : base( input )
         {
@@ -887,18 +1006,6 @@ namespace MikuMikuLibrary.IO.Common
             Init( encoding, endianness, addressSpace );
         }
 
-        private void Init( Encoding encoding, Endianness endianness, AddressSpace addressSpace )
-        {
-            Endianness = endianness;
-            AddressSpace = addressSpace;
-            mEncoding = encoding;
-            mOffsets = new Stack<long>();
-            mBaseOffsets = new Stack<long>();
-            mScheduledWrites = new List<ScheduledWrite>();
-            mStringTables = new Stack<StringTable>();
-            mOffsetPositions = new List<long>();
-        }
-
         private class ScheduledWrite
         {
             public long BaseOffset;
@@ -931,14 +1038,14 @@ namespace MikuMikuLibrary.IO.Common
         None,
         Left,
         Center,
-        Right,
-    };
+        Right
+    }
 
     public enum OffsetMode
     {
         Offset,
         Size,
         OffsetAndSize,
-        SizeAndOffset,
-    };
+        SizeAndOffset
+    }
 }

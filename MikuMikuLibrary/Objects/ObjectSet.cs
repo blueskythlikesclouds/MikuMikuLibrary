@@ -1,12 +1,12 @@
-﻿using MikuMikuLibrary.Databases;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Textures;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace MikuMikuLibrary.Objects
 {
@@ -21,8 +21,7 @@ namespace MikuMikuLibrary.Objects
             {
                 if ( BinaryFormatUtilities.IsModern( Format ) )
                     return base.Endianness;
-                else
-                    return Endianness.LittleEndian;
+                return Endianness.LittleEndian;
             }
 
             set
@@ -57,7 +56,6 @@ namespace MikuMikuLibrary.Objects
             {
                 Objects.Capacity = objectCount;
                 for ( int i = 0; i < objectCount; i++ )
-                {
                     reader.ReadOffset( () =>
                     {
                         reader.PushBaseOffset();
@@ -68,19 +66,16 @@ namespace MikuMikuLibrary.Objects
                         }
                         reader.PopBaseOffset();
                     } );
-                }
             } );
 
             reader.ReadAtOffsetIf( section == null, objectSkinningsOffset, () =>
             {
                 foreach ( var obj in Objects )
-                {
                     reader.ReadOffset( () =>
                     {
                         obj.Skin = new Skin();
                         obj.Skin.Read( reader );
                     } );
-                }
             } );
 
             reader.ReadAtOffset( objectNamesOffset, () =>
@@ -112,22 +107,18 @@ namespace MikuMikuLibrary.Objects
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var obj in Objects )
-                {
                     writer.ScheduleWriteOffsetIf( section == null, 4, AlignmentMode.Center, () =>
                     {
                         writer.PushBaseOffset();
                         obj.Write( writer );
                         writer.PopBaseOffset();
                     } );
-                }
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var obj in Objects )
-                {
                     writer.ScheduleWriteOffsetIf( obj.Skin != null && section == null, 16, AlignmentMode.Left,
                         () => { obj.Skin.Write( writer ); } );
-                }
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
@@ -142,7 +133,7 @@ namespace MikuMikuLibrary.Objects
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
-                foreach ( var textureId in TextureIds )
+                foreach ( int textureId in TextureIds )
                     writer.Write( textureId );
             } );
             writer.Write( TextureIds.Count );
@@ -188,17 +179,17 @@ namespace MikuMikuLibrary.Objects
                 textureSet = Load<TextureSet>( textureSetFilePath );
 
             using ( var source = File.OpenRead( filePath ) )
+            {
                 Load( source, textureSet, textureDatabase );
+            }
         }
 
         public void Save( Stream destination, ObjectDatabase objectDatabase, TextureDatabase textureDatabase,
             BoneDatabase boneDatabase, bool leaveOpen = false )
         {
             if ( objectDatabase != null )
-            {
                 foreach ( var obj in Objects )
                     obj.Id = objectDatabase.GetObjectInfo( obj.Name )?.Id ?? obj.Id;
-            }
 
             if ( boneDatabase != null )
             {
@@ -214,30 +205,26 @@ namespace MikuMikuLibrary.Objects
                     null;
 
                 if ( skeleton != null )
-                {
                     foreach ( var skin in Objects.Where( x => x.Skin != null ).Select( x => x.Skin ) )
+                    foreach ( var boneInfo in skin.Bones )
                     {
-                        foreach ( var boneInfo in skin.Bones )
-                        {
-                            int index = skin.ExData?.BoneNames?.FindIndex( x =>
-                                            x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
+                        int index = skin.ExData?.BoneNames?.FindIndex( x =>
+                                        x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
 
-                            if ( index == -1 )
-                                index = skeleton.ObjectBoneNames.FindIndex( x =>
-                                    x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
-                            else
-                                index = 0x8000 | index;
+                        if ( index == -1 )
+                            index = skeleton.ObjectBoneNames.FindIndex( x =>
+                                x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
+                        else
+                            index = 0x8000 | index;
 
-                            if ( index == -1 )
-                                continue;
+                        if ( index == -1 )
+                            continue;
 
-                            foreach ( var childBone in skin.Bones.Where( x => x.ParentId == boneInfo.Id ) )
-                                childBone.ParentId = index;
+                        foreach ( var childBone in skin.Bones.Where( x => x.ParentId == boneInfo.Id ) )
+                            childBone.ParentId = index;
 
-                            boneInfo.Id = index;
-                        }
+                        boneInfo.Id = index;
                     }
-                }
             }
 
             if ( textureDatabase != null && TextureSet != null )
@@ -272,10 +259,8 @@ namespace MikuMikuLibrary.Objects
 
                 foreach ( var materialTexture in Objects.SelectMany( x => x.Materials )
                     .SelectMany( x => x.MaterialTextures ) )
-                {
                     if ( idDictionary.TryGetValue( materialTexture.TextureId, out id ) )
                         materialTexture.TextureId = id;
-                }
 
                 TextureIds.Clear();
                 TextureIds.AddRange( TextureSet.Textures.Select( x => x.Id ) );
@@ -335,7 +320,9 @@ namespace MikuMikuLibrary.Objects
             }
 
             using ( var destination = File.Create( filePath ) )
+            {
                 Save( destination, objectDatabase, textureDatabase, boneDatabase );
+            }
         }
 
         public ObjectSet()

@@ -4,6 +4,6 @@
     {
         Half,
         Single,
-        Int16,
+        Int16
     }
 }

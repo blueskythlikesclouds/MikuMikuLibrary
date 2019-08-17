@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.Textures;
-using System.Collections.Generic;
-using System.IO;
-using MikuMikuLibrary.Databases;
 
 namespace MikuMikuLibrary.Sprites
 {
@@ -103,7 +103,7 @@ namespace MikuMikuLibrary.Sprites
             if ( !File.Exists( spriteDatabaseFilePath ) )
                 return;
 
-            var spriteDatabase = BinaryFile.Load<SpriteDatabase>( spriteDatabaseFilePath );
+            var spriteDatabase = Load<SpriteDatabase>( spriteDatabaseFilePath );
             var spriteSetInfo = spriteDatabase.SpriteSets[ 0 ];
 
             foreach ( var spriteInfo in spriteSetInfo.Sprites )

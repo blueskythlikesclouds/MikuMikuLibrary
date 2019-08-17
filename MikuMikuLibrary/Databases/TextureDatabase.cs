@@ -1,9 +1,9 @@
-﻿using MikuMikuLibrary.IO;
-using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.IO.Sections;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -30,13 +30,11 @@ namespace MikuMikuLibrary.Databases
                 Textures.Capacity = textureCount;
 
                 for ( int i = 0; i < textureCount; i++ )
-                {
                     Textures.Add( new TextureInfo
                     {
                         Id = reader.ReadInt32(),
                         Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
                     } );
-                }
             } );
         }
 
@@ -74,11 +72,15 @@ namespace MikuMikuLibrary.Databases
             base.Save( filePath );
         }
 
-        public TextureInfo GetTextureInfo( string textureName ) =>
-            Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
+        public TextureInfo GetTextureInfo( string textureName )
+        {
+            return Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
+        }
 
-        public TextureInfo GetTextureInfo( int textureId ) =>
-            Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
+        public TextureInfo GetTextureInfo( int textureId )
+        {
+            return Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
+        }
 
         public TextureDatabase()
         {

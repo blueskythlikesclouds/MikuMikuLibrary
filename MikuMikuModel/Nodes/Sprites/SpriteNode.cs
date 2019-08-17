@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using MikuMikuLibrary.Sprites;
-using MikuMikuModel.Nodes.TypeConverters;
 
 namespace MikuMikuModel.Nodes.Sprites
 {

@@ -1,8 +1,8 @@
-﻿using MikuMikuLibrary.IO;
+﻿using System.Collections.Generic;
+using System.Linq;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -57,7 +57,7 @@ namespace MikuMikuLibrary.Databases
                         Id = id,
                         Name = name,
                         FileName = fileName,
-                        SpriteSetId = spriteSetId,
+                        SpriteSetId = spriteSetId
                     } );
                 }
             } );
@@ -77,7 +77,7 @@ namespace MikuMikuLibrary.Databases
                     {
                         Id = id,
                         Name = name,
-                        Index = index,
+                        Index = index
                     };
 
                     AetSets[ setIndex ].Aets.Add( aetInfo );
@@ -110,7 +110,7 @@ namespace MikuMikuLibrary.Databases
                     {
                         writer.Write( aetInfo.Id );
                         writer.AddStringToStringTable( aetInfo.Name );
-                        writer.Write( i << 16 | aetInfo.Index );
+                        writer.Write( ( i << 16 ) | aetInfo.Index );
                     }
                 }
             } );

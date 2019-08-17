@@ -5,60 +5,61 @@
 namespace MikuMikuLibrary.Textures.DDS
 {
     /// <summary>
-    /// Old method of identifying Compressed textures.
-    /// DX10 indicates new texture, the DX10 Additional header will contain the true format. See <see cref="DXGI_FORMAT"/>.
+    ///     Old method of identifying Compressed textures.
+    ///     DX10 indicates new texture, the DX10 Additional header will contain the true format. See <see cref="DXGI_FORMAT" />
+    ///     .
     /// </summary>
     public enum DDSPixelFormatFourCC
     {
         /// <summary>
-        /// Used when FourCC is unknown.
+        ///     Used when FourCC is unknown.
         /// </summary>
         Unknown = 0,
 
         /// <summary>
-        /// (BC1) Block Compressed Texture. Compresses 4x4 texels.
-        /// Used for Simple Non Alpha.
+        ///     (BC1) Block Compressed Texture. Compresses 4x4 texels.
+        ///     Used for Simple Non Alpha.
         /// </summary>
-        DXT1 = 0x31545844,  // 1TXD i.e. DXT1 backwards
+        DXT1 = 0x31545844, // 1TXD i.e. DXT1 backwards
 
         /// <summary>
-        /// (BC2) Block Compressed Texture. Compresses 4x4 texels.
-        /// Used for Sharp Alpha. Premultiplied alpha. 
+        ///     (BC2) Block Compressed Texture. Compresses 4x4 texels.
+        ///     Used for Sharp Alpha. Premultiplied alpha.
         /// </summary>
         DXT2 = 0x32545844,
 
         /// <summary>
-        /// (BC2) Block Compressed Texture. Compresses 4x4 texels.
-        /// Used for Sharp Alpha. 
+        ///     (BC2) Block Compressed Texture. Compresses 4x4 texels.
+        ///     Used for Sharp Alpha.
         /// </summary>
         DXT3 = 0x33545844,
 
         /// <summary>
-        /// (BC3) Block Compressed Texture. Compresses 4x4 texels.
-        /// Used for Gradient Alpha. Premultiplied alpha.
+        ///     (BC3) Block Compressed Texture. Compresses 4x4 texels.
+        ///     Used for Gradient Alpha. Premultiplied alpha.
         /// </summary>
         DXT4 = 0x34545844,
 
         /// <summary>
-        /// (BC3) Block Compressed Texture. Compresses 4x4 texels.
-        /// Used for Gradient Alpha. 
+        ///     (BC3) Block Compressed Texture. Compresses 4x4 texels.
+        ///     Used for Gradient Alpha.
         /// </summary>
         DXT5 = 0x35545844,
 
         /// <summary>
-        /// Fancy new DirectX 10+ format indicator. DX10 Header will contain true format.
+        ///     Fancy new DirectX 10+ format indicator. DX10 Header will contain true format.
         /// </summary>
         DX10 = 0x30315844,
 
         /// <summary>
-        /// (BC4) Block Compressed Texture. Compresses 4x4 texels.
-        /// Used for Normal (bump) Maps. 8 bit single channel with alpha.
+        ///     (BC4) Block Compressed Texture. Compresses 4x4 texels.
+        ///     Used for Normal (bump) Maps. 8 bit single channel with alpha.
         /// </summary>
         ATI1 = 0x31495441,
 
         /// <summary>
-        /// (BC5) Block Compressed Texture. Compresses 4x4 texels.
-        /// Used for Normal (bump) Maps. Pair of 8 bit channels.
+        ///     (BC5) Block Compressed Texture. Compresses 4x4 texels.
+        ///     Used for Normal (bump) Maps. Pair of 8 bit channels.
         /// </summary>
         ATI2N_3Dc = 0x32495441,
 
@@ -119,6 +120,6 @@ namespace MikuMikuLibrary.Textures.DDS
         R32F,
         G32R32F,
         A32B32G32R32F,
-        CxV8U8,
+        CxV8U8
     }
 }

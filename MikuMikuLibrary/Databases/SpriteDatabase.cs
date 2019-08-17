@@ -1,8 +1,8 @@
-﻿using MikuMikuLibrary.IO;
+﻿using System.Collections.Generic;
+using System.Linq;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -86,24 +86,20 @@ namespace MikuMikuLibrary.Databases
 
                     var set = SpriteSets[ setIndex & 0xFFF ];
                     if ( ( setIndex & 0x1000 ) == 0x1000 )
-                    {
                         set.Textures.Add( new SpriteTextureInfo
                         {
                             Id = id,
                             Name = name,
-                            Index = index,
+                            Index = index
                         } );
-                    }
 
                     else
-                    {
                         set.Sprites.Add( new SpriteInfo
                         {
                             Id = id,
                             Name = name,
-                            Index = index,
+                            Index = index
                         } );
-                    }
                 }
             } );
         }
@@ -132,7 +128,7 @@ namespace MikuMikuLibrary.Databases
                     {
                         writer.Write( spriteInfo.Id );
                         writer.AddStringToStringTable( spriteInfo.Name );
-                        writer.Write( spriteInfo.Index | i << 16 );
+                        writer.Write( spriteInfo.Index | ( i << 16 ) );
 
                         if ( section?.Format == BinaryFormat.X )
                             writer.WriteNulls( 4 );
@@ -142,7 +138,7 @@ namespace MikuMikuLibrary.Databases
                     {
                         writer.Write( spriteTextureInfo.Id );
                         writer.AddStringToStringTable( spriteTextureInfo.Name );
-                        writer.Write( spriteTextureInfo.Index | ( i | 0x1000 ) << 16 );
+                        writer.Write( spriteTextureInfo.Index | ( ( i | 0x1000 ) << 16 ) );
 
                         if ( section?.Format == BinaryFormat.X )
                             writer.WriteNulls( 4 );

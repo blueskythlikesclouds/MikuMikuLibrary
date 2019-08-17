@@ -20,7 +20,7 @@ namespace MikuMikuLibrary.Cryptography
             BlockSize = 128,
             Mode = CipherMode.ECB,
             Padding = PaddingMode.Zeros,
-            IV = new byte[ 16 ],
+            IV = new byte[ 16 ]
         };
 
         public static void ReadHeader( Stream source, bool skipSignature, out uint encryptedSize,
@@ -62,7 +62,9 @@ namespace MikuMikuLibrary.Cryptography
             var memoryStream = new MemoryStream();
 
             using ( var cryptoStream = CreateDecryptorStream( source, readHeader, skipSignature ) )
+            {
                 cryptoStream.CopyTo( memoryStream );
+            }
 
             memoryStream.Seek( 0, SeekOrigin.Begin );
             return memoryStream;

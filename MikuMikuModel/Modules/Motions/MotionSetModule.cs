@@ -11,9 +11,12 @@ namespace MikuMikuModel.Modules.Motions
         public override string Name => "Motion Set";
         public override string[] Extensions => new[] { "bin" };
 
-        public override bool Match( string fileName ) =>
-            Path.GetFileNameWithoutExtension( fileName ).StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) &&
-            base.Match( fileName );
+        public override bool Match( string fileName )
+        {
+            return Path.GetFileNameWithoutExtension( fileName )
+                       .StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) &&
+                   base.Match( fileName );
+        }
 
         public override MotionSet Import( string filePath )
         {

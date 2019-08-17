@@ -1,19 +1,21 @@
-﻿using MikuMikuLibrary.Textures;
-using MikuMikuLibrary.Textures.DDS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using MikuMikuLibrary.IO;
+using MikuMikuLibrary.Textures;
+using MikuMikuLibrary.Textures.DDS;
+using TxpConverter.Properties;
 
 namespace TxpConverter
 {
-    class Program
+    internal class Program
     {
-        static void Main( string[] args )
+        private static void Main( string[] args )
         {
             if ( args.Length < 1 )
             {
-                Console.WriteLine( Properties.Resources.HelpText );
+                Console.WriteLine( Resources.HelpText );
                 Console.ReadLine();
                 return;
             }
@@ -21,14 +23,12 @@ namespace TxpConverter
             string sourceFileName = null;
             string destinationFileName = null;
 
-            foreach ( var arg in args )
-            {
+            foreach ( string arg in args )
                 if ( sourceFileName == null )
                     sourceFileName = arg;
 
                 else if ( destinationFileName == null )
                     destinationFileName = arg;
-            }
 
             if ( destinationFileName == null )
                 destinationFileName = sourceFileName;
@@ -39,12 +39,11 @@ namespace TxpConverter
 
                 var textureSet = new TextureSet();
                 var textures = new SortedList<int, Texture>();
-                foreach ( var textureFileName in Directory.EnumerateFiles( sourceFileName ) )
-                {
+                foreach ( string textureFileName in Directory.EnumerateFiles( sourceFileName ) )
                     if ( textureFileName.EndsWith( ".dds", StringComparison.OrdinalIgnoreCase ) ||
-                        textureFileName.EndsWith( ".png", StringComparison.OrdinalIgnoreCase ) )
+                         textureFileName.EndsWith( ".png", StringComparison.OrdinalIgnoreCase ) )
                     {
-                        var cleanFileName = Path.GetFileNameWithoutExtension( textureFileName );
+                        string cleanFileName = Path.GetFileNameWithoutExtension( textureFileName );
                         if ( int.TryParse( cleanFileName, out int index ) )
                         {
                             Texture texture;
@@ -61,15 +60,20 @@ namespace TxpConverter
                             }
 
                             else
+                            {
                                 texture = TextureEncoder.Encode( textureFileName );
+                            }
 
                             textures.Add( index, texture );
                         }
 
                         else
-                            Console.WriteLine( "WARNING: Skipped '{0}' because it didn't match the expected name format", Path.GetFileName( textureFileName ) );
+                        {
+                            Console.WriteLine(
+                                "WARNING: Skipped '{0}' because it didn't match the expected name format",
+                                Path.GetFileName( textureFileName ) );
+                        }
                     }
-                }
 
                 textureSet.Textures.Capacity = textures.Count;
                 foreach ( var texture in textures.Values )
@@ -79,18 +83,18 @@ namespace TxpConverter
             }
 
             else if ( sourceFileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) ||
-                sourceFileName.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
+                      sourceFileName.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
             {
                 destinationFileName = Path.ChangeExtension( destinationFileName, null );
 
-                var textureSet = TextureSet.Load<TextureSet>( sourceFileName );
+                var textureSet = BinaryFile.Load<TextureSet>( sourceFileName );
 
                 Directory.CreateDirectory( destinationFileName );
                 for ( int i = 0; i < textureSet.Textures.Count; i++ )
                 {
                     var texture = textureSet.Textures[ i ];
                     string name = string.IsNullOrEmpty( texture.Name ) ? $"{i}" : texture.Name;
-                    
+
                     if ( TextureFormatUtilities.IsCompressed( texture.Format ) )
                         TextureDecoder.DecodeToDDS( texture, Path.Combine( destinationFileName, $"{name}.dds" ) );
 

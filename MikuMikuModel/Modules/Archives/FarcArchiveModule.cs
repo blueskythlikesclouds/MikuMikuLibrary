@@ -17,13 +17,19 @@ namespace MikuMikuModel.Modules.Archives
             return signature == "FArc" || signature == "FArC" || signature == "FARC";
         }
 
-        public override FarcArchive Import( string filePath ) =>
-            BinaryFile.Load<FarcArchive>( filePath );
+        public override FarcArchive Import( string filePath )
+        {
+            return BinaryFile.Load<FarcArchive>( filePath );
+        }
 
-        protected override FarcArchive ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<FarcArchive>( source, true );
+        protected override FarcArchive ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<FarcArchive>( source, true );
+        }
 
-        protected override void ExportCore( FarcArchive model, Stream destination, string fileName ) =>
+        protected override void ExportCore( FarcArchive model, Stream destination, string fileName )
+        {
             model.Save( destination, true );
+        }
     }
 }

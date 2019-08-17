@@ -13,8 +13,10 @@ namespace MikuMikuModel.Resources
         private static readonly string sResourcesDirectory =
             Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Resources" );
 
-        public static string GetPath( string relativePath ) =>
-            Path.GetFullPath( Path.Combine( sResourcesDirectory, relativePath ) );
+        public static string GetPath( string relativePath )
+        {
+            return Path.GetFullPath( Path.Combine( sResourcesDirectory, relativePath ) );
+        }
 
         public static string GetPathIfExist( string relativePath )
         {
@@ -41,7 +43,10 @@ namespace MikuMikuModel.Resources
             return ( T ) obj;
         }
 
-        public static Bitmap LoadBitmap( string relativePath ) => Load( relativePath, ( path ) => new Bitmap( path ) );
+        public static Bitmap LoadBitmap( string relativePath )
+        {
+            return Load( relativePath, path => new Bitmap( path ) );
+        }
 
         static ResourceStore()
         {

@@ -1,19 +1,19 @@
-﻿using MikuMikuLibrary.Materials;
-using MikuMikuLibrary.Geometry;
-using MikuMikuLibrary.Misc;
-using MikuMikuLibrary.Textures;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Materials;
+using MikuMikuLibrary.Misc;
+using MikuMikuLibrary.Textures;
 using Ai = Assimp;
 
 namespace MikuMikuLibrary.Objects.Processing.Assimp
 {
     public static class Importer
     {
-        private static Random sRandom = new Random();
+        private static readonly Random sRandom = new Random();
 
         public static ObjectSet ConvertObjectSetFromAiScene( string filePath )
         {
@@ -88,7 +88,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             {
                 Name = aiBone.Name,
                 Id = boneId,
-                InverseBindPoseMatrix = inverseTransformation,
+                InverseBindPoseMatrix = inverseTransformation
             };
         }
 
@@ -120,7 +120,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
         private static Material ConvertMaterialFromAiMaterial( Ai.Material aiMaterial, string texturesDirectory,
             TextureSet textureSet )
         {
-            Material material = new Material();
+            var material = new Material();
 
             material.Shader = "BLINN";
             material.Field02 = 2688;
@@ -197,7 +197,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                 material.Reflection.Field02 = 1017;
             }
 
-            if ( aiMaterial.GetMaterialTexture( Ai.TextureType.Shininess, 0, out Ai.TextureSlot shininess ) &&
+            if ( aiMaterial.GetMaterialTexture( Ai.TextureType.Shininess, 0, out var shininess ) &&
                  ( texture = ConvertTexture( shininess.FilePath, texturesDirectory, textureSet ) ) != null )
             {
                 material.Field00 |= 8192;
@@ -245,7 +245,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             var mesh = new Mesh
             {
                 Name = aiNode.Name,
-                Vertices = new Vector3[ vertexCount ],
+                Vertices = new Vector3[ vertexCount ]
             };
 
             int vertexOffset = 0;
@@ -273,10 +273,10 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
                     for ( int i = 0; i < aiMesh.Tangents.Count; i++ )
                     {
-                        Vector3 tangent =
+                        var tangent =
                             Vector3.Normalize( Vector3.TransformNormal( aiMesh.Tangents[ i ].ToNumerics(),
                                 transformation ) );
-                        Vector3 bitangent =
+                        var bitangent =
                             Vector3.Normalize( Vector3.TransformNormal( aiMesh.BiTangents[ i ].ToNumerics(),
                                 transformation ) );
                         int direction = Math.Sign( Vector3.Dot( bitangent,
@@ -354,7 +354,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                 subMesh.Indices = aiMesh.Faces.Where( x => x.IndexCount == 3 ).SelectMany( x => x.Indices )
                     .Select( x => ( ushort ) ( vertexOffset + x ) ).ToArray();
 
-                ushort[] triangleStrip = Stripifier.Stripify( subMesh.Indices );
+                var triangleStrip = Stripifier.Stripify( subMesh.Indices );
                 if ( triangleStrip != null )
                 {
                     subMesh.PrimitiveType = PrimitiveType.TriangleStrip;

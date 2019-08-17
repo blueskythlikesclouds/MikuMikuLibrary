@@ -1,29 +1,26 @@
-﻿using MikuMikuLibrary.IO;
-using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Geometry;
-using MikuMikuLibrary.Misc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections.Objects;
+using MikuMikuLibrary.Misc;
 
 namespace MikuMikuLibrary.Objects
 {
     public class Mesh
     {
-        [Flags]
-        private enum VertexFormatAttribute
-        {
-            Vertex = 1 << 0,
-            Normal = 1 << 1,
-            Tangent = 1 << 2,
-            UVChannel1 = 1 << 4,
-            UVChannel2 = 1 << 5,
-            Color = 1 << 8,
-            BoneWeight = 1 << 10,
-            BoneIndex = 1 << 11,
-            UsesModernStorage = 1 << 31,
-        };
+        public BoundingSphere BoundingSphere { get; set; }
+        public List<SubMesh> SubMeshes { get; }
+        public Vector3[] Vertices { get; set; }
+        public Vector3[] Normals { get; set; }
+        public Vector4[] Tangents { get; set; }
+        public Vector2[] UVChannel1 { get; set; }
+        public Vector2[] UVChannel2 { get; set; }
+        public Color[] Colors { get; set; }
+        public BoneWeight[] BoneWeights { get; set; }
+        public string Name { get; set; }
 
         public static int GetByteSize( BinaryFormat format )
         {
@@ -42,24 +39,13 @@ namespace MikuMikuLibrary.Objects
             throw new ArgumentException( nameof( format ) );
         }
 
-        public BoundingSphere BoundingSphere { get; set; }
-        public List<SubMesh> SubMeshes { get; }
-        public Vector3[] Vertices { get; set; }
-        public Vector3[] Normals { get; set; }
-        public Vector4[] Tangents { get; set; }
-        public Vector2[] UVChannel1 { get; set; }
-        public Vector2[] UVChannel2 { get; set; }
-        public Color[] Colors { get; set; }
-        public BoneWeight[] BoneWeights { get; set; }
-        public string Name { get; set; }
-
         internal void Read( EndianBinaryReader reader, ObjectSection section = null )
         {
             reader.SeekCurrent( 4 );
             BoundingSphere = reader.ReadBoundingSphere();
             int subMeshCount = reader.ReadInt32();
             long subMeshesOffset = reader.ReadOffset();
-            var attributes = ( VertexFormatAttribute )reader.ReadUInt32();
+            var attributes = ( VertexFormatAttribute ) reader.ReadUInt32();
             int stride = reader.ReadInt32();
             int vertexCount = reader.ReadInt32();
             var elemItems = reader.ReadUInt32s( section?.Format == BinaryFormat.X ? 49 : 28 );
@@ -67,14 +53,13 @@ namespace MikuMikuLibrary.Objects
 
             SubMeshes.Capacity = subMeshCount;
             for ( int i = 0; i < subMeshCount; i++ )
-            {
-                reader.ReadAtOffset( subMeshesOffset + i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ), () =>
-                {
-                    var subMesh = new SubMesh();
-                    subMesh.Read( reader, section );
-                    SubMeshes.Add( subMesh );
-                } );
-            }
+                reader.ReadAtOffset( subMeshesOffset + i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ),
+                    () =>
+                    {
+                        var subMesh = new SubMesh();
+                        subMesh.Read( reader, section );
+                        SubMeshes.Add( subMesh );
+                    } );
 
             // Modern Format
             if ( section != null )
@@ -89,7 +74,7 @@ namespace MikuMikuLibrary.Objects
 
                 for ( int i = 0; i < 28; i++ )
                 {
-                    var attribute = ( VertexFormatAttribute )( 1 << i );
+                    var attribute = ( VertexFormatAttribute ) ( 1 << i );
 
                     reader.ReadAtOffsetIf( ( attributes & attribute ) != 0, elemItems[ i ], () =>
                     {
@@ -139,8 +124,8 @@ namespace MikuMikuLibrary.Objects
                     BoneWeights = new BoneWeight[ vertexCount ];
                     for ( int i = 0; i < vertexCount; i++ )
                     {
-                        Vector4 weight4 = boneWeights[ i ];
-                        Vector4 index4 = Vector4.Divide( boneIndices[ i ], 3 );
+                        var weight4 = boneWeights[ i ];
+                        var index4 = Vector4.Divide( boneIndices[ i ], 3 );
 
                         var boneWeight = new BoneWeight
                         {
@@ -148,10 +133,10 @@ namespace MikuMikuLibrary.Objects
                             Weight2 = weight4.Y,
                             Weight3 = weight4.Z,
                             Weight4 = weight4.W,
-                            Index1 = ( int )index4.X,
-                            Index2 = ( int )index4.Y,
-                            Index3 = ( int )index4.Z,
-                            Index4 = ( int )index4.W,
+                            Index1 = ( int ) index4.X,
+                            Index2 = ( int ) index4.Y,
+                            Index3 = ( int ) index4.Z,
+                            Index4 = ( int ) index4.W
                         };
                         boneWeight.Validate();
 
@@ -204,7 +189,7 @@ namespace MikuMikuLibrary.Objects
                                 Index1 = vertexReader.ReadByte() / 3,
                                 Index2 = vertexReader.ReadByte() / 3,
                                 Index3 = vertexReader.ReadByte() / 3,
-                                Index4 = vertexReader.ReadByte() / 3,
+                                Index4 = vertexReader.ReadByte() / 3
                             };
                             boneWeight.Validate();
 
@@ -226,15 +211,14 @@ namespace MikuMikuLibrary.Objects
                 }
 
                 if ( Tangents != null )
-                {
                     for ( int i = 0; i < Tangents.Length; i++ )
                     {
                         int direction = Math.Sign( Tangents[ i ].W );
-                        Vector3 tangent = Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
+                        var tangent =
+                            Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
 
                         Tangents[ i ] = new Vector4( tangent, direction );
                     }
-                }
             }
         }
 
@@ -250,7 +234,7 @@ namespace MikuMikuLibrary.Objects
             } );
 
             int stride = 0;
-            VertexFormatAttribute attributes = default( VertexFormatAttribute );
+            VertexFormatAttribute attributes = default;
 
             if ( section != null )
             {
@@ -306,7 +290,7 @@ namespace MikuMikuLibrary.Objects
                 }
             }
 
-            writer.Write( ( int )attributes );
+            writer.Write( ( int ) attributes );
             writer.Write( stride );
             writer.Write( Vertices.Length );
 
@@ -321,7 +305,7 @@ namespace MikuMikuLibrary.Objects
             {
                 for ( int i = 0; i < 28; i++ )
                 {
-                    var attribute = ( VertexFormatAttribute )( 1 << i );
+                    var attribute = ( VertexFormatAttribute ) ( 1 << i );
 
                     writer.ScheduleWriteOffsetIf( ( attributes & attribute ) != 0, 4, AlignmentMode.Left, () =>
                     {
@@ -359,6 +343,7 @@ namespace MikuMikuLibrary.Objects
                                     writer.Write( weight.Weight3 );
                                     writer.Write( weight.Weight4 );
                                 }
+
                                 break;
 
                             case VertexFormatAttribute.BoneIndex:
@@ -369,6 +354,7 @@ namespace MikuMikuLibrary.Objects
                                     writer.Write( weight.Index3 < 0 ? -1f : weight.Index3 * 3.0f );
                                     writer.Write( weight.Index4 < 0 ? -1f : weight.Index4 * 3.0f );
                                 }
+
                                 break;
                         }
                     } );
@@ -378,7 +364,7 @@ namespace MikuMikuLibrary.Objects
             void WriteVertexAttributesModern()
             {
                 writer.WriteNulls( section.Format == BinaryFormat.X ? 0x6C : 0x34 );
-                writer.Write( ( uint )section.VertexData.AddSubMesh( this, stride ) );
+                writer.Write( ( uint ) section.VertexData.AddSubMesh( this, stride ) );
                 writer.WriteNulls( section.Format == BinaryFormat.X ? 0x38 : 0x1C );
                 writer.Write( BoneWeights != null ? 4 : 2 );
                 writer.WriteNulls( 0x18 );
@@ -388,6 +374,20 @@ namespace MikuMikuLibrary.Objects
         public Mesh()
         {
             SubMeshes = new List<SubMesh>();
+        }
+
+        [Flags]
+        private enum VertexFormatAttribute
+        {
+            Vertex = 1 << 0,
+            Normal = 1 << 1,
+            Tangent = 1 << 2,
+            UVChannel1 = 1 << 4,
+            UVChannel2 = 1 << 5,
+            Color = 1 << 8,
+            BoneWeight = 1 << 10,
+            BoneIndex = 1 << 11,
+            UsesModernStorage = 1 << 31
         }
     }
 }

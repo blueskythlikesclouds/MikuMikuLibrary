@@ -32,7 +32,7 @@ namespace MikuMikuLibrary.Geometry
             return new BoundingSphere
             {
                 Center = Center,
-                Radius = SizeMax / 2,
+                Radius = SizeMax / 2
             };
         }
 
@@ -43,7 +43,7 @@ namespace MikuMikuLibrary.Geometry
                 Center = Center,
                 Width = SizeX,
                 Height = SizeY,
-                Depth = SizeZ,
+                Depth = SizeZ
             };
         }
 

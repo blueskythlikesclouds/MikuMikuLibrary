@@ -7,11 +7,15 @@ namespace MikuMikuModel.Nodes.TypeConverters
 {
     public class Vector2TypeConverter : TypeConverter
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        }
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        }
 
         public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
         {
@@ -20,8 +24,8 @@ namespace MikuMikuModel.Nodes.TypeConverters
                 var floatValues = input.Trim( '<', '>' )
                     .Split( new[] { "," }, StringSplitOptions.RemoveEmptyEntries );
 
-                var x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
-                var y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
+                float x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
+                float y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
 
                 return new Vector2( x, y );
             }
@@ -34,8 +38,8 @@ namespace MikuMikuModel.Nodes.TypeConverters
         {
             if ( value is Vector2 input && destinationType == typeof( string ) )
             {
-                var x = input.X.ToString( CultureInfo.InvariantCulture );
-                var y = input.Y.ToString( CultureInfo.InvariantCulture );
+                string x = input.X.ToString( CultureInfo.InvariantCulture );
+                string y = input.Y.ToString( CultureInfo.InvariantCulture );
 
                 return $"<{x}, {y}>";
             }
@@ -46,11 +50,15 @@ namespace MikuMikuModel.Nodes.TypeConverters
 
     public class Vector3TypeConverter : TypeConverter
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        }
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        }
 
         public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
         {
@@ -59,9 +67,9 @@ namespace MikuMikuModel.Nodes.TypeConverters
                 var floatValues = input.Trim( '<', '>' )
                     .Split( new[] { "," }, StringSplitOptions.RemoveEmptyEntries );
 
-                var x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
-                var y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
-                var z = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
+                float x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
+                float y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
+                float z = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
 
                 return new Vector3( x, y, z );
             }
@@ -74,9 +82,9 @@ namespace MikuMikuModel.Nodes.TypeConverters
         {
             if ( value is Vector3 input && destinationType == typeof( string ) )
             {
-                var x = input.X.ToString( CultureInfo.InvariantCulture );
-                var y = input.Y.ToString( CultureInfo.InvariantCulture );
-                var z = input.Z.ToString( CultureInfo.InvariantCulture );
+                string x = input.X.ToString( CultureInfo.InvariantCulture );
+                string y = input.Y.ToString( CultureInfo.InvariantCulture );
+                string z = input.Z.ToString( CultureInfo.InvariantCulture );
 
                 return $"<{x}, {y}, {z}>";
             }
@@ -87,11 +95,15 @@ namespace MikuMikuModel.Nodes.TypeConverters
 
     public class Vector4TypeConverter : TypeConverter
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        }
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        }
 
         public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
         {
@@ -100,10 +112,10 @@ namespace MikuMikuModel.Nodes.TypeConverters
                 var floatValues = input.Trim( '<', '>' )
                     .Split( new[] { "," }, StringSplitOptions.RemoveEmptyEntries );
 
-                var x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
-                var y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
-                var z = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
-                var w = float.Parse( floatValues[ 3 ], CultureInfo.InvariantCulture );
+                float x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
+                float y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
+                float z = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
+                float w = float.Parse( floatValues[ 3 ], CultureInfo.InvariantCulture );
 
                 return new Vector4( x, y, z, w );
             }
@@ -116,10 +128,10 @@ namespace MikuMikuModel.Nodes.TypeConverters
         {
             if ( value is Vector4 input && destinationType == typeof( string ) )
             {
-                var x = input.X.ToString( CultureInfo.InvariantCulture );
-                var y = input.Y.ToString( CultureInfo.InvariantCulture );
-                var z = input.Z.ToString( CultureInfo.InvariantCulture );
-                var w = input.W.ToString( CultureInfo.InvariantCulture );
+                string x = input.X.ToString( CultureInfo.InvariantCulture );
+                string y = input.Y.ToString( CultureInfo.InvariantCulture );
+                string z = input.Z.ToString( CultureInfo.InvariantCulture );
+                string w = input.W.ToString( CultureInfo.InvariantCulture );
 
                 return $"<{x}, {y}, {z}, {w}>";
             }

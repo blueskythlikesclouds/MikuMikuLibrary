@@ -52,7 +52,10 @@ namespace MikuMikuModel.Resources.Styles
         public byte B => Color.B;
         public byte A => Color.A;
 
-        public XmlSchema GetSchema() => null;
+        public XmlSchema GetSchema()
+        {
+            return null;
+        }
 
         public void ReadXml( XmlReader reader )
         {
@@ -72,8 +75,15 @@ namespace MikuMikuModel.Resources.Styles
             writer.WriteAttributeString( "A", Color.A.ToString( CultureInfo.InvariantCulture ) );
         }
 
-        public static implicit operator SerializableColor( Color color ) => new SerializableColor( color );
-        public static implicit operator Color( SerializableColor serializableColor ) => serializableColor.Color;
+        public static implicit operator SerializableColor( Color color )
+        {
+            return new SerializableColor( color );
+        }
+
+        public static implicit operator Color( SerializableColor serializableColor )
+        {
+            return serializableColor.Color;
+        }
 
         public SerializableColor( Color color )
         {

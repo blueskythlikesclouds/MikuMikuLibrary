@@ -5,8 +5,8 @@ namespace MikuMikuModel.Nodes.IO
 {
     public interface IDirtyNode : INode
     {
-        event EventHandler DirtyStateChanged;
         bool IsDirty { get; }
+        event EventHandler DirtyStateChanged;
         Stream GetStream();
     }
 }

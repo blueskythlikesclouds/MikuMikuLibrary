@@ -1,28 +1,15 @@
-﻿using MikuMikuLibrary.Databases;
-using MikuMikuLibrary.IO;
-using System;
+﻿using System;
 using System.IO;
 using System.Xml.Serialization;
+using DatabaseConverter.Properties;
+using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.IO;
 
 namespace DatabaseConverter
 {
-    class Program
+    internal class Program
     {
-        class DatabaseInfo
-        {
-            public Type Type;
-            public string ClassicFileName;
-            public string ModernFileExtension;
-
-            public DatabaseInfo( Type type, string classicFileName, string modernFileExtension )
-            {
-                Type = type;
-                ClassicFileName = classicFileName;
-                ModernFileExtension = modernFileExtension;
-            }
-        }
-
-        private static readonly DatabaseInfo[] sDatabaseInfos = new DatabaseInfo[]
+        private static readonly DatabaseInfo[] sDatabaseInfos =
         {
             new DatabaseInfo( typeof( AetDatabase ), "aetdb", "aei" ),
             new DatabaseInfo( typeof( BoneDatabase ), "bonedata", "bon" ),
@@ -35,7 +22,7 @@ namespace DatabaseConverter
             new DatabaseInfo( typeof( TextureDatabase ), "texdb", "txi" )
         };
 
-        static DatabaseInfo GetDatabaseInfo( string fileName )
+        private static DatabaseInfo GetDatabaseInfo( string fileName )
         {
             if ( fileName.EndsWith( ".xml" ) )
                 fileName = Path.ChangeExtension( fileName, null );
@@ -47,19 +34,19 @@ namespace DatabaseConverter
                 fileName = fileName.Substring( 5 );
 
             foreach ( var databaseInfo in sDatabaseInfos )
-                if ( ( !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) &&
-                       databaseInfo.ModernFileExtension.Equals( extension, StringComparison.OrdinalIgnoreCase ) ) ||
+                if ( !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) &&
+                     databaseInfo.ModernFileExtension.Equals( extension, StringComparison.OrdinalIgnoreCase ) ||
                      databaseInfo.ClassicFileName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) )
                     return databaseInfo;
 
             return null;
         }
 
-        static void Main( string[] args )
+        private static void Main( string[] args )
         {
             if ( args.Length < 1 )
             {
-                Console.WriteLine( Properties.Resources.HelpText );
+                Console.WriteLine( Resources.HelpText );
                 Console.ReadLine();
                 return;
             }
@@ -67,14 +54,12 @@ namespace DatabaseConverter
             string sourceFileName = null;
             string destinationFileName = null;
 
-            foreach ( var arg in args )
-            {
+            foreach ( string arg in args )
                 if ( sourceFileName == null )
                     sourceFileName = arg;
 
                 else if ( destinationFileName == null )
                     destinationFileName = arg;
-            }
 
             if ( destinationFileName == null )
                 destinationFileName = sourceFileName;
@@ -88,7 +73,9 @@ namespace DatabaseConverter
 
                     IBinaryFile database;
                     using ( var source = File.OpenText( sourceFileName ) )
+                    {
                         database = ( IBinaryFile ) serializer.Deserialize( source );
+                    }
 
                     if ( BinaryFormatUtilities.IsModern( database.Format ) &&
                          !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) )
@@ -113,11 +100,29 @@ namespace DatabaseConverter
                     var serializer = new XmlSerializer( databaseInfo.Type );
 
                     using ( var destination = File.CreateText( destinationFileName ) )
+                    {
                         serializer.Serialize( destination, database );
+                    }
                 }
             }
             else
+            {
                 throw new InvalidDataException( "Database type could not be detected" );
+            }
+        }
+
+        private class DatabaseInfo
+        {
+            public readonly Type Type;
+            public readonly string ClassicFileName;
+            public readonly string ModernFileExtension;
+
+            public DatabaseInfo( Type type, string classicFileName, string modernFileExtension )
+            {
+                Type = type;
+                ClassicFileName = classicFileName;
+                ModernFileExtension = modernFileExtension;
+            }
         }
     }
 }

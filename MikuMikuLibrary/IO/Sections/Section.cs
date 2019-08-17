@@ -86,6 +86,66 @@ namespace MikuMikuLibrary.IO.Sections
                 section.Dispose();
         }
 
+        public void ProcessData()
+        {
+            if ( mIsDataProcessed )
+                return;
+
+            mIsProcessingData = true;
+
+            switch ( Mode )
+            {
+                case SectionMode.Read when BaseStream == null || Reader == null:
+                    throw new InvalidOperationException( "Section has not been read yet, cannot process data object" );
+                case SectionMode.Read:
+                {
+                    if ( mData == null )
+                        mData = new T();
+
+                    foreach ( var section in mSections )
+                        if ( SectionInfo.SubSectionInfos.TryGetValue( section.SectionInfo, out var subSectionInfo ) )
+                            subSectionInfo.ProcessPropertyForReading( section, this );
+
+                    Reader.SeekBegin( DataOffset );
+                    {
+                        Read( mData, Reader, DataSize );
+                    }
+                    Reader.SeekBegin( DataOffset + SectionSize );
+                    break;
+                }
+
+                case SectionMode.Write when BaseStream == null || Writer == null:
+                    throw new InvalidOperationException(
+                        "Data object has not been written yet, cannot process data object" );
+                case SectionMode.Write:
+                {
+                    mSections.Clear();
+                    if ( Writer.OffsetPositions.Count > 0 && Flags.HasFlag( SectionFlags.HasRelocationTable ) )
+                    {
+                        ISection relocationTableSection;
+
+                        var offsets = Writer.OffsetPositions.Select( x => x - Writer.BaseOffset ).ToList();
+                        if ( AddressSpace == AddressSpace.Int64 )
+                            relocationTableSection = new RelocationTableSectionInt64( SectionMode.Write, offsets );
+                        else
+                            relocationTableSection = new RelocationTableSectionInt32( SectionMode.Write, offsets );
+
+                        mSections.Add( relocationTableSection );
+                    }
+
+                    foreach ( var subSectionInfo in SectionInfo.SubSectionInfos.Values.OrderBy( x => x.Priority ) )
+                        mSections.AddRange( subSectionInfo.ProcessPropertyForWriting( this ) );
+
+                    if ( mSections.Count > 0 )
+                        mSections.Add( new EndOfFileSection( SectionMode.Write, this ) );
+                    break;
+                }
+            }
+
+            mIsDataProcessed = true;
+            mIsProcessingData = false;
+        }
+
         private void Read( Stream source, bool skipSignature )
         {
             if ( Mode == SectionMode.Write )
@@ -98,7 +158,9 @@ namespace MikuMikuLibrary.IO.Sections
             Reader = new EndianBinaryReader( BaseStream, Encoding.UTF8, true, Endianness.LittleEndian );
 
             if ( skipSignature )
+            {
                 Reader.PushBaseOffset( Reader.Position - 4 );
+            }
             else
             {
                 Reader.PushBaseOffset();
@@ -138,7 +200,9 @@ namespace MikuMikuLibrary.IO.Sections
                 }
             }
             else
+            {
                 Reader.SeekBegin( DataOffset + SectionSize );
+            }
 
             if ( AddressSpace == AddressSpace.Int64 )
                 Reader.BaseOffset = DataOffset;
@@ -207,70 +271,10 @@ namespace MikuMikuLibrary.IO.Sections
             } );
         }
 
-        public void ProcessData()
-        {
-            if ( mIsDataProcessed )
-                return;
-
-            mIsProcessingData = true;
-
-            switch ( Mode )
-            {
-                case SectionMode.Read when BaseStream == null || Reader == null:
-                    throw new InvalidOperationException( "Section has not been read yet, cannot process data object" );
-                case SectionMode.Read:
-                {
-                    if ( mData == null )
-                        mData = new T();
-
-                    foreach ( var section in mSections )
-                        if ( SectionInfo.SubSectionInfos.TryGetValue( section.SectionInfo, out var subSectionInfo ) )
-                            subSectionInfo.ProcessPropertyForReading( section, this );
-
-                    Reader.SeekBegin( DataOffset );
-                    {
-                        Read( mData, Reader, DataSize );
-                    }
-                    Reader.SeekBegin( DataOffset + SectionSize );
-                    break;
-                }
-
-                case SectionMode.Write when BaseStream == null || Writer == null:
-                    throw new InvalidOperationException(
-                        "Data object has not been written yet, cannot process data object" );
-                case SectionMode.Write:
-                {
-                    mSections.Clear();
-                    if ( Writer.OffsetPositions.Count > 0 && Flags.HasFlag( SectionFlags.HasRelocationTable ) )
-                    {
-                        ISection relocationTableSection;
-
-                        var offsets = Writer.OffsetPositions.Select( x => x - Writer.BaseOffset ).ToList();
-                        if ( AddressSpace == AddressSpace.Int64 )
-                            relocationTableSection = new RelocationTableSectionInt64( SectionMode.Write, offsets );
-                        else
-                            relocationTableSection = new RelocationTableSectionInt32( SectionMode.Write, offsets );
-
-                        mSections.Add( relocationTableSection );
-                    }
-
-                    foreach ( var subSectionInfo in SectionInfo.SubSectionInfos.Values.OrderBy( x => x.Priority ) )
-                        mSections.AddRange( subSectionInfo.ProcessPropertyForWriting( this ) );
-
-                    if ( mSections.Count > 0 )
-                        mSections.Add( new EndOfFileSection( SectionMode.Write, this ) );
-                    break;
-                }
-            }
-
-            mIsDataProcessed = true;
-            mIsProcessingData = false;
-        }
-
         protected abstract void Read( T data, EndianBinaryReader reader, long length );
         protected abstract void Write( T data, EndianBinaryWriter writer );
 
-        protected Section( SectionMode mode, T data = default( T ) )
+        protected Section( SectionMode mode, T data = default )
         {
             var type = GetType();
             SectionInfo = SectionRegistry.GetOrRegisterSectionInfo( type );

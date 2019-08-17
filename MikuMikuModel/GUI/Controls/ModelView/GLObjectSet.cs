@@ -1,10 +1,10 @@
-﻿using MikuMikuLibrary.Objects;
+﻿using System.Collections.Generic;
+using MikuMikuLibrary.Objects;
 using MikuMikuLibrary.Textures;
-using System.Collections.Generic;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
-    public class GLObjectSet : IGLDraw
+    public class GLObjectSet : IDrawable
     {
         public List<GLObject> Objects { get; }
 
@@ -16,10 +16,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public void Draw( GLShaderProgram shaderProgram )
         {
-            foreach ( var mesh in Objects )
-            {
-                mesh.Draw( shaderProgram );
-            }
+            foreach ( var mesh in Objects ) mesh.Draw( shaderProgram );
         }
 
         public GLObjectSet( ObjectSet objectSet, TextureSet textureSet )

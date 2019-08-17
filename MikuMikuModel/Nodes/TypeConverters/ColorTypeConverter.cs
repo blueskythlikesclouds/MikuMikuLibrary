@@ -1,17 +1,21 @@
-﻿using MikuMikuLibrary.Misc;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using MikuMikuLibrary.Misc;
 
 namespace MikuMikuModel.Nodes.TypeConverters
 {
     public class ColorTypeConverter : TypeConverter
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        }
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) =>
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType )
+        {
+            return sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        }
 
         public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
         {
@@ -20,10 +24,10 @@ namespace MikuMikuModel.Nodes.TypeConverters
                 var floatValues = input.Trim( '<', '>' )
                     .Split( new[] { "," }, StringSplitOptions.RemoveEmptyEntries );
 
-                var r = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
-                var g = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
-                var b = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
-                var a = float.Parse( floatValues[ 3 ], CultureInfo.InvariantCulture );
+                float r = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
+                float g = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
+                float b = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
+                float a = float.Parse( floatValues[ 3 ], CultureInfo.InvariantCulture );
 
                 return new Color( r, g, b, a );
             }
@@ -36,10 +40,10 @@ namespace MikuMikuModel.Nodes.TypeConverters
         {
             if ( value is Color input && destinationType == typeof( string ) )
             {
-                var r = input.R.ToString( CultureInfo.InvariantCulture );
-                var g = input.G.ToString( CultureInfo.InvariantCulture );
-                var b = input.B.ToString( CultureInfo.InvariantCulture );
-                var a = input.A.ToString( CultureInfo.InvariantCulture );
+                string r = input.R.ToString( CultureInfo.InvariantCulture );
+                string g = input.G.ToString( CultureInfo.InvariantCulture );
+                string b = input.B.ToString( CultureInfo.InvariantCulture );
+                string a = input.A.ToString( CultureInfo.InvariantCulture );
 
                 return $"<{r}, {g}, {b}, {a}>";
             }

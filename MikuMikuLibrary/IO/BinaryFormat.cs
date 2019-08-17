@@ -3,28 +3,28 @@
     public enum BinaryFormat
     {
         /// <summary>
-        /// Dreamy Theater
+        ///     Dreamy Theater
         /// </summary>
         DT,
 
         /// <summary>
-        /// F
+        ///     F
         /// </summary>
         F,
 
         /// <summary>
-        /// Future Tone
+        ///     Future Tone
         /// </summary>
         FT,
 
         /// <summary>
-        /// F 2nd
+        ///     F 2nd
         /// </summary>
         F2nd,
 
         /// <summary>
-        /// X
+        ///     X
         /// </summary>
-        X,
+        X
     }
 }

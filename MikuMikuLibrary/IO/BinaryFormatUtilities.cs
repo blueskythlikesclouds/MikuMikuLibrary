@@ -55,7 +55,9 @@ namespace MikuMikuLibrary.IO
             throw new ArgumentException( nameof( format ) );
         }
 
-        public static BinaryFormat GetFormat( AddressSpace addressSpace ) =>
-            addressSpace == AddressSpace.Int64 ? BinaryFormat.X : BinaryFormat.F2nd;
+        public static BinaryFormat GetFormat( AddressSpace addressSpace )
+        {
+            return addressSpace == AddressSpace.Int64 ? BinaryFormat.X : BinaryFormat.F2nd;
+        }
     }
 }

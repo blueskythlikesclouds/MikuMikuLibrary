@@ -17,7 +17,7 @@ namespace MikuMikuLibrary.Geometry
             return new BoundingSphere
             {
                 Center = Center,
-                Radius = radius,
+                Radius = radius
             };
         }
 

@@ -1,10 +1,9 @@
-﻿using MikuMikuLibrary.IO;
-using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Materials;
+﻿using System.Collections.Generic;
 using MikuMikuLibrary.Geometry;
-using System;
-using System.Collections.Generic;
+using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections.Objects;
+using MikuMikuLibrary.Materials;
 
 namespace MikuMikuLibrary.Objects
 {
@@ -48,25 +47,21 @@ namespace MikuMikuLibrary.Objects
 
             Meshes.Capacity = meshCount;
             for ( int i = 0; i < meshCount; i++ )
-            {
                 reader.ReadAtOffset( meshesOffset + i * Mesh.GetByteSize( section?.Format ?? BinaryFormat.DT ), () =>
                 {
                     var mesh = new Mesh();
                     mesh.Read( reader, section );
                     Meshes.Add( mesh );
                 } );
-            }
 
             Materials.Capacity = materialCount;
             for ( int i = 0; i < materialCount; i++ )
-            {
                 reader.ReadAtOffset( materialsOffset + i * Material.BYTE_SIZE, () =>
                 {
                     var material = new Material();
                     material.Read( reader );
                     Materials.Add( material );
                 } );
-            }
         }
 
         internal void Write( EndianBinaryWriter writer, ObjectSection section = null )
@@ -79,16 +74,16 @@ namespace MikuMikuLibrary.Objects
                 writer.Write( Meshes.Count );
                 writer.Write( Materials.Count );
                 writer.Write( BoundingSphere );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteMeshes );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteMaterials );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMeshes );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMaterials );
             }
             else
             {
                 writer.Write( BoundingSphere );
                 writer.Write( Meshes.Count );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteMeshes );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMeshes );
                 writer.Write( Materials.Count );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, ( Action ) WriteMaterials );
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, WriteMaterials );
             }
 
             writer.WriteNulls( section?.Format == BinaryFormat.X ? 0x40 : 0x28 );

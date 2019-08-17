@@ -40,6 +40,18 @@ namespace MikuMikuModel.Nodes.Wrappers
             }
         }
 
+        public void Dispose()
+        {
+            Node.Renamed -= OnNodeRenamed;
+            Node.Added -= OnNodeAdded;
+            Node.Removed -= OnNodeRemoved;
+            Node.Moved -= OnNodeMoved;
+            Node.Dispose();
+
+            foreach ( var node in Nodes.OfType<NodeAsTreeNode>() )
+                node.Dispose();
+        }
+
         private void OnNodeMoved( object sender, NodeMoveEventArgs args )
         {
             var movedNode = Nodes[ args.PreviousIndex ];
@@ -104,27 +116,11 @@ namespace MikuMikuModel.Nodes.Wrappers
             if ( node.Flags.HasFlag( NodeFlags.Add ) && !hideNodes )
             {
                 if ( node.IsPopulated )
-                {
                     foreach ( var childNode in Node.Nodes )
                         Nodes.Add( new NodeAsTreeNode( childNode ) );
-                }
                 else
-                {
                     Nodes.Add( new TreeNode() );
-                }
             }
-        }
-
-        public void Dispose()
-        {
-            Node.Renamed -= OnNodeRenamed;
-            Node.Added -= OnNodeAdded;
-            Node.Removed -= OnNodeRemoved;
-            Node.Moved -= OnNodeMoved;
-            Node.Dispose();
-
-            foreach ( var node in Nodes.OfType<NodeAsTreeNode>() )
-                node.Dispose();
         }
     }
 }

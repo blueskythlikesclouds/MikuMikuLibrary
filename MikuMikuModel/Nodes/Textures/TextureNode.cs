@@ -49,13 +49,13 @@ namespace MikuMikuModel.Nodes.Textures
                     var format =
                         Data.Format == TextureFormat.DXT1 ||
                         Data.Format == TextureFormat.DXT3 ||
-                        Data.Format == TextureFormat.DXT5 ? ( hasTransparency
+                        Data.Format == TextureFormat.DXT5 ? hasTransparency
                             ? TextureFormat.DXT5
-                            : TextureFormat.DXT1 ) :
+                            : TextureFormat.DXT1 :
                         Data.Format == TextureFormat.RGB ||
-                        Data.Format == TextureFormat.RGBA ? ( hasTransparency
+                        Data.Format == TextureFormat.RGBA ? hasTransparency
                             ? TextureFormat.RGBA
-                            : TextureFormat.RGB ) : Data.Format;
+                            : TextureFormat.RGB : Data.Format;
 
                     return TextureEncoder.Encode( bitmap, format, Data.MipMapCount != 0 );
                 }

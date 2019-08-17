@@ -4,6 +4,6 @@
     {
         RaiseError,
         Replace,
-        Ignore,
+        Ignore
     }
 }

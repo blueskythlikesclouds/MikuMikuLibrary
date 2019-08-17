@@ -1,8 +1,8 @@
-﻿using MikuMikuLibrary.IO.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Skeletons
 {
@@ -52,10 +52,7 @@ namespace MikuMikuLibrary.Skeletons
                     Positions.Add( reader.ReadVector3() );
             } );
 
-            reader.ReadAtOffset( unknownValueOffset, () =>
-            {
-                UnknownValue = reader.ReadInt32();
-            } );
+            reader.ReadAtOffset( unknownValueOffset, () => { UnknownValue = reader.ReadInt32(); } );
 
             reader.ReadAtOffset( objectBoneNamesOffset, () =>
             {
@@ -106,25 +103,27 @@ namespace MikuMikuLibrary.Skeletons
             writer.Write( ObjectBoneNames.Count );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var boneName in ObjectBoneNames )
+                foreach ( string boneName in ObjectBoneNames )
                     writer.AddStringToStringTable( boneName );
             } );
             writer.Write( MotionBoneNames.Count );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var boneName in MotionBoneNames )
+                foreach ( string boneName in MotionBoneNames )
                     writer.AddStringToStringTable( boneName );
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var parentId in ParentIndices )
+                foreach ( short parentId in ParentIndices )
                     writer.Write( parentId );
             } );
             writer.WriteNulls( 32 );
         }
 
-        public Bone GetBone( string boneName ) =>
-            Bones.FirstOrDefault( x => x.Name.Equals( boneName, StringComparison.OrdinalIgnoreCase ) );
+        public Bone GetBone( string boneName )
+        {
+            return Bones.FirstOrDefault( x => x.Name.Equals( boneName, StringComparison.OrdinalIgnoreCase ) );
+        }
 
         public Skeleton()
         {

@@ -26,8 +26,10 @@ namespace MikuMikuModel.Modules
             return moduleList.Count != 1 ? null : moduleList[ 0 ];
         }
 
-        public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string fileName ) =>
-            GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName );
+        public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string fileName )
+        {
+            return GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName );
+        }
 
         public static string SelectModuleExport<T>( string title = "Select a file to export to.",
             string filePath = null )

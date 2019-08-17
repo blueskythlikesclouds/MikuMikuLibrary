@@ -24,22 +24,11 @@ namespace MikuMikuLibrary.Textures.DDS
 
         public int ABitMask { get; set; }
 
-        public DDSPixelFormat()
-        {
-            Size = 0x20;
-            Flags = DDSPixelFormatFlags.FourCC;
-        }
-
-        public DDSPixelFormat( DDSPixelFormatFourCC format ) : this()
-        {
-            FourCC = format;
-        }
-
         internal void Read( BinaryReader reader )
         {
             Size = reader.ReadInt32();
-            Flags = ( DDSPixelFormatFlags )reader.ReadInt32();
-            FourCC = ( DDSPixelFormatFourCC )reader.ReadInt32();
+            Flags = ( DDSPixelFormatFlags ) reader.ReadInt32();
+            FourCC = ( DDSPixelFormatFourCC ) reader.ReadInt32();
             RGBBitCount = reader.ReadInt32();
             RBitMask = reader.ReadInt32();
             GBitMask = reader.ReadInt32();
@@ -50,13 +39,24 @@ namespace MikuMikuLibrary.Textures.DDS
         internal void Write( BinaryWriter writer )
         {
             writer.Write( Size );
-            writer.Write( ( int )Flags );
-            writer.Write( ( int )FourCC );
+            writer.Write( ( int ) Flags );
+            writer.Write( ( int ) FourCC );
             writer.Write( RGBBitCount );
             writer.Write( RBitMask );
             writer.Write( GBitMask );
             writer.Write( BBitMask );
             writer.Write( ABitMask );
+        }
+
+        public DDSPixelFormat()
+        {
+            Size = 0x20;
+            Flags = DDSPixelFormatFlags.FourCC;
+        }
+
+        public DDSPixelFormat( DDSPixelFormatFourCC format ) : this()
+        {
+            FourCC = format;
         }
     }
 }

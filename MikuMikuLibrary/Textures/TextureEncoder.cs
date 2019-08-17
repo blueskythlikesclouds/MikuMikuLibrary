@@ -1,10 +1,10 @@
-﻿using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Textures.DDS;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Numerics;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.Textures.DDS;
 
 namespace MikuMikuLibrary.Textures
 {
@@ -28,12 +28,8 @@ namespace MikuMikuLibrary.Textures
 
             var texture = new Texture( ddsHeader.Width, ddsHeader.Height, format, depth, mipMapCount );
             foreach ( var level in texture.EnumerateLevels() )
-            {
-                foreach ( var mipMap in level )
-                {
-                    source.Read( mipMap.Data, 0, mipMap.Data.Length );
-                }
-            }
+            foreach ( var mipMap in level )
+                source.Read( mipMap.Data, 0, mipMap.Data.Length );
 
             return texture;
         }
@@ -132,7 +128,9 @@ namespace MikuMikuLibrary.Textures
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb );
 
                 fixed ( byte* ptr = subTexture.Data )
+                {
                     BGRtoRGB( ( byte* ) bitmapData.Scan0, ptr, subTexture.Data.Length );
+                }
 
                 bitmap.UnlockBits( bitmapData );
             }
@@ -141,7 +139,9 @@ namespace MikuMikuLibrary.Textures
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
 
                 fixed ( byte* ptr = subTexture.Data )
+                {
                     Int32RGBAToByte( ( int* ) bitmapData.Scan0, ptr, subTexture.Data.Length );
+                }
 
                 bitmap.UnlockBits( bitmapData );
             }
@@ -159,19 +159,21 @@ namespace MikuMikuLibrary.Textures
         public static Texture Encode( string sourceFileName )
         {
             if ( sourceFileName.EndsWith( ".dds", StringComparison.OrdinalIgnoreCase ) )
-            {
                 using ( var source = File.OpenRead( sourceFileName ) )
+                {
                     return Encode( source );
-            }
+                }
 
             using ( var bitmap = new Bitmap( sourceFileName ) )
+            {
                 return Encode( bitmap, DDSCodec.HasTransparency( bitmap ) ? TextureFormat.DXT5 : TextureFormat.DXT1,
                     true );
+            }
         }
 
         private static unsafe void Int32RGBAToByte( int* source, byte* destination, int length )
         {
-            byte* end = destination + length;
+            var end = destination + length;
 
             while ( destination < end )
             {
@@ -185,7 +187,7 @@ namespace MikuMikuLibrary.Textures
 
         private static unsafe void BGRtoRGB( byte* source, byte* destination, int length )
         {
-            byte* end = source + length;
+            var end = source + length;
             while ( source < end )
             {
                 byte b = *source++;

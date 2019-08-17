@@ -12,15 +12,19 @@ namespace MikuMikuModel.Modules.Objects
         public override string Name => "Object Set";
         public override string[] Extensions => new[] { "bin", "osd" };
 
-        public override bool Match( string fileName ) =>
-            fileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase )
+        public override bool Match( string fileName )
+        {
+            return fileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase )
                 ? fileName.EndsWith( "_obj.bin",
                     StringComparison.OrdinalIgnoreCase ) // TODO: Should this check be done?
                 : base.Match( fileName );
+        }
 
-        public override bool Match( byte[] buffer ) =>
-            buffer[ 0 ] == 'M' && buffer[ 1 ] == 'O' && buffer[ 2 ] == 'S' && buffer[ 3 ] == 'D' ||
-            buffer[ 0 ] == 0 && buffer[ 1 ] == 0x25 && buffer[ 2 ] == 0x06 && buffer[ 3 ] == 0x05;
+        public override bool Match( byte[] buffer )
+        {
+            return buffer[ 0 ] == 'M' && buffer[ 1 ] == 'O' && buffer[ 2 ] == 'S' && buffer[ 3 ] == 'D' ||
+                   buffer[ 0 ] == 0 && buffer[ 1 ] == 0x25 && buffer[ 2 ] == 0x06 && buffer[ 3 ] == 0x05;
+        }
 
         public override ObjectSet Import( string filePath )
         {
@@ -32,8 +36,10 @@ namespace MikuMikuModel.Modules.Objects
             return model;
         }
 
-        protected override ObjectSet ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<ObjectSet>( source, true );
+        protected override ObjectSet ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<ObjectSet>( source, true );
+        }
 
         protected override void ExportCore( ObjectSet model, Stream destination, string fileName )
         {

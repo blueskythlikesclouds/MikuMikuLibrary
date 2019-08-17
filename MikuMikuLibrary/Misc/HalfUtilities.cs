@@ -1,13 +1,14 @@
 ﻿namespace MikuMikuLibrary.Misc
 {
     /// <summary>
-    /// Helper class for Half conversions and some low level operations.
-    /// This class is internally used in the Half class.
+    ///     Helper class for Half conversions and some low level operations.
+    ///     This class is internally used in the Half class.
     /// </summary>
     /// <remarks>
-    /// References:
+    ///     References:
     ///     - Code retrieved from http://sourceforge.net/p/csharp-half/code/HEAD/tree/ on 2015-12-04
-    ///     - Fast Half Float Conversions, Jeroen van der Zijp, link: http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
+    ///     - Fast Half Float Conversions, Jeroen van der Zijp, link:
+    ///     http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
     /// </remarks>
     internal static class HalfUtilities
     {
@@ -37,36 +38,24 @@
 
         private static uint[] GenerateMantissaTable()
         {
-            uint[] mantissaTable = new uint[ 2048 ];
+            var mantissaTable = new uint[ 2048 ];
             mantissaTable[ 0 ] = 0;
-            for ( int i = 1; i < 1024; i++ )
-            {
-                mantissaTable[ i ] = ConvertMantissa( i );
-            }
+            for ( int i = 1; i < 1024; i++ ) mantissaTable[ i ] = ConvertMantissa( i );
 
-            for ( int i = 1024; i < 2048; i++ )
-            {
-                mantissaTable[ i ] = ( uint ) ( 0x38000000 + ( ( i - 1024 ) << 13 ) );
-            }
+            for ( int i = 1024; i < 2048; i++ ) mantissaTable[ i ] = ( uint ) ( 0x38000000 + ( ( i - 1024 ) << 13 ) );
 
             return mantissaTable;
         }
 
         private static uint[] GenerateExponentTable()
         {
-            uint[] exponentTable = new uint[ 64 ];
+            var exponentTable = new uint[ 64 ];
             exponentTable[ 0 ] = 0;
-            for ( int i = 1; i < 31; i++ )
-            {
-                exponentTable[ i ] = ( uint ) ( i << 23 );
-            }
+            for ( int i = 1; i < 31; i++ ) exponentTable[ i ] = ( uint ) ( i << 23 );
 
             exponentTable[ 31 ] = 0x47800000;
             exponentTable[ 32 ] = 0x80000000;
-            for ( int i = 33; i < 63; i++ )
-            {
-                exponentTable[ i ] = ( uint ) ( 0x80000000 + ( ( i - 32 ) << 23 ) );
-            }
+            for ( int i = 33; i < 63; i++ ) exponentTable[ i ] = ( uint ) ( 0x80000000 + ( ( i - 32 ) << 23 ) );
 
             exponentTable[ 63 ] = 0xc7800000;
 
@@ -75,25 +64,19 @@
 
         private static ushort[] GenerateOffsetTable()
         {
-            ushort[] offsetTable = new ushort[ 64 ];
+            var offsetTable = new ushort[ 64 ];
             offsetTable[ 0 ] = 0;
-            for ( int i = 1; i < 32; i++ )
-            {
-                offsetTable[ i ] = 1024;
-            }
+            for ( int i = 1; i < 32; i++ ) offsetTable[ i ] = 1024;
 
             offsetTable[ 32 ] = 0;
-            for ( int i = 33; i < 64; i++ )
-            {
-                offsetTable[ i ] = 1024;
-            }
+            for ( int i = 33; i < 64; i++ ) offsetTable[ i ] = 1024;
 
             return offsetTable;
         }
 
         private static ushort[] GenerateBaseTable()
         {
-            ushort[] baseTable = new ushort[ 512 ];
+            var baseTable = new ushort[ 512 ];
             for ( int i = 0; i < 256; ++i )
             {
                 sbyte e = ( sbyte ) ( 127 - i );
@@ -134,7 +117,7 @@
 
         private static sbyte[] GenerateShiftTable()
         {
-            sbyte[] shiftTable = new sbyte[ 512 ];
+            var shiftTable = new sbyte[ 512 ];
             for ( int i = 0; i < 256; ++i )
             {
                 sbyte e = ( sbyte ) ( 127 - i );

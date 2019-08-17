@@ -6,24 +6,30 @@ namespace MikuMikuModel.Nodes
     {
         public string PreviousName { get; }
 
-        public NodeRenameEventArgs( string previousName ) =>
+        public NodeRenameEventArgs( string previousName )
+        {
             PreviousName = previousName;
+        }
     }
 
     public class NodeAddEventArgs : EventArgs
     {
         public INode AddedNode { get; }
 
-        public NodeAddEventArgs( INode addedNode ) =>
+        public NodeAddEventArgs( INode addedNode )
+        {
             AddedNode = addedNode;
+        }
     }
 
     public class NodeRemoveEventArgs : EventArgs
     {
         public INode RemovedNode { get; }
 
-        public NodeRemoveEventArgs( INode removedNode ) =>
+        public NodeRemoveEventArgs( INode removedNode )
+        {
             RemovedNode = removedNode;
+        }
     }
 
     public class NodeImportEventArgs : EventArgs
@@ -40,16 +46,20 @@ namespace MikuMikuModel.Nodes
     {
         public string FilePath { get; }
 
-        public NodeExportEventArgs( string filePath ) =>
+        public NodeExportEventArgs( string filePath )
+        {
             FilePath = filePath;
+        }
     }
 
     public class NodeReplaceEventArgs : EventArgs
     {
         public object PreviousData { get; }
 
-        public NodeReplaceEventArgs( object previousData ) =>
+        public NodeReplaceEventArgs( object previousData )
+        {
             PreviousData = previousData;
+        }
     }
 
     public class NodeMoveEventArgs : EventArgs

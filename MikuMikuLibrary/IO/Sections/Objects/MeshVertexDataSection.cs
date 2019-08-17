@@ -1,8 +1,8 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Objects;
-using System.Collections.Generic;
-using System.Numerics;
 
 namespace MikuMikuLibrary.IO.Sections.Objects
 {
@@ -32,7 +32,6 @@ namespace MikuMikuLibrary.IO.Sections.Objects
         protected override void Write( object data, EndianBinaryWriter writer )
         {
             foreach ( var mesh in mMeshes )
-            {
                 for ( int i = 0; i < mesh.Vertices.Length; i++ )
                 {
                     writer.Write( mesh.Vertices?[ i ] ?? Vector3.Zero );
@@ -56,7 +55,6 @@ namespace MikuMikuLibrary.IO.Sections.Objects
                         writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index4 * 3 ) );
                     }
                 }
-            }
         }
 
         public MeshVertexDataSection( SectionMode mode, object data = null ) : base( mode, data )

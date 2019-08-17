@@ -15,8 +15,7 @@ namespace MikuMikuLibrary.IO.Common
             {
                 if ( BitConverter.IsLittleEndian )
                     return Endianness.LittleEndian;
-                else
-                    return Endianness.BigEndian;
+                return Endianness.BigEndian;
             }
         }
 
@@ -88,7 +87,7 @@ namespace MikuMikuLibrary.IO.Common
             value = Swap( value );
         }
 
-        public static unsafe float Swap( float value )
+        public static float Swap( float value )
         {
             return UnsafeUtilities.ReinterpretCast<uint, float>(
                 Swap( UnsafeUtilities.ReinterpretCast<float, uint>( value ) )
@@ -100,7 +99,7 @@ namespace MikuMikuLibrary.IO.Common
             value = Swap( value );
         }
 
-        public static unsafe double Swap( double value )
+        public static double Swap( double value )
         {
             return UnsafeUtilities.ReinterpretCast<ulong, double>(
                 Swap( UnsafeUtilities.ReinterpretCast<double, ulong>( value ) )
@@ -114,7 +113,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public static unsafe decimal Swap( decimal value )
         {
-            ulong* pData = stackalloc ulong[ 2 ];
+            var pData = stackalloc ulong[ 2 ];
 
             *pData = Swap( *( ulong* ) &value );
             pData++;
@@ -136,47 +135,36 @@ namespace MikuMikuLibrary.IO.Common
                 var elemType = type.GetElementType();
 
                 for ( int i = 0; i < array.Length; i++ )
-                {
                     array.SetValue( SwapRecursive( array.GetValue( i ), elemType ), i );
-                }
 
                 return array;
             }
-            else if ( type.IsClass )
+
+            if ( type.IsClass )
             {
                 Swap( obj, type );
                 return obj;
             }
-            else if ( type.IsEnum )
-            {
-                return SwapRecursive( obj, type.GetEnumUnderlyingType() );
-            }
-            else if ( type.IsGenericType )
-            {
-                throw new NotImplementedException();
-            }
-            else if ( type.IsInterface )
-            {
-                throw new NotImplementedException();
-            }
-            else if ( type.IsPointer )
-            {
-                throw new NotImplementedException();
-            }
-            else if ( type.IsPrimitive )
-            {
+
+            if ( type.IsEnum ) return SwapRecursive( obj, type.GetEnumUnderlyingType() );
+
+            if ( type.IsGenericType ) throw new NotImplementedException();
+
+            if ( type.IsInterface ) throw new NotImplementedException();
+
+            if ( type.IsPointer ) throw new NotImplementedException();
+
+            if ( type.IsPrimitive )
                 return Swap( ( dynamic ) obj );
-                //return SwapEndiannessPrimitive(type, obj);
-            }
-            else if ( type.IsValueType )
+            //return SwapEndiannessPrimitive(type, obj);
+
+            if ( type.IsValueType )
             {
                 Swap( obj, type );
                 return obj;
             }
-            else
-            {
-                throw new NotImplementedException();
-            }
+
+            throw new NotImplementedException();
         }
 
         private static object Swap( object obj, Type type )

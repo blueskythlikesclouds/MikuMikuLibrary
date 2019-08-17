@@ -1,7 +1,7 @@
-﻿using MikuMikuLibrary.IO;
-using MikuMikuLibrary.IO.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects
 {
@@ -24,10 +24,7 @@ namespace MikuMikuLibrary.Objects
             reader.ReadAtOffset( boneIdsOffset, () =>
             {
                 Bones.Capacity = boneCount;
-                for ( int i = 0; i < boneCount; i++ )
-                {
-                    Bones.Add( new BoneInfo { Id = reader.ReadInt32() } );
-                }
+                for ( int i = 0; i < boneCount; i++ ) Bones.Add( new BoneInfo { Id = reader.ReadInt32() } );
             } );
 
             reader.ReadAtOffset( boneMatricesOffset, () =>

@@ -1,7 +1,7 @@
-﻿using MikuMikuLibrary.IO.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.IO.Sections
 {
@@ -35,13 +35,13 @@ namespace MikuMikuLibrary.IO.Sections
     {
         Read,
         Write
-    };
+    }
 
     [Flags]
     public enum SectionFlags
     {
         None = 0,
         HasRelocationTable = 1 << 0,
-        HasEndianReverseTable = 1 << 1,
-    };
+        HasEndianReverseTable = 1 << 1
+    }
 }

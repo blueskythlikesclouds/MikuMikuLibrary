@@ -25,10 +25,14 @@ namespace MikuMikuModel.Modules.Databases
             return base.Match( fileName );
         }
 
-        protected override TextureDatabase ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<TextureDatabase>( source, true );
+        protected override TextureDatabase ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<TextureDatabase>( source, true );
+        }
 
-        protected override void ExportCore( TextureDatabase model, Stream destination, string fileName ) =>
+        protected override void ExportCore( TextureDatabase model, Stream destination, string fileName )
+        {
             model.Save( destination, true );
+        }
     }
 }

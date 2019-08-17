@@ -1,8 +1,8 @@
 ﻿using System;
-using MikuMikuLibrary.IO;
-using MikuMikuLibrary.IO.Common;
 using System.Collections.Generic;
 using System.Numerics;
+using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects
 {
@@ -157,7 +157,7 @@ namespace MikuMikuLibrary.Objects
             writer.Write( BoneIds.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var value in BoneIds )
+                foreach ( int value in BoneIds )
                     writer.Write( value );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
@@ -198,7 +198,7 @@ namespace MikuMikuLibrary.Objects
             writer.AddStringToStringTable( BoneName );
             writer.Write( Expressions.Count );
 
-            foreach ( var str in Expressions )
+            foreach ( string str in Expressions )
                 writer.AddStringToStringTable( str );
 
             writer.WriteNulls( ( 12 - Expressions.Count ) * 4 );
@@ -400,7 +400,7 @@ namespace MikuMikuLibrary.Objects
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var value in OsageNames )
+                foreach ( string value in OsageNames )
                     writer.AddStringToStringTable( value );
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
@@ -416,7 +416,7 @@ namespace MikuMikuLibrary.Objects
             writer.Write( BoneNames.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var value in BoneNames )
+                foreach ( string value in BoneNames )
                     writer.AddStringToStringTable( value );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>

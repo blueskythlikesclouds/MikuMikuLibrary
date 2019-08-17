@@ -25,10 +25,14 @@ namespace MikuMikuModel.Modules.Databases
             return base.Match( fileName );
         }
 
-        protected override SpriteDatabase ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<SpriteDatabase>( source, true );
+        protected override SpriteDatabase ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<SpriteDatabase>( source, true );
+        }
 
-        protected override void ExportCore( SpriteDatabase model, Stream destination, string fileName ) =>
+        protected override void ExportCore( SpriteDatabase model, Stream destination, string fileName )
+        {
             model.Save( destination, true );
+        }
     }
 }

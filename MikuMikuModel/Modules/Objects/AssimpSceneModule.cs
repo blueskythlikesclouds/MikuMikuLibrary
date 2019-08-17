@@ -11,11 +11,13 @@ namespace MikuMikuModel.Modules.Objects
         public override string Name => "Assimp Scene";
         public override string[] Extensions => new[] { "dae", "fbx", "obj" };
 
-        protected override Scene ImportCore( Stream source, string fileName ) =>
-            source is FileStream fileStream
+        protected override Scene ImportCore( Stream source, string fileName )
+        {
+            return source is FileStream fileStream
                 ? SceneUtilities.Import( fileStream.Name )
                 : throw new ArgumentException( "Assimp scene can only be imported from a file stream",
                     nameof( source ) );
+        }
 
         protected override void ExportCore( Scene model, Stream destination, string fileName )
         {

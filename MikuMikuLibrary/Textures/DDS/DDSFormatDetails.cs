@@ -160,18 +160,17 @@ namespace MikuMikuLibrary.Textures.DDS
             return 0;
         }
 
-        public static int CalculatePitchOrLinearSize( int width, int height, DDSPixelFormatFourCC format, out DDSHeaderFlags additionalFlags )
+        public static int CalculatePitchOrLinearSize( int width, int height, DDSPixelFormatFourCC format,
+            out DDSHeaderFlags additionalFlags )
         {
             if ( IsBlockCompressed( format ) )
             {
                 additionalFlags = DDSHeaderFlags.LinearSize;
                 return CalculateLinearSize( width, height, format );
             }
-            else
-            {
-                additionalFlags = DDSHeaderFlags.Pitch;
-                return CalculatePitch( width, format );
-            }
+
+            additionalFlags = DDSHeaderFlags.Pitch;
+            return CalculatePitch( width, format );
         }
 
         public static int CalculatePitch( int width, DDSPixelFormatFourCC format )
@@ -184,9 +183,7 @@ namespace MikuMikuLibrary.Textures.DDS
 
             if ( format == DDSPixelFormatFourCC.R8G8_B8G8 || format == DDSPixelFormatFourCC.G8R8_G8B8 ||
                  format == DDSPixelFormatFourCC.UYVY || format == DDSPixelFormatFourCC.YUY2 )
-            {
                 return ( ( width + 1 ) >> 1 ) * 4;
-            }
 
             int bitsPerPixel = GetBitsPerPixel( format );
             return ( width * bitsPerPixel + 7 ) / 8;

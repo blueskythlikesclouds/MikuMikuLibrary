@@ -206,59 +206,59 @@ namespace MikuMikuModel.Nodes.Materials
         protected override void Initialize()
         {
             RegisterCustomHandler( "Copy values", () =>
-            {
-                using ( var stringWriter = new StringWriter( CultureInfo.InvariantCulture ) )
                 {
-                    sSerializer.Serialize( stringWriter, Data );
-                    Clipboard.SetText( stringWriter.ToString() );
-                }
-            }, Keys.Control | Keys.C );
-            RegisterCustomHandler( "Paste values", () =>
-            {
-                try
-                {
-                    using ( var stringReader = new StringReader( Clipboard.GetText() ) )
+                    using ( var stringWriter = new StringWriter( CultureInfo.InvariantCulture ) )
                     {
-                        var materialTexture = ( MaterialTexture ) sSerializer.Deserialize( stringReader );
-
-                        // holy hell this looks BAD
-                        SetProperty( materialTexture.Field00, nameof( materialTexture.Field00 ) );
-                        SetProperty( materialTexture.Field01, nameof( materialTexture.Field01 ) );
-                        SetProperty( materialTexture.Field02, nameof( materialTexture.Field02 ) );
-                        SetProperty( materialTexture.Field03, nameof( materialTexture.Field03 ) );
-                        SetProperty( materialTexture.Field04, nameof( materialTexture.Field04 ) );
-                        SetProperty( materialTexture.Field05, nameof( materialTexture.Field05 ) );
-                        SetProperty( materialTexture.Field06, nameof( materialTexture.Field06 ) );
-                        SetProperty( materialTexture.Field07, nameof( materialTexture.Field07 ) );
-                        SetProperty( materialTexture.Field08, nameof( materialTexture.Field08 ) );
-                        SetProperty( materialTexture.Field09, nameof( materialTexture.Field09 ) );
-                        SetProperty( materialTexture.Field10, nameof( materialTexture.Field10 ) );
-                        SetProperty( materialTexture.Field11, nameof( materialTexture.Field11 ) );
-                        SetProperty( materialTexture.Field12, nameof( materialTexture.Field12 ) );
-                        SetProperty( materialTexture.Field13, nameof( materialTexture.Field13 ) );
-                        SetProperty( materialTexture.Field14, nameof( materialTexture.Field14 ) );
-                        SetProperty( materialTexture.Field15, nameof( materialTexture.Field15 ) );
-                        SetProperty( materialTexture.Field16, nameof( materialTexture.Field16 ) );
-                        SetProperty( materialTexture.Field17, nameof( materialTexture.Field17 ) );
-                        SetProperty( materialTexture.Field18, nameof( materialTexture.Field18 ) );
-                        SetProperty( materialTexture.Field19, nameof( materialTexture.Field19 ) );
-                        SetProperty( materialTexture.Field20, nameof( materialTexture.Field20 ) );
-                        SetProperty( materialTexture.Field21, nameof( materialTexture.Field21 ) );
-                        SetProperty( materialTexture.Field22, nameof( materialTexture.Field22 ) );
-                        SetProperty( materialTexture.Field23, nameof( materialTexture.Field23 ) );
-                        SetProperty( materialTexture.Field24, nameof( materialTexture.Field24 ) );
-                        SetProperty( materialTexture.Field25, nameof( materialTexture.Field25 ) );
-                        SetProperty( materialTexture.Field26, nameof( materialTexture.Field26 ) );
-                        SetProperty( materialTexture.Field27, nameof( materialTexture.Field27 ) );
-                        SetProperty( materialTexture.Field28, nameof( materialTexture.Field28 ) );
+                        sSerializer.Serialize( stringWriter, Data );
+                        Clipboard.SetText( stringWriter.ToString() );
                     }
-                }
-                catch
+                }, Keys.Control | Keys.C );
+            RegisterCustomHandler( "Paste values", () =>
                 {
-                    MessageBox.Show( "There is no valid data to paste.", "Miku Miku Model", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error );
-                }
-            }, Keys.Control | Keys.V );
+                    try
+                    {
+                        using ( var stringReader = new StringReader( Clipboard.GetText() ) )
+                        {
+                            var materialTexture = ( MaterialTexture ) sSerializer.Deserialize( stringReader );
+
+                            // holy hell this looks BAD
+                            SetProperty( materialTexture.Field00, nameof( materialTexture.Field00 ) );
+                            SetProperty( materialTexture.Field01, nameof( materialTexture.Field01 ) );
+                            SetProperty( materialTexture.Field02, nameof( materialTexture.Field02 ) );
+                            SetProperty( materialTexture.Field03, nameof( materialTexture.Field03 ) );
+                            SetProperty( materialTexture.Field04, nameof( materialTexture.Field04 ) );
+                            SetProperty( materialTexture.Field05, nameof( materialTexture.Field05 ) );
+                            SetProperty( materialTexture.Field06, nameof( materialTexture.Field06 ) );
+                            SetProperty( materialTexture.Field07, nameof( materialTexture.Field07 ) );
+                            SetProperty( materialTexture.Field08, nameof( materialTexture.Field08 ) );
+                            SetProperty( materialTexture.Field09, nameof( materialTexture.Field09 ) );
+                            SetProperty( materialTexture.Field10, nameof( materialTexture.Field10 ) );
+                            SetProperty( materialTexture.Field11, nameof( materialTexture.Field11 ) );
+                            SetProperty( materialTexture.Field12, nameof( materialTexture.Field12 ) );
+                            SetProperty( materialTexture.Field13, nameof( materialTexture.Field13 ) );
+                            SetProperty( materialTexture.Field14, nameof( materialTexture.Field14 ) );
+                            SetProperty( materialTexture.Field15, nameof( materialTexture.Field15 ) );
+                            SetProperty( materialTexture.Field16, nameof( materialTexture.Field16 ) );
+                            SetProperty( materialTexture.Field17, nameof( materialTexture.Field17 ) );
+                            SetProperty( materialTexture.Field18, nameof( materialTexture.Field18 ) );
+                            SetProperty( materialTexture.Field19, nameof( materialTexture.Field19 ) );
+                            SetProperty( materialTexture.Field20, nameof( materialTexture.Field20 ) );
+                            SetProperty( materialTexture.Field21, nameof( materialTexture.Field21 ) );
+                            SetProperty( materialTexture.Field22, nameof( materialTexture.Field22 ) );
+                            SetProperty( materialTexture.Field23, nameof( materialTexture.Field23 ) );
+                            SetProperty( materialTexture.Field24, nameof( materialTexture.Field24 ) );
+                            SetProperty( materialTexture.Field25, nameof( materialTexture.Field25 ) );
+                            SetProperty( materialTexture.Field26, nameof( materialTexture.Field26 ) );
+                            SetProperty( materialTexture.Field27, nameof( materialTexture.Field27 ) );
+                            SetProperty( materialTexture.Field28, nameof( materialTexture.Field28 ) );
+                        }
+                    }
+                    catch
+                    {
+                        MessageBox.Show( "There is no valid data to paste.", "Miku Miku Model", MessageBoxButtons.OK,
+                            MessageBoxIcon.Error );
+                    }
+                }, Keys.Control | Keys.V );
         }
 
         protected override void PopulateCore()

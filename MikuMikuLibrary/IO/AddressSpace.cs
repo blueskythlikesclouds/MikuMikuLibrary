@@ -3,6 +3,6 @@
     public enum AddressSpace
     {
         Int32,
-        Int64,
+        Int64
     }
 }

@@ -1,6 +1,6 @@
-﻿using MikuMikuLibrary.Textures;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
+using MikuMikuLibrary.Textures;
 
 namespace MikuMikuLibrary.Sprites
 {

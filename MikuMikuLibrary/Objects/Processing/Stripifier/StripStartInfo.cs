@@ -5,10 +5,10 @@
 namespace NvTriStripDotNet
 {
     /// <summary>
-    /// This class is a quick summary of parameters used
-    /// to begin a triangle strip.  Some operations may
-    /// want to create lists of such items, so they were
-    /// pulled out into a class
+    ///     This class is a quick summary of parameters used
+    ///     to begin a triangle strip.  Some operations may
+    ///     want to create lists of such items, so they were
+    ///     pulled out into a class
     /// </summary>
     internal class StripStartInfo
     {
@@ -22,5 +22,5 @@ namespace NvTriStripDotNet
             StartEdge = startEdge;
             ToV1 = toV1;
         }
-    };
+    }
 }

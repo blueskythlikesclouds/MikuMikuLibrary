@@ -10,16 +10,6 @@ namespace NvTriStripDotNet
     {
         private readonly int[] mEntries;
 
-        public VertexCache( int size )
-        {
-            mEntries = new int[ size ];
-
-            for ( var i = 0; i < mEntries.Length; i++ )
-                mEntries[ i ] = -1;
-        }
-
-        public VertexCache() : this( 16 ) { }
-
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public bool InCache( int entry )
         {
@@ -35,10 +25,7 @@ namespace NvTriStripDotNet
             int removed = mEntries[ mEntries.Length - 1 ];
 
             //push everything right one
-            for ( int i = mEntries.Length - 2; i >= 0; i-- )
-            {
-                mEntries[ i + 1 ] = mEntries[ i ];
-            }
+            for ( int i = mEntries.Length - 2; i >= 0; i-- ) mEntries[ i + 1 ] = mEntries[ i ];
 
             mEntries[ 0 ] = entry;
 
@@ -47,20 +34,35 @@ namespace NvTriStripDotNet
 
         public void Clear()
         {
-            for ( var i = 0; i < mEntries.Length; ++i )
+            for ( int i = 0; i < mEntries.Length; ++i )
                 mEntries[ i ] = -1;
         }
 
         public void Copy( VertexCache inVcache )
         {
-            for ( var i = 0; i < mEntries.Length; i++ )
-            {
-                inVcache.Set( i, mEntries[ i ] );
-            }
+            for ( int i = 0; i < mEntries.Length; i++ ) inVcache.Set( i, mEntries[ i ] );
         }
 
-        public int At( int index ) { return mEntries[ index ]; }
+        public int At( int index )
+        {
+            return mEntries[ index ];
+        }
 
-        public void Set( int index, int value ) { mEntries[ index ] = value; }
+        public void Set( int index, int value )
+        {
+            mEntries[ index ] = value;
+        }
+
+        public VertexCache( int size )
+        {
+            mEntries = new int[ size ];
+
+            for ( int i = 0; i < mEntries.Length; i++ )
+                mEntries[ i ] = -1;
+        }
+
+        public VertexCache() : this( 16 )
+        {
+        }
     }
 }

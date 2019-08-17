@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace NvTriStripDotNet
 {
     /// <summary>
-    /// Misc. utility class.
+    ///     Misc. utility class.
     /// </summary>
     internal static class Utils
     {

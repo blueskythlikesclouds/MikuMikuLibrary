@@ -128,7 +128,7 @@ namespace MikuMikuModel.Nodes.Misc
                 if ( parent is T node )
                     return node;
 
-            return default( T );
+            return default;
         }
 
         public T FindNode<T>( string nodeName, bool searchChildren ) where T : INode

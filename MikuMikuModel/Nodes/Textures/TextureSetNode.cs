@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
@@ -57,14 +57,12 @@ namespace MikuMikuModel.Nodes.Textures
                             return;
 
                         foreach ( var texture in Data.Textures )
-                        {
                             if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
                                 TextureDecoder.DecodeToPNG( texture,
                                     Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.png" ) );
                             else
                                 TextureDecoder.DecodeToDDS( texture,
                                     Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.dds" ) );
-                        }
                     }
                 }, Keys.Control | Keys.Shift | Keys.E );
 
@@ -106,7 +104,7 @@ namespace MikuMikuModel.Nodes.Textures
                 textureDatabase.Textures.Add( new TextureInfo
                 {
                     Id = texture.Id,
-                    Name = texture.Name,
+                    Name = texture.Name
                 } );
 
             mTextureDatabaseNode.Replace( textureDatabase );

@@ -14,7 +14,9 @@ namespace MikuMikuLibrary.Motions
         internal void Read( EndianBinaryReader reader, bool isModern )
         {
             if ( Type == KeySetType.Static )
+            {
                 Keys.Add( new Key { Value = reader.ReadSingle() } );
+            }
 
             else if ( Type != KeySetType.None )
             {
@@ -74,7 +76,9 @@ namespace MikuMikuLibrary.Motions
         internal void Write( EndianBinaryWriter writer, bool isModern )
         {
             if ( Keys.Count == 1 )
+            {
                 writer.Write( Keys[ 0 ].Value );
+            }
 
             else if ( Keys.Count > 1 )
             {

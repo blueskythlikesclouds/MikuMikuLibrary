@@ -84,14 +84,10 @@ namespace MikuMikuModel.Nodes.Motions
                         bool result = int.TryParse( inputDialog.Input, out id );
 
                         if ( !result || id < 0 )
-                        {
                             MessageBox.Show( "Please enter a correct id number.", "Miku Miku Model",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error );
-                        }
                         else
-                        {
                             break;
-                        }
                     }
                 }
 
@@ -101,20 +97,18 @@ namespace MikuMikuModel.Nodes.Motions
                 var motionSetInfo = new MotionSetInfo
                 {
                     Id = 39,
-                    Name = Path.GetFileNameWithoutExtension( Name ),
+                    Name = Path.GetFileNameWithoutExtension( Name )
                 };
 
                 if ( motionSetInfo.Name.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
                     motionSetInfo.Name = motionSetInfo.Name.Remove( 0, 4 );
 
                 foreach ( var motion in Data.Motions )
-                {
                     motionSetInfo.Motions.Add( new MotionInfo
                     {
                         Name = motion.Name,
-                        Id = id++,
+                        Id = id++
                     } );
-                }
 
                 using ( var stringWriter = new StringWriter() )
                 using ( var xmlWriter =
@@ -131,10 +125,12 @@ namespace MikuMikuModel.Nodes.Motions
             base.Initialize();
         }
 
-        protected override void Load( MotionSet data, Stream source ) =>
+        protected override void Load( MotionSet data, Stream source )
+        {
             data.Load( source,
                 SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ],
                 SourceConfiguration?.MotionDatabase );
+        }
 
         protected override void PopulateCore()
         {

@@ -1,11 +1,11 @@
-﻿using MikuMikuLibrary.Databases;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.IO.Sections.Textures;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace MikuMikuLibrary.Textures
 {
@@ -35,9 +35,7 @@ namespace MikuMikuLibrary.Textures
 
             Textures.Capacity = textureCount;
             for ( int i = 0; i < textureCount; i++ )
-            {
                 reader.ReadOffset( () => { Textures.Add( new Texture( reader ) ); } );
-            }
 
             reader.PopBaseOffset();
         }
@@ -51,14 +49,15 @@ namespace MikuMikuLibrary.Textures
             writer.Write( Textures.Count | 0x01010100 );
 
             foreach ( var texture in Textures )
-            {
                 writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { texture.Write( writer ); } );
-            }
 
             writer.PopBaseOffset();
         }
 
-        protected override ISection GetSectionInstanceForWriting() => new TextureSetSection( SectionMode.Write, this );
+        protected override ISection GetSectionInstanceForWriting()
+        {
+            return new TextureSetSection( SectionMode.Write, this );
+        }
 
         public override void Load( string filePath )
         {
@@ -68,13 +67,11 @@ namespace MikuMikuLibrary.Textures
             {
                 var textureDatabase = LoadIfExist<TextureDatabase>( Path.ChangeExtension( filePath, "txi" ) );
                 if ( Textures.Count == textureDatabase.Textures.Count )
-                {
                     for ( int i = 0; i < Textures.Count; i++ )
                     {
                         Textures[ i ].Id = textureDatabase.Textures[ i ].Id;
                         Textures[ i ].Name = textureDatabase.Textures[ i ].Name;
                     }
-                }
             }
         }
 
@@ -101,13 +98,11 @@ namespace MikuMikuLibrary.Textures
             {
                 var textureDatabase = new TextureDatabase();
                 foreach ( var texture in Textures )
-                {
                     textureDatabase.Textures.Add( new TextureInfo
                     {
                         Id = texture.Id,
-                        Name = texture.Name ?? $"Texture{texture.Id}",
+                        Name = texture.Name ?? $"Texture{texture.Id}"
                     } );
-                }
 
                 textureDatabase.Format = Format;
                 textureDatabase.Endianness = Endianness;

@@ -54,6 +54,6 @@ namespace MikuMikuLibrary.Archives
     public enum EntryStreamMode
     {
         MemoryStream,
-        OriginalStream,
-    };
+        OriginalStream
+    }
 }

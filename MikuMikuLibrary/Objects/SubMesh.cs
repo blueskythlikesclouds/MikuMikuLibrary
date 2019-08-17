@@ -1,8 +1,8 @@
-﻿using MikuMikuLibrary.IO;
-using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections.Objects;
 
 namespace MikuMikuLibrary.Objects
@@ -10,8 +10,8 @@ namespace MikuMikuLibrary.Objects
     public enum PrimitiveType
     {
         Triangles = 4,
-        TriangleStrip = 5,
-    };
+        TriangleStrip = 5
+    }
 
     public struct Triangle
     {
@@ -27,6 +27,17 @@ namespace MikuMikuLibrary.Objects
 
     public class SubMesh
     {
+        public BoundingSphere BoundingSphere { get; set; }
+        public ushort[] Indices { get; set; }
+        public ushort[] BoneIndices { get; set; }
+        public int MaterialIndex { get; set; }
+        public byte[] MaterialUVIndices { get; set; }
+        public PrimitiveType PrimitiveType { get; set; }
+
+        // Modern Formats
+        public BoundingBox BoundingBox { get; set; }
+        public int Field00 { get; set; }
+
         public static int GetByteSize( BinaryFormat format )
         {
             switch ( format )
@@ -45,17 +56,6 @@ namespace MikuMikuLibrary.Objects
 
             throw new ArgumentException( nameof( format ) );
         }
-
-        public BoundingSphere BoundingSphere { get; set; }
-        public ushort[] Indices { get; set; }
-        public ushort[] BoneIndices { get; set; }
-        public int MaterialIndex { get; set; }
-        public byte[] MaterialUVIndices { get; set; }
-        public PrimitiveType PrimitiveType { get; set; }
-
-        // Modern Formats
-        public BoundingBox BoundingBox { get; set; }
-        public int Field00 { get; set; }
 
         internal void Read( EndianBinaryReader reader, ObjectSection section = null )
         {
@@ -78,7 +78,9 @@ namespace MikuMikuLibrary.Objects
                 Field00 = reader.ReadInt32();
             }
             else
+            {
                 BoundingBox = BoundingSphere.ToBoundingBox();
+            }
 
             reader.ReadAtOffsetIf( field00 == 4, boneIndicesOffset,
                 () => { BoneIndices = reader.ReadUInt16s( boneIndexCount ); } );
@@ -142,8 +144,8 @@ namespace MikuMikuLibrary.Objects
 
             fixed ( ushort* indicesPtr = Indices )
             {
-                ushort* start = indicesPtr;
-                ushort* end = start + Indices.Length;
+                var start = indicesPtr;
+                var end = start + Indices.Length;
 
                 if ( PrimitiveType == PrimitiveType.Triangles )
                 {

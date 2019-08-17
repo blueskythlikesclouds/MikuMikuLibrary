@@ -8,10 +8,15 @@ namespace MikuMikuModel.Modules.IO
         public override string Name => "Stream";
         public override string[] Extensions => new[] { "*" };
 
-        public override Stream Import( string fileName ) =>
-            Import( File.OpenRead( fileName ), Path.GetFileName( fileName ) );
+        public override Stream Import( string fileName )
+        {
+            return Import( File.OpenRead( fileName ), Path.GetFileName( fileName ) );
+        }
 
-        protected override Stream ImportCore( Stream source, string fileName ) => source;
+        protected override Stream ImportCore( Stream source, string fileName )
+        {
+            return source;
+        }
 
         protected override void ExportCore( Stream model, Stream destination, string fileName )
         {

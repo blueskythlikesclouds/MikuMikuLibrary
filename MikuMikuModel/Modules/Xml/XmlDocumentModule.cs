@@ -16,7 +16,9 @@ namespace MikuMikuModel.Modules.Xml
             return document;
         }
 
-        protected override void ExportCore( XmlDocument model, Stream destination, string fileName ) =>
+        protected override void ExportCore( XmlDocument model, Stream destination, string fileName )
+        {
             model.Save( destination );
+        }
     }
 }

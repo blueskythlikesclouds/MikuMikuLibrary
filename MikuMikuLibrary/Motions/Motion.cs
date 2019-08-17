@@ -209,17 +209,24 @@ namespace MikuMikuLibrary.Motions
                 }
 
                 else if ( boneInfo.Name.Equals( "gblctr", StringComparison.OrdinalIgnoreCase ) )
+                {
                     binding.GlobalTransformation.Position = BindNext();
+                }
 
                 else if ( boneInfo.Name.Equals( "kg_ya_ex", StringComparison.OrdinalIgnoreCase ) )
-                    binding.GlobalTransformation.Rotation = BindNext();
-
-                KeyBinding BindNext() => new KeyBinding
                 {
-                    X = KeySets[ index++ ],
-                    Y = KeySets[ index++ ],
-                    Z = KeySets[ index++ ],
-                };
+                    binding.GlobalTransformation.Rotation = BindNext();
+                }
+
+                KeyBinding BindNext()
+                {
+                    return new KeyBinding
+                    {
+                        X = KeySets[ index++ ],
+                        Y = KeySets[ index++ ],
+                        Z = KeySets[ index++ ]
+                    };
+                }
             }
 
             return mBinding = binding;
@@ -236,7 +243,9 @@ namespace MikuMikuLibrary.Motions
         public void Load( string filePath, Skeleton skeleton )
         {
             using ( var stream = File.OpenRead( filePath ) )
+            {
                 Load( stream, skeleton );
+            }
         }
 
         public void Save( Stream destination, Skeleton skeleton, bool leaveOpen = false )
@@ -250,7 +259,9 @@ namespace MikuMikuLibrary.Motions
         public void Save( string filePath, Skeleton skeleton )
         {
             using ( var stream = File.Create( filePath ) )
+            {
                 Save( stream, skeleton );
+            }
         }
 
         public Motion()

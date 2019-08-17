@@ -29,33 +29,45 @@ namespace MikuMikuModel.Modules
 
             var buffer = new byte[ 16 ];
             using ( var stream = streamGetter() )
+            {
                 stream.Read( buffer, 0, 16 );
+            }
 
             moduleList.RemoveAll( x => !x.Match( buffer ) );
             return moduleList.Count != 1 ? null : moduleList[ 0 ];
         }
 
         public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string fileName,
-            Func<Stream> streamGetter ) =>
-            GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName,
+            Func<Stream> streamGetter )
+        {
+            return GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName,
                 streamGetter );
+        }
 
-        public static IFormatModule GetModule( IEnumerable<IFormatModule> modulesToMatch, string filePath ) =>
-            GetModule( modulesToMatch, Path.GetFileName( filePath ), () => File.OpenRead( filePath ) );
+        public static IFormatModule GetModule( IEnumerable<IFormatModule> modulesToMatch, string filePath )
+        {
+            return GetModule( modulesToMatch, Path.GetFileName( filePath ), () => File.OpenRead( filePath ) );
+        }
 
-        public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string filePath ) =>
-            GetModule( modelTypesToMatch, Path.GetFileName( filePath ), () => File.OpenRead( filePath ) );
+        public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string filePath )
+        {
+            return GetModule( modelTypesToMatch, Path.GetFileName( filePath ), () => File.OpenRead( filePath ) );
+        }
 
-        public static IFormatModule GetModule( string fileName, Func<Stream> streamGetter ) =>
-            GetModule( FormatModuleRegistry.Modules, fileName, streamGetter );
+        public static IFormatModule GetModule( string fileName, Func<Stream> streamGetter )
+        {
+            return GetModule( FormatModuleRegistry.Modules, fileName, streamGetter );
+        }
 
-        public static IFormatModule GetModule( string filePath ) =>
-            GetModule( FormatModuleRegistry.Modules, filePath );
+        public static IFormatModule GetModule( string filePath )
+        {
+            return GetModule( FormatModuleRegistry.Modules, filePath );
+        }
 
         public static T ImportFile<T>( string filePath )
         {
             if ( !FormatModuleRegistry.ModulesByType.TryGetValue( typeof( T ), out var module ) )
-                return default( T );
+                return default;
 
             return ( T ) module.Import( filePath );
         }

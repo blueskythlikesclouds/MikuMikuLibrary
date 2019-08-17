@@ -1,5 +1,5 @@
-﻿using MikuMikuLibrary.IO.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.IO.Sections
 {
@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.IO.Sections
             data.Sort();
 
             long currentOffset = 0;
-            foreach ( var offset in data )
+            foreach ( long offset in data )
             {
                 long distance = ( offset - currentOffset ) >> 2;
 
@@ -47,7 +47,7 @@ namespace MikuMikuLibrary.IO.Sections
 
             writer.Write( 4 + AlignmentUtilities.Align( bytes.Count, 4 ) );
 
-            foreach ( var val in bytes )
+            foreach ( byte val in bytes )
                 writer.Write( val );
 
             writer.WriteAlignmentPadding( 4 );
@@ -76,7 +76,7 @@ namespace MikuMikuLibrary.IO.Sections
             data.Sort();
 
             long currentOffset = 0;
-            foreach ( var offset in data )
+            foreach ( long offset in data )
             {
                 long distance = ( offset - currentOffset ) >> 3;
 
@@ -102,7 +102,7 @@ namespace MikuMikuLibrary.IO.Sections
 
             writer.Write( 4 + AlignmentUtilities.Align( bytes.Count, 4 ) );
 
-            foreach ( var val in bytes )
+            foreach ( byte val in bytes )
                 writer.Write( val );
 
             writer.WriteAlignmentPadding( 8 );

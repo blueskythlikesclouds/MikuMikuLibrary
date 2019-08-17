@@ -10,8 +10,10 @@ namespace MikuMikuModel.Modules.Motions
         public override string Name => "Motion";
         public override string[] Extensions => new[] { "mot" };
 
-        public override bool Match( byte[] buffer ) =>
-            buffer[ 0 ] == 'M' && buffer[ 1 ] == 'O' && buffer[ 2 ] == 'T' && buffer[ 3 ] == 'C';
+        public override bool Match( byte[] buffer )
+        {
+            return buffer[ 0 ] == 'M' && buffer[ 1 ] == 'O' && buffer[ 2 ] == 'T' && buffer[ 3 ] == 'C';
+        }
 
         protected override Motion ImportCore( Stream source, string fileName )
         {

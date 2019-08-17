@@ -9,10 +9,14 @@ namespace MikuMikuModel.Modules.Textures
         public override string Name => "Texture";
         public override string[] Extensions => new[] { "dds" };
 
-        protected override Texture ImportCore( Stream source, string fileName ) =>
-            TextureEncoder.Encode( source );
+        protected override Texture ImportCore( Stream source, string fileName )
+        {
+            return TextureEncoder.Encode( source );
+        }
 
-        protected override void ExportCore( Texture model, Stream destination, string fileName ) =>
+        protected override void ExportCore( Texture model, Stream destination, string fileName )
+        {
             TextureDecoder.DecodeToDDS( model, destination );
+        }
     }
 }

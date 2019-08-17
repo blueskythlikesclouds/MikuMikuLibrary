@@ -10,31 +10,28 @@ namespace MikuMikuLibrary.IO.Common
     public class StreamView : Stream
     {
         private readonly Stream mStream;
-        private long mSourcePositionCopy;
         private readonly long mStreamPosition;
-        private long mPosition;
-        private long mLength;
         private readonly long mMaxLength;
         private readonly bool mLeaveOpen;
+        private long mSourcePositionCopy;
+        private long mPosition;
+        private long mLength;
 
-        public StreamView( Stream source, long position, long length, bool leaveOpen = true )
+        public override bool CanRead => mStream.CanRead;
+
+        public override bool CanSeek => mStream.CanSeek;
+
+        public override bool CanWrite => mStream.CanWrite;
+
+        public override long Length => mLength;
+
+        public override long Position
         {
-            if ( source == null )
-                throw new ArgumentNullException( nameof( source ) );
-
-            if ( position < 0 ||
-                 ( source.CanSeek && ( position >= source.Length || position + length > source.Length ) ) )
-                throw new ArgumentOutOfRangeException( nameof( position ) );
-
-            if ( length < 0 )
-                throw new ArgumentOutOfRangeException( nameof( length ) );
-
-            mStream = source;
-            mStreamPosition = position;
-            mPosition = 0;
-            mMaxLength = mLength = length;
-            mLeaveOpen = leaveOpen;
+            get => mPosition;
+            set => mPosition = value;
         }
+
+        public bool EndOfStream => mPosition == mMaxLength;
 
         public override void Flush()
         {
@@ -130,34 +127,6 @@ namespace MikuMikuLibrary.IO.Common
             if ( mStream.CanSeek )
                 RestorePosition();
         }
-
-        public override bool CanRead
-        {
-            get { return mStream.CanRead; }
-        }
-
-        public override bool CanSeek
-        {
-            get { return mStream.CanSeek; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return mStream.CanWrite; }
-        }
-
-        public override long Length
-        {
-            get { return mLength; }
-        }
-
-        public override long Position
-        {
-            get { return mPosition; }
-            set { mPosition = value; }
-        }
-
-        public bool EndOfStream => mPosition == mMaxLength;
 
         public override int ReadByte()
         {
@@ -287,6 +256,25 @@ namespace MikuMikuLibrary.IO.Common
                 mStream.Dispose();
 
             base.Dispose( disposing );
+        }
+
+        public StreamView( Stream source, long position, long length, bool leaveOpen = true )
+        {
+            if ( source == null )
+                throw new ArgumentNullException( nameof( source ) );
+
+            if ( position < 0 ||
+                 source.CanSeek && ( position >= source.Length || position + length > source.Length ) )
+                throw new ArgumentOutOfRangeException( nameof( position ) );
+
+            if ( length < 0 )
+                throw new ArgumentOutOfRangeException( nameof( length ) );
+
+            mStream = source;
+            mStreamPosition = position;
+            mPosition = 0;
+            mMaxLength = mLength = length;
+            mLeaveOpen = leaveOpen;
         }
     }
 }

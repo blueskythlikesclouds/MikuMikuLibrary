@@ -11,7 +11,7 @@ namespace MikuMikuLibrary.Textures.DDS
     {
         Complex = 0x8,
         MipMap = 0x400000,
-        Texture = 0x1000,
+        Texture = 0x1000
     }
 
     [Flags]
@@ -24,6 +24,6 @@ namespace MikuMikuLibrary.Textures.DDS
         CubeMapNegativeY = 0x2000,
         CubeMapPositiveZ = 0x4000,
         CubeMapNegativeZ = 0x8000,
-        Volume = 0x200000,
+        Volume = 0x200000
     }
 }

@@ -36,7 +36,10 @@ namespace MikuMikuLibrary.IO.Sections
             return sectionInfo;
         }
 
-        public static SectionInfo Register<T>() where T : ISection => GetOrRegisterSectionInfo( typeof( T ) );
+        public static SectionInfo Register<T>() where T : ISection
+        {
+            return GetOrRegisterSectionInfo( typeof( T ) );
+        }
 
         static SectionRegistry()
         {

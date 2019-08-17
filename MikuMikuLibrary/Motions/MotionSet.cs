@@ -57,7 +57,9 @@ namespace MikuMikuLibrary.Motions
         public void Load( string filePath, Skeleton skeleton, MotionDatabase motionDatabase )
         {
             using ( var stream = File.OpenRead( filePath ) )
+            {
                 Load( stream, skeleton, motionDatabase );
+            }
 
             if ( motionDatabase == null )
                 return;
@@ -80,10 +82,8 @@ namespace MikuMikuLibrary.Motions
         public void Save( Stream destination, Skeleton skeleton, MotionDatabase motionDatabase, bool leaveOpen = false )
         {
             if ( skeleton != null && motionDatabase != null )
-            {
                 foreach ( var motion in Motions.Where( x => x.HasBinding ) )
                     motion.Bind().Unbind( skeleton, motionDatabase );
-            }
 
             Save( destination, leaveOpen );
         }
@@ -91,7 +91,9 @@ namespace MikuMikuLibrary.Motions
         public void Save( string filePath, Skeleton skeleton, MotionDatabase motionDatabase )
         {
             using ( var stream = File.Create( filePath ) )
+            {
                 Save( stream, skeleton, motionDatabase );
+            }
         }
 
         public MotionSet()

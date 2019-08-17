@@ -13,9 +13,12 @@ namespace MikuMikuLibrary.IO.Sections.IO
             }
         }
 
-        protected override void Write( T data, EndianBinaryWriter writer ) => data.Write( writer, this );
+        protected override void Write( T data, EndianBinaryWriter writer )
+        {
+            data.Write( writer, this );
+        }
 
-        protected BinaryFileSection( SectionMode mode, T data = default( T ) ) : base( mode, data )
+        protected BinaryFileSection( SectionMode mode, T data = default ) : base( mode, data )
         {
             if ( mode != SectionMode.Write )
                 return;

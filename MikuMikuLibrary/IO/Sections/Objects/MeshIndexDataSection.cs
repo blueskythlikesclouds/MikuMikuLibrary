@@ -1,5 +1,5 @@
-﻿using MikuMikuLibrary.IO.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.IO.Sections.Objects
 {

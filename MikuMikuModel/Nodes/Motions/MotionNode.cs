@@ -49,8 +49,10 @@ namespace MikuMikuModel.Nodes.Motions
             } );
         }
 
-        protected override void Load( Motion data, Stream source ) =>
+        protected override void Load( Motion data, Stream source )
+        {
             data.Load( source, SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ] );
+        }
 
         protected override void PopulateCore()
         {
@@ -65,7 +67,6 @@ namespace MikuMikuModel.Nodes.Motions
                 }
                 catch ( ArgumentNullException )
                 {
-
                 }
             }
 

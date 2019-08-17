@@ -1,7 +1,7 @@
-﻿using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Misc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.Misc;
 
 namespace MikuMikuLibrary.Materials
 {

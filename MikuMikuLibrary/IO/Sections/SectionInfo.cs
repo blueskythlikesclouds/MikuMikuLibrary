@@ -18,8 +18,10 @@ namespace MikuMikuLibrary.IO.Sections
 
         public IReadOnlyDictionary<SectionInfo, SubSectionInfo> SubSectionInfos => mSubSectionInfos;
 
-        public ISection Create( SectionMode mode, object obj = null ) =>
-            ( ISection ) Activator.CreateInstance( SectionType, mode, obj );
+        public ISection Create( SectionMode mode, object obj = null )
+        {
+            return ( ISection ) Activator.CreateInstance( SectionType, mode, obj );
+        }
 
         internal SectionInfo( Type sectionType )
         {
@@ -64,11 +66,15 @@ namespace MikuMikuLibrary.IO.Sections
         public string Signature { get; }
         public Type DataType { get; }
 
-        public SectionAttribute( string signature ) =>
+        public SectionAttribute( string signature )
+        {
             Signature = signature;
+        }
 
-        public SectionAttribute( string signature, Type dataType ) : this( signature ) =>
+        public SectionAttribute( string signature, Type dataType ) : this( signature )
+        {
             DataType = dataType;
+        }
     }
 
     public class SubSectionInfo
@@ -87,7 +93,9 @@ namespace MikuMikuLibrary.IO.Sections
                 list.Add( IsSectionType ? section : section.Data );
             }
             else
+            {
                 PropertyInfo.SetValue( obj, IsSectionType ? section : section.Data );
+            }
         }
 
         public IEnumerable<ISection> ProcessPropertyForWriting( object obj )
@@ -99,15 +107,11 @@ namespace MikuMikuLibrary.IO.Sections
                 {
                     var list = value as IList;
                     if ( IsSectionType )
-                    {
                         foreach ( var item in list )
                             yield return ( ISection ) item;
-                    }
                     else
-                    {
                         foreach ( var item in list )
                             yield return SectionInfo.Create( SectionMode.Write, item );
-                    }
                 }
                 else
                 {
@@ -125,13 +129,11 @@ namespace MikuMikuLibrary.IO.Sections
 
             Type genericType = null;
             for ( var type = propertyInfo.PropertyType; type != null; type = type.BaseType )
-            {
                 if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof( List<> ) )
                 {
                     genericType = type.GetGenericArguments()[ 0 ];
                     break;
                 }
-            }
 
             if ( genericType != null )
             {
@@ -164,11 +166,15 @@ namespace MikuMikuLibrary.IO.Sections
         public int Priority { get; }
         public Type SectionType { get; }
 
-        public SubSectionAttribute( [CallerLineNumber] int priority = int.MaxValue ) =>
+        public SubSectionAttribute( [CallerLineNumber] int priority = int.MaxValue )
+        {
             Priority = priority;
+        }
 
         public SubSectionAttribute( Type sectionType, [CallerLineNumber] int priority = int.MaxValue ) :
-            this( priority ) =>
+            this( priority )
+        {
             SectionType = sectionType;
+        }
     }
 }

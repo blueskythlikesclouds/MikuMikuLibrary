@@ -1,19 +1,19 @@
-﻿using MikuMikuLibrary.Objects;
-using MikuMikuLibrary.Textures;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using MikuMikuLibrary.Objects;
+using MikuMikuLibrary.Textures;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
-    public class GLObject : IGLDraw
+    public class GLObject : IDrawable
     {
         public List<GLMesh> Meshes { get; }
         public List<GLMaterial> Materials { get; }
 
         public void Dispose()
         {
-            foreach ( var subMesh in Meshes )
-                subMesh.Dispose();
+            foreach ( var mesh in Meshes )
+                mesh.Dispose();
 
             foreach ( var material in Materials )
                 material.Dispose();
@@ -21,10 +21,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public void Draw( GLShaderProgram shaderProgram )
         {
-            foreach ( var subMesh in Meshes )
-            {
-                subMesh.Draw( shaderProgram );
-            }
+            foreach ( var mesh in Meshes ) mesh.Draw( shaderProgram );
         }
 
         public GLObject( Object obj, Dictionary<int, GLTexture> textures, TextureSet textureSet )

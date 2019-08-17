@@ -2,7 +2,7 @@
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
-    internal interface IGLDraw : IDisposable
+    internal interface IDrawable : IDisposable
     {
         void Draw( GLShaderProgram shaderProgram );
     }

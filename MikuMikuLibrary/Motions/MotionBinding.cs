@@ -66,7 +66,7 @@ namespace MikuMikuLibrary.Motions
                 {
                     Name = name,
                     Id = motionDatabase?.BoneNames?.FindIndex(
-                             x => x.Equals( name, StringComparison.OrdinalIgnoreCase ) ) ?? -1,
+                             x => x.Equals( name, StringComparison.OrdinalIgnoreCase ) ) ?? -1
                 } );
             }
         }

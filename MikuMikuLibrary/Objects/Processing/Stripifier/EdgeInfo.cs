@@ -5,9 +5,9 @@
 namespace NvTriStripDotNet
 {
     /// <summary>
-    /// Nice and dumb edge class that points knows its
-    /// indices, the two faces, and the next edge using
-    /// the lesser of the indices.
+    ///     Nice and dumb edge class that points knows its
+    ///     indices, the two faces, and the next edge using
+    ///     the lesser of the indices.
     /// </summary>
     internal class EdgeInfo
     {

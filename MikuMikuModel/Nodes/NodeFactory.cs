@@ -45,8 +45,10 @@ namespace MikuMikuModel.Nodes
             return Create( module.ModelType, Path.GetFileName( filePath ), module.Import( filePath ) );
         }
 
-        public static INode Create( string filePath ) =>
-            Create( filePath, FormatModuleRegistry.ModelTypes );
+        public static INode Create( string filePath )
+        {
+            return Create( filePath, FormatModuleRegistry.ModelTypes );
+        }
 
         static NodeFactory()
         {
@@ -58,16 +60,12 @@ namespace MikuMikuModel.Nodes
                 x => typeof( INode ).IsAssignableFrom( x ) && x.IsClass && !x.IsAbstract );
 
             foreach ( var type in types )
-            {
                 for ( var baseType = type.BaseType; baseType != null; baseType = baseType.BaseType )
-                {
                     if ( baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof( Node<> ) )
                     {
                         sNodeTypes[ baseType.GetGenericArguments()[ 0 ] ] = type;
                         break;
                     }
-                }
-            }
         }
     }
 }

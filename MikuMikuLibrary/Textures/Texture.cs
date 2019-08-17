@@ -1,11 +1,11 @@
-﻿using MikuMikuLibrary.IO.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Textures
 {
-    public partial class Texture
+    public class Texture
     {
         private SubTexture[ , ] mSubTextures;
 
@@ -44,7 +44,7 @@ namespace MikuMikuLibrary.Textures
         {
             reader.PushBaseOffset();
 
-            var signature = reader.ReadInt32();
+            int signature = reader.ReadInt32();
             if ( signature != 0x04505854 && signature != 0x05505854 )
                 throw new InvalidDataException( "Invalid signature (expected TXP with type 4 or 5)" );
 
@@ -59,12 +59,8 @@ namespace MikuMikuLibrary.Textures
 
             mSubTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )
-            {
-                for ( int j = 0; j < mipMapCount; j++ )
-                {
-                    reader.ReadOffset( () => { mSubTextures[ i, j ] = new SubTexture( reader ); } );
-                }
-            }
+            for ( int j = 0; j < mipMapCount; j++ )
+                reader.ReadOffset( () => { mSubTextures[ i, j ] = new SubTexture( reader ); } );
 
             reader.PopBaseOffset();
         }
@@ -77,12 +73,10 @@ namespace MikuMikuLibrary.Textures
             writer.Write( MipMapCount | ( Depth << 8 ) | 0x01010000 );
 
             for ( int i = 0; i < Depth; i++ )
+            for ( int j = 0; j < MipMapCount; j++ )
             {
-                for ( int j = 0; j < MipMapCount; j++ )
-                {
-                    var subTexture = mSubTextures[ i, j ];
-                    writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { subTexture.Write( writer ); } );
-                }
+                var subTexture = mSubTextures[ i, j ];
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { subTexture.Write( writer ); } );
             }
 
             writer.PopBaseOffset();
@@ -97,12 +91,8 @@ namespace MikuMikuLibrary.Textures
 
             mSubTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )
-            {
-                for ( int j = 0; j < mipMapCount; j++ )
-                {
-                    mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, i * mipMapCount + j );
-                }
-            }
+            for ( int j = 0; j < mipMapCount; j++ )
+                mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, i * mipMapCount + j );
         }
 
         internal Texture( EndianBinaryReader reader )

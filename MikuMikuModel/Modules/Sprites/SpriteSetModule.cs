@@ -11,22 +11,32 @@ namespace MikuMikuModel.Modules.Sprites
         public override string Name => "Sprite Set";
         public override string[] Extensions => new[] { "bin", "spr" };
 
-        public override bool Match( string fileName ) =>
-            fileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase )
+        public override bool Match( string fileName )
+        {
+            return fileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase )
                 ? fileName.StartsWith( "spr_", StringComparison.OrdinalIgnoreCase ) // TODO: Should this check be done?
                 : base.Match( fileName );
+        }
 
-        public override bool Match( byte[] buffer ) =>
-            buffer[ 0 ] == 'S' && buffer[ 1 ] == 'P' && buffer[ 2 ] == 'R' && buffer[ 3 ] == 'C' ||
-            buffer[ 0 ] == 0 && buffer[ 1 ] == 0 && buffer[ 2 ] == 0 && buffer[ 3 ] == 0;
+        public override bool Match( byte[] buffer )
+        {
+            return buffer[ 0 ] == 'S' && buffer[ 1 ] == 'P' && buffer[ 2 ] == 'R' && buffer[ 3 ] == 'C' ||
+                   buffer[ 0 ] == 0 && buffer[ 1 ] == 0 && buffer[ 2 ] == 0 && buffer[ 3 ] == 0;
+        }
 
-        public override SpriteSet Import( string filePath ) =>
-            BinaryFile.Load<SpriteSet>( filePath );
+        public override SpriteSet Import( string filePath )
+        {
+            return BinaryFile.Load<SpriteSet>( filePath );
+        }
 
-        protected override SpriteSet ImportCore( Stream source, string fileName ) =>
-            BinaryFile.Load<SpriteSet>( source, true );
+        protected override SpriteSet ImportCore( Stream source, string fileName )
+        {
+            return BinaryFile.Load<SpriteSet>( source, true );
+        }
 
-        protected override void ExportCore( SpriteSet model, Stream destination, string fileName ) =>
+        protected override void ExportCore( SpriteSet model, Stream destination, string fileName )
+        {
             model.Save( destination, true );
+        }
     }
 }

@@ -1,11 +1,11 @@
-﻿using MikuMikuModel.Resources;
-using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using MikuMikuModel.Resources;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
@@ -18,6 +18,12 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public string Name { get; }
         public int Id { get; }
+
+        public void Dispose()
+        {
+            Dispose( true );
+            GC.SuppressFinalize( this );
+        }
 
         public void Use()
         {
@@ -78,22 +84,13 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public int GetUniformLocation( string name )
         {
-            if ( mUniforms.TryGetValue( name, out int location ) )
-                return location;
-            else
-            {
-                Debug.WriteLine( $"GetUniformLocation: {name}" );
+            if ( mUniforms.TryGetValue( name, out int location ) ) return location;
 
-                location = GL.GetUniformLocation( Id, name );
-                mUniforms.Add( name, location );
-                return location;
-            }
-        }
+            Debug.WriteLine( $"GetUniformLocation: {name}" );
 
-        public void Dispose()
-        {
-            Dispose( true );
-            GC.SuppressFinalize( this );
+            location = GL.GetUniformLocation( Id, name );
+            mUniforms.Add( name, location );
+            return location;
         }
 
         protected void Dispose( bool disposing )
@@ -107,11 +104,11 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public static GLShaderProgram Create( string shaderName )
         {
-            if ( sShaderPrograms.TryGetValue( shaderName, out GLShaderProgram shaderProgram ) )
+            if ( sShaderPrograms.TryGetValue( shaderName, out var shaderProgram ) )
                 return shaderProgram;
 
-            var fragmentShaderFilePath = ResourceStore.GetPath( Path.Combine( "Shaders", shaderName + ".frag" ) );
-            var vertexShaderFilePath = ResourceStore.GetPath( Path.Combine( "Shaders", shaderName + ".vert" ) );
+            string fragmentShaderFilePath = ResourceStore.GetPath( Path.Combine( "Shaders", shaderName + ".frag" ) );
+            string vertexShaderFilePath = ResourceStore.GetPath( Path.Combine( "Shaders", shaderName + ".vert" ) );
 
             if ( !File.Exists( fragmentShaderFilePath ) || !File.Exists( vertexShaderFilePath ) )
                 return null;
@@ -124,7 +121,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             if ( vertexShader == -1 )
                 return null;
 
-            var shaderProgramId = GL.CreateProgram();
+            int shaderProgramId = GL.CreateProgram();
             GL.AttachShader( shaderProgramId, fragmentShader );
             GL.AttachShader( shaderProgramId, vertexShader );
             GL.LinkProgram( shaderProgramId );
@@ -147,7 +144,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             if ( compileStatus == 0 )
             {
                 Debug.WriteLine(
-                    $"Shader compile failed for {shaderType}, error message: {GL.GetShaderInfoLog( shader )}" );
+                    $"Shader compilation failed for {shaderType}, error message: {GL.GetShaderInfoLog( shader )}" );
                 GL.DeleteShader( shader );
                 return -1;
             }
@@ -160,6 +157,11 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Dispose( false );
         }
 
+        static GLShaderProgram()
+        {
+            sShaderPrograms = new Dictionary<string, GLShaderProgram>( StringComparer.OrdinalIgnoreCase );
+        }
+
         private GLShaderProgram( string name, int shaderProgram )
         {
             mUniforms = new Dictionary<string, int>( StringComparer.OrdinalIgnoreCase );
@@ -167,11 +169,6 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Name = name;
             Id = shaderProgram;
             RegisterUniforms();
-        }
-
-        static GLShaderProgram()
-        {
-            sShaderPrograms = new Dictionary<string, GLShaderProgram>( StringComparer.OrdinalIgnoreCase );
         }
     }
 }

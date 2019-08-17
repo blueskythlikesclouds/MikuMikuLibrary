@@ -6,10 +6,10 @@ namespace MikuMikuLibrary.IO.Sections.Databases
     [Section( "MTXI" )]
     public class TextureDatabaseSection : BinaryFileSection<TextureDatabase>
     {
+        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
+
         public TextureDatabaseSection( SectionMode mode, TextureDatabase data = null ) : base( mode, data )
         {
         }
-
-        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
     }
 }

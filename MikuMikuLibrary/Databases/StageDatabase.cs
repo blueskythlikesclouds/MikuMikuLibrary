@@ -1,8 +1,8 @@
-﻿using MikuMikuLibrary.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
-using System.Collections.Generic;
-using System.IO;
 
 namespace MikuMikuLibrary.Databases
 {
@@ -38,7 +38,7 @@ namespace MikuMikuLibrary.Databases
             WaterSplashOnFeet = 12,
             Fog = 16,
             LightProjection = 19,
-            Stars = 20,
+            Stars = 20
         }
 
         public string Name { get; set; }
@@ -170,7 +170,7 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Field16 );
             writer.Write( Field17 );
             writer.Write( Field18 );
-            foreach ( StageEffect stageEffect in StageEffects )
+            foreach ( var stageEffect in StageEffects )
                 writer.Write( ( int ) stageEffect );
         }
 
@@ -193,7 +193,7 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Id );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( var id in Auth3dIds )
+                foreach ( int id in Auth3dIds )
                     writer.Write( id );
 
                 writer.Write( -1 );

@@ -20,8 +20,6 @@ namespace MikuMikuModel.Nodes.IO
         private bool mLoaded;
         private bool mDirty;
 
-        public event EventHandler DirtyStateChanged;
-
         protected override T InternalData
         {
             get
@@ -39,6 +37,20 @@ namespace MikuMikuModel.Nodes.IO
                 return internalData;
             }
         }
+
+        public Endianness Endianness
+        {
+            get => GetProperty<Endianness>();
+            set => SetProperty( value );
+        }
+
+        public BinaryFormat Format
+        {
+            get => GetProperty<BinaryFormat>();
+            set => SetProperty( value );
+        }
+
+        public event EventHandler DirtyStateChanged;
 
         [Browsable( false )]
         public virtual bool IsDirty
@@ -64,22 +76,15 @@ namespace MikuMikuModel.Nodes.IO
         public override Bitmap Image =>
             ResourceStore.LoadBitmap( "Icons/File.png" );
 
-        public Endianness Endianness
+        public virtual Stream GetStream()
         {
-            get => GetProperty<Endianness>();
-            set => SetProperty( value );
+            return new DynamicStream( this );
         }
 
-        public BinaryFormat Format
+        protected virtual void Load( T data, Stream source )
         {
-            get => GetProperty<BinaryFormat>();
-            set => SetProperty( value );
-        }
-
-        public virtual Stream GetStream() => new DynamicStream( this );
-
-        protected virtual void Load( T data, Stream source ) =>
             data.Load( source );
+        }
 
         private void InitializeSubscription( INode node, bool unsubscribe )
         {
@@ -89,7 +94,9 @@ namespace MikuMikuModel.Nodes.IO
             if ( unsubscribe )
             {
                 if ( node is IDirtyNode dirtyNode )
+                {
                     dirtyNode.DirtyStateChanged -= OnNodeDirtyStateChanged;
+                }
                 else
                 {
                     node.PropertyChanged -= OnNodePropertyChanged;
@@ -105,7 +112,9 @@ namespace MikuMikuModel.Nodes.IO
             else
             {
                 if ( node is IDirtyNode dirtyNode )
+                {
                     dirtyNode.DirtyStateChanged += OnNodeDirtyStateChanged;
+                }
                 else
                 {
                     node.PropertyChanged += OnNodePropertyChanged;
@@ -116,14 +125,35 @@ namespace MikuMikuModel.Nodes.IO
                 }
             }
 
-            void OnNodeDirtyStateChanged( object sender, EventArgs args ) =>
+            void OnNodeDirtyStateChanged( object sender, EventArgs args )
+            {
                 IsDirty = ( ( IDirtyNode ) sender ).IsDirty || IsDirty;
+            }
 
-            void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args ) => IsDirty = true;
-            void OnNodeAdded( object sender, NodeAddEventArgs args ) => InitializeSubscription( args.AddedNode, false );
-            void OnNodeRemoved( object sender, NodeRemoveEventArgs args ) => IsDirty = true;
-            void OnNodeReplaced( object sender, NodeReplaceEventArgs args ) => IsDirty = true;
-            void OnNodeMoved( object sender, NodeMoveEventArgs args ) => IsDirty = true;
+            void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args )
+            {
+                IsDirty = true;
+            }
+
+            void OnNodeAdded( object sender, NodeAddEventArgs args )
+            {
+                InitializeSubscription( args.AddedNode, false );
+            }
+
+            void OnNodeRemoved( object sender, NodeRemoveEventArgs args )
+            {
+                IsDirty = true;
+            }
+
+            void OnNodeReplaced( object sender, NodeReplaceEventArgs args )
+            {
+                IsDirty = true;
+            }
+
+            void OnNodeMoved( object sender, NodeMoveEventArgs args )
+            {
+                IsDirty = true;
+            }
         }
 
         protected override void OnPropertyChanged( string propertyName = null )
@@ -172,8 +202,10 @@ namespace MikuMikuModel.Nodes.IO
             base.OnMove( movedNode, previousIndex, newIndex );
         }
 
-        protected virtual void OnDirtyStateChanged() =>
+        protected virtual void OnDirtyStateChanged()
+        {
             DirtyStateChanged?.Invoke( this, EventArgs.Empty );
+        }
 
         protected override void Initialize()
         {

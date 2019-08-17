@@ -1,7 +1,7 @@
-﻿using MikuMikuLibrary.IO;
+﻿using System.Collections.Generic;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
-using System.Collections.Generic;
 using MikuMikuLibrary.Skeletons;
 
 namespace MikuMikuLibrary.Databases
@@ -24,14 +24,12 @@ namespace MikuMikuLibrary.Databases
             {
                 Skeletons.Capacity = skeletonCount;
                 for ( int i = 0; i < skeletonCount; i++ )
-                {
                     reader.ReadAtOffset( reader.ReadUInt32(), () =>
                     {
                         var skeleton = new Skeleton();
                         skeleton.Read( reader );
                         Skeletons.Add( skeleton );
                     } );
-                }
             } );
 
             reader.ReadAtOffset( skeletonNamesOffset, () =>

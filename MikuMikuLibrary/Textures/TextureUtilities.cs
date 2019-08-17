@@ -1,10 +1,10 @@
-﻿using MikuMikuLibrary.Databases;
-using MikuMikuLibrary.Objects;
-using MikuMikuLibrary.Textures.DDS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.Objects;
+using MikuMikuLibrary.Textures.DDS;
 
 namespace MikuMikuLibrary.Textures
 {
@@ -39,8 +39,7 @@ namespace MikuMikuLibrary.Textures
         {
             if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
                 return texture.Name + ".png";
-            else
-                return texture.Name + ".dds";
+            return texture.Name + ".dds";
         }
 
         public static void SaveTextures( TextureSet textures, string outputDirectory )
@@ -48,12 +47,10 @@ namespace MikuMikuLibrary.Textures
             Directory.CreateDirectory( outputDirectory );
 
             foreach ( var texture in textures.Textures )
-            {
                 if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
                     TextureDecoder.DecodeToPNG( texture, Path.Combine( outputDirectory, texture.Name + ".png" ) );
                 else
                     TextureDecoder.DecodeToDDS( texture, Path.Combine( outputDirectory, texture.Name + ".dds" ) );
-            }
         }
 
         public static void ReAssignTextureIDs( ObjectSet model, List<int> newTextureIds )
@@ -68,12 +65,10 @@ namespace MikuMikuLibrary.Textures
 
             foreach ( var materialTexture in model.Objects.SelectMany( x => x.Materials )
                 .SelectMany( x => x.MaterialTextures ) )
-            {
                 if ( dictionary.TryGetValue( materialTexture.TextureId, out int id ) )
                     materialTexture.TextureId = id;
                 else
                     materialTexture.TextureId = -1;
-            }
         }
 
         public static DDSPixelFormatFourCC GetDDSPixelFormat( TextureFormat textureFormat )

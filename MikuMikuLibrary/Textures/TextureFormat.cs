@@ -12,7 +12,7 @@ namespace MikuMikuLibrary.Textures
         DXT4 = 8,
         DXT5 = 9,
         ATI1 = 10,
-        ATI2 = 11,
+        ATI2 = 11
     }
 
     public static class TextureFormatUtilities

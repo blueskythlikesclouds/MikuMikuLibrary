@@ -1,6 +1,6 @@
-﻿using MikuMikuLibrary.IO.Sections.IO;
+﻿using System.Collections.Generic;
+using MikuMikuLibrary.IO.Sections.IO;
 using MikuMikuLibrary.Objects;
-using System.Collections.Generic;
 
 namespace MikuMikuLibrary.IO.Sections.Objects
 {

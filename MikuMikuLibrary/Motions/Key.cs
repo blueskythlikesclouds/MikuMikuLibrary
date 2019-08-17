@@ -6,7 +6,9 @@
         public float Tangent { get; set; }
         public int Frame { get; set; }
 
-        public override string ToString() =>
-            $"{Frame}, {Value}, {Tangent}";
+        public override string ToString()
+        {
+            return $"{Frame}, {Value}, {Tangent}";
+        }
     }
 }

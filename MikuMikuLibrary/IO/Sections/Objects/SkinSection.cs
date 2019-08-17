@@ -8,9 +8,15 @@ namespace MikuMikuLibrary.IO.Sections.Objects
     {
         public override SectionFlags Flags => SectionFlags.HasRelocationTable;
 
-        protected override void Read( Skin data, EndianBinaryReader reader, long length ) => data.Read( reader );
+        protected override void Read( Skin data, EndianBinaryReader reader, long length )
+        {
+            data.Read( reader );
+        }
 
-        protected override void Write( Skin data, EndianBinaryWriter writer ) => data.Write( writer );
+        protected override void Write( Skin data, EndianBinaryWriter writer )
+        {
+            data.Write( writer );
+        }
 
         public SkinSection( SectionMode mode, Skin data = null ) : base( mode, data )
         {

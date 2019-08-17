@@ -26,6 +26,6 @@ namespace MikuMikuLibrary.IO
         Load = 1 << 0,
         Save = 1 << 1,
         HasSectionFormat = 1 << 2,
-        UsesSourceStream = 1 << 3,
+        UsesSourceStream = 1 << 3
     }
 }

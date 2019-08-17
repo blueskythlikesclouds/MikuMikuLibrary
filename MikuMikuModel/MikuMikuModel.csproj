@@ -39,6 +39,7 @@
     <AllowedReferenceRelatedFileExtensions>
         .MikuMikuNiShiteAgeru
     </AllowedReferenceRelatedFileExtensions>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>MikuPoke.ico</ApplicationIcon>
@@ -72,6 +73,8 @@
   <ItemGroup>
     <Compile Include="Configurations\Configuration.cs" />
     <Compile Include="Configurations\ConfigurationList.cs" />
+    <Compile Include="GUI\Controls\ModelView\Extensions.cs" />
+    <Compile Include="GUI\Controls\ModelView\IDrawable.cs" />
     <Compile Include="GUI\Forms\FarcArchiveViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -152,7 +155,6 @@
     <Compile Include="GUI\Controls\ModelView\GLShaderProgram.cs" />
     <Compile Include="GUI\Controls\ModelView\GLMesh.cs" />
     <Compile Include="GUI\Controls\ModelView\GLTexture.cs" />
-    <Compile Include="GUI\Controls\ModelView\IGLDraw.cs" />
     <Compile Include="GUI\Controls\TextureViewControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -199,12 +201,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\Shaders\Default.vert">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Shaders\DefaultBasic.frag">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Shaders\DefaultBasic.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\Shaders\Grid.frag">

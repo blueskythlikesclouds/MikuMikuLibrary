@@ -18,8 +18,8 @@ namespace MikuMikuLibrary.Misc
 
             var tag = new Tag();
 
-            var firstIndex = s.IndexOf( '(' );
-            var secondIndex = s.IndexOf( ')' );
+            int firstIndex = s.IndexOf( '(' );
+            int secondIndex = s.IndexOf( ')' );
 
             if ( firstIndex == -1 && secondIndex == -1 )
             {
@@ -31,7 +31,7 @@ namespace MikuMikuLibrary.Misc
                 tag.Key = s.Substring( 1, firstIndex - 1 );
                 tag.Values.AddRange(
                     s.Substring( firstIndex + 1, secondIndex - firstIndex - 1 )
-                        .Split( new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries )
+                        .Split( new[] { ',' }, StringSplitOptions.RemoveEmptyEntries )
                         .Select( x => x.Trim() ) );
             }
 
@@ -62,7 +62,7 @@ namespace MikuMikuLibrary.Misc
             return s;
         }
 
-        public T GetValue<T>( int valueIndex = 0, T defaultValue = default( T ) )
+        public T GetValue<T>( int valueIndex = 0, T defaultValue = default )
         {
             if ( valueIndex < 0 || valueIndex >= Values.Count )
                 return defaultValue;
@@ -78,8 +78,7 @@ namespace MikuMikuLibrary.Misc
         {
             if ( Values.Count <= 0 )
                 return $"@{Key}";
-            else
-                return $"@{Key}({string.Join( ",", Values )})";
+            return $"@{Key}({string.Join( ",", Values )})";
         }
 
         public Tag()
@@ -95,7 +94,7 @@ namespace MikuMikuLibrary.Misc
         public static TagList Parse( string s )
         {
             var tagList = new TagList();
-            var index = s.IndexOf( '@' );
+            int index = s.IndexOf( '@' );
 
             if ( index == -1 )
             {
@@ -119,7 +118,7 @@ namespace MikuMikuLibrary.Misc
             return tagList;
         }
 
-        public T GetValue<T>( string key, int valueIndex = 0, T defaultValue = default( T ) )
+        public T GetValue<T>( string key, int valueIndex = 0, T defaultValue = default )
         {
             var tag = this.FirstOrDefault( x =>
                 x.Key.Equals( key, StringComparison.OrdinalIgnoreCase ) );

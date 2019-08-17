@@ -1,45 +1,49 @@
-﻿using MikuMikuLibrary.Archives;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
+using FarcPack.Properties;
+using MikuMikuLibrary.Archives;
+using MikuMikuLibrary.IO;
 
 namespace FarcPack
 {
-    class Program
+    internal class Program
     {
-        static void Main( string[] args )
+        private static void Main( string[] args )
         {
             if ( args.Length < 1 )
             {
-                Console.WriteLine( Properties.Resources.HelpText );
+                Console.WriteLine( Resources.HelpText );
                 Console.ReadLine();
                 return;
             }
 
             string sourceFileName = null;
             string destinationFileName = null;
-            
+
             bool compress = false;
             int alignment = 16;
 
             for ( int i = 0; i < args.Length; i++ )
             {
                 string arg = args[ i ];
-            
+
                 if ( EqualsAny( "-c", "--compress" ) )
                     compress = true;
-                    
+
                 else if ( EqualsAny( "-a", "--alignment" ) )
                     alignment = int.Parse( args[ ++i ] );
-            
+
                 else if ( sourceFileName == null )
                     sourceFileName = arg;
 
                 else if ( destinationFileName == null )
                     destinationFileName = arg;
-                    
-                bool EqualsAny( params string[] strings ) =>
-                    strings.Contains( arg, StringComparer.OrdinalIgnoreCase );
+
+                bool EqualsAny( params string[] strings )
+                {
+                    return strings.Contains( arg, StringComparer.OrdinalIgnoreCase );
+                }
             }
 
             if ( destinationFileName == null )
@@ -52,8 +56,8 @@ namespace FarcPack
                 var farcArchive = new FarcArchive();
                 farcArchive.IsCompressed = compress;
                 farcArchive.Alignment = alignment;
-                
-                foreach ( var filePath in Directory.EnumerateFiles( sourceFileName ) )
+
+                foreach ( string filePath in Directory.EnumerateFiles( sourceFileName ) )
                     farcArchive.Add( Path.GetFileName( filePath ), filePath );
 
                 farcArchive.Save( destinationFileName );
@@ -65,15 +69,15 @@ namespace FarcPack
 
                 using ( var stream = File.OpenRead( sourceFileName ) )
                 {
-                    var farcArchive = FarcArchive.Load<FarcArchive>( stream );
+                    var farcArchive = BinaryFile.Load<FarcArchive>( stream );
 
                     Directory.CreateDirectory( destinationFileName );
-                    foreach ( var fileName in farcArchive )
-                    {
+                    foreach ( string fileName in farcArchive )
                         using ( var destination = File.Create( Path.Combine( destinationFileName, fileName ) ) )
                         using ( var source = farcArchive.Open( fileName, EntryStreamMode.OriginalStream ) )
+                        {
                             source.CopyTo( destination );
-                    }
+                        }
                 }
             }
         }

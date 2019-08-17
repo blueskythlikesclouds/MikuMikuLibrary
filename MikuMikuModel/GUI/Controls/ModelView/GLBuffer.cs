@@ -1,9 +1,9 @@
-﻿using OpenTK.Graphics.OpenGL;
-using System;
+﻿using System;
+using OpenTK.Graphics.OpenGL;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
-    public class GLBuffer<T> : IDisposable where T : struct
+    public class GLBuffer<T> : IDisposable where T : unmanaged
     {
         public T[] Array { get; }
         public int Id { get; }
@@ -13,15 +13,15 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public int Length => Array.Length;
 
-        public void Bind()
-        {
-            GL.BindBuffer( Target, Id );
-        }
-
         public void Dispose()
         {
             Dispose( true );
             GC.SuppressFinalize( this );
+        }
+
+        public void Bind()
+        {
+            GL.BindBuffer( Target, Id );
         }
 
         protected void Dispose( bool disposing )
@@ -38,13 +38,13 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Dispose( false );
         }
 
-        public GLBuffer( BufferTarget target, T[] array, int stride, BufferUsageHint usageHint )
+        public unsafe GLBuffer( BufferTarget target, T[] array, BufferUsageHint usageHint )
         {
             Array = array;
             Id = GL.GenBuffer();
             Target = target;
             UsageHint = usageHint;
-            Stride = stride;
+            Stride = sizeof( T );
 
             GL.BindBuffer( Target, Id );
             GL.BufferData( Target, Length * Stride, Array, UsageHint );

@@ -49,12 +49,12 @@ namespace MikuMikuModel.Nodes.Archives
                             return;
 
                         foreach ( string handle in Data.Entries )
-                        {
                             using ( var source = Data.Open( handle, EntryStreamMode.OriginalStream ) )
                             using ( var destination =
                                 File.Create( Path.Combine( folderBrowseDialog.SelectedPath, handle ) ) )
+                            {
                                 source.CopyTo( destination );
-                        }
+                            }
                     }
                 }, Keys.Control | Keys.Shift | Keys.E );
         }
@@ -78,7 +78,6 @@ namespace MikuMikuModel.Nodes.Archives
         protected override void SynchronizeCore()
         {
             foreach ( var node in Nodes )
-            {
                 switch ( node )
                 {
                     case IDirtyNode dirtyNode when dirtyNode.IsDirty:
@@ -88,13 +87,10 @@ namespace MikuMikuModel.Nodes.Archives
                         Data.Add( streamNode.Name, streamNode.Data, true, ConflictPolicy.Replace );
                         break;
                 }
-            }
 
             foreach ( string entryName in Data.Entries.Except( Nodes.Select( x => x.Name ),
                 StringComparer.InvariantCultureIgnoreCase ).ToList() )
-            {
                 Data.Remove( entryName );
-            }
         }
 
         public FarcArchiveNode( string name, FarcArchive data ) : base( name, data )

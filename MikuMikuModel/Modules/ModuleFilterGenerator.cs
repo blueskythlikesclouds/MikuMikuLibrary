@@ -6,11 +6,15 @@ namespace MikuMikuModel.Modules
 {
     public static class ModuleFilterGenerator
     {
-        public static string GenerateFilter( IFormatModule module ) =>
-            $"{module.Name}|{string.Join( ";", module.Extensions.Select( x => $"*.{x}" ) )}";
+        public static string GenerateFilter( IFormatModule module )
+        {
+            return $"{module.Name}|{string.Join( ";", module.Extensions.Select( x => $"*.{x}" ) )}";
+        }
 
-        public static string GenerateFilter( Type modelType ) =>
-            GenerateFilter( FormatModuleRegistry.ModulesByType[ modelType ] );
+        public static string GenerateFilter( Type modelType )
+        {
+            return GenerateFilter( FormatModuleRegistry.ModulesByType[ modelType ] );
+        }
 
         public static string GenerateFilter( IEnumerable<IFormatModule> modules, FormatModuleFlags flags )
         {
@@ -27,10 +31,14 @@ namespace MikuMikuModel.Modules
                 string.Join( "|", moduleList.Select( GenerateFilter ) ) );
         }
 
-        public static string GenerateFilter( IEnumerable<Type> modelTypes, FormatModuleFlags flags ) =>
-            GenerateFilter( modelTypes.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), flags );
+        public static string GenerateFilter( IEnumerable<Type> modelTypes, FormatModuleFlags flags )
+        {
+            return GenerateFilter( modelTypes.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), flags );
+        }
 
-        public static string GenerateFilter( FormatModuleFlags flags ) =>
-            GenerateFilter( FormatModuleRegistry.Modules, flags );
+        public static string GenerateFilter( FormatModuleFlags flags )
+        {
+            return GenerateFilter( FormatModuleRegistry.Modules, flags );
+        }
     }
 }

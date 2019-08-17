@@ -20,7 +20,7 @@ namespace MikuMikuLibrary.Geometry
                 Center = Center,
                 Width = Radius * 2,
                 Height = Radius * 2,
-                Depth = Radius * 2,
+                Depth = Radius * 2
             };
         }
 

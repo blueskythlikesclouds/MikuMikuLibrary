@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace MikuMikuLibrary.Objects
 {
@@ -19,28 +20,30 @@ namespace MikuMikuLibrary.Objects
 
     public struct BoneWeight
     {
+        public const float WeightTolerance = 0.0001f;
+
         public static readonly BoneWeight Empty = new BoneWeight
         {
             Index1 = -1,
             Index2 = -1,
             Index3 = -1,
-            Index4 = -1,
+            Index4 = -1
         };
 
         public float Weight1, Weight2, Weight3, Weight4;
         public int Index1, Index2, Index3, Index4;
 
-        public bool IsValid => Weight1 + Weight2 + Weight3 + Weight4 == 1.0f;
+        public bool IsValid => Math.Abs( Weight1 + Weight2 + Weight3 + Weight4 - 1.0f ) < WeightTolerance;
 
         public void Validate()
         {
-            if ( Weight1 != 0 )
+            if ( Math.Abs( Weight1 ) > WeightTolerance )
             {
-                if ( Weight2 != 0 )
+                if ( Math.Abs( Weight2 ) > WeightTolerance )
                 {
-                    if ( Weight3 != 0 )
+                    if ( Math.Abs( Weight3 ) > WeightTolerance )
                     {
-                        if ( Weight4 == 0 )
+                        if ( Math.Abs( Weight4 ) < WeightTolerance )
                         {
                             Index4 = -1;
                             Weight4 = 0;
@@ -65,8 +68,8 @@ namespace MikuMikuLibrary.Objects
                 }
 
                 float sum = Weight1 + Weight2 + Weight3 + Weight4;
-                if ( sum != 1f )
-                    Weight1 = Weight1 + ( 1f - sum );
+                if ( Math.Abs( sum - 1f ) > WeightTolerance )
+                    Weight1 += 1f - sum;
             }
             else
             {
@@ -105,7 +108,9 @@ namespace MikuMikuLibrary.Objects
             }
         }
 
-        public override string ToString() =>
-            $"<({Index1}, {Weight1}), ({Index2}, {Weight2}), ({Index3}, {Weight3}), ({Index4}, {Weight4})>";
+        public override string ToString()
+        {
+            return $"<({Index1}, {Weight1}), ({Index2}, {Weight2}), ({Index3}, {Weight3}), ({Index4}, {Weight4})>";
+        }
     }
 }

@@ -12,21 +12,20 @@ A GUI front-end of the library that allows you to work with models, textures, mo
 These are command line front-ends for certain functionalities of the library.
 
 ### Database Converter
-A program that allows you to convert database files to XML and vice versa.
+A program that allows you to convert database files to .xml and vice versa.
 
 Supported files:
-* aet_db.bin
-* bone_data.bin
+* aet_db.bin/.aei
+* bone_data.bin/.bon
 * mot_db.bin
-* obj_db.bin
-* spr_db.bin
+* obj_db.bin/.osi
+* spr_db.bin/.spi
 * stage_data.bin
-* str_array.bin
-* string_array.bin
-* tex_db.bin
+* str_array.bin/string_array.bin/.str
+* tex_db.bin/.txi
 
 ### FARC Pack
-A program that allows you to extract FARC files or create them.
+A program that allows you to extract .farc files or create them from folders.
 
 ### TXP Converter
-A program allows you to modify _tex.bin and .txd files by extracting them to .dds or .png files.
+A program allows you to modify _tex.bin or .txd files by extracting them to .dds or .png files.

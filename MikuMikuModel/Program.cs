@@ -1,10 +1,10 @@
-﻿using MikuMikuModel.GUI.Forms;
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using MikuMikuModel.GUI.Forms;
 
 namespace MikuMikuModel
 {
@@ -14,10 +14,10 @@ namespace MikuMikuModel
         public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
 
         /// <summary>
-        /// The main entry point for the application.
+        ///     The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main( string[] args )
+        private static void Main( string[] args )
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;

@@ -74,6 +74,6 @@ namespace MikuMikuModel.Nodes
         Import = 1 << 3,
         Export = 1 << 4,
         Replace = 1 << 5,
-        Move = 1 << 6,
-    };
+        Move = 1 << 6
+    }
 }

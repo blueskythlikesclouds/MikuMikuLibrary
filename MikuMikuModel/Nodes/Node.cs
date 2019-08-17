@@ -28,18 +28,15 @@ namespace MikuMikuModel.Nodes
             new Dictionary<string, PropertyInfo>( StringComparer.OrdinalIgnoreCase );
 
         private static InputDialog sInputDialog;
+        private readonly NodeList mNodes;
 
-        public override string ToString() => Name;
-
-        public IEnumerator<INode> GetEnumerator() =>
-            mNodes.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() =>
-            mNodes.GetEnumerator();
+        private readonly Dictionary<Type, NodeImportHandler> mImportHandlers;
+        private readonly Dictionary<Type, NodeExportHandler> mExportHandlers;
+        private readonly Dictionary<Type, NodeReplaceHandler<T>> mReplaceHandlers;
+        private readonly List<ToolStripItem> mCustomHandlers;
 
         private T mData;
         private INode mParent;
-        private readonly NodeList mNodes;
         private string mName;
 
         private ContextMenuStrip mContextMenuStrip;
@@ -47,18 +44,11 @@ namespace MikuMikuModel.Nodes
         private bool mIsPendingSynchronization;
         private bool mIsPopulated;
 
-        private readonly Dictionary<Type, NodeImportHandler> mImportHandlers;
-        private readonly Dictionary<Type, NodeExportHandler> mExportHandlers;
-        private readonly Dictionary<Type, NodeReplaceHandler<T>> mReplaceHandlers;
-        private readonly List<ToolStripItem> mCustomHandlers;
-
         private OpenFileDialog mImportDialog;
         private SaveFileDialog mExportDialog;
         private OpenFileDialog mReplaceDialog;
 
         protected virtual T InternalData => mData;
-
-        [Browsable( false )] public abstract NodeFlags Flags { get; }
 
         [Browsable( false )]
         public T Data
@@ -69,6 +59,22 @@ namespace MikuMikuModel.Nodes
                 return InternalData;
             }
         }
+
+        protected bool IsPopulating { get; private set; }
+
+        protected bool IsSynchronizing { get; private set; }
+
+        public IEnumerator<INode> GetEnumerator()
+        {
+            return mNodes.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return mNodes.GetEnumerator();
+        }
+
+        [Browsable( false )] public abstract NodeFlags Flags { get; }
 
         object INode.Data => Data;
 
@@ -123,8 +129,6 @@ namespace MikuMikuModel.Nodes
             }
         }
 
-        protected bool IsPopulating { get; private set; }
-
         [Browsable( false )]
         public bool IsPendingSynchronization
         {
@@ -135,8 +139,6 @@ namespace MikuMikuModel.Nodes
                     mIsPendingSynchronization = value;
             }
         }
-
-        protected bool IsSynchronizing { get; private set; }
 
         public event EventHandler<NodeRenameEventArgs> Renamed;
         public event EventHandler<NodeAddEventArgs> Added;
@@ -164,10 +166,8 @@ namespace MikuMikuModel.Nodes
         public void Synchronize()
         {
             if ( !IsSynchronizing && Flags.HasFlag( NodeFlags.Add ) )
-            {
                 foreach ( var node in mNodes )
                     node.Synchronize();
-            }
 
             if ( IsSynchronizing || !mIsPendingSynchronization )
                 return;
@@ -186,28 +186,24 @@ namespace MikuMikuModel.Nodes
                 if ( parent is TNode node )
                     return node;
 
-            return default( TNode );
+            return default;
         }
 
         public TNode FindNode<TNode>( string nodeName, bool searchChildren ) where TNode : INode
         {
             foreach ( var node in mNodes )
-            {
                 if ( node is TNode genericNode && node.Name.Equals( nodeName, StringComparison.OrdinalIgnoreCase ) )
                     return genericNode;
-            }
 
             if ( searchChildren )
-            {
                 foreach ( var node in mNodes )
                 {
                     TNode subNode;
                     if ( ( subNode = node.FindNode<TNode>( nodeName, true ) ) != null )
                         return subNode;
                 }
-            }
 
-            return default( TNode );
+            return default;
         }
 
         public void Rename( string name )
@@ -240,7 +236,6 @@ namespace MikuMikuModel.Nodes
 
             sInputDialog.Input = Name;
             while ( sInputDialog.ShowDialog() == DialogResult.OK )
-            {
                 if ( string.IsNullOrEmpty( sInputDialog.Input ) )
                 {
                     MessageBox.Show( "Please enter a valid name.", "Miku Miku Model", MessageBoxButtons.OK,
@@ -253,7 +248,6 @@ namespace MikuMikuModel.Nodes
                     Rename( sInputDialog.Input );
                     break;
                 }
-            }
         }
 
         public void Remove()
@@ -269,8 +263,10 @@ namespace MikuMikuModel.Nodes
 
             var module = ModuleImportUtilities.GetModule( mImportHandlers.Keys, filePath );
             if ( module == null )
+            {
                 MessageBox.Show( "File could not be imported.", "Miku Miku Model", MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
+            }
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
@@ -318,8 +314,10 @@ namespace MikuMikuModel.Nodes
 
             var module = ModuleExportUtilities.GetModule( mExportHandlers.Keys, filePath );
             if ( module == null )
+            {
                 MessageBox.Show( "Node could not be exported.", "Miku Miku Model", MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
+            }
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
@@ -356,22 +354,10 @@ namespace MikuMikuModel.Nodes
             return null;
         }
 
-        public void Replace( T data )
+        void INode.Replace( object data )
         {
-            if ( !Flags.HasFlag( NodeFlags.Replace ) || data == null || data.Equals( Data ) )
-                return;
-
-            var previousData = Data;
-            {
-                mData = data;
-                mIsPopulated = false;
-                mIsPendingSynchronization = false;
-
-                OnReplace( previousData );
-            }
+            Replace( data as T );
         }
-
-        void INode.Replace( object data ) => Replace( data as T );
 
         public void Replace( string filePath )
         {
@@ -380,8 +366,10 @@ namespace MikuMikuModel.Nodes
 
             var module = ModuleImportUtilities.GetModule( mReplaceHandlers.Keys, filePath );
             if ( module == null )
+            {
                 MessageBox.Show( "Node could not be replaced.", "Miku Miku Model", MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
+            }
             else
             {
                 ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
@@ -421,8 +409,10 @@ namespace MikuMikuModel.Nodes
             return mReplaceDialog.FileName;
         }
 
-        public void Move( int index, int targetIndex ) =>
+        public void Move( int index, int targetIndex )
+        {
             mNodes.Move( index, targetIndex );
+        }
 
         public void MoveUp()
         {
@@ -442,6 +432,38 @@ namespace MikuMikuModel.Nodes
             mParent.Move( index, index + 1 );
         }
 
+        public void Dispose()
+        {
+            Dispose( true );
+            GC.SuppressFinalize( this );
+        }
+
+        public void DisposeData()
+        {
+            if ( mData is IDisposable disposable )
+                disposable.Dispose();
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+
+        public void Replace( T data )
+        {
+            if ( !Flags.HasFlag( NodeFlags.Replace ) || data == null || data.Equals( Data ) )
+                return;
+
+            var previousData = Data;
+            {
+                mData = data;
+                mIsPopulated = false;
+                mIsPendingSynchronization = false;
+
+                OnReplace( previousData );
+            }
+        }
+
         private static PropertyInfo GetPropertyInfo( string propertyName )
         {
             if ( sPropertyInfos.TryGetValue( propertyName, out var propertyInfo ) )
@@ -452,8 +474,10 @@ namespace MikuMikuModel.Nodes
             return propertyInfo;
         }
 
-        protected TProperty GetProperty<TProperty>( [CallerMemberName] string propertyName = null ) =>
-            ( TProperty ) GetPropertyInfo( propertyName )?.GetValue( InternalData );
+        protected TProperty GetProperty<TProperty>( [CallerMemberName] string propertyName = null )
+        {
+            return ( TProperty ) GetPropertyInfo( propertyName )?.GetValue( InternalData );
+        }
 
         protected void SetProperty<TProperty>( TProperty value, [CallerMemberName] string propertyName = null )
         {
@@ -465,50 +489,80 @@ namespace MikuMikuModel.Nodes
             OnPropertyChanged( propertyName );
         }
 
-        protected static EventHandler CreateEventHandler( Action action ) =>
-            ( sender, args ) => action();
+        protected static EventHandler CreateEventHandler( Action action )
+        {
+            return ( sender, args ) => action();
+        }
 
-        protected void RegisterImportHandler<TModule>( NodeImportHandler handler ) =>
+        protected void RegisterImportHandler<TModule>( NodeImportHandler handler )
+        {
             mImportHandlers[ typeof( TModule ) ] = handler;
+        }
 
-        protected void RegisterExportHandler<TModule>( NodeExportHandler handler ) =>
+        protected void RegisterExportHandler<TModule>( NodeExportHandler handler )
+        {
             mExportHandlers[ typeof( TModule ) ] = handler;
+        }
 
-        protected void RegisterReplaceHandler<TModule>( NodeReplaceHandler<T> handler ) =>
+        protected void RegisterReplaceHandler<TModule>( NodeReplaceHandler<T> handler )
+        {
             mReplaceHandlers[ typeof( TModule ) ] = handler;
+        }
 
-        protected void RegisterCustomHandler( string name, Action action, Keys shortcutKeys = Keys.None ) =>
+        protected void RegisterCustomHandler( string name, Action action, Keys shortcutKeys = Keys.None )
+        {
             mCustomHandlers.Add( new ToolStripMenuItem( name, null, CreateEventHandler( action ), shortcutKeys ) );
+        }
 
-        protected virtual void OnPropertyChanged( [CallerMemberName] string propertyName = null ) =>
+        protected virtual void OnPropertyChanged( [CallerMemberName] string propertyName = null )
+        {
             PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
+        }
 
-        protected virtual void OnRename( string previousName ) =>
+        protected virtual void OnRename( string previousName )
+        {
             Renamed?.Invoke( this, new NodeRenameEventArgs( previousName ) );
+        }
 
-        protected virtual void OnAdd( INode addedNode ) =>
+        protected virtual void OnAdd( INode addedNode )
+        {
             Added?.Invoke( this, new NodeAddEventArgs( addedNode ) );
+        }
 
-        protected virtual void OnRemove( INode removedNode ) =>
+        protected virtual void OnRemove( INode removedNode )
+        {
             Removed?.Invoke( this, new NodeRemoveEventArgs( removedNode ) );
+        }
 
-        protected virtual void OnImport( string filePath ) =>
+        protected virtual void OnImport( string filePath )
+        {
             Imported?.Invoke( this, new NodeImportEventArgs( filePath ) );
+        }
 
-        protected virtual void OnExport( string filePath ) =>
+        protected virtual void OnExport( string filePath )
+        {
             Exported?.Invoke( this, new NodeExportEventArgs( filePath ) );
+        }
 
-        protected virtual void OnReplace( T previousData ) =>
+        protected virtual void OnReplace( T previousData )
+        {
             Replaced?.Invoke( this, new NodeReplaceEventArgs( previousData ) );
+        }
 
-        protected virtual void OnMove( INode movedNode, int previousIndex, int newIndex ) =>
+        protected virtual void OnMove( INode movedNode, int previousIndex, int newIndex )
+        {
             Moved?.Invoke( this, new NodeMoveEventArgs( movedNode, previousIndex, newIndex ) );
+        }
 
-        private void OnChildRenamed( object sender, NodeRenameEventArgs args ) =>
+        private void OnChildRenamed( object sender, NodeRenameEventArgs args )
+        {
             IsPendingSynchronization = true;
+        }
 
-        private void OnChildReplaced( object sender, NodeReplaceEventArgs args ) =>
+        private void OnChildReplaced( object sender, NodeReplaceEventArgs args )
+        {
             IsPendingSynchronization = true;
+        }
 
         protected abstract void Initialize();
         protected abstract void PopulateCore();
@@ -537,10 +591,8 @@ namespace MikuMikuModel.Nodes
             }
 
             if ( Flags.HasFlag( NodeFlags.Export ) && mExportHandlers.Count > 0 )
-            {
                 ContextMenuStrip.Items.Add( new ToolStripMenuItem( "Export", null, CreateEventHandler( () => Export() ),
                     Keys.Control | Keys.E ) );
-            }
 
             if ( Flags.HasFlag( NodeFlags.Replace ) && mReplaceHandlers.Count > 0 )
             {
@@ -574,15 +626,11 @@ namespace MikuMikuModel.Nodes
 
             // Remove start/end/duplicate separators
             for ( int i = 0; i < ContextMenuStrip.Items.Count; )
-            {
                 if ( ( i == 0 || i == ContextMenuStrip.Items.Count - 1 ) &&
                      ContextMenuStrip.Items[ i ] is ToolStripSeparator ||
                      ContextMenuStrip.Items[ i++ ] is ToolStripSeparator &&
                      ContextMenuStrip.Items[ i ] is ToolStripSeparator )
-                {
                     ContextMenuStrip.Items.RemoveAt( i++ );
-                }
-            }
 
             return mContextMenuStrip;
         }
@@ -599,18 +647,6 @@ namespace MikuMikuModel.Nodes
             mImportDialog?.Dispose();
             mExportDialog?.Dispose();
             mReplaceDialog?.Dispose();
-        }
-
-        public void Dispose()
-        {
-            Dispose( true );
-            GC.SuppressFinalize( this );
-        }
-
-        public void DisposeData()
-        {
-            if ( mData is IDisposable disposable )
-                disposable.Dispose();
         }
 
         ~Node()
@@ -641,11 +677,15 @@ namespace MikuMikuModel.Nodes
             public int Count => mNodes.Count;
             public bool IsReadOnly => !mNode.Flags.HasFlag( NodeFlags.Add );
 
-            public IEnumerator<INode> GetEnumerator() =>
-                mNodes.GetEnumerator();
+            public IEnumerator<INode> GetEnumerator()
+            {
+                return mNodes.GetEnumerator();
+            }
 
-            IEnumerator IEnumerable.GetEnumerator() =>
-                mNodes.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return mNodes.GetEnumerator();
+            }
 
             public void Add( INode item )
             {
@@ -661,6 +701,56 @@ namespace MikuMikuModel.Nodes
                 mNode.IsPendingSynchronization = true;
             }
 
+            public void Clear()
+            {
+                Clear( false );
+            }
+
+            public bool Contains( INode item )
+            {
+                return mNodes.Contains( item );
+            }
+
+            public void CopyTo( INode[] array, int arrayIndex )
+            {
+                mNodes.CopyTo( array, arrayIndex );
+            }
+
+            public bool Remove( INode item )
+            {
+                return Remove( item, false );
+            }
+
+            public int IndexOf( INode item )
+            {
+                return mNodes.IndexOf( item );
+            }
+
+            public void Insert( int index, INode item )
+            {
+                if ( !mNode.Flags.HasFlag( NodeFlags.Add ) )
+                    return;
+
+                item.Parent = mNode;
+                item.Renamed += mNode.OnChildRenamed;
+                item.Replaced += mNode.OnChildReplaced;
+
+                mNodes.Insert( index, item );
+                mNode.OnAdd( item );
+                mNode.IsPendingSynchronization = true;
+            }
+
+            public void RemoveAt( int index )
+            {
+                RemoveAt( index, false );
+            }
+
+            public INode this[ int index ]
+            {
+                get => mNodes[ index ];
+                set => throw new NotSupportedException();
+            }
+
             public void Clear( bool force )
             {
                 if ( !mNode.Flags.HasFlag( NodeFlags.Remove ) && !force )
@@ -669,14 +759,6 @@ namespace MikuMikuModel.Nodes
                 while ( mNodes.Count != 0 )
                     Remove( mNodes[ 0 ], force );
             }
-
-            public void Clear() => Clear( false );
-
-            public bool Contains( INode item ) =>
-                mNodes.Contains( item );
-
-            public void CopyTo( INode[] array, int arrayIndex ) =>
-                mNodes.CopyTo( array, arrayIndex );
 
             public bool Remove( INode item, bool force )
             {
@@ -697,25 +779,6 @@ namespace MikuMikuModel.Nodes
                 return result;
             }
 
-            public bool Remove( INode item ) => Remove( item, false );
-
-            public int IndexOf( INode item ) =>
-                mNodes.IndexOf( item );
-
-            public void Insert( int index, INode item )
-            {
-                if ( !mNode.Flags.HasFlag( NodeFlags.Add ) )
-                    return;
-
-                item.Parent = mNode;
-                item.Renamed += mNode.OnChildRenamed;
-                item.Replaced += mNode.OnChildReplaced;
-
-                mNodes.Insert( index, item );
-                mNode.OnAdd( item );
-                mNode.IsPendingSynchronization = true;
-            }
-
             public void RemoveAt( int index, bool force )
             {
                 if ( !mNode.Flags.HasFlag( NodeFlags.Remove ) && !force )
@@ -731,8 +794,6 @@ namespace MikuMikuModel.Nodes
                 mNode.OnRemove( node );
                 mNode.IsPendingSynchronization = true;
             }
-
-            public void RemoveAt( int index ) => RemoveAt( index, false );
 
             public void Move( int index, int targetIndex )
             {
@@ -751,18 +812,16 @@ namespace MikuMikuModel.Nodes
                     mNode.IsPendingSynchronization = true;
                 }
 
-                int Clamp( int value ) =>
-                    value >= mNodes.Count ? mNodes.Count - 1 : value < 0 ? 0 : value;
+                int Clamp( int value )
+                {
+                    return value >= mNodes.Count ? mNodes.Count - 1 : value < 0 ? 0 : value;
+                }
             }
 
-            public INode this[ int index ]
+            public NodeList( Node<T> node )
             {
-                get => mNodes[ index ];
-                set => throw new NotSupportedException();
-            }
-
-            public NodeList( Node<T> node ) =>
                 mNode = node;
+            }
         }
     }
 }

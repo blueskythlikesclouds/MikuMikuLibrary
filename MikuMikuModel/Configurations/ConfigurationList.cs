@@ -12,6 +12,8 @@ namespace MikuMikuModel.Configurations
         private static ConfigurationList sInstance;
         private static readonly XmlSerializer sSerializer = new XmlSerializer( typeof( ConfigurationList ) );
 
+        private Configuration mCurrentConfiguration;
+
         public static ConfigurationList Instance
         {
             get
@@ -30,7 +32,9 @@ namespace MikuMikuModel.Configurations
                     try
                     {
                         using ( var stream = File.OpenRead( FilePath ) )
+                        {
                             sInstance = ( ConfigurationList ) sSerializer.Deserialize( stream );
+                        }
                     }
                     catch
                     {
@@ -45,8 +49,6 @@ namespace MikuMikuModel.Configurations
 
         public static string FilePath => ResourceStore.GetPath( "ConfigurationList.xml" );
 
-        private Configuration mCurrentConfiguration;
-
         public List<Configuration> Configurations { get; }
 
         [XmlIgnore]
@@ -60,43 +62,6 @@ namespace MikuMikuModel.Configurations
                 if ( !Configurations.Contains( value ) && value != null )
                     Configurations.Add( value );
             }
-        }
-
-        public void DetermineCurrentConfiguration( string referenceFilePath ) =>
-            mCurrentConfiguration = FindConfiguration( referenceFilePath ) ?? mCurrentConfiguration;
-
-        public Configuration FindConfiguration( string referenceFilePath )
-        {
-            var directoryPath = Path.GetFullPath( Path.GetDirectoryName( referenceFilePath ) ) +
-                                Path.DirectorySeparatorChar;
-            foreach ( var configuration in Configurations )
-            {
-                bool result = false;
-
-                result |= ComparePath( configuration.ObjectDatabaseFilePath );
-                result |= ComparePath( configuration.TextureDatabaseFilePath );
-                result |= ComparePath( configuration.BoneDatabaseFilePath );
-                result |= ComparePath( configuration.MotionDatabaseFilePath );
-
-                if ( result )
-                    return configuration;
-            }
-
-            bool ComparePath( string path ) =>
-                !string.IsNullOrEmpty( path ) && directoryPath.StartsWith(
-                    Path.GetFullPath( Path.GetDirectoryName( path ) ) + Path.DirectorySeparatorChar,
-                    StringComparison.OrdinalIgnoreCase );
-
-            return null;
-        }
-
-        public void Save()
-        {
-            using ( var stream = File.Create( FilePath ) )
-                sSerializer.Serialize( stream, this );
-
-            foreach ( var configuration in Configurations )
-                configuration.Save();
         }
 
         public object Clone()
@@ -117,6 +82,49 @@ namespace MikuMikuModel.Configurations
 
             return other.Configurations.Count == Configurations.Count &&
                    !other.Configurations.Where( ( t, i ) => !t.Equals( Configurations[ i ] ) ).Any();
+        }
+
+        public void DetermineCurrentConfiguration( string referenceFilePath )
+        {
+            mCurrentConfiguration = FindConfiguration( referenceFilePath ) ?? mCurrentConfiguration;
+        }
+
+        public Configuration FindConfiguration( string referenceFilePath )
+        {
+            string directoryPath = Path.GetFullPath( Path.GetDirectoryName( referenceFilePath ) ) +
+                                   Path.DirectorySeparatorChar;
+            foreach ( var configuration in Configurations )
+            {
+                bool result = false;
+
+                result |= ComparePath( configuration.ObjectDatabaseFilePath );
+                result |= ComparePath( configuration.TextureDatabaseFilePath );
+                result |= ComparePath( configuration.BoneDatabaseFilePath );
+                result |= ComparePath( configuration.MotionDatabaseFilePath );
+
+                if ( result )
+                    return configuration;
+            }
+
+            bool ComparePath( string path )
+            {
+                return !string.IsNullOrEmpty( path ) && directoryPath.StartsWith(
+                           Path.GetFullPath( Path.GetDirectoryName( path ) ) + Path.DirectorySeparatorChar,
+                           StringComparison.OrdinalIgnoreCase );
+            }
+
+            return null;
+        }
+
+        public void Save()
+        {
+            using ( var stream = File.Create( FilePath ) )
+            {
+                sSerializer.Serialize( stream, this );
+            }
+
+            foreach ( var configuration in Configurations )
+                configuration.Save();
         }
 
         private ConfigurationList()

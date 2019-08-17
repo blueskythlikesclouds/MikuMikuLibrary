@@ -253,8 +253,10 @@ namespace MikuMikuModel.GUI.Forms
             SetTitle( Path.GetFileName( filePath ) );
         }
 
-        private static void OnNodeExported( object sender, NodeExportEventArgs e ) =>
+        private static void OnNodeExported( object sender, NodeExportEventArgs e )
+        {
             ConfigurationList.Instance.CurrentConfiguration?.SaveTextureDatabase();
+        }
 
         public void Reset()
         {

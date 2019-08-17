@@ -17,8 +17,6 @@ namespace MikuMikuModel.Resources.Styles
 
         public static IReadOnlyList<Style> Styles => sStyles;
 
-        public static event EventHandler<StyleChangedEventArgs> StyleChanged;
-
         public static Style CurrentStyle
         {
             get => sCurrentStyle;
@@ -30,7 +28,9 @@ namespace MikuMikuModel.Resources.Styles
                 if ( !sStyles.Contains( value ) && value != null )
                 {
                     using ( var stream = File.CreateText( Path.Combine( sStylesDirectory, value.Name + ".xml" ) ) )
+                    {
                         sStyleSerializer.Serialize( stream, value );
+                    }
 
                     sStyles.Add( value );
                 }
@@ -42,13 +42,15 @@ namespace MikuMikuModel.Resources.Styles
             }
         }
 
+        public static event EventHandler<StyleChangedEventArgs> StyleChanged;
+
         static StyleSet()
         {
             foreach ( string filePath in Directory.GetFiles( sStylesDirectory, "*.xml" ) )
-            {
                 using ( var stream = File.OpenText( filePath ) )
+                {
                     sStyles.Add( ( Style ) sStyleSerializer.Deserialize( stream ) );
-            }
+                }
 
             if ( !File.Exists( sCurrentStyleFilePath ) )
                 return;

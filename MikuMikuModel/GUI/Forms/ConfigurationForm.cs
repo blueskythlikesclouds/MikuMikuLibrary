@@ -1,11 +1,11 @@
-﻿using MikuMikuLibrary.Databases;
-using MikuMikuModel.Configurations;
-using MikuMikuModel.Modules;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using MikuMikuLibrary.Archives;
+using MikuMikuLibrary.Databases;
+using MikuMikuModel.Configurations;
+using MikuMikuModel.Modules;
 using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.GUI.Forms
@@ -13,13 +13,6 @@ namespace MikuMikuModel.GUI.Forms
     public partial class ConfigurationForm : Form
     {
         private readonly ConfigurationList mConfigurationList;
-
-        public ConfigurationForm()
-        {
-            InitializeComponent();
-
-            mConfigurationList = ( ConfigurationList ) ConfigurationList.Instance.Clone();
-        }
 
         public Configuration SelectedConfiguration =>
             mListBox.SelectedIndex < 0 ? null : mConfigurationList.Configurations[ mListBox.SelectedIndex ];
@@ -99,7 +92,6 @@ namespace MikuMikuModel.GUI.Forms
             string name = "New Configuration";
             if ( mConfigurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) )
             )
-            {
                 for ( int i = 0;; i++ )
                 {
                     name = $"New Configuration {i + 1}";
@@ -107,7 +99,6 @@ namespace MikuMikuModel.GUI.Forms
                         x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
                         break;
                 }
-            }
 
             var configuration = new Configuration { Name = name };
             mConfigurationList.Configurations.Add( configuration );
@@ -128,7 +119,6 @@ namespace MikuMikuModel.GUI.Forms
                 { WindowTitle = "Rename configuration", Input = configuration.Name } )
             {
                 while ( inputDialog.ShowDialog( this ) == DialogResult.OK )
-                {
                     if ( string.IsNullOrEmpty( inputDialog.Input ) )
                     {
                         MessageBox.Show( "Please enter a valid name.", "Miku Miku Model", MessageBoxButtons.OK,
@@ -147,7 +137,6 @@ namespace MikuMikuModel.GUI.Forms
                         configuration.Name = inputDialog.Input;
                         break;
                     }
-                }
             }
 
             UpdateListBox();
@@ -160,17 +149,13 @@ namespace MikuMikuModel.GUI.Forms
             string name = clone.Name;
             if ( mConfigurationList.Configurations.Any( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) )
             )
-            {
                 for ( int i = 0;; i++ )
                 {
                     name = $"{clone.Name} {i}";
                     if ( !mConfigurationList.Configurations.Any( x =>
                         x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) ) )
-                    {
                         break;
-                    }
                 }
-            }
 
             clone.Name = name;
             mConfigurationList.Configurations.Insert( mListBox.SelectedIndex + 1, clone );
@@ -249,10 +234,13 @@ namespace MikuMikuModel.GUI.Forms
 
                 SetConfiguration( SelectedConfiguration );
 
-                string PickPath( params string[] relativePaths ) => relativePaths
-                    .Select( relativePath =>
-                        Path.GetFullPath( Path.Combine( folderBrowseDialog.SelectedPath, relativePath ) ) )
-                    .FirstOrDefault( File.Exists );
+                string PickPath( params string[] relativePaths )
+                {
+                    return relativePaths
+                        .Select( relativePath =>
+                            Path.GetFullPath( Path.Combine( folderBrowseDialog.SelectedPath, relativePath ) ) )
+                        .FirstOrDefault( File.Exists );
+                }
             }
         }
 
@@ -301,6 +289,13 @@ namespace MikuMikuModel.GUI.Forms
         {
             SelectedConfiguration.MotionDatabaseFilePath = mMotionDatabasePathTextBox.Text;
             SelectedConfiguration.MotionDatabase = null;
+        }
+
+        public ConfigurationForm()
+        {
+            InitializeComponent();
+
+            mConfigurationList = ( ConfigurationList ) ConfigurationList.Instance.Clone();
         }
     }
 }

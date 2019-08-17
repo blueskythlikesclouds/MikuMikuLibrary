@@ -25,6 +25,6 @@ namespace MikuMikuModel.Modules
     public enum FormatModuleFlags
     {
         Import = 1 << 0,
-        Export = 1 << 1,
+        Export = 1 << 1
     }
 }

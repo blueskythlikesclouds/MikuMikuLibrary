@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Objects;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Misc;

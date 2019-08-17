@@ -13,7 +13,7 @@ namespace MikuMikuLibrary.IO.Common
             var sourceRef = __makeref(source);
             var dest = default( TDest );
             var destRef = __makeref(dest);
-            *( IntPtr* ) &destRef = *( ( IntPtr* ) &sourceRef );
+            *( IntPtr* ) &destRef = *( IntPtr* ) &sourceRef;
             return __refvalue(destRef, TDest);
         }
 
@@ -22,7 +22,7 @@ namespace MikuMikuLibrary.IO.Common
             var sourceRef = __makeref(source);
             var dest = default( TDest );
             var destRef = __makeref(dest);
-            *( IntPtr* ) &destRef = *( ( IntPtr* ) &sourceRef );
+            *( IntPtr* ) &destRef = *( IntPtr* ) &sourceRef;
             destination = __refvalue(destRef, TDest);
         }
     }

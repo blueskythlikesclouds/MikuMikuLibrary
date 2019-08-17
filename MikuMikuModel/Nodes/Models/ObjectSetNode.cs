@@ -90,17 +90,15 @@ namespace MikuMikuModel.Nodes.Models
             RegisterCustomHandler( "Convert triangles to triangle strips", () =>
             {
                 foreach ( var subMesh in Data.Objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
-                {
                     if ( subMesh.PrimitiveType == PrimitiveType.Triangles )
                     {
-                        ushort[] triangleStrip = Stripifier.Stripify( subMesh.Indices );
+                        var triangleStrip = Stripifier.Stripify( subMesh.Indices );
                         if ( triangleStrip != null )
                         {
                             subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
                             subMesh.Indices = triangleStrip;
                         }
                     }
-                }
 
                 IsDirty = true;
             } );
@@ -126,7 +124,7 @@ namespace MikuMikuModel.Nodes.Models
                             for ( int i = 0; i < obj.Skin.Bones.Count; i++ )
                             {
                                 var bone = obj.Skin.Bones[ i ];
-                                var boneIndex = combinedObject.Skin.Bones
+                                int boneIndex = combinedObject.Skin.Bones
                                     .FindIndex( x => x.Name.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
 
                                 if ( boneIndex == -1 )
@@ -141,14 +139,10 @@ namespace MikuMikuModel.Nodes.Models
                             }
 
                             foreach ( var subMesh in obj.Meshes.SelectMany( x => x.SubMeshes ) )
-                            {
                                 if ( subMesh.BoneIndices?.Length >= 1 )
-                                {
                                     for ( int i = 0; i < subMesh.BoneIndices.Length; i++ )
                                         subMesh.BoneIndices[ i ] =
                                             ( ushort ) indexMap[ subMesh.BoneIndices[ i ] ];
-                                }
-                            }
                         }
                     }
 
@@ -217,7 +211,9 @@ namespace MikuMikuModel.Nodes.Models
                     mTextureSetNode = new ReferenceNode( "Texture Set", textureSetNode );
                 }
                 else
+                {
                     mTextureSetNode = null;
+                }
             }
 
             if ( mTextureSetNode == null && Data.TextureSet != null )
