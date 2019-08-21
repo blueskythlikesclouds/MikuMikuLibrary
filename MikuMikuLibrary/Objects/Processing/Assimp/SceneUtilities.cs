@@ -14,6 +14,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             aiContext.SetConfig( new MeshVertexLimitConfig( 32768 ) );
             aiContext.SetConfig( new VertexCacheSizeConfig( 63 ) );
             aiContext.SetConfig( new MaxBoneCountConfig( 48 ) );
+            aiContext.SetConfig( new FBXPreservePivotsConfig( false ) );
 
             return aiContext.ImportFile( fileName,
                 Ai.PostProcessSteps.CalculateTangentSpace | Ai.PostProcessSteps.Triangulate |
