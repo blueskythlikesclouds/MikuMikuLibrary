@@ -7,7 +7,7 @@ using MikuMikuLibrary.Objects;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Misc;
 
-namespace MikuMikuModel.Nodes.Models
+namespace MikuMikuModel.Nodes.Objects
 {
     public class MeshNode : Node<Mesh>
     {

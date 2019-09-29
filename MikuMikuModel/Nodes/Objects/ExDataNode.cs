@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using MikuMikuLibrary.Objects;
 
-namespace MikuMikuModel.Nodes.Models
+namespace MikuMikuModel.Nodes.Objects
 {
     public class ExDataNode : Node<ExData>
     {

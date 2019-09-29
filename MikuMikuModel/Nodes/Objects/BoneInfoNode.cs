@@ -2,7 +2,7 @@
 using System.Numerics;
 using MikuMikuLibrary.Objects;
 
-namespace MikuMikuModel.Nodes.Models
+namespace MikuMikuModel.Nodes.Objects
 {
     public class BoneInfoNode : Node<BoneInfo>
     {

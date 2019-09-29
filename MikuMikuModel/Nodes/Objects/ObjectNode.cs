@@ -8,7 +8,7 @@ using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Misc;
 using MikuMikuModel.Resources;
 
-namespace MikuMikuModel.Nodes.Models
+namespace MikuMikuModel.Nodes.Objects
 {
     public class ObjectNode : Node<Object>
     {

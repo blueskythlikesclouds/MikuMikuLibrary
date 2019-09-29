@@ -20,7 +20,7 @@ using Ookii.Dialogs.WinForms;
 using Object = MikuMikuLibrary.Objects.Object;
 using PrimitiveType = MikuMikuLibrary.Objects.PrimitiveType;
 
-namespace MikuMikuModel.Nodes.Models
+namespace MikuMikuModel.Nodes.Objects
 {
     public class ObjectSetNode : BinaryFileNode<ObjectSet>
     {

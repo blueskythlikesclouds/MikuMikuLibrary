@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.Nodes.IO;
@@ -47,6 +49,8 @@ namespace MikuMikuModel.Nodes.Motions
                     }
                 }
             } );
+            RegisterCustomHandler( "Copy bone names to clipboard",
+                () => Clipboard.SetText( string.Join( "\n", Data.BoneInfos.Select( x => x.Name ) ) ) );
         }
 
         protected override void Load( Motion data, Stream source )

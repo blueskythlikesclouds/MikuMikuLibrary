@@ -1,7 +1,7 @@
 ﻿using MikuMikuLibrary.Objects;
 using MikuMikuModel.Nodes.Misc;
 
-namespace MikuMikuModel.Nodes.Models
+namespace MikuMikuModel.Nodes.Objects
 {
     public class SkinNode : Node<Skin>
     {

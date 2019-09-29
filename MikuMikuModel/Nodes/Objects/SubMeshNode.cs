@@ -2,7 +2,7 @@
 using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Objects;
 
-namespace MikuMikuModel.Nodes.Models
+namespace MikuMikuModel.Nodes.Objects
 {
     public class SubMeshNode : Node<SubMesh>
     {
