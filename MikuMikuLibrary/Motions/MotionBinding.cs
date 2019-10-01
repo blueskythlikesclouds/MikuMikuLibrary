@@ -85,6 +85,8 @@ namespace MikuMikuLibrary.Motions
                     baseBoneBinding.Merge( boneBinding );
             }
 
+            GlobalTransformation.Merge( other.GlobalTransformation );
+
             Parent.FrameCount = Math.Max( Parent.FrameCount, other.Parent.FrameCount );
         }
 

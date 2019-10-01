@@ -1,6 +1,10 @@
 # Miku Miku Library
 Format library and file editor for Hatsune Miku: Project DIVA games.
 
+# Building
+* [Stable (release) builds](https://github.com/blueskythlikesclouds/MikuMikuLibrary/releases)
+* [Unstable (development) builds](https://ci.appveyor.com/project/blueskythlikesclouds/mikumikulibrary/build/artifacts)
+
 # Projects
 ## Miku Miku Library
 This is the main library of the solution, providing methods and classes to read, edit, and write file formats in Hatsune Miku: Project DIVA games.
