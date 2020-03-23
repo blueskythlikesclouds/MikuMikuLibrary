@@ -45,10 +45,10 @@ namespace MikuMikuLibrary.IO.Sections.Objects
 
                     if ( mesh.BoneWeights != null )
                     {
-                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight1 * 32768f ) );
-                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight2 * 32768f ) );
-                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight3 * 32768f ) );
-                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight4 * 32768f ) );
+                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight1 * 32767f ) );
+                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight2 * 32767f ) );
+                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight3 * 32767f ) );
+                        writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight4 * 32767f ) );
                         writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index1 * 3 ) );
                         writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index2 * 3 ) );
                         writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index3 * 3 ) );

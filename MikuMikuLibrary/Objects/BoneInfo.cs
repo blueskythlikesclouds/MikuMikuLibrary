@@ -33,17 +33,17 @@ namespace MikuMikuLibrary.Objects
         public float Weight1, Weight2, Weight3, Weight4;
         public int Index1, Index2, Index3, Index4;
 
-        public bool IsValid => Math.Abs( Weight1 + Weight2 + Weight3 + Weight4 - 1.0f ) < WeightTolerance;
+        public bool IsValid => Weight1 + Weight2 + Weight3 + Weight4 == 1.0f;
 
         public void Validate()
         {
-            if ( Math.Abs( Weight1 ) > WeightTolerance )
+            if ( Weight1 != 0 )
             {
-                if ( Math.Abs( Weight2 ) > WeightTolerance )
+                if ( Weight2 != 0 )
                 {
-                    if ( Math.Abs( Weight3 ) > WeightTolerance )
+                    if ( Weight3 != 0 )
                     {
-                        if ( Math.Abs( Weight4 ) < WeightTolerance )
+                        if ( Weight4 == 0 )
                         {
                             Index4 = -1;
                             Weight4 = 0;
@@ -68,8 +68,8 @@ namespace MikuMikuLibrary.Objects
                 }
 
                 float sum = Weight1 + Weight2 + Weight3 + Weight4;
-                if ( Math.Abs( sum - 1f ) > WeightTolerance )
-                    Weight1 += 1f - sum;
+                if ( sum != 1f )
+                    Weight1 = Weight1 + ( 1f - sum );
             }
             else
             {

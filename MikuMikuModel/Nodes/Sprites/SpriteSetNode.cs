@@ -36,6 +36,33 @@ namespace MikuMikuModel.Nodes.Sprites
                             pair.Value.Save( Path.Combine( folderBrowseDialog.SelectedPath, $"{pair.Key.Name}.png" ) );
                     }
                 }, Keys.Control | Keys.Shift | Keys.E );
+            RegisterCustomHandler( "Set all resolution modes to...", () =>
+            {
+                string input = "HDTV720";
+
+                while ( true )
+                {
+                    using ( var inputDialog = new InputDialog { WindowTitle = "Set all resolution modes", Input = input } )
+                    {
+                        if ( inputDialog.ShowDialog() != DialogResult.OK )
+                            break;
+
+                        if ( !Enum.TryParse( input = inputDialog.Input, out ResolutionMode mode ) )
+                        {
+                            MessageBox.Show( "Please enter a valid resolution mode.", "Miku Miku Model",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error );
+
+                            continue;
+                        }
+
+                        foreach ( var sprite in Data.Sprites )
+                            sprite.ResolutionMode = mode;
+
+                        IsDirty = true;
+                        break;
+                    }
+                }
+            } );
 
             base.Initialize();
         }

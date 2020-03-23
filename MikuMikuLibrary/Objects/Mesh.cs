@@ -182,10 +182,10 @@ namespace MikuMikuLibrary.Objects
                         {
                             var boneWeight = new BoneWeight
                             {
-                                Weight1 = vertexReader.ReadUInt16() / 32768f,
-                                Weight2 = vertexReader.ReadUInt16() / 32768f,
-                                Weight3 = vertexReader.ReadUInt16() / 32768f,
-                                Weight4 = vertexReader.ReadUInt16() / 32768f,
+                                Weight1 = vertexReader.ReadUInt16() / 32767f,
+                                Weight2 = vertexReader.ReadUInt16() / 32767f,
+                                Weight3 = vertexReader.ReadUInt16() / 32767f,
+                                Weight4 = vertexReader.ReadUInt16() / 32767f,
                                 Index1 = vertexReader.ReadByte() / 3,
                                 Index2 = vertexReader.ReadByte() / 3,
                                 Index3 = vertexReader.ReadByte() / 3,
