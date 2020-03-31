@@ -63,6 +63,40 @@ namespace MikuMikuModel.Nodes.Sprites
                     }
                 }
             } );
+            RegisterCustomHandler("Scale all sprites...", () =>
+            {
+                string input = "2.0";
+
+                while (true)
+                {
+                    using (var inputDialog = new InputDialog { WindowTitle = "Scale all sprites", Input = input })
+                    {
+                        if (inputDialog.ShowDialog() != DialogResult.OK)
+                            break;
+
+                        double dfactor;
+
+                        if (Double.TryParse(input, System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out dfactor))
+                        {
+                            float factor = (float)dfactor;
+
+                            foreach (var sprite in Data.Sprites)
+                            {
+                                sprite.Width = sprite.Width * factor;
+                                sprite.Height = sprite.Height * factor;
+                                sprite.X = sprite.X * factor;
+                                sprite.Y = sprite.Y * factor;
+                            }
+
+                            IsDirty = true;
+                        }
+                        else
+                            MessageBox.Show("Invalid factor.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        break;
+                    }
+                }
+            });
 
             base.Initialize();
         }

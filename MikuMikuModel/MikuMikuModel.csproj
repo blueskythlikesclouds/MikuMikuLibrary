@@ -75,6 +75,12 @@
     <Compile Include="Configurations\ConfigurationList.cs" />
     <Compile Include="GUI\Controls\ModelView\Extensions.cs" />
     <Compile Include="GUI\Controls\ModelView\IDrawable.cs" />
+    <Compile Include="GUI\Controls\SpriteViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\SpriteViewControl.Designer.cs">
+      <DependentUpon>SpriteViewControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Forms\FarcArchiveViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -182,6 +188,10 @@
     <Compile Include="Resources\Styles\StyleToolStripRenderer.cs" />
     <EmbeddedResource Include="GUI\Controls\ModelViewControl.resx">
       <DependentUpon>ModelViewControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Controls\SpriteViewControl.resx">
+      <DependentUpon>SpriteViewControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\TextureViewControl.resx">
       <DependentUpon>TextureViewControl.cs</DependentUpon>

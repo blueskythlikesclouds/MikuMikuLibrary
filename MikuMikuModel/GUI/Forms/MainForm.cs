@@ -424,14 +424,17 @@ namespace MikuMikuModel.GUI.Forms
 
         protected override void OnLoad( EventArgs eventArgs )
         {
-            StoreOriginalStyle();
+            if (Type.GetType("Mono.Runtime") == null)
+            {
+                StoreOriginalStyle();
 
-            if ( StyleSet.CurrentStyle != null )
-                ApplyStyle( StyleSet.CurrentStyle );
+                if (StyleSet.CurrentStyle != null)
+                    ApplyStyle(StyleSet.CurrentStyle);
 
-            StyleSet.StyleChanged += OnStyleChanged;
+                StyleSet.StyleChanged += OnStyleChanged;
 
-            InitializeStylesToolStripMenuItem();
+                InitializeStylesToolStripMenuItem();
+            }
 
             base.OnLoad( eventArgs );
         }
