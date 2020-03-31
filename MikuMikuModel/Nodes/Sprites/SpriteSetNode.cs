@@ -74,12 +74,8 @@ namespace MikuMikuModel.Nodes.Sprites
                         if (inputDialog.ShowDialog() != DialogResult.OK)
                             break;
 
-                        double dfactor;
-
-                        if (Double.TryParse(input, System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out dfactor))
+                        if (float.TryParse(input, System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out float factor))
                         {
-                            float factor = (float)dfactor;
-
                             foreach (var sprite in Data.Sprites)
                             {
                                 sprite.Width = sprite.Width * factor;
@@ -89,11 +85,10 @@ namespace MikuMikuModel.Nodes.Sprites
                             }
 
                             IsDirty = true;
+                            break;
                         }
                         else
                             MessageBox.Show("Invalid factor.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                        break;
                     }
                 }
             });

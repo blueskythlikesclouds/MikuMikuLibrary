@@ -16,6 +16,7 @@ namespace MikuMikuModel.GUI.Controls
 
         public void SetBitmap(Bitmap bitmap)
         {
+            mBitmap.Dispose();
             mBitmap = bitmap;
             BackgroundImage = mBitmap;
 
