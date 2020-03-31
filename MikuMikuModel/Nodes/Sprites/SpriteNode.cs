@@ -116,7 +116,7 @@ namespace MikuMikuModel.Nodes.Sprites
                     }
                 }
 
-                using (Bitmap obitmap = SpriteCropper.Crop(Data, FindParent<SpriteSetNode>().Data)) obitmap.Save(filePath, imageFormat);
+                using (Bitmap oBitmap = SpriteCropper.Crop(Data, FindParent<SpriteSetNode>().Data)) oBitmap.Save(filePath, imageFormat);
             });
         }
 
