@@ -33,9 +33,9 @@
             this.mToolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mCombineMotsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mStylesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
-            this.mStylesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
             this.mMainSplitContainer.Panel2.SuspendLayout();
             this.mMainSplitContainer.SuspendLayout();
@@ -184,8 +184,8 @@
             // mConfigurationsToolStripMenuItem
             // 
             this.mConfigurationsToolStripMenuItem.Name = "mConfigurationsToolStripMenuItem";
-            this.mConfigurationsToolStripMenuItem.Size = new System.Drawing.Size(98, 21);
-            this.mConfigurationsToolStripMenuItem.Text = "Configurations";
+            this.mConfigurationsToolStripMenuItem.Size = new System.Drawing.Size(156, 21);
+            this.mConfigurationsToolStripMenuItem.Text = "Game data configurations";
             this.mConfigurationsToolStripMenuItem.Click += new System.EventHandler(this.OnConfigurations);
             // 
             // mToolsToolStripMenuItem
@@ -200,15 +200,21 @@
             // 
             this.mCombineMotsFileToolStripMenuItem.Name = "mCombineMotsFileToolStripMenuItem";
             this.mCombineMotsFileToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
-            this.mCombineMotsFileToolStripMenuItem.Text = "Combine divided .mot files into one";
+            this.mCombineMotsFileToolStripMenuItem.Text = "Join mot files";
             this.mCombineMotsFileToolStripMenuItem.Click += new System.EventHandler(this.OnCombineMotions);
             // 
             // mHelpToolStripMenuItem
             // 
             this.mHelpToolStripMenuItem.Name = "mHelpToolStripMenuItem";
-            this.mHelpToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
-            this.mHelpToolStripMenuItem.Text = "Help";
+            this.mHelpToolStripMenuItem.Size = new System.Drawing.Size(75, 21);
+            this.mHelpToolStripMenuItem.Text = "User guide";
             this.mHelpToolStripMenuItem.Click += new System.EventHandler(this.OnHelp);
+            // 
+            // mStylesToolStripMenuItem
+            // 
+            this.mStylesToolStripMenuItem.Name = "mStylesToolStripMenuItem";
+            this.mStylesToolStripMenuItem.Size = new System.Drawing.Size(49, 21);
+            this.mStylesToolStripMenuItem.Text = "Styles";
             // 
             // mAboutToolStripMenuItem
             // 
@@ -225,12 +231,6 @@
             this.mPanel.Name = "mPanel";
             this.mPanel.Size = new System.Drawing.Size(736, 25);
             this.mPanel.TabIndex = 1;
-            // 
-            // mStylesToolStripMenuItem
-            // 
-            this.mStylesToolStripMenuItem.Name = "mStylesToolStripMenuItem";
-            this.mStylesToolStripMenuItem.Size = new System.Drawing.Size(49, 21);
-            this.mStylesToolStripMenuItem.Text = "Styles";
             // 
             // MainForm
             // 

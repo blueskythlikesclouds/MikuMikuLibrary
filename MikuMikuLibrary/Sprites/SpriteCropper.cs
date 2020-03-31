@@ -12,8 +12,12 @@ namespace MikuMikuLibrary.Sprites
                 parentSet.TextureSet.Textures[ sprite.TextureIndex ] );
             bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
 
-            var croppedBitmap = bitmap.Clone(
-                new RectangleF( sprite.X, sprite.Y, sprite.Width, sprite.Height ), bitmap.PixelFormat );
+            Bitmap croppedBitmap = null;
+            if (sprite.X + sprite.Width <= bitmap.Width && sprite.Y + sprite.Height <= bitmap.Height)
+            {
+                croppedBitmap = bitmap.Clone(
+                new RectangleF(sprite.X, sprite.Y, sprite.Width, sprite.Height), bitmap.PixelFormat);
+            }
 
             bitmap.Dispose();
             return croppedBitmap;
