@@ -105,7 +105,7 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
         public EnrsBinaryWriter( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness ) : base( input,
             encoding, leaveOpen, endianness )
         {
-            mPositionMap = new Dictionary<long, int>();
+            mPositionMap = new Dictionary<long, int>( 1024 * 1024 );
         }
     }
 }

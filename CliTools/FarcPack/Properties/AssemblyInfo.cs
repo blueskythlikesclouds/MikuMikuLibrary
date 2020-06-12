@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
 [assembly: AssemblyProduct( "FARC Pack" )]
-[assembly: AssemblyCopyright( "Copyright © 2019 Skyth" )]
+[assembly: AssemblyCopyright( "Copyright © 2020 Skyth (MIT License)" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 

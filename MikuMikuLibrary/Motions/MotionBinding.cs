@@ -25,7 +25,7 @@ namespace MikuMikuLibrary.Motions
                 .Select( x =>
                     BoneBindings.Find( y => y.Name.Equals( x, StringComparison.OrdinalIgnoreCase ) ) ??
                     new BoneBinding { Name = x } )
-                .OrderBy( x => sReferenceIndices.TryGetValue( x.Name, out int index ) ? index : -1 ) )
+                .OrderBy( x => sReferenceIndices.TryGetValue( x.Name, out int index ) ? index : int.MaxValue ) )
             {
                 var bone = skeleton.GetBone( boneBinding.Name );
                 if ( bone != null )

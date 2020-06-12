@@ -239,7 +239,7 @@ namespace MikuMikuModel.Nodes
             while ( sInputDialog.ShowDialog() == DialogResult.OK )
                 if ( string.IsNullOrEmpty( sInputDialog.Input ) )
                 {
-                    MessageBox.Show( "Please enter a valid name.", "Miku Miku Model", MessageBoxButtons.OK,
+                    MessageBox.Show( "Please enter a valid name.", Program.Name, MessageBoxButtons.OK,
                         MessageBoxIcon.Error );
 
                     sInputDialog.Input = Name;
@@ -265,7 +265,7 @@ namespace MikuMikuModel.Nodes
             var module = ModuleImportUtilities.GetModule( mImportHandlers.Keys, filePath );
             if ( module == null )
             {
-                MessageBox.Show( "File could not be imported.", "Miku Miku Model", MessageBoxButtons.OK,
+                MessageBox.Show( "File could not be imported.", Program.Name, MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
             }
             else
@@ -316,7 +316,7 @@ namespace MikuMikuModel.Nodes
             var module = ModuleExportUtilities.GetModule( mExportHandlers.Keys, filePath );
             if ( module == null )
             {
-                MessageBox.Show( "Node could not be exported.", "Miku Miku Model", MessageBoxButtons.OK,
+                MessageBox.Show( "Node could not be exported.", Program.Name, MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
             }
             else
@@ -368,7 +368,7 @@ namespace MikuMikuModel.Nodes
             var module = ModuleImportUtilities.GetModule( mReplaceHandlers.Keys, filePath );
             if ( module == null )
             {
-                MessageBox.Show( "Node could not be replaced.", "Miku Miku Model", MessageBoxButtons.OK,
+                MessageBox.Show( "Node could not be replaced.", Program.Name, MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
             }
             else

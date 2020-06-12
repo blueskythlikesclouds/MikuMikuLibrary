@@ -84,7 +84,7 @@ namespace MikuMikuModel.Nodes.Motions
                         bool result = uint.TryParse( inputDialog.Input, out id );
 
                         if ( !result || id == 0xFFFFFFFF )
-                            MessageBox.Show( "Please enter a correct id number.", "Miku Miku Model",
+                            MessageBox.Show( "Please enter a correct id number.", Program.Name,
                                 MessageBoxButtons.OK, MessageBoxIcon.Error );
                         else
                             break;

@@ -218,7 +218,7 @@ namespace MikuMikuModel.Nodes.IO
 
                     if ( farcArchiveViewForm.NodeCount == 0 )
                         MessageBox.Show( "This archive has no entries that you could replace the node with.",
-                            "Miku Miku Model",
+                            Program.Name,
                             MessageBoxButtons.OK, MessageBoxIcon.Information );
 
                     else if ( farcArchiveViewForm.NodeCount == 1 )

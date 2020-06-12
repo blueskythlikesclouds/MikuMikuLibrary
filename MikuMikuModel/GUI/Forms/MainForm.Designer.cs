@@ -32,6 +32,7 @@
             this.mConfigurationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mToolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mCombineMotsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.murmurHashGeneratorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mStylesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -191,7 +192,8 @@
             // mToolsToolStripMenuItem
             // 
             this.mToolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mCombineMotsFileToolStripMenuItem});
+            this.mCombineMotsFileToolStripMenuItem,
+            this.murmurHashGeneratorToolStripMenuItem});
             this.mToolsToolStripMenuItem.Name = "mToolsToolStripMenuItem";
             this.mToolsToolStripMenuItem.Size = new System.Drawing.Size(46, 21);
             this.mToolsToolStripMenuItem.Text = "Tools";
@@ -202,6 +204,13 @@
             this.mCombineMotsFileToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
             this.mCombineMotsFileToolStripMenuItem.Text = "Combine multiple .mot files into one";
             this.mCombineMotsFileToolStripMenuItem.Click += new System.EventHandler(this.OnCombineMotions);
+            // 
+            // murmurHashGeneratorToolStripMenuItem
+            // 
+            this.murmurHashGeneratorToolStripMenuItem.Name = "murmurHashGeneratorToolStripMenuItem";
+            this.murmurHashGeneratorToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.murmurHashGeneratorToolStripMenuItem.Text = "Murmur hash generator";
+            this.murmurHashGeneratorToolStripMenuItem.Click += new System.EventHandler(this.OnMurmurHashGenerator);
             // 
             // mHelpToolStripMenuItem
             // 
@@ -242,7 +251,7 @@
             this.Controls.Add(this.mMainSplitContainer);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
-            this.Text = "Miku Miku Model";
+            this.Text = Program.Name;
             this.mMainSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).EndInit();
             this.mMainSplitContainer.ResumeLayout(false);
@@ -280,5 +289,6 @@
         private System.Windows.Forms.ToolStripMenuItem mToolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mCombineMotsFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mStylesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem murmurHashGeneratorToolStripMenuItem;
     }
 }

@@ -26,7 +26,7 @@ namespace MikuMikuModel.Nodes.Collections
                     while ( inputDialog1.ShowDialog() == DialogResult.OK )
                         if ( string.IsNullOrEmpty( inputDialog1.Input ) )
                         {
-                            MessageBox.Show( "Please enter a valid substring.", "Miku Miku Model",
+                            MessageBox.Show( "Please enter a valid substring.", Program.Name,
                                 MessageBoxButtons.OK, MessageBoxIcon.Error );
                         }
                         else

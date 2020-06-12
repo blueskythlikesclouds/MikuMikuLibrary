@@ -8,16 +8,21 @@ namespace MikuMikuLibrary.Sprites
     {
         public static Bitmap Crop( Sprite sprite, SpriteSet parentSet )
         {
-            var bitmap = TextureDecoder.Decode(
-                parentSet.TextureSet.Textures[ ( int ) sprite.TextureIndex ] );
+            if ( sprite.TextureIndex >= parentSet.TextureSet.Textures.Count )
+                return null;
+
+            var texture = parentSet.TextureSet.Textures[ ( int ) sprite.TextureIndex ];
+
+            if ( sprite.Width <= 0 || sprite.Height <= 0 || 
+                 sprite.X + sprite.Width > texture.Width || sprite.Y + sprite.Height > texture.Height )
+                return null;
+
+            var bitmap = TextureDecoder.Decode( texture );
+
             bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
 
-            Bitmap croppedBitmap = null;
-            if (sprite.X + sprite.Width <= bitmap.Width && sprite.Y + sprite.Height <= bitmap.Height)
-            {
-                croppedBitmap = bitmap.Clone(
-                new RectangleF(sprite.X, sprite.Y, sprite.Width, sprite.Height), bitmap.PixelFormat);
-            }
+            Bitmap croppedBitmap = bitmap.Clone(
+                new RectangleF( sprite.X, sprite.Y, sprite.Width, sprite.Height ), bitmap.PixelFormat );
 
             bitmap.Dispose();
             return croppedBitmap;

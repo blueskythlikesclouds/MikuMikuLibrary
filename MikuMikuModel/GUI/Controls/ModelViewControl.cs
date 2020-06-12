@@ -484,7 +484,7 @@ namespace MikuMikuModel.GUI.Controls
 
             if ( !CanRender )
             {
-                MessageBox.Show( "Shader compilation failed. GL rendering will be disabled.", "Miku Miku Model",
+                MessageBox.Show( "Shader compilation failed. GL rendering will be disabled.", Program.Name,
                     MessageBoxButtons.OK, MessageBoxIcon.Error );
 
                 Visible = false;

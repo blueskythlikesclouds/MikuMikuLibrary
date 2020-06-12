@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
@@ -15,6 +16,7 @@ using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Wrappers;
 using MikuMikuModel.Resources.Styles;
+using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.GUI.Forms
 {
@@ -37,7 +39,7 @@ namespace MikuMikuModel.GUI.Forms
                 return false;
 
             var result = MessageBox.Show(
-                "You have unsaved changes. Do you want to save them?", "Miku Miku Model", MessageBoxButtons.YesNoCancel,
+                "You have unsaved changes. Do you want to save them?", Program.Name, MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question );
 
             if ( result == DialogResult.Cancel )
@@ -107,6 +109,7 @@ namespace MikuMikuModel.GUI.Forms
 #endif
             mStringBuilder.AppendLine();
             mStringBuilder.AppendLine( "This program was created by Skyth." );
+            mStringBuilder.Append( "Please see README.md for additional information." );
 
             MessageBox.Show( mStringBuilder.ToString(), "About", MessageBoxButtons.OK );
         }
@@ -224,12 +227,16 @@ namespace MikuMikuModel.GUI.Forms
             }
             catch
             {
+#if DEBUG
+                throw;
+#endif
+
                 errorsOccured = true;
             }
 
             if ( errorsOccured || !typeof( IBinaryFile ).IsAssignableFrom( node.DataType ) )
             {
-                MessageBox.Show( "File could not be opened.", "Miku Miku Model", MessageBoxButtons.OK,
+                MessageBox.Show( "File could not be opened.", Program.Name, MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
 
                 node?.Dispose();
@@ -252,9 +259,10 @@ namespace MikuMikuModel.GUI.Forms
             SetTitle( Path.GetFileName( filePath ) );
         }
 
-        private static void OnNodeExported( object sender, NodeExportEventArgs e )
+        private void OnNodeExported( object sender, NodeExportEventArgs e )
         {
             ConfigurationList.Instance.CurrentConfiguration?.SaveTextureDatabase();
+            SetTitle( Path.GetFileName( e.FilePath ) );
         }
 
         public void Reset()
@@ -322,6 +330,9 @@ namespace MikuMikuModel.GUI.Forms
             if ( !string.IsNullOrEmpty( fileName ) )
                 mStringBuilder.AppendFormat( " - {0}", fileName );
 
+            mStringBuilder.AppendFormat( " - {0}",
+                ConfigurationList.Instance.CurrentConfiguration?.Name ?? "No configuration" );
+
             Text = mStringBuilder.ToString();
         }
 
@@ -337,7 +348,7 @@ namespace MikuMikuModel.GUI.Forms
             var configuration = ConfigurationList.Instance.FindConfiguration( filePath );
             if ( configuration?.BoneDatabase == null )
             {
-                MessageBox.Show( "Could not find suitable configuration for the file.", "Miku Miku Model",
+                MessageBox.Show( "Could not find suitable configuration for the file.", Program.Name,
                     MessageBoxButtons.OK, MessageBoxIcon.Error );
             }
             else
@@ -423,12 +434,12 @@ namespace MikuMikuModel.GUI.Forms
 
         protected override void OnLoad( EventArgs eventArgs )
         {
-            if (Type.GetType("Mono.Runtime") == null)
+            if ( Type.GetType( "Mono.Runtime" ) == null )
             {
                 StoreOriginalStyle();
 
-                if (StyleSet.CurrentStyle != null)
-                    ApplyStyle(StyleSet.CurrentStyle);
+                if ( StyleSet.CurrentStyle != null )
+                    ApplyStyle( StyleSet.CurrentStyle );
 
                 StyleSet.StyleChanged += OnStyleChanged;
 
@@ -519,6 +530,22 @@ namespace MikuMikuModel.GUI.Forms
             public Color PropertyGridSelectedItemWithFocusBackColor;
             public Color PropertyGridViewBackColor;
             public Color PropertyGridViewForeColor;
+        }
+
+        private void OnMurmurHashGenerator( object sender, EventArgs e )
+        {
+            while ( true )
+            {
+                using ( var inputDialog = new InputDialog() { WindowTitle = "Enter input" } )
+                {
+                    if ( inputDialog.ShowDialog() != DialogResult.OK )
+                        break;
+
+                    uint hash = MurmurHash.Calculate( inputDialog.Input );
+                    MessageBox.Show( $"{inputDialog.Input}: 0x{hash:X8} ({hash})", Program.Name,
+                        MessageBoxButtons.OK, MessageBoxIcon.None );
+                }
+            }
         }
     }
 }

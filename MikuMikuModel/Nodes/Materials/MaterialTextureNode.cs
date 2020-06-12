@@ -256,7 +256,7 @@ namespace MikuMikuModel.Nodes.Materials
                     }
                     catch
                     {
-                        MessageBox.Show( "There is no valid data to paste.", "Miku Miku Model", MessageBoxButtons.OK,
+                        MessageBox.Show( "There is no valid data to paste.", Program.Name, MessageBoxButtons.OK,
                             MessageBoxIcon.Error );
                     }
                 }, Keys.Control | Keys.V );

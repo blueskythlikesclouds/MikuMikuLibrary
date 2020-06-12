@@ -122,8 +122,8 @@ namespace MikuMikuLibrary.Objects
             {
                 foreach ( var bone in Bones )
                 {
-                    int parentId = reader.ReadInt32();
-                    if ( parentId != -1 )
+                    uint parentId = reader.ReadUInt32();
+                    if ( parentId != 0xFFFFFFFF )
                         bone.Parent = Bones.FirstOrDefault( x => x.Id == parentId );
                 }
             } );

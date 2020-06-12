@@ -36,20 +36,7 @@ namespace MikuMikuModel.Nodes.Archives
         protected override void Initialize()
         {
             RegisterImportHandler<Stream>( filePath => Data.Add( Path.GetFileName( filePath ), filePath ) );
-            RegisterExportHandler<FarcArchive>( filePath =>
-            {
-                Data.Save( filePath );
-
-                foreach ( var node in Nodes )
-                {
-                    if ( !( node.Data is Stream stream ) )
-                        continue;
-
-                    stream.Close();
-
-                    node.Replace( Data.Open( node.Name, EntryStreamMode.OriginalStream ) );
-                }
-            } );
+            RegisterExportHandler<FarcArchive>( filePath => Data.Save( filePath ) );
             RegisterReplaceHandler<FarcArchive>( BinaryFile.Load<FarcArchive> );
             RegisterCustomHandler( "Export All", () =>
                 {
@@ -104,6 +91,21 @@ namespace MikuMikuModel.Nodes.Archives
             foreach ( string entryName in Data.Entries.Except( Nodes.Select( x => x.Name ),
                 StringComparer.InvariantCultureIgnoreCase ).ToList() )
                 Data.Remove( entryName );
+        }
+
+        protected override void OnExport( string filePath )
+        {
+            foreach ( var node in Nodes )
+            {
+                if ( !( node.Data is Stream stream ) )
+                    continue;
+
+                stream.Close();
+
+                node.Replace( Data.Open( node.Name, EntryStreamMode.OriginalStream ) );
+            }
+
+            base.OnExport( filePath );
         }
 
         public FarcArchiveNode( string name, FarcArchive data ) : base( name, data )

@@ -10,7 +10,7 @@ namespace MikuMikuModel
 {
     internal static class Program
     {
-        public static string Name => "Miku Miku Model";
+        public static string Name => "Miku Miku Model (Unstable)";
         public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
 
         /// <summary>

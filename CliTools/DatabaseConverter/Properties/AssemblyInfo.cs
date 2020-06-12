@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
 [assembly: AssemblyProduct( "Database Converter" )]
-[assembly: AssemblyCopyright( "Copyright © 2019 Skyth" )]
+[assembly: AssemblyCopyright( "Copyright © 2020 Skyth (MIT License)" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 

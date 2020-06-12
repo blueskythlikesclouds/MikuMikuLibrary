@@ -8,6 +8,7 @@ using MikuMikuModel.Nodes.Databases;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Textures;
 using Ookii.Dialogs.WinForms;
+using System.Globalization;
 
 namespace MikuMikuModel.Nodes.Sprites
 {
@@ -49,7 +50,7 @@ namespace MikuMikuModel.Nodes.Sprites
 
                         if ( !Enum.TryParse( input = inputDialog.Input, out ResolutionMode mode ) )
                         {
-                            MessageBox.Show( "Please enter a valid resolution mode.", "Miku Miku Model",
+                            MessageBox.Show( "Please enter a valid resolution mode.", Program.Name,
                                 MessageBoxButtons.OK, MessageBoxIcon.Error );
 
                             continue;
@@ -63,20 +64,22 @@ namespace MikuMikuModel.Nodes.Sprites
                     }
                 }
             } );
-            RegisterCustomHandler("Scale all sprites...", () =>
+            RegisterCustomHandler( "Scale all sprites...", () =>
             {
                 string input = "2.0";
 
-                while (true)
+                while ( true )
                 {
-                    using (var inputDialog = new InputDialog { WindowTitle = "Scale all sprites", Input = input })
+                    using ( var inputDialog = new InputDialog { WindowTitle = "Scale all sprites", Input = input } )
                     {
-                        if (inputDialog.ShowDialog() != DialogResult.OK)
+                        if ( inputDialog.ShowDialog() != DialogResult.OK )
                             break;
 
-                        if (float.TryParse(inputDialog.Input, System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out float factor))
+                        if ( float.TryParse( inputDialog.Input,
+                            NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands, CultureInfo.InvariantCulture,
+                            out float factor ) )
                         {
-                            foreach (var sprite in Data.Sprites)
+                            foreach ( var sprite in Data.Sprites )
                             {
                                 sprite.Width = sprite.Width * factor;
                                 sprite.Height = sprite.Height * factor;
@@ -88,12 +91,25 @@ namespace MikuMikuModel.Nodes.Sprites
                             break;
                         }
                         else
-                            MessageBox.Show("Invalid factor.", "Miku Miku Model", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show( "Invalid factor.", Program.Name, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error );
 
                         input = inputDialog.Input;
                     }
                 }
-            });
+            } );
+            RegisterCustomHandler( "Add dummy sprite", () =>
+            {
+                Data.Sprites.Add( new Sprite { Name = "DUMMY", ResolutionMode = ResolutionMode.HDTV720 } );
+
+                if ( IsPopulated )
+                {
+                    IsPopulated = false;
+                    Populate();
+                }
+
+                IsDirty = true;
+            } );
 
             base.Initialize();
         }

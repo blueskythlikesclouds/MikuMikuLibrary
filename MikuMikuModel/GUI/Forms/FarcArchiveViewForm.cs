@@ -38,7 +38,7 @@ namespace MikuMikuModel.GUI.Forms
         {
             if ( DialogResult == DialogResult.OK && mNodeTreeView.SelectedNode == null )
             {
-                MessageBox.Show( "Please select a node.", "Miku Miku Model", MessageBoxButtons.OK,
+                MessageBox.Show( "Please select a node.", Program.Name, MessageBoxButtons.OK,
                     MessageBoxIcon.Error );
 
                 e.Cancel = true;

@@ -64,7 +64,7 @@ namespace MikuMikuModel.GUI.Forms
             bool instanceEquals = mConfigurationList.Equals( ConfigurationList.Instance );
             if ( DialogResult != DialogResult.OK && !instanceEquals )
             {
-                var result = MessageBox.Show( "You have unsaved changes. Do you want to save them?", "Miku Miku Model",
+                var result = MessageBox.Show( "You have unsaved changes. Do you want to save them?", Program.Name,
                     MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question );
                 if ( result == DialogResult.OK )
                 {
@@ -121,7 +121,7 @@ namespace MikuMikuModel.GUI.Forms
                 while ( inputDialog.ShowDialog( this ) == DialogResult.OK )
                     if ( string.IsNullOrEmpty( inputDialog.Input ) )
                     {
-                        MessageBox.Show( "Please enter a valid name.", "Miku Miku Model", MessageBoxButtons.OK,
+                        MessageBox.Show( "Please enter a valid name.", Program.Name, MessageBoxButtons.OK,
                             MessageBoxIcon.Error );
 
                         inputDialog.Input = configuration.Name;
@@ -129,7 +129,7 @@ namespace MikuMikuModel.GUI.Forms
                     else if ( mConfigurationList.Configurations.Any( x =>
                         x != configuration && x.Name.Equals( inputDialog.Input, StringComparison.OrdinalIgnoreCase ) ) )
                     {
-                        MessageBox.Show( "A configuration with the same name already exists.", "Miku Miku Model",
+                        MessageBox.Show( "A configuration with the same name already exists.", Program.Name,
                             MessageBoxButtons.OK, MessageBoxIcon.Error );
                     }
                     else
