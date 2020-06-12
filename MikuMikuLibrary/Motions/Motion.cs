@@ -70,7 +70,7 @@ namespace MikuMikuLibrary.Motions
                     {
                         BoneInfos.Add( new BoneInfo { Id = index } );
                         index = reader.ReadUInt16();
-                    } while ( index != 0 );
+                    } while ( index != 0 && reader.Position < reader.Length );
                 } );
             }
 

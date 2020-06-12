@@ -218,6 +218,10 @@ namespace MikuMikuModel.GUI.Forms
         {
             Reset();
 
+#if DEBUG
+            var node = NodeFactory.Create( filePath );
+#else
+
             bool errorsOccured = false;
 
             INode node = null;
@@ -227,10 +231,6 @@ namespace MikuMikuModel.GUI.Forms
             }
             catch
             {
-#if DEBUG
-                throw;
-#endif
-
                 errorsOccured = true;
             }
 
@@ -242,6 +242,7 @@ namespace MikuMikuModel.GUI.Forms
                 node?.Dispose();
                 return;
             }
+#endif
 
             node.Exported += OnNodeExported;
 
