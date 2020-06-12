@@ -15,7 +15,7 @@ namespace MikuMikuLibrary.Objects
         public List<Material> Materials { get; }
         public Skin Skin { get; set; }
         public string Name { get; set; }
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public BoundingSphere BoundingSphere { get; set; }
 
         internal void Read( EndianBinaryReader reader, ObjectSection section = null )

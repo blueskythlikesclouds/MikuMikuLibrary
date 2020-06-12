@@ -199,8 +199,8 @@
             // mCombineMotsFileToolStripMenuItem
             // 
             this.mCombineMotsFileToolStripMenuItem.Name = "mCombineMotsFileToolStripMenuItem";
-            this.mCombineMotsFileToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
-            this.mCombineMotsFileToolStripMenuItem.Text = "Join mot files";
+            this.mCombineMotsFileToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.mCombineMotsFileToolStripMenuItem.Text = "Combine multiple .mot files into one";
             this.mCombineMotsFileToolStripMenuItem.Click += new System.EventHandler(this.OnCombineMotions);
             // 
             // mHelpToolStripMenuItem

@@ -109,7 +109,7 @@ namespace MikuMikuLibrary.Objects
             else
                 writer.WriteNulls( 8 );
 
-            writer.Write( BoneIndices != null ? BoneIndices.Length : 0 );
+            writer.Write( BoneIndices?.Length ?? 0 );
             writer.ScheduleWriteOffsetIf( BoneIndices != null, 4, AlignmentMode.Left,
                 () => { writer.Write( BoneIndices ); } );
             writer.Write( BoneIndices != null ? 4 : 0 );

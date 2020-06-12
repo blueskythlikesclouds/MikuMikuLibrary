@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Sprites
         public static Bitmap Crop( Sprite sprite, SpriteSet parentSet )
         {
             var bitmap = TextureDecoder.Decode(
-                parentSet.TextureSet.Textures[ sprite.TextureIndex ] );
+                parentSet.TextureSet.Textures[ ( int ) sprite.TextureIndex ] );
             bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
 
             Bitmap croppedBitmap = null;
@@ -36,7 +36,7 @@ namespace MikuMikuLibrary.Sprites
             var sprites = new Dictionary<Sprite, Bitmap>( spriteSet.Sprites.Count );
             foreach ( var sprite in spriteSet.Sprites )
             {
-                var sourceBitmap = bitmaps[ sprite.TextureIndex ];
+                var sourceBitmap = bitmaps[ ( int ) sprite.TextureIndex ];
                 var bitmap = sourceBitmap.Clone(
                     new RectangleF( sprite.X, sprite.Y, sprite.Width, sprite.Height ), sourceBitmap.PixelFormat );
                 sprites.Add( sprite, bitmap );

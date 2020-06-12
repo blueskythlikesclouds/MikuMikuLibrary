@@ -6,7 +6,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
     [Section( "OMDL" )]
     public class ObjectSection : Section<Object>
     {
-        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
+        public override SectionFlags Flags => SectionFlags.None;
 
         [SubSection( typeof( SkinSection ) )]
         public Skin Skin
@@ -15,9 +15,9 @@ namespace MikuMikuLibrary.IO.Sections.Objects
             set => Data.Skin = value;
         }
 
-        [SubSection] public MeshIndexDataSection IndexData { get; set; }
+        [SubSection] public IndexDataSection IndexData { get; set; }
 
-        [SubSection] public MeshVertexDataSection VertexData { get; set; }
+        [SubSection] public VertexDataSection VertexData { get; set; }
 
         protected override void Read( Object data, EndianBinaryReader reader, long length )
         {
@@ -31,8 +31,8 @@ namespace MikuMikuLibrary.IO.Sections.Objects
 
         public ObjectSection( SectionMode mode, Object data = null ) : base( mode, data )
         {
-            IndexData = new MeshIndexDataSection( mode, this );
-            VertexData = new MeshVertexDataSection( mode, this );
+            IndexData = new IndexDataSection( mode, this );
+            VertexData = new VertexDataSection( mode, this );
         }
     }
 }

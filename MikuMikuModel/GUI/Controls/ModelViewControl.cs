@@ -87,7 +87,7 @@ namespace MikuMikuModel.GUI.Controls
                 return;
 
             Reset();
-            mModel = new GLObject( obj, new Dictionary<int, GLTexture>(), textureSet );
+            mModel = new GLObject( obj, new Dictionary<uint, GLTexture>(), textureSet );
             SetCamera( obj.BoundingSphere );
         }
 
@@ -99,7 +99,7 @@ namespace MikuMikuModel.GUI.Controls
             Reset();
 
             var materials = new List<GLMaterial>( new GLMaterial[ obj.Materials.Count ] );
-            var dictionary = new Dictionary<int, GLTexture>();
+            var dictionary = new Dictionary<uint, GLTexture>();
 
             foreach ( var subMesh in mesh.SubMeshes )
                 if ( materials[ subMesh.MaterialIndex ] == null )

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Textures;
@@ -13,8 +14,6 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 {
     public static class Importer
     {
-        private static readonly Random sRandom = new Random();
-
         public static ObjectSet ConvertObjectSetFromAiScene( string filePath )
         {
             string texturesDirectory = Path.GetDirectoryName( filePath );
@@ -64,7 +63,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             return objectSet;
         }
 
-        private static Ai.Matrix4x4 GetGlobalTransformation( Ai.Node aiNode )
+        private static Ai.Matrix4x4 GetWorldTransformation( Ai.Node aiNode )
         {
             var transform = Ai.Matrix4x4.Identity;
 
@@ -74,21 +73,21 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             return transform;
         }
 
-        private static BoneInfo ConvertBoneFromAiBone( Ai.Bone aiBone, Ai.Scene aiScene, int boneId )
+        private static BoneInfo ConvertBoneFromAiBone( Ai.Bone aiBone, Ai.Scene aiScene )
         {
             Matrix4x4 inverseTransformation;
 
             var aiBoneNode = aiScene.RootNode.FindNode( aiBone.Name );
             if ( aiBoneNode != null )
-                Matrix4x4.Invert( GetGlobalTransformation( aiBoneNode ).ToNumerics(), out inverseTransformation );
+                Matrix4x4.Invert( GetWorldTransformation( aiBoneNode ).ToNumerics(), out inverseTransformation );
             else
                 inverseTransformation = aiBone.OffsetMatrix.ToNumerics();
 
             return new BoneInfo
             {
                 Name = aiBone.Name,
-                Id = boneId,
-                InverseBindPoseMatrix = inverseTransformation
+                Id = MurmurHash.Calculate( aiBone.Name ),
+                InverseBindPoseMatrix = Matrix4x4.Transpose( inverseTransformation )
             };
         }
 
@@ -106,7 +105,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
             texture = TextureEncoder.Encode( textureFilePath );
             texture.Name = textureName;
-            texture.Id = sRandom.Next( int.MinValue, int.MaxValue );
+            texture.Id = MurmurHash.Calculate( textureName );
             textureSet.Textures.Add( texture );
 
             return texture;
@@ -341,7 +340,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                         {
                             boneIndex = bones.Count;
                             boneMap[ aiBone.Name ] = boneIndex;
-                            bones.Add( ConvertBoneFromAiBone( aiBone, aiScene, boneIndex ) );
+                            bones.Add( ConvertBoneFromAiBone( aiBone, aiScene ) );
                         }
 
                         subMesh.BoneIndices[ i ] = ( ushort ) boneIndex;
@@ -408,7 +407,8 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             var obj = new Object
             {
                 Name = aiNode.Name,
-                Skin = new Skin()
+                Skin = new Skin(),
+                Id = MurmurHash.Calculate( aiNode.Name )
             };
 
             var boneMap = new Dictionary<string, int>( StringComparer.OrdinalIgnoreCase );

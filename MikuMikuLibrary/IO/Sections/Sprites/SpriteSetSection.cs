@@ -7,7 +7,7 @@ namespace MikuMikuLibrary.IO.Sections.Sprites
     [Section( "SPRC" )]
     public class SpriteSetSection : BinaryFileSection<SpriteSet>
     {
-        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
+        public override SectionFlags Flags => SectionFlags.None;
 
         [SubSection( typeof( SpriteTextureSetSection ) )]
         public TextureSet TextureSet

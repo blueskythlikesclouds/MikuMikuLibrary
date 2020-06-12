@@ -53,9 +53,9 @@ namespace MikuMikuLibrary.Textures
                     TextureDecoder.DecodeToDDS( texture, Path.Combine( outputDirectory, texture.Name + ".dds" ) );
         }
 
-        public static void ReAssignTextureIDs( ObjectSet model, List<int> newTextureIds )
+        public static void ReAssignTextureIDs( ObjectSet model, List<uint> newTextureIds )
         {
-            var dictionary = new Dictionary<int, int>( model.TextureIds.Count );
+            var dictionary = new Dictionary<uint, uint>( model.TextureIds.Count );
             for ( int i = 0; i < model.TextureIds.Count; i++ )
             {
                 dictionary.Add( model.TextureIds[ i ], newTextureIds[ i ] );
@@ -65,10 +65,10 @@ namespace MikuMikuLibrary.Textures
 
             foreach ( var materialTexture in model.Objects.SelectMany( x => x.Materials )
                 .SelectMany( x => x.MaterialTextures ) )
-                if ( dictionary.TryGetValue( materialTexture.TextureId, out int id ) )
+                if ( dictionary.TryGetValue( materialTexture.TextureId, out uint id ) )
                     materialTexture.TextureId = id;
                 else
-                    materialTexture.TextureId = -1;
+                    materialTexture.TextureId = 0xFFFFFFFF;
         }
 
         public static DDSPixelFormatFourCC GetDDSPixelFormat( TextureFormat textureFormat )

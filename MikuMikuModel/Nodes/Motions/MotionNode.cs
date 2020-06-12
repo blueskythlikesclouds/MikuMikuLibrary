@@ -1,12 +1,14 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
+using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
-using MikuMikuModel.Nodes.Misc;
+using MikuMikuModel.Nodes.TypeConverters;
 using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Nodes.Motions
@@ -102,9 +104,10 @@ namespace MikuMikuModel.Nodes.Motions
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
-        public int Id
+        [TypeConverter( typeof( IdTypeConverter ) )]
+        public uint Id
         {
-            get => GetProperty<int>();
+            get => GetProperty<uint>();
             set => SetProperty( value );
         }
 

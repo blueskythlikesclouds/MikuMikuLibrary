@@ -10,13 +10,13 @@ namespace MikuMikuLibrary.Databases
     public class MotionInfo
     {
         public string Name { get; set; }
-        public int Id { get; set; }
+        public uint Id { get; set; }
     }
 
     public class MotionSetInfo
     {
         public string Name { get; set; }
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public List<MotionInfo> Motions { get; }
 
         internal void Read( EndianBinaryReader reader )
@@ -41,7 +41,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( motionIdsOffset, () =>
             {
                 foreach ( var motionInfo in Motions )
-                    motionInfo.Id = reader.ReadInt32();
+                    motionInfo.Id = reader.ReadUInt32();
             } );
         }
 
@@ -97,7 +97,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( motionSetIdsOffset, () =>
             {
                 foreach ( var motionSetInfo in MotionSets )
-                    motionSetInfo.Id = reader.ReadInt32();
+                    motionSetInfo.Id = reader.ReadUInt32();
             } );
 
             reader.ReadAtOffset( boneNameOffsetsOffset, () =>

@@ -17,7 +17,7 @@ namespace MikuMikuLibrary.Skeletons
         public List<string> ObjectBoneNames { get; }
         public List<string> MotionBoneNames { get; }
 
-        public int UnknownValue { get; set; }
+        public uint UnknownValue { get; set; }
 
         internal void Read( EndianBinaryReader reader )
         {
@@ -52,7 +52,7 @@ namespace MikuMikuLibrary.Skeletons
                     Positions.Add( reader.ReadVector3() );
             } );
 
-            reader.ReadAtOffset( unknownValueOffset, () => { UnknownValue = reader.ReadInt32(); } );
+            reader.ReadAtOffset( unknownValueOffset, () => { UnknownValue = reader.ReadUInt32(); } );
 
             reader.ReadAtOffset( objectBoneNamesOffset, () =>
             {

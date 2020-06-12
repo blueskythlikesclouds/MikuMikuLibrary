@@ -41,14 +41,15 @@ namespace MikuMikuLibrary.Textures
 
             if ( TextureFormatUtilities.IsCompressed( format ) )
             {
-                width = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Width );
-                height = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Height );
+                width = AlignmentHelper.AlignToNextPowerOfTwo( bitmap.Width );
+                height = AlignmentHelper.AlignToNextPowerOfTwo( bitmap.Height );
             }
 
             Texture texture;
 
             if ( generateMipMaps && TextureFormatUtilities.IsCompressed( format ) )
-                texture = new Texture( width, height, format, 1, ( int ) Math.Log( Math.Max( width, height ), 2 ) + 1 );
+                texture = new Texture( width, height, format, 1,
+                    ( int ) Math.Log( Math.Max( width, height ), 2 ) + 1 );
 
             else
                 texture = new Texture( width, height, format );
@@ -61,8 +62,8 @@ namespace MikuMikuLibrary.Textures
 
         public static unsafe Texture EncodeYCbCr( Bitmap bitmap )
         {
-            int width = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Width );
-            int height = AlignmentUtilities.AlignToNextPowerOfTwo( bitmap.Height );
+            int width = AlignmentHelper.Align( bitmap.Width, 4 );
+            int height = AlignmentHelper.Align( bitmap.Height, 4 );
 
             var texture = new Texture( width, height, TextureFormat.ATI2, 1, 2 );
 
@@ -118,7 +119,7 @@ namespace MikuMikuLibrary.Textures
             if ( subTexture.Width != bitmap.Width || subTexture.Height != bitmap.Height )
             {
                 ownsBitmap = true;
-                bitmap = new Bitmap( bitmap, subTexture.Width, subTexture.Height );
+                bitmap = new Bitmap( bitmap, ( int ) subTexture.Width, ( int ) subTexture.Height );
             }
 
             var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );

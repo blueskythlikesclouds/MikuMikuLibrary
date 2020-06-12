@@ -33,3 +33,13 @@ A program that allows you to extract .farc files or create them from folders.
 
 ### TXP Converter
 A program allows you to modify _tex.bin or .txd files by extracting them to .dds or .png files.
+
+# Special thanks
+* [Brolijah](https://github.com/Brolijah)
+* [korenkonder](https://github.com/korenkonder)
+* [lybxlpsv](https://github.com/lybxlpsv)
+* [minmode](https://www.deviantart.com/minmode)
+* [nastys](https://github.com/nastys)
+* [samyuu](https://github.com/samyuu)
+* [Stewie1.0](https://github.com/Stewie100)
+* [Waelwindows](https://github.com/Waelwindows)

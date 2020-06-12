@@ -8,17 +8,17 @@ namespace MikuMikuLibrary.Databases
 {
     public class AetInfo
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
-        public int Index { get; set; }
+        public ushort Index { get; set; }
     }
 
     public class AetSetInfo
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
         public string FileName { get; set; }
-        public int SpriteSetId { get; set; }
+        public uint SpriteSetId { get; set; }
         public List<AetInfo> Aets { get; }
 
         public AetSetInfo()
@@ -46,11 +46,11 @@ namespace MikuMikuLibrary.Databases
                 AetSets.Capacity = aetSetCount;
                 for ( int i = 0; i < aetSetCount; i++ )
                 {
-                    int id = reader.ReadInt32();
+                    uint id = reader.ReadUInt32();
                     string name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     string fileName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                     int index = reader.ReadInt32();
-                    int spriteSetId = reader.ReadInt32();
+                    uint spriteSetId = reader.ReadUInt32();
 
                     AetSets.Add( new AetSetInfo
                     {
@@ -66,12 +66,12 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < aetCount; i++ )
                 {
-                    int id = reader.ReadInt32();
+                    uint id = reader.ReadUInt32();
                     string name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
                     int info = reader.ReadInt32();
-                    int index = info & 0xFFFF;
-                    int setIndex = ( info >> 16 ) & 0xFFFF;
+                    ushort index = ( ushort ) ( info & 0xFFFF );
+                    ushort setIndex = ( ushort ) ( ( info >> 16 ) & 0xFFFF );
 
                     var aetInfo = new AetInfo
                     {

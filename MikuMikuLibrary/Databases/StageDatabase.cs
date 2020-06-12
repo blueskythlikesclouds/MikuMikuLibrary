@@ -8,13 +8,13 @@ namespace MikuMikuLibrary.Databases
 {
     public struct StageObjectInfo
     {
-        public short Id { get; set; }
-        public short SetId { get; set; }
+        public ushort Id { get; set; }
+        public ushort SetId { get; set; }
 
         internal void Read( EndianBinaryReader reader )
         {
-            Id = reader.ReadInt16();
-            SetId = reader.ReadInt16();
+            Id = reader.ReadUInt16();
+            SetId = reader.ReadUInt16();
         }
 
         internal void Write( EndianBinaryWriter writer )
@@ -49,8 +49,8 @@ namespace MikuMikuLibrary.Databases
         public int LensFlareScaleZ { get; set; }
         public float Field00 { get; set; }
         public int Field01 { get; set; } // It's always set to 0
-        public int Field02 { get; set; }
-        public int Field03 { get; set; }
+        public uint RenderTextureId { get; set; }
+        public uint MovieTextureId { get; set; }
         public string CollisionFilePath { get; set; } // Unused
         public int Field04 { get; set; }
         public int Field05 { get; set; }
@@ -74,8 +74,8 @@ namespace MikuMikuLibrary.Databases
         public int Field17 { get; set; }
         public int Field18 { get; set; }
         public StageEffect[] StageEffects { get; set; }
-        public int Id { get; set; }
-        public List<int> Auth3dIds { get; }
+        public uint Id { get; set; }
+        public List<uint> Auth3dIds { get; }
 
         internal void Read( EndianBinaryReader reader, BinaryFormat format )
         {
@@ -88,9 +88,9 @@ namespace MikuMikuLibrary.Databases
             LensFlareScaleZ = reader.ReadInt32();
             Field00 = reader.ReadSingle();
             Field01 = reader.ReadInt32();
-            Field02 = reader.ReadInt32();
+            RenderTextureId = reader.ReadUInt32();
             if ( format > BinaryFormat.DT )
-                Field03 = reader.ReadInt32();
+                MovieTextureId = reader.ReadUInt32();
             CollisionFilePath = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Field04 = reader.ReadInt32();
             Field05 = reader.ReadInt32();
@@ -122,9 +122,9 @@ namespace MikuMikuLibrary.Databases
             writer.Write( LensFlareScaleZ );
             writer.Write( Field00 );
             writer.Write( Field01 );
-            writer.Write( Field02 );
+            writer.Write( RenderTextureId );
             if ( format > BinaryFormat.DT )
-                writer.Write( Field03 );
+                writer.Write( MovieTextureId );
             writer.AddStringToStringTable( CollisionFilePath );
             writer.Write( Field04 );
             writer.Write( Field05 );
@@ -176,15 +176,15 @@ namespace MikuMikuLibrary.Databases
 
         internal void ReadAuth3dIds( EndianBinaryReader reader, int count )
         {
-            Id = reader.ReadInt32();
+            Id = reader.ReadUInt32();
 
             reader.ReadOffset( () =>
             {
                 Auth3dIds.Capacity = count;
                 for ( int i = 0; i < count; i++ )
-                    Auth3dIds.Add( reader.ReadInt32() );
+                    Auth3dIds.Add( reader.ReadUInt32() );
 
-                Auth3dIds.Remove( -1 );
+                Auth3dIds.Remove( 0xFFFFFFFF );
             } );
         }
 
@@ -193,7 +193,7 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Id );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
-                foreach ( int id in Auth3dIds )
+                foreach ( uint id in Auth3dIds )
                     writer.Write( id );
 
                 writer.Write( -1 );
@@ -204,7 +204,7 @@ namespace MikuMikuLibrary.Databases
         {
             Objects = new StageObjectInfo[ 7 ];
             StageEffects = new StageEffect[ 16 ];
-            Auth3dIds = new List<int>();
+            Auth3dIds = new List<uint>();
         }
     }
 

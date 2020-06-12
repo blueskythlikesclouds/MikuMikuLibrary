@@ -7,7 +7,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
     [Section( "MOSD" )]
     public class ObjectSetSection : BinaryFileSection<ObjectSet>
     {
-        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
+        public override SectionFlags Flags => SectionFlags.None;
 
         [SubSection( typeof( ObjectSection ) )]
         public List<Object> Objects => Data.Objects;

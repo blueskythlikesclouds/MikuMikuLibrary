@@ -14,9 +14,9 @@ namespace MikuMikuModel.Nodes.Sprites
         public override NodeFlags Flags => NodeFlags.Rename | NodeFlags.Export;
 
         [DisplayName( "Texture index" )]
-        public int TextureIndex
+        public uint TextureIndex
         {
-            get => GetProperty<int>();
+            get => GetProperty<uint>();
             set => SetProperty( value );
         }
 
@@ -33,7 +33,7 @@ namespace MikuMikuModel.Nodes.Sprites
             set
             {
                 SetProperty( value );
-                CalculateNdcValues();
+                CalculateNormalizedValues();
             }
         }
 
@@ -43,7 +43,7 @@ namespace MikuMikuModel.Nodes.Sprites
             set
             {
                 SetProperty( value );
-                CalculateNdcValues();
+                CalculateNormalizedValues();
             }
         }
 
@@ -53,7 +53,7 @@ namespace MikuMikuModel.Nodes.Sprites
             set
             {
                 SetProperty( value );
-                CalculateNdcValues();
+                CalculateNormalizedValues();
             }
         }
 
@@ -63,11 +63,11 @@ namespace MikuMikuModel.Nodes.Sprites
             set
             {
                 SetProperty( value );
-                CalculateNdcValues();
+                CalculateNormalizedValues();
             }
         }
 
-        private void CalculateNdcValues()
+        private void CalculateNormalizedValues()
         {
             var spriteSetNode = FindParent<SpriteSetNode>();
             var spriteSet = spriteSetNode.Data;
@@ -75,12 +75,12 @@ namespace MikuMikuModel.Nodes.Sprites
             if ( Data.TextureIndex >= spriteSet.TextureSet.Textures.Count )
                 return;
 
-            var texture = spriteSet.TextureSet.Textures[ Data.TextureIndex ];
+            var texture = spriteSet.TextureSet.Textures[ ( int ) Data.TextureIndex ];
 
-            Data.NdcX = Data.X / texture.Width;
-            Data.NdcY = Data.Y / texture.Height;
-            Data.NdcWidth = Data.Width / texture.Width;
-            Data.NdcHeight = Data.Height / texture.Height;
+            Data.NormalizedX = Data.X / texture.Width;
+            Data.NormalizedY = Data.Y / texture.Height;
+            Data.NormalizedWidth = Data.Width / texture.Width;
+            Data.NormalizedHeight = Data.Height / texture.Height;
         }
 
         protected override void Initialize()

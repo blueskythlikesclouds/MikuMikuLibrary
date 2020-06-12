@@ -10,11 +10,11 @@ namespace MikuMikuLibrary.Motions
         public KeySet Y { get; set; }
         public KeySet Z { get; set; }
 
-        public IEnumerable<int> Frames
+        public IEnumerable<ushort> Frames
         {
             get
             {
-                var enumerable = Enumerable.Empty<int>();
+                var enumerable = Enumerable.Empty<ushort>();
                 if ( X != null )
                     enumerable = enumerable.Concat( X.Keys.Select( x => x.Frame ) );
                 if ( Y != null )

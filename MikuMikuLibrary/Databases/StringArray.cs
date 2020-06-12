@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Databases
     public class StringEntry
     {
         public string Value { get; set; }
-        public int Id { get; set; }
+        public uint Id { get; set; }
     }
 
     public class StringArray : BinaryFile
@@ -34,8 +34,8 @@ namespace MikuMikuLibrary.Databases
                 uint stringOffset = reader.ReadUInt32();
                 if ( stringOffset >= reader.Length )
                 {
-                    reader.Endianness = Endianness.BigEndian;
-                    stringOffset = EndiannessSwapUtilities.Swap( stringOffset );
+                    reader.Endianness = Endianness.Big;
+                    stringOffset = EndiannessHelper.Swap( stringOffset );
                 }
 
                 Endianness = reader.Endianness;
@@ -54,7 +54,7 @@ namespace MikuMikuLibrary.Databases
 
                     string value = reader.ReadString( StringBinaryFormat.NullTerminated );
                     if ( !string.IsNullOrEmpty( value ) )
-                        Strings.Add( new StringEntry { Value = value, Id = i } );
+                        Strings.Add( new StringEntry { Value = value, Id = ( uint ) i } );
                 }
             }
 
@@ -69,7 +69,7 @@ namespace MikuMikuLibrary.Databases
                         Strings.Add( new StringEntry
                         {
                             Value = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ),
-                            Id = reader.ReadInt32()
+                            Id = reader.ReadUInt32()
                         } );
                 } );
             }
@@ -84,7 +84,7 @@ namespace MikuMikuLibrary.Databases
 
             void WriteClassic()
             {
-                int previousId = 0;
+                uint previousId = 0;
 
                 foreach ( var stringEntry in Strings.OrderBy( x => x.Id ) )
                 {

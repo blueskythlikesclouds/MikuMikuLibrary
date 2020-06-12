@@ -43,11 +43,8 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             foreach ( var boneInfo in obj.Skin.Bones )
                 if ( !boneParentMap.ContainsKey( boneInfo.Name ) )
                 {
-                    var parentBone =
-                        obj.Skin.Bones.FirstOrDefault( x => x.Id == boneInfo.ParentId );
-
                     bones.Add( boneInfo );
-                    boneParentMap.Add( boneInfo.Name, parentBone?.Name );
+                    boneParentMap.Add( boneInfo.Name, boneInfo.Parent?.Name );
                 }
 
             ConvertAiNodesFromBones( aiScene, bones, boneParentMap, appendTags );
@@ -86,11 +83,8 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             foreach ( var boneInfo in obj.Skin.Bones )
                 if ( !boneParentMap.ContainsKey( boneInfo.Name ) )
                 {
-                    var parentBone =
-                        obj.Skin.Bones.FirstOrDefault( x => x.Id == boneInfo.ParentId );
-
                     bones.Add( boneInfo );
-                    boneParentMap.Add( boneInfo.Name, parentBone?.Name );
+                    boneParentMap.Add( boneInfo.Name, boneInfo.Parent?.Name );
                 }
 
             ConvertAiNodesFromBones( aiScene, bones, boneParentMap );
@@ -108,7 +102,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             var transform = Matrix4x4.Multiply( inverseParentTransform, inverse );
 
             var aiNode = new Ai.Node( boneInfo.Name, parent );
-            aiNode.Transform = transform.ToAssimp();
+            aiNode.Transform = Matrix4x4.Transpose( transform ).ToAssimp();
 
             if ( appendTags )
                 aiNode.Name = $"{aiNode.Name}{Tag.Create( "ID", boneInfo.Id )}";
@@ -185,7 +179,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                         var bone = obj.Skin.Bones[ boneIndex ];
                         var aiBone = new Ai.Bone();
                         aiBone.Name = bone.Name;
-                        aiBone.OffsetMatrix = bone.InverseBindPoseMatrix.ToAssimp();
+                        aiBone.OffsetMatrix = Matrix4x4.Transpose( bone.InverseBindPoseMatrix ).ToAssimp();
 
                         if ( appendTags )
                             aiBone.Name = $"{aiBone.Name}{Tag.Create( "ID", bone.Id )}";
@@ -242,10 +236,10 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                 aiScene.RootNode.Children.Add( ConvertAiNodeFromObject( obj, aiScene, appendTags ) );
         }
 
-        private static Ai.TextureSlot ConvertTextureSlotFromTextureId( int textureId, Ai.TextureType type,
+        private static Ai.TextureSlot ConvertTextureSlotFromTextureId( uint textureId, Ai.TextureType type,
             TextureSet textureList )
         {
-            if ( textureId == -1 || textureList == null )
+            if ( textureId == 0xFFFFFFFF || textureList == null )
                 return default;
 
             var texture = textureList.Textures.FirstOrDefault( x => x.Id == textureId );
@@ -278,11 +272,11 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
             void ConvertMaterialTexture( MaterialTexture materialTexture, Ai.TextureType textureType )
             {
-                if ( materialTexture.IsActive )
-                {
-                    var texture = ConvertTextureSlotFromTextureId( materialTexture.TextureId, textureType, textures );
-                    aiMaterial.AddMaterialTexture( ref texture );
-                }
+                if ( !materialTexture.IsActive ) 
+                    return;
+
+                var texture = ConvertTextureSlotFromTextureId( materialTexture.TextureId, textureType, textures );
+                aiMaterial.AddMaterialTexture( in texture );
             }
 
             return aiMaterial;

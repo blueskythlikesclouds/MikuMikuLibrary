@@ -5,7 +5,7 @@ using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Objects;
 using MikuMikuModel.GUI.Controls;
-using MikuMikuModel.Nodes.Misc;
+using MikuMikuModel.Nodes.Collections;
 
 namespace MikuMikuModel.Nodes.Objects
 {

@@ -57,7 +57,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             ActivateTexture( Tangent, "TangentTexture" );
         }
 
-        public GLMaterial( Material material, Dictionary<int, GLTexture> textures, TextureSet textureSet )
+        public GLMaterial( Material material, Dictionary<uint, GLTexture> textures, TextureSet textureSet )
         {
             if ( textureSet == null )
                 return;

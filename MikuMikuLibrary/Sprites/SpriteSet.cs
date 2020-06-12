@@ -42,13 +42,13 @@ namespace MikuMikuLibrary.Sprites
                 }
             } );
 
-            reader.ReadAtOffsetIf( section?.Endianness != Endianness.BigEndian, textureNamesOffset, () =>
+            reader.ReadAtOffsetIf( section?.Endianness != Endianness.Big, textureNamesOffset, () =>
             {
                 foreach ( var texture in TextureSet.Textures )
                     texture.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
-            reader.ReadAtOffsetIf( section?.Endianness != Endianness.BigEndian, spriteNamesOffset, () =>
+            reader.ReadAtOffsetIf( section?.Endianness != Endianness.Big, spriteNamesOffset, () =>
             {
                 foreach ( var sprite in Sprites )
                     sprite.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );

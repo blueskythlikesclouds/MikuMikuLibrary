@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>MikuMikuModel</RootNamespace>
     <AssemblyName>MikuMikuModel</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
@@ -45,15 +45,15 @@
     <ApplicationIcon>MikuPoke.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AssimpNet, Version=4.1.0.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
-      <HintPath>..\packages\AssimpNet.4.1.0\lib\net40\AssimpNet.dll</HintPath>
+    <Reference Include="AssimpNet, Version=5.0.0.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
+      <HintPath>..\packages\AssimpNet.5.0.0-beta1\lib\net40\AssimpNet.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Ookii.Dialogs.WinForms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.WinForms.1.1.0\lib\net45\Ookii.Dialogs.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
+    <Reference Include="OpenTK, Version=3.2.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.2\lib\net20\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK.GLControl, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.GLControl.3.1.0\lib\net20\OpenTK.GLControl.dll</HintPath>
@@ -87,6 +87,8 @@
     <Compile Include="GUI\Forms\FarcArchiveViewForm.Designer.cs">
       <DependentUpon>FarcArchiveViewForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Nodes\IO\StreamNode.cs" />
+    <Compile Include="Nodes\TypeConverters\IdTypeConverter.cs" />
     <Compile Include="Resources\Styles\Style.cs" />
     <Compile Include="Resources\Styles\StyleColorTable.cs" />
     <Compile Include="Resources\Styles\StyleSet.cs" />
@@ -118,13 +120,11 @@
     <Compile Include="Nodes\INode.cs" />
     <Compile Include="Nodes\IO\BinaryFileNode.cs" />
     <Compile Include="Nodes\IO\IDirtyNode.cs" />
-    <Compile Include="Nodes\IO\StreamNode.cs" />
     <Compile Include="Nodes\Materials\MaterialNode.cs" />
     <Compile Include="Nodes\Materials\MaterialTextureNode.cs" />
-    <Compile Include="Nodes\Misc\ListNode.cs" />
-    <Compile Include="Nodes\Misc\ReferenceNode.cs" />
+    <Compile Include="Nodes\Collections\ListNode.cs" />
+    <Compile Include="Nodes\ReferenceNode.cs" />
     <Compile Include="Nodes\Objects\BoneInfoNode.cs" />
-    <Compile Include="Nodes\Objects\ExDataNode.cs" />
     <Compile Include="Nodes\Objects\SubMeshNode.cs" />
     <Compile Include="Nodes\Objects\ObjectNode.cs" />
     <Compile Include="Nodes\Objects\ObjectSetNode.cs" />
@@ -288,11 +288,11 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\AssimpNet.4.1.0\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.4.1.0\build\AssimpNet.targets')" />
+  <Import Project="..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\AssimpNet.4.1.0\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.4.1.0\build\AssimpNet.targets'))" />
+    <Error Condition="!Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets'))" />
   </Target>
 </Project>

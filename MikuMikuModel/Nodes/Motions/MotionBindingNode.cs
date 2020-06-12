@@ -1,5 +1,5 @@
 ﻿using MikuMikuLibrary.Motions;
-using MikuMikuModel.Nodes.Misc;
+using MikuMikuModel.Nodes.Collections;
 
 namespace MikuMikuModel.Nodes.Motions
 {

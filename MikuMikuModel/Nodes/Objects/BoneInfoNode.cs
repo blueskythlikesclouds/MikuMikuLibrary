@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Numerics;
 using MikuMikuLibrary.Objects;
+using MikuMikuModel.Nodes.TypeConverters;
 
 namespace MikuMikuModel.Nodes.Objects
 {
@@ -8,16 +9,13 @@ namespace MikuMikuModel.Nodes.Objects
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
-        [DisplayName( "Parent id" )]
-        public int ParentId
-        {
-            get => GetProperty<int>();
-            set => SetProperty( value );
-        }
+        [DisplayName( "Parent name" )] public string ParentBone => 
+            GetProperty<BoneInfo>( nameof( BoneInfo.Parent ) )?.Name;
 
-        public int Id
+        [TypeConverter( typeof( IdTypeConverter ) )]
+        public uint Id
         {
-            get => GetProperty<int>();
+            get => GetProperty<uint>();
             set => SetProperty( value );
         }
 

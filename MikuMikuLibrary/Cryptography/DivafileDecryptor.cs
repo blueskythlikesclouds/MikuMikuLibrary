@@ -52,7 +52,7 @@ namespace MikuMikuLibrary.Cryptography
 
             ReadHeader( source, skipSignature, out uint encryptedSize, out _ );
 
-            var streamView = source.CreateSubView( source.Position, encryptedSize );
+            var streamView = new StreamView( source, source.Position, encryptedSize, true );
             return new CryptoStream( streamView, decryptor, CryptoStreamMode.Read );
         }
 

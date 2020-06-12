@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -470,6 +471,9 @@ namespace MikuMikuModel.Nodes
                 return propertyInfo;
 
             propertyInfo = typeof( T ).GetProperty( propertyName );
+            if ( propertyInfo == null )
+                Debug.WriteLine( $"Could not find property info: {propertyName}" );
+
             sPropertyInfos[ propertyName ] = propertyInfo;
             return propertyInfo;
         }

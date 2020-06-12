@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Textures
         public int Width { get; private set; }
         public int Height { get; private set; }
         public TextureFormat Format { get; private set; }
-        public int Id { get; private set; }
+        public uint Id { get; private set; }
         public byte[] Data { get; private set; }
 
         internal void Read( EndianBinaryReader reader )
@@ -21,7 +21,7 @@ namespace MikuMikuLibrary.Textures
             Width = reader.ReadInt32();
             Height = reader.ReadInt32();
             Format = ( TextureFormat ) reader.ReadInt32();
-            Id = reader.ReadInt32();
+            Id = reader.ReadUInt32();
 
             int dataSize = reader.ReadInt32();
             Data = reader.ReadBytes( dataSize );
@@ -43,7 +43,7 @@ namespace MikuMikuLibrary.Textures
             Read( reader );
         }
 
-        internal SubTexture( int width, int height, TextureFormat format, int id )
+        internal SubTexture( int width, int height, TextureFormat format, uint id )
         {
             Width = Math.Max( 1, width );
             Height = Math.Max( 1, height );

@@ -6,8 +6,8 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "POF0" )]
     public class RelocationTableSectionInt32 : Section<List<long>>
     {
-        public override SectionFlags Flags => SectionFlags.None;
-        public override Endianness Endianness => Endianness.LittleEndian;
+        public override SectionFlags Flags => SectionFlags.HasNoRelocationTable;
+        public override Endianness Endianness => Endianness.Little;
         public override AddressSpace AddressSpace => AddressSpace.Int32;
 
         protected override void Read( List<long> data, EndianBinaryReader reader, long length )
@@ -45,7 +45,7 @@ namespace MikuMikuLibrary.IO.Sections
                 currentOffset = offset;
             }
 
-            writer.Write( 4 + AlignmentUtilities.Align( bytes.Count, 4 ) );
+            writer.Write( 4 + AlignmentHelper.Align( bytes.Count, 4 ) );
 
             foreach ( byte val in bytes )
                 writer.Write( val );
@@ -61,8 +61,8 @@ namespace MikuMikuLibrary.IO.Sections
     [Section( "POF1" )]
     public class RelocationTableSectionInt64 : Section<List<long>>
     {
-        public override SectionFlags Flags => SectionFlags.None;
-        public override Endianness Endianness => Endianness.LittleEndian;
+        public override SectionFlags Flags => SectionFlags.HasNoRelocationTable;
+        public override Endianness Endianness => Endianness.Little;
         public override AddressSpace AddressSpace => AddressSpace.Int32;
 
         protected override void Read( List<long> data, EndianBinaryReader reader, long length )
@@ -100,7 +100,7 @@ namespace MikuMikuLibrary.IO.Sections
                 currentOffset = offset;
             }
 
-            writer.Write( 4 + AlignmentUtilities.Align( bytes.Count, 4 ) );
+            writer.Write( 4 + AlignmentHelper.Align( bytes.Count, 4 ) );
 
             foreach ( byte val in bytes )
                 writer.Write( val );

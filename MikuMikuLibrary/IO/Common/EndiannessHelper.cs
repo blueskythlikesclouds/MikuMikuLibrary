@@ -7,15 +7,15 @@ using System.Linq;
 
 namespace MikuMikuLibrary.IO.Common
 {
-    public static class EndiannessSwapUtilities
+    public static class EndiannessHelper
     {
         public static Endianness SystemEndianness
         {
             get
             {
                 if ( BitConverter.IsLittleEndian )
-                    return Endianness.LittleEndian;
-                return Endianness.BigEndian;
+                    return Endianness.Little;
+                return Endianness.Big;
             }
         }
 
@@ -87,11 +87,10 @@ namespace MikuMikuLibrary.IO.Common
             value = Swap( value );
         }
 
-        public static float Swap( float value )
+        public static unsafe float Swap( float value )
         {
-            return UnsafeUtilities.ReinterpretCast<uint, float>(
-                Swap( UnsafeUtilities.ReinterpretCast<float, uint>( value ) )
-            );
+            uint swapped = Swap( *( uint* ) &value );
+            return *( float* ) &swapped;
         }
 
         public static void Swap( ref float value )
@@ -99,11 +98,10 @@ namespace MikuMikuLibrary.IO.Common
             value = Swap( value );
         }
 
-        public static double Swap( double value )
+        public static unsafe double Swap( double value )
         {
-            return UnsafeUtilities.ReinterpretCast<ulong, double>(
-                Swap( UnsafeUtilities.ReinterpretCast<double, ulong>( value ) )
-            );
+            ulong swapped = Swap( *( ulong* ) &value );
+            return *( double* ) &swapped;
         }
 
         public static void Swap( ref double value )

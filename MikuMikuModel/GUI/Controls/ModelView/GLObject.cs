@@ -24,7 +24,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             foreach ( var mesh in Meshes ) mesh.Draw( shaderProgram );
         }
 
-        public GLObject( Object obj, Dictionary<int, GLTexture> textures, TextureSet textureSet )
+        public GLObject( Object obj, Dictionary<uint, GLTexture> textures, TextureSet textureSet )
         {
             Materials = new List<GLMaterial>();
             foreach ( var material in obj.Materials )

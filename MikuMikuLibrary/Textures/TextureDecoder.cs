@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Numerics;
@@ -10,6 +10,8 @@ namespace MikuMikuLibrary.Textures
 {
     public static class TextureDecoder
     {
+        private static readonly int[] sCubeMapToDds = { 0, 1, 2, 3, 5, 4 };
+
         internal static readonly Matrix4x4 sYCbCrToRGB = new Matrix4x4( 1.0f, 1.0f, 1.0f, 0.0f,
             0.0f, -0.1873f, 1.8556f, 0.0f,
             1.5748f, -0.4681f, 0.0f, 0.0f,
@@ -21,17 +23,16 @@ namespace MikuMikuLibrary.Textures
             for ( int y = 0; y < height; y++ )
             for ( int x = 0; x < width; x++ )
             {
-                int lumOffset = y * width + x;
-                int cbrOffset = y / 2 * width / 2 + x / 2;
+                int offset = y * width + x;
 
-                var lum = Color.FromArgb( *( lumPtr + lumOffset ) );
-                var cbr = Color.FromArgb( *( cbrPtr + cbrOffset ) );
+                var lum = Color.FromArgb( *( lumPtr + offset ) );
+                var cbr = Color.FromArgb( *( cbrPtr + offset ) );
 
                 var rgb = Vector3.Transform(
                     new Vector3( lum.R / 255.0f, cbr.R / 255.0f - 0.5f, cbr.G / 255.0f - 0.5f ), sYCbCrToRGB );
                 rgb = Vector3.Multiply( Vector3.Max( Vector3.Zero, Vector3.Min( Vector3.One, rgb ) ), 255.0f );
 
-                *( outPtr + lumOffset ) = Color.FromArgb( lum.G, ( int ) rgb.X, ( int ) rgb.Y, ( int ) rgb.Z ).ToArgb();
+                *( outPtr + offset ) = Color.FromArgb( lum.G, ( int ) rgb.X, ( int ) rgb.Y, ( int ) rgb.Z ).ToArgb();
             }
         }
 
@@ -75,32 +76,16 @@ namespace MikuMikuLibrary.Textures
             }
             else
             {
-                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width, subTexture.Height,
+                var buffer = DDSCodec.DecompressPixelDataToRGBA( subTexture.Data, subTexture.Width,
+                    subTexture.Height,
                     TextureUtilities.GetDDSPixelFormat( subTexture.Format ) );
+
                 var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
                 Marshal.Copy( buffer, 0, bitmapData.Scan0, buffer.Length );
                 bitmap.UnlockBits( bitmapData );
             }
 
             return bitmap;
-        }
-
-        private static IEnumerable<int> CubeMapToDDSCubeMap()
-        {
-            yield return 0;
-            yield return 1;
-            yield return 2;
-            yield return 3;
-            yield return 5;
-            yield return 4;
-
-            // Just for you Yukikami
-            //yield return 0;
-            //yield return 4;
-            //yield return 1;
-            //yield return 5;
-            //yield return 3;
-            //yield return 2;
         }
 
         public static unsafe Bitmap Decode( Texture texture )
@@ -110,25 +95,31 @@ namespace MikuMikuLibrary.Textures
                 var bitmap = new Bitmap( texture[ 0 ].Width, texture[ 0 ].Height );
                 var rect = new Rectangle( 0, 0, bitmap.Width, bitmap.Height );
 
-                var lumBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture[ 0 ].Data, texture[ 0 ].Width, texture[ 0 ].Height,
-                    TextureUtilities.GetDDSPixelFormat( texture.Format ) );
+                var lumBitmap = Decode( texture[ 0, 0 ] );
+                var cbrBitmap = Decode( texture[ 0, 1 ] );
 
-                var cbrBuffer = DDSCodec.DecompressPixelDataToRGBA(
-                    texture[ 1 ].Data, texture[ 1 ].Width, texture[ 1 ].Height,
-                    TextureUtilities.GetDDSPixelFormat( texture.Format ) );
-
-                var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
-                fixed ( byte* lumPtr = lumBuffer )
-                fixed ( byte* cbrPtr = cbrBuffer )
+                var cbrBitmapScaled = new Bitmap( texture.Width, texture.Height );
+                using ( var gfx = Graphics.FromImage( cbrBitmapScaled ) )
                 {
-                    var lumIntPtr = ( int* ) lumPtr;
-                    var cbrIntPtr = ( int* ) cbrPtr;
-
-                    ConvertYCbCrToRGBA( lumIntPtr, cbrIntPtr, ( int* ) bitmapData.Scan0, bitmap.Width, bitmap.Height );
+                    gfx.InterpolationMode = InterpolationMode.HighQualityBilinear;
+                    gfx.DrawImage( cbrBitmap, rect );
                 }
 
+                var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
+                var lumData = lumBitmap.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
+                var cbrData = cbrBitmapScaled.LockBits( rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb );
+
+                ConvertYCbCrToRGBA( ( int* ) lumData.Scan0, ( int* ) cbrData.Scan0, ( int* ) bitmapData.Scan0,
+                    bitmap.Width, bitmap.Height );
+
                 bitmap.UnlockBits( bitmapData );
+                lumBitmap.UnlockBits( lumData );
+                cbrBitmapScaled.UnlockBits( cbrData );
+
+                lumBitmap.Dispose();
+                cbrBitmap.Dispose();
+                cbrBitmapScaled.Dispose();
+
                 return bitmap;
             }
 
@@ -138,7 +129,7 @@ namespace MikuMikuLibrary.Textures
                 using ( var gfx = Graphics.FromImage( bitmap ) )
                 {
                     int currentIndex = 0;
-                    foreach ( int i in CubeMapToDDSCubeMap() )
+                    foreach ( int i in sCubeMapToDds )
                         gfx.DrawImageUnscaled( Decode( texture[ i, 0 ] ), currentIndex++ * texture.Width, 0 );
                 }
 
@@ -182,7 +173,7 @@ namespace MikuMikuLibrary.Textures
             ddsHeader.Save( destination );
 
             if ( texture.UsesDepth )
-                foreach ( int i in CubeMapToDDSCubeMap() )
+                foreach ( int i in sCubeMapToDds )
                 foreach ( var mipMap in texture.EnumerateMipMaps( i ) )
                     destination.Write( mipMap.Data, 0, mipMap.Data.Length );
 

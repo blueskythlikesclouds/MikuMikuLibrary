@@ -29,11 +29,11 @@ namespace MikuMikuLibrary.Sprites
     {
         public string Name { get; set; }
         public ResolutionMode ResolutionMode { get; set; }
-        public int TextureIndex { get; set; }
-        public float NdcX { get; set; }
-        public float NdcY { get; set; }
-        public float NdcWidth { get; set; }
-        public float NdcHeight { get; set; }
+        public uint TextureIndex { get; set; }
+        public float NormalizedX { get; set; }
+        public float NormalizedY { get; set; }
+        public float NormalizedWidth { get; set; }
+        public float NormalizedHeight { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Width { get; set; }
@@ -41,12 +41,12 @@ namespace MikuMikuLibrary.Sprites
 
         internal void Read( EndianBinaryReader reader )
         {
-            TextureIndex = reader.ReadInt32();
+            TextureIndex = reader.ReadUInt32();
             reader.SeekCurrent( 4 );
-            NdcX = reader.ReadSingle();
-            NdcY = reader.ReadSingle();
-            NdcWidth = reader.ReadSingle();
-            NdcHeight = reader.ReadSingle();
+            NormalizedX = reader.ReadSingle();
+            NormalizedY = reader.ReadSingle();
+            NormalizedWidth = reader.ReadSingle();
+            NormalizedHeight = reader.ReadSingle();
             X = reader.ReadSingle();
             Y = reader.ReadSingle();
             Width = reader.ReadSingle();
@@ -57,10 +57,10 @@ namespace MikuMikuLibrary.Sprites
         {
             writer.Write( TextureIndex );
             writer.Write( 0 );
-            writer.Write( NdcX );
-            writer.Write( NdcY );
-            writer.Write( NdcWidth );
-            writer.Write( NdcHeight );
+            writer.Write( NormalizedX );
+            writer.Write( NormalizedY );
+            writer.Write( NormalizedWidth );
+            writer.Write( NormalizedHeight );
             writer.Write( X );
             writer.Write( Y );
             writer.Write( Width );

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace MikuMikuLibrary.IO.Common
 {
-    public static class AlignmentUtilities
+    public static class AlignmentHelper
     {
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public static long Align( long value, int alignment )
@@ -34,6 +34,20 @@ namespace MikuMikuLibrary.IO.Common
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public static int AlignToNextPowerOfTwo( int value )
+        {
+            value--;
+            value |= value >> 1;
+            value |= value >> 2;
+            value |= value >> 4;
+            value |= value >> 8;
+            value |= value >> 16;
+            value++;
+
+            return value;
+        }
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static uint AlignToNextPowerOfTwo( uint value )
         {
             value--;
             value |= value >> 1;

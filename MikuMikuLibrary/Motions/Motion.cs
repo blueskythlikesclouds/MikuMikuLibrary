@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
@@ -16,10 +17,10 @@ namespace MikuMikuLibrary.Motions
         public override BinaryFileFlags Flags =>
             BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
 
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
-        public int HighBits { get; set; }
-        public int FrameCount { get; set; }
+        public byte HighBits { get; set; }
+        public ushort FrameCount { get; set; }
         public List<KeySet> KeySets { get; }
         public List<BoneInfo> BoneInfos { get; }
 
@@ -32,7 +33,7 @@ namespace MikuMikuLibrary.Motions
                 if ( section.Format == BinaryFormat.F2nd )
                     reader.SeekCurrent( 4 );
 
-                Id = reader.ReadInt32();
+                Id = reader.ReadUInt32();
                 Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             }
 
@@ -57,14 +58,14 @@ namespace MikuMikuLibrary.Motions
                 reader.ReadAtOffset( boneIdsOffset, () =>
                 {
                     foreach ( var boneInfo in BoneInfos )
-                        boneInfo.Id = ( int ) reader.ReadUInt64();
+                        boneInfo.Id = ( uint ) reader.ReadUInt64();
                 } );
             }
             else
             {
                 reader.ReadAtOffset( boneInfosOffset, () =>
                 {
-                    int index = reader.ReadUInt16();
+                    uint index = reader.ReadUInt16();
                     do
                     {
                         BoneInfos.Add( new BoneInfo { Id = index } );
@@ -77,7 +78,7 @@ namespace MikuMikuLibrary.Motions
             {
                 int info = reader.ReadUInt16();
                 int keySetCount = info & 0x3FFF;
-                HighBits = info >> 14;
+                HighBits = ( byte ) ( info >> 14 );
                 FrameCount = reader.ReadUInt16();
 
                 KeySets.Capacity = keySetCount;
@@ -114,7 +115,7 @@ namespace MikuMikuLibrary.Motions
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 writer.Write( ( ushort ) ( ( HighBits << 14 ) | KeySets.Count ) );
-                writer.Write( ( ushort ) FrameCount );
+                writer.Write( FrameCount );
             } );
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
@@ -191,8 +192,8 @@ namespace MikuMikuLibrary.Motions
                 if ( motionDatabase != null && boneInfo.Id >= motionDatabase.BoneNames.Count )
                     break;
 
-                boneInfo.Name = boneInfo.Name ?? motionDatabase?.BoneNames[ boneInfo.Id ] ??
-                                throw new ArgumentNullException( nameof( motionDatabase ) );
+                boneInfo.Name = boneInfo.Name ?? motionDatabase?.BoneNames[ ( int ) boneInfo.Id ] ??
+                    throw new ArgumentNullException( nameof( motionDatabase ) );
 
                 var bone = skeleton.GetBone( boneInfo.Name );
                 var boneBinding = new BoneBinding { Name = boneInfo.Name };
@@ -253,6 +254,21 @@ namespace MikuMikuLibrary.Motions
             if ( skeleton != null )
                 mBinding?.Unbind( skeleton );
 
+            // Force modern format if we are saving motions individually
+            if ( !Format.IsModern() )
+                Format = BinaryFormat.F2nd;
+
+            if ( !string.IsNullOrEmpty( Name ) )
+                Id = MurmurHash.Calculate( Name );
+
+            foreach ( var boneInfo in BoneInfos )
+            {
+                if ( string.IsNullOrEmpty( boneInfo.Name ) )
+                    continue;
+
+                boneInfo.Id = MurmurHash.Calculate( boneInfo.Name );
+            }
+
             Save( destination, leaveOpen );
         }
 
@@ -274,6 +290,6 @@ namespace MikuMikuLibrary.Motions
     public class BoneInfo
     {
         public string Name { get; set; }
-        public int Id { get; set; }
+        public uint Id { get; set; }
     }
 }

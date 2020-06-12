@@ -27,7 +27,7 @@ namespace MikuMikuLibrary.IO.Common
             get => mEndianness;
             set
             {
-                SwapBytes = value != EndiannessSwapUtilities.SystemEndianness;
+                SwapBytes = value != EndiannessHelper.SystemEndianness;
                 mEndianness = value;
             }
         }
@@ -121,7 +121,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public void Align( int alignment )
         {
-            SeekCurrent( AlignmentUtilities.GetAlignedDifference( Position, alignment ) );
+            SeekCurrent( AlignmentHelper.GetAlignedDifference( Position, alignment ) );
         }
 
         public long ReadOffset()
@@ -332,7 +332,7 @@ namespace MikuMikuLibrary.IO.Common
         public override short ReadInt16()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadInt16() );
+                return EndiannessHelper.Swap( base.ReadInt16() );
             return base.ReadInt16();
         }
 
@@ -347,7 +347,7 @@ namespace MikuMikuLibrary.IO.Common
         public override ushort ReadUInt16()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadUInt16() );
+                return EndiannessHelper.Swap( base.ReadUInt16() );
             return base.ReadUInt16();
         }
 
@@ -362,7 +362,7 @@ namespace MikuMikuLibrary.IO.Common
         public override decimal ReadDecimal()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadDecimal() );
+                return EndiannessHelper.Swap( base.ReadDecimal() );
             return base.ReadDecimal();
         }
 
@@ -377,7 +377,7 @@ namespace MikuMikuLibrary.IO.Common
         public override double ReadDouble()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadDouble() );
+                return EndiannessHelper.Swap( base.ReadDouble() );
             return base.ReadDouble();
         }
 
@@ -392,7 +392,7 @@ namespace MikuMikuLibrary.IO.Common
         public override int ReadInt32()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadInt32() );
+                return EndiannessHelper.Swap( base.ReadInt32() );
             return base.ReadInt32();
         }
 
@@ -407,7 +407,7 @@ namespace MikuMikuLibrary.IO.Common
         public override long ReadInt64()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadInt64() );
+                return EndiannessHelper.Swap( base.ReadInt64() );
             return base.ReadInt64();
         }
 
@@ -422,7 +422,7 @@ namespace MikuMikuLibrary.IO.Common
         public Half ReadHalf()
         {
             if ( SwapBytes )
-                return Half.ToHalf( EndiannessSwapUtilities.Swap( base.ReadUInt16() ) );
+                return Half.ToHalf( EndiannessHelper.Swap( base.ReadUInt16() ) );
             return Half.ToHalf( base.ReadUInt16() );
         }
 
@@ -438,7 +438,7 @@ namespace MikuMikuLibrary.IO.Common
         public override float ReadSingle()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadSingle() );
+                return EndiannessHelper.Swap( base.ReadSingle() );
             return base.ReadSingle();
         }
 
@@ -453,7 +453,7 @@ namespace MikuMikuLibrary.IO.Common
         public override uint ReadUInt32()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadUInt32() );
+                return EndiannessHelper.Swap( base.ReadUInt32() );
             return base.ReadUInt32();
         }
 
@@ -468,7 +468,7 @@ namespace MikuMikuLibrary.IO.Common
         public override ulong ReadUInt64()
         {
             if ( SwapBytes )
-                return EndiannessSwapUtilities.Swap( base.ReadUInt64() );
+                return EndiannessHelper.Swap( base.ReadUInt64() );
             return base.ReadUInt64();
         }
 
@@ -687,11 +687,24 @@ namespace MikuMikuLibrary.IO.Common
 
         public Matrix4x4 ReadMatrix4x4()
         {
-            return new Matrix4x4(
-                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
-                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
-                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle(),
-                ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle() );
+            float m11 = ReadSingle();
+            float m21 = ReadSingle();
+            float m31 = ReadSingle();
+            float m41 = ReadSingle();
+            float m12 = ReadSingle();
+            float m22 = ReadSingle();
+            float m32 = ReadSingle();
+            float m42 = ReadSingle();
+            float m13 = ReadSingle();
+            float m23 = ReadSingle();
+            float m33 = ReadSingle();
+            float m43 = ReadSingle();
+            float m14 = ReadSingle();
+            float m24 = ReadSingle();
+            float m34 = ReadSingle();
+            float m44 = ReadSingle();
+
+            return new Matrix4x4( m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44 );
         }
 
         public Matrix4x4[] ReadMatrix4x4s( int count )

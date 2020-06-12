@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -7,6 +8,7 @@ using MikuMikuLibrary.Textures;
 using MikuMikuLibrary.Textures.DDS;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Modules;
+using MikuMikuModel.Nodes.TypeConverters;
 using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Nodes.Textures
@@ -25,9 +27,10 @@ namespace MikuMikuModel.Nodes.Textures
             }
         }
 
-        public int Id
+        [TypeConverter( typeof( IdTypeConverter ) )]
+        public uint Id
         {
-            get => GetProperty<int>();
+            get => GetProperty<uint>();
             set => SetProperty( value );
         }
 
@@ -35,18 +38,18 @@ namespace MikuMikuModel.Nodes.Textures
         public int Height => GetProperty<int>();
         public TextureFormat Format => GetProperty<TextureFormat>();
 
-        private Texture ReplaceBitmap(string filePath, bool flipped=false)
+        private Texture ReplaceBitmap( string filePath, bool flipped = false )
         {
-            using (var bitmap = new Bitmap(filePath))
+            using ( var bitmap = new Bitmap( filePath ) )
             {
-                if (flipped)
-                    bitmap.RotateFlip(RotateFlipType.Rotate180FlipX);
+                if ( flipped )
+                    bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
 
-                bool hasTransparency = DDSCodec.HasTransparency(bitmap);
+                bool hasTransparency = DDSCodec.HasTransparency( bitmap );
 
-                if (Data.IsYCbCr)
-                    return TextureEncoder.Encode(bitmap,
-                        hasTransparency ? TextureFormat.RGBA : TextureFormat.RGB, false);
+                if ( Data.IsYCbCr )
+                    return TextureEncoder.Encode( bitmap,
+                        hasTransparency ? TextureFormat.RGBA : TextureFormat.RGB, false );
 
                 var format =
                     Data.Format == TextureFormat.DXT1 ||
@@ -59,16 +62,14 @@ namespace MikuMikuModel.Nodes.Textures
                         ? TextureFormat.RGBA
                         : TextureFormat.RGB : Data.Format;
 
-
-
-                return TextureEncoder.Encode(bitmap, format, Data.MipMapCount != 0);
+                return TextureEncoder.Encode( bitmap, format, Data.MipMapCount != 0 );
             }
         }
 
-        private ImageFormat GetImageFormat(string filePath)
+        private ImageFormat GetImageFormat( string filePath )
         {
-            string extension = Path.GetExtension(filePath).Trim('.').ToLowerInvariant();
-            switch (extension)
+            string extension = Path.GetExtension( filePath ).Trim( '.' ).ToLowerInvariant();
+            switch ( extension )
             {
                 case "png":
                     return ImageFormat.Png;
@@ -84,7 +85,7 @@ namespace MikuMikuModel.Nodes.Textures
                     return ImageFormat.Bmp;
 
                 default:
-                    throw new ArgumentException("Image format could not be detected", nameof(filePath));
+                    throw new ArgumentException( "Image format could not be detected", nameof( filePath ) );
             }
         }
 
@@ -93,27 +94,27 @@ namespace MikuMikuModel.Nodes.Textures
             RegisterExportHandler<Bitmap>( filePath => TextureDecoder.DecodeToPNG( Data, filePath ) );
             RegisterExportHandler<Texture>( filePath => TextureDecoder.DecodeToDDS( Data, filePath ) );
             RegisterReplaceHandler<Texture>( TextureEncoder.Encode );
-            RegisterReplaceHandler<Bitmap>( filePath => ReplaceBitmap(filePath) );
-            RegisterCustomHandler("Export flipped", () =>
+            RegisterReplaceHandler<Bitmap>( filePath => ReplaceBitmap( filePath ) );
+            RegisterCustomHandler( "Export flipped", () =>
             {
                 string filePath = ModuleExportUtilities.SelectModuleExport<Bitmap>();
-                if (!string.IsNullOrEmpty(filePath))
+                if ( !string.IsNullOrEmpty( filePath ) )
                 {
-                    var imageFormat = GetImageFormat(filePath);
+                    var imageFormat = GetImageFormat( filePath );
 
-                    using (Bitmap oBitmap = TextureDecoder.Decode(Data))
+                    using ( Bitmap oBitmap = TextureDecoder.Decode( Data ) )
                     {
-                        oBitmap.RotateFlip(RotateFlipType.Rotate180FlipX);
-                        oBitmap.Save(filePath, imageFormat);
+                        oBitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
+                        oBitmap.Save( filePath, imageFormat );
                     }
                 }
-            });
-            RegisterCustomHandler("Replace flipped", () =>
+            } );
+            RegisterCustomHandler( "Replace flipped", () =>
             {
                 string filePath = ModuleImportUtilities.SelectModuleImport<Bitmap>();
-                 if (!string.IsNullOrEmpty(filePath))
-                     Replace(ReplaceBitmap(filePath, true));
-            });
+                if ( !string.IsNullOrEmpty( filePath ) )
+                    Replace( ReplaceBitmap( filePath, true ) );
+            } );
         }
 
         protected override void PopulateCore()

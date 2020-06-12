@@ -41,7 +41,6 @@ namespace MikuMikuLibrary.IO.Sections
     public enum SectionFlags
     {
         None = 0,
-        HasRelocationTable = 1 << 0,
-        HasEndianReverseTable = 1 << 1
+        HasNoRelocationTable = 1
     }
 }

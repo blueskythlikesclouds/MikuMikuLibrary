@@ -23,8 +23,8 @@ namespace MikuMikuLibrary.Textures
             int signature = reader.ReadInt32();
             if ( signature != 0x03505854 )
             {
-                reader.Endianness = Endianness = Endianness.BigEndian;
-                signature = EndiannessSwapUtilities.Swap( signature );
+                reader.Endianness = Endianness = Endianness.Big;
+                signature = EndiannessHelper.Swap( signature );
             }
 
             if ( signature != 0x03505854 )
@@ -82,7 +82,7 @@ namespace MikuMikuLibrary.Textures
                  filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.F2nd;
-                Endianness = Endianness.BigEndian;
+                Endianness = Endianness.Big;
             }
 
             // Or reverse
@@ -90,7 +90,7 @@ namespace MikuMikuLibrary.Textures
                       filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.DT;
-                Endianness = Endianness.LittleEndian;
+                Endianness = Endianness.Little;
             }
 
             // Save a TXI if we are modern
@@ -101,7 +101,7 @@ namespace MikuMikuLibrary.Textures
                     textureDatabase.Textures.Add( new TextureInfo
                     {
                         Id = texture.Id,
-                        Name = texture.Name ?? $"Texture{texture.Id}"
+                        Name = texture.Name ?? Guid.NewGuid().ToString()
                     } );
 
                 textureDatabase.Format = Format;

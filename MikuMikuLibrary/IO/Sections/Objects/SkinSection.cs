@@ -6,7 +6,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
     [Section( "OSKN" )]
     public class SkinSection : Section<Skin>
     {
-        public override SectionFlags Flags => SectionFlags.HasRelocationTable;
+        public override SectionFlags Flags => SectionFlags.None;
 
         protected override void Read( Skin data, EndianBinaryReader reader, long length )
         {

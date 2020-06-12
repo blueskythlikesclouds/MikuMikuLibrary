@@ -132,7 +132,7 @@ namespace MikuMikuLibrary.IO
             if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
             {
                 if ( mOwnsStream )
-                    mStream.Dispose();
+                    mStream.Close();
 
                 mStream = destination;
                 mOwnsStream = !leaveOpen;
@@ -197,9 +197,7 @@ namespace MikuMikuLibrary.IO
                     } while ( File.Exists( thisFilePath ) );
 
                     using ( var destination = File.Create( thisFilePath ) )
-                    {
                         Save( destination );
-                    }
 
                     fileStream.Close();
 
@@ -278,7 +276,7 @@ namespace MikuMikuLibrary.IO
         protected virtual void Dispose( bool disposing )
         {
             if ( disposing && Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && mOwnsStream )
-                mStream?.Dispose();
+                mStream?.Close();
         }
 
         ~BinaryFile()

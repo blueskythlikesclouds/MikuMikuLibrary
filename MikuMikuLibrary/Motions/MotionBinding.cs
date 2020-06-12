@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.Skeletons;
 
 namespace MikuMikuLibrary.Motions
@@ -66,8 +67,8 @@ namespace MikuMikuLibrary.Motions
                 Parent.BoneInfos.Add( new BoneInfo
                 {
                     Name = name,
-                    Id = motionDatabase?.BoneNames?.FindIndex(
-                             x => x.Equals( name, StringComparison.OrdinalIgnoreCase ) ) ?? -1
+                    Id = ( uint? ) motionDatabase?.BoneNames?.FindIndex(
+                        x => x.Equals( name, StringComparison.OrdinalIgnoreCase ) ) ?? MurmurHash.Calculate( name )
                 } );
             }
         }

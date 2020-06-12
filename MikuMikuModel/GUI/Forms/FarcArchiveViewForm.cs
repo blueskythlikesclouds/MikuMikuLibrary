@@ -3,7 +3,6 @@ using System.Windows.Forms;
 using MikuMikuLibrary.Archives;
 using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Archives;
-using MikuMikuModel.Nodes.Misc;
 using MikuMikuModel.Nodes.Wrappers;
 
 namespace MikuMikuModel.GUI.Forms

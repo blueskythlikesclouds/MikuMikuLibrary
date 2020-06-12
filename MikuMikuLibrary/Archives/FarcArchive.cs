@@ -23,7 +23,7 @@ namespace MikuMikuLibrary.Archives
             set
             {
                 if ( ( value & ( value - 1 ) ) != 0 )
-                    mAlignment = AlignmentUtilities.AlignToNextPowerOfTwo( value );
+                    mAlignment = AlignmentHelper.AlignToNextPowerOfTwo( value );
                 else
                     mAlignment = value;
             }
@@ -34,7 +34,7 @@ namespace MikuMikuLibrary.Archives
         public override BinaryFileFlags Flags =>
             BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.UsesSourceStream;
 
-        public override Endianness Endianness => Endianness.BigEndian;
+        public override Endianness Endianness => Endianness.Big;
 
         public bool CanAdd => true;
         public bool CanRemove => true;
@@ -98,6 +98,7 @@ namespace MikuMikuLibrary.Archives
             entryStream = new MemoryStream();
             temp.CopyTo( entryStream );
             entryStream.Position = 0;
+            temp.Close();
 
             return new EntryStream<string>( entry.Handle, entryStream );
         }
@@ -155,7 +156,7 @@ namespace MikuMikuLibrary.Archives
                     var aesManaged = CreateAesManagedForFT( iv );
                     var decryptor = aesManaged.CreateDecryptor();
                     var cryptoStream = new CryptoStream( reader.BaseStream, decryptor, CryptoStreamMode.Read );
-                    reader = new EndianBinaryReader( cryptoStream, Encoding.UTF8, Endianness.BigEndian );
+                    reader = new EndianBinaryReader( cryptoStream, Encoding.UTF8, Endianness.Big );
                     mAlignment = reader.ReadInt32();
                 }
 
@@ -183,9 +184,9 @@ namespace MikuMikuLibrary.Archives
                     if ( isEncrypted )
                     {
                         if ( isCompressed )
-                            fixedSize = AlignmentUtilities.Align( compressedSize, 16 );
+                            fixedSize = AlignmentHelper.Align( compressedSize, 16 );
                         else
-                            fixedSize = AlignmentUtilities.Align( uncompressedSize, 16 );
+                            fixedSize = AlignmentHelper.Align( uncompressedSize, 16 );
                     }
 
                     else if ( isCompressed )
@@ -413,7 +414,11 @@ namespace MikuMikuLibrary.Archives
                 if ( IsCompressed )
                     stream = GetDecompressingStream( stream, stream == source );
 
-                return stream.CreateSubView( Position, UnpackedLength, stream == source );
+                long position = Position;
+                if ( IsFutureTone && IsEncrypted )
+                    position += 16; // Skip the IV
+
+                return new StreamView( stream, source, position, UnpackedLength, stream == source );
             }
 
             internal void CopyTo( Stream destination, Stream source, bool compress )
@@ -435,27 +440,26 @@ namespace MikuMikuLibrary.Archives
 
                 Stream sourceStream;
 
+                long position = Position;
+                if ( IsFutureTone && IsEncrypted )
+                    position += 16; // Skip the IV
+
                 if ( IsEncrypted )
                 {
-                    sourceStream = source.CreateSubView( Position, Length );
-                    sourceStream = GetDecryptingStream( sourceStream );
-                    sourceStream =
-                        sourceStream.CreateSubView( 0, IsCompressed ? CompressedLength : UnpackedLength, false );
+                    var streamView = new StreamView( source, position, Length, true );
+                    sourceStream = new StreamView( GetDecryptingStream( streamView ), streamView, 0, IsCompressed ? CompressedLength : UnpackedLength );
                 }
                 else if ( IsCompressed )
                 {
-                    sourceStream = source.CreateSubView( Position, CompressedLength );
+                    sourceStream = new StreamView( source, position, CompressedLength, true );
                 }
                 else
                 {
-                    sourceStream = source.CreateSubView( Position, UnpackedLength );
+                    sourceStream = new StreamView( source, position, UnpackedLength, true );
                 }
 
                 if ( IsCompressed && !compress )
-                {
-                    sourceStream = GetDecompressingStream( sourceStream );
-                    sourceStream = sourceStream.CreateSubView( 0, UnpackedLength, false );
-                }
+                    sourceStream = new StreamView( GetDecompressingStream( sourceStream, sourceStream == source ), sourceStream, 0, UnpackedLength );
 
                 CopyCompressedIf( !IsCompressed && compress, sourceStream );
 

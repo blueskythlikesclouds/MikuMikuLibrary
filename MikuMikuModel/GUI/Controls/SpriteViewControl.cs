@@ -1,8 +1,5 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
-using MikuMikuLibrary.Textures;
-using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Controls
 {

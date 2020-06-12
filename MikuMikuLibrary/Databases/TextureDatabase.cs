@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Databases
 {
     public class TextureInfo
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
     }
 
@@ -32,7 +32,7 @@ namespace MikuMikuLibrary.Databases
                 for ( int i = 0; i < textureCount; i++ )
                     Textures.Add( new TextureInfo
                     {
-                        Id = reader.ReadInt32(),
+                        Id = reader.ReadUInt32(),
                         Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
                     } );
             } );
@@ -58,7 +58,7 @@ namespace MikuMikuLibrary.Databases
                  filePath.EndsWith( ".txi", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.F2nd;
-                Endianness = Endianness.BigEndian;
+                Endianness = Endianness.Big;
             }
 
             // Or reverse
@@ -66,7 +66,7 @@ namespace MikuMikuLibrary.Databases
                       filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.DT;
-                Endianness = Endianness.LittleEndian;
+                Endianness = Endianness.Little;
             }
 
             base.Save( filePath );
@@ -77,7 +77,7 @@ namespace MikuMikuLibrary.Databases
             return Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public TextureInfo GetTextureInfo( int textureId )
+        public TextureInfo GetTextureInfo( uint textureId )
         {
             return Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
         }

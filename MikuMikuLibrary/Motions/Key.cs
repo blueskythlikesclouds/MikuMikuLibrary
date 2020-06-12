@@ -4,7 +4,7 @@
     {
         public float Value { get; set; }
         public float Tangent { get; set; }
-        public int Frame { get; set; }
+        public ushort Frame { get; set; }
 
         public override string ToString()
         {

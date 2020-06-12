@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections.Enrs;
 
 namespace MikuMikuLibrary.IO.Sections
 {
@@ -51,7 +52,7 @@ namespace MikuMikuLibrary.IO.Sections
 
         public virtual AddressSpace AddressSpace { get; set; }
 
-        public BinaryFormat Format => BinaryFormatUtilities.GetFormat( AddressSpace );
+        public BinaryFormat Format => AddressSpace.GetCorrespondingModernFormat();
 
         public EndianBinaryReader Reader { get; private set; }
 
@@ -120,7 +121,7 @@ namespace MikuMikuLibrary.IO.Sections
                 case SectionMode.Write:
                 {
                     mSections.Clear();
-                    if ( Writer.OffsetPositions.Count > 0 && Flags.HasFlag( SectionFlags.HasRelocationTable ) )
+                    if ( IsRelocationTableWorthWriting() )
                     {
                         ISection relocationTableSection;
 
@@ -132,6 +133,10 @@ namespace MikuMikuLibrary.IO.Sections
 
                         mSections.Add( relocationTableSection );
                     }
+
+                    if ( DataSize > 0 && Writer is EnrsBinaryWriter enrsWriter )
+                        mSections.Add( new EnrsSection( SectionMode.Write,
+                            enrsWriter.CreateScopeDescriptors( DataOffset, DataOffset + DataSize ) ) );
 
                     foreach ( var subSectionInfo in SectionInfo.SubSectionInfos.Values.OrderBy( x => x.Priority ) )
                         mSections.AddRange( subSectionInfo.ProcessPropertyForWriting( this ) );
@@ -155,7 +160,7 @@ namespace MikuMikuLibrary.IO.Sections
                 throw new InvalidOperationException( "Section has already been read before" );
 
             BaseStream = source;
-            Reader = new EndianBinaryReader( BaseStream, Encoding.UTF8, true, Endianness.LittleEndian );
+            Reader = new EndianBinaryReader( BaseStream, Encoding.UTF8, true, Endianness.Little );
 
             if ( skipSignature )
             {
@@ -172,7 +177,7 @@ namespace MikuMikuLibrary.IO.Sections
 
             SectionSize = Reader.ReadUInt32();
             DataOffset = Reader.BaseOffset + Reader.ReadUInt32();
-            Endianness = Reader.ReadInt32() == 0x18000000 ? Endianness.BigEndian : Endianness.LittleEndian;
+            Endianness = Reader.ReadInt32() == 0x18000000 ? Endianness.Big : Endianness.Little;
             int depth = Reader.ReadInt32();
             DataSize = Reader.ReadUInt32();
 
@@ -220,7 +225,10 @@ namespace MikuMikuLibrary.IO.Sections
                 throw new InvalidOperationException( "Section has already been written before" );
 
             BaseStream = destination;
-            Writer = new EndianBinaryWriter( BaseStream, Encoding.UTF8, true, Endianness.LittleEndian );
+
+            Writer = IsEnrsWorthWriting()
+                ? new EnrsBinaryWriter( BaseStream, Encoding.UTF8, true, Endianness.Little )
+                : new EndianBinaryWriter( BaseStream, Encoding.UTF8, true, Endianness.Little );
 
             long headerOffset = Writer.Position;
             {
@@ -241,7 +249,7 @@ namespace MikuMikuLibrary.IO.Sections
                     Writer.PerformScheduledWrites();
                     Writer.PopStringTablesReversed();
                 }
-                Writer.Endianness = Endianness.LittleEndian;
+                Writer.Endianness = Endianness.Little;
                 Writer.AddressSpace = AddressSpace.Int32;
                 Writer.WriteAlignmentPadding( 16 );
             }
@@ -265,10 +273,29 @@ namespace MikuMikuLibrary.IO.Sections
                 Writer.Write( Signature, StringBinaryFormat.FixedLength, 4 );
                 Writer.Write( ( uint ) SectionSize );
                 Writer.Write( ( uint ) ( DataOffset - headerOffset ) );
-                Writer.Write( Endianness == Endianness.BigEndian ? 0x18000000 : 0x10000000 );
+                Writer.Write( Endianness == Endianness.Big ? 0x18000000 : 0x10000000 );
                 Writer.Write( depth );
                 Writer.Write( ( uint ) DataSize );
             } );
+        }
+
+        private bool IsRelocationTableWorthWriting()
+        {
+            return Writer.OffsetPositions.Count > 0 &&
+                   !Flags.HasFlag( SectionFlags.HasNoRelocationTable ) &&
+                   !( this is EnrsSection ) &&
+                   !( this is EndOfFileSection ) &&
+                   !( this is RelocationTableSectionInt32 ) &&
+                   !( this is RelocationTableSectionInt64 );
+        }
+
+        private bool IsEnrsWorthWriting()
+        {
+            return Endianness == Endianness.Little &&
+                   !( this is EnrsSection ) &&
+                   !( this is EndOfFileSection ) &&
+                   !( this is RelocationTableSectionInt32 ) &&
+                   !( this is RelocationTableSectionInt64 );
         }
 
         protected abstract void Read( T data, EndianBinaryReader reader, long length );

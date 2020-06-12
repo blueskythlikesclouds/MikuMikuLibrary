@@ -28,7 +28,7 @@ namespace MikuMikuLibrary.IO.Common
             get => mEndianness;
             set
             {
-                SwapBytes = value != EndiannessSwapUtilities.SystemEndianness;
+                SwapBytes = value != EndiannessHelper.SystemEndianness;
                 mEndianness = value;
             }
         }
@@ -124,7 +124,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public void WriteAlignmentPadding( int alignment, byte filler = 0 )
         {
-            int difference = AlignmentUtilities.GetAlignedDifference( Position, alignment );
+            int difference = AlignmentHelper.GetAlignedDifference( Position, alignment );
 
             int fourByte = ( filler << 24 ) | ( filler << 16 ) | ( filler << 8 ) | filler;
 
@@ -591,7 +591,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( short value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( short[] values )
@@ -602,7 +602,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( ushort value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( ushort[] values )
@@ -613,7 +613,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( int value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( int[] values )
@@ -624,7 +624,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( uint value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( uint[] values )
@@ -635,7 +635,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( long value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( long[] values )
@@ -646,7 +646,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( ulong value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( ulong[] values )
@@ -657,7 +657,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( float value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( float[] values )
@@ -668,7 +668,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public void Write( Half value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value.Value ) : value.Value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value.Value ) : value.Value );
         }
 
         public void Write( Half[] values )
@@ -679,7 +679,7 @@ namespace MikuMikuLibrary.IO.Common
 
         public override void Write( decimal value )
         {
-            base.Write( SwapBytes ? EndiannessSwapUtilities.Swap( value ) : value );
+            base.Write( SwapBytes ? EndiannessHelper.Swap( value ) : value );
         }
 
         public void Write( decimal[] values )
@@ -865,20 +865,23 @@ namespace MikuMikuLibrary.IO.Common
         public void Write( Matrix4x4 value )
         {
             Write( value.M11 );
-            Write( value.M12 );
-            Write( value.M13 );
-            Write( value.M14 );
             Write( value.M21 );
-            Write( value.M22 );
-            Write( value.M23 );
-            Write( value.M24 );
             Write( value.M31 );
-            Write( value.M32 );
-            Write( value.M33 );
-            Write( value.M34 );
             Write( value.M41 );
+
+            Write( value.M12 );
+            Write( value.M22 );
+            Write( value.M32 );
             Write( value.M42 );
+
+            Write( value.M13 );
+            Write( value.M23 );
+            Write( value.M33 );
             Write( value.M43 );
+
+            Write( value.M14 );
+            Write( value.M24 );
+            Write( value.M34 );
             Write( value.M44 );
         }
 

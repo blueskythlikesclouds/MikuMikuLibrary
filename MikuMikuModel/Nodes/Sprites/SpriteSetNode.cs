@@ -3,9 +3,9 @@ using System.IO;
 using System.Windows.Forms;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Sprites;
+using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.Databases;
 using MikuMikuModel.Nodes.IO;
-using MikuMikuModel.Nodes.Misc;
 using MikuMikuModel.Nodes.Textures;
 using Ookii.Dialogs.WinForms;
 

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
+using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
-using MikuMikuModel.Nodes.Misc;
+using MikuMikuModel.Nodes.TypeConverters;
 
 namespace MikuMikuModel.Nodes.Databases
 {
@@ -42,9 +44,10 @@ namespace MikuMikuModel.Nodes.Databases
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
-        public int Id
+        [TypeConverter( typeof( IdTypeConverter ) )]
+        public uint Id
         {
-            get => GetProperty<int>();
+            get => GetProperty<uint>();
             set => SetProperty( value );
         }
 

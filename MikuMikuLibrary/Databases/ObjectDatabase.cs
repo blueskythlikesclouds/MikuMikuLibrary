@@ -10,13 +10,13 @@ namespace MikuMikuLibrary.Databases
     public class ObjectInfo
     {
         public string Name { get; set; }
-        public int Id { get; set; }
+        public uint Id { get; set; }
     }
 
     public class ObjectSetInfo
     {
         public string Name { get; set; }
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string FileName { get; set; }
         public string TextureFileName { get; set; }
         public string ArchiveFileName { get; set; }
@@ -27,7 +27,7 @@ namespace MikuMikuLibrary.Databases
             return Objects.FirstOrDefault( x => x.Name.Equals( meshName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public ObjectInfo GetObjectInfo( int meshId )
+        public ObjectInfo GetObjectInfo( uint meshId )
         {
             return Objects.FirstOrDefault( x => x.Id.Equals( meshId ) );
         }
@@ -51,7 +51,7 @@ namespace MikuMikuLibrary.Databases
                 reader.SeekCurrent( 4 );
 
             int objectCount = reader.ReadInt32();
-            int maxId = reader.ReadInt32();
+            uint maxId = reader.ReadUInt32();
             long objectsOffset = reader.ReadOffset();
             int meshCount = reader.ReadInt32();
             long meshesOffset = reader.ReadOffset();
@@ -64,7 +64,7 @@ namespace MikuMikuLibrary.Databases
                     ObjectSets.Add( new ObjectSetInfo
                     {
                         Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ),
-                        Id = reader.ReadInt32(),
+                        Id = reader.ReadUInt32(),
                         FileName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ),
                         TextureFileName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ),
                         ArchiveFileName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
@@ -77,11 +77,11 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < meshCount; i++ )
                 {
-                    int id, parentId;
+                    uint id, parentId;
                     if ( section != null )
                     {
-                        id = reader.ReadInt32();
-                        parentId = reader.ReadInt32();
+                        id = reader.ReadUInt32();
+                        parentId = reader.ReadUInt32();
                     }
                     else
                     {
@@ -145,7 +145,7 @@ namespace MikuMikuLibrary.Databases
             return ObjectSets.FirstOrDefault( x => x.Name.Equals( objectName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public ObjectSetInfo GetObjectSetInfo( int objectId )
+        public ObjectSetInfo GetObjectSetInfo( uint objectId )
         {
             return ObjectSets.FirstOrDefault( x => x.Id.Equals( objectId ) );
         }
@@ -161,7 +161,7 @@ namespace MikuMikuLibrary.Databases
                 .FirstOrDefault( x => x.Name.Equals( meshName, StringComparison.OrdinalIgnoreCase ) );
         }
 
-        public ObjectInfo GetObjectInfo( int meshId )
+        public ObjectInfo GetObjectInfo( uint meshId )
         {
             return ObjectSets.SelectMany( x => x.Objects ).FirstOrDefault( x => x.Id.Equals( meshId ) );
         }

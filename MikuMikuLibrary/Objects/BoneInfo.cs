@@ -1,27 +1,20 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace MikuMikuLibrary.Objects
 {
     public class BoneInfo
     {
-        public string Name { get; set; }
-        public int ParentId { get; set; }
-        public int Id { get; set; }
+        public const uint InvalidId = 0xFFFFFFFF;
+
+        public uint Id { get; set; } = InvalidId;
         public Matrix4x4 InverseBindPoseMatrix { get; set; }
-
-        public bool IsEx => ( Id & 0x8000 ) != 0;
-
-        public BoneInfo()
-        {
-            ParentId = -1;
-        }
+        public string Name { get; set; }
+        public bool IsEx { get; set; }
+        public BoneInfo Parent { get; set; }
     }
 
     public struct BoneWeight
     {
-        public const float WeightTolerance = 0.0001f;
-
         public static readonly BoneWeight Empty = new BoneWeight
         {
             Index1 = -1,

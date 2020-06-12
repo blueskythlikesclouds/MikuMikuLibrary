@@ -5,7 +5,8 @@ using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Objects;
 using MikuMikuModel.GUI.Controls;
-using MikuMikuModel.Nodes.Misc;
+using MikuMikuModel.Nodes.Collections;
+using MikuMikuModel.Nodes.TypeConverters;
 using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Nodes.Objects
@@ -31,9 +32,10 @@ namespace MikuMikuModel.Nodes.Objects
             }
         }
 
-        public int Id
+        [TypeConverter( typeof( IdTypeConverter ) )]
+        public uint Id
         {
-            get => GetProperty<int>();
+            get => GetProperty<uint>();
             set => SetProperty( value );
         }
 

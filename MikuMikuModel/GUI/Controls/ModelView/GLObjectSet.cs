@@ -23,7 +23,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         {
             Objects = new List<GLObject>();
 
-            var textures = new Dictionary<int, GLTexture>();
+            var textures = new Dictionary<uint, GLTexture>();
             foreach ( var obj in objectSet.Objects )
                 Objects.Add( new GLObject( obj, textures, textureSet ) );
         }

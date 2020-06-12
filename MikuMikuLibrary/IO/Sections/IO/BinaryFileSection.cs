@@ -24,7 +24,7 @@ namespace MikuMikuLibrary.IO.Sections.IO
                 return;
 
             Endianness = data.Endianness;
-            AddressSpace = BinaryFormatUtilities.GetAddressSpace( data.Format );
+            AddressSpace = data.Format.GetAddressSpace();
         }
     }
 }

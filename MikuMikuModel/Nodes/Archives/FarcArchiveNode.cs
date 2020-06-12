@@ -36,7 +36,20 @@ namespace MikuMikuModel.Nodes.Archives
         protected override void Initialize()
         {
             RegisterImportHandler<Stream>( filePath => Data.Add( Path.GetFileName( filePath ), filePath ) );
-            RegisterExportHandler<FarcArchive>( filePath => Data.Save( filePath ) );
+            RegisterExportHandler<FarcArchive>( filePath =>
+            {
+                Data.Save( filePath );
+
+                foreach ( var node in Nodes )
+                {
+                    if ( !( node.Data is Stream stream ) )
+                        continue;
+
+                    stream.Close();
+
+                    node.Replace( Data.Open( node.Name, EntryStreamMode.OriginalStream ) );
+                }
+            } );
             RegisterReplaceHandler<FarcArchive>( BinaryFile.Load<FarcArchive> );
             RegisterCustomHandler( "Export All", () =>
                 {

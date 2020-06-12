@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using MikuMikuModel.Resources;
 using Ookii.Dialogs.WinForms;
 
-namespace MikuMikuModel.Nodes.Misc
+namespace MikuMikuModel.Nodes.Collections
 {
     public class ListNode<T> : Node<List<T>> where T : class
     {

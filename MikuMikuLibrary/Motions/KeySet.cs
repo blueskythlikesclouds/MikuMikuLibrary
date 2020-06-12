@@ -102,7 +102,7 @@ namespace MikuMikuLibrary.Motions
 
                     writer.WriteAlignmentPadding( 4 );
                     foreach ( var key in Keys )
-                        writer.Write( ( ushort ) key.Frame );
+                        writer.Write( key.Frame );
 
                     writer.WriteAlignmentPadding( 4 );
                 }
@@ -111,7 +111,7 @@ namespace MikuMikuLibrary.Motions
                 {
                     writer.Write( ( ushort ) Keys.Count );
                     foreach ( var key in Keys )
-                        writer.Write( ( ushort ) key.Frame );
+                        writer.Write( key.Frame );
 
                     writer.WriteAlignmentPadding( 4 );
                     foreach ( var key in Keys )
@@ -159,9 +159,6 @@ namespace MikuMikuLibrary.Motions
                 if ( frame < next.Frame )
                     break;
             }
-
-            if ( previous != null && next == null )
-                return previous.Value;
 
             if ( previous == null && next != null )
                 return next.Value;

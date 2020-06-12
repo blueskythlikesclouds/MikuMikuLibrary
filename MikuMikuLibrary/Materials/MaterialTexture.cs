@@ -6,7 +6,7 @@ namespace MikuMikuLibrary.Materials
     {
         public int Field00 { get; set; }
         public int Field01 { get; set; }
-        public int TextureId { get; set; }
+        public uint TextureId { get; set; }
         public int Field02 { get; set; }
         public float Field03 { get; set; }
         public float Field04 { get; set; }
@@ -41,7 +41,7 @@ namespace MikuMikuLibrary.Materials
         {
             Field00 = reader.ReadInt32();
             Field01 = reader.ReadInt32();
-            TextureId = reader.ReadInt32();
+            TextureId = reader.ReadUInt32();
             Field02 = reader.ReadInt32();
             Field03 = reader.ReadSingle();
             Field04 = reader.ReadSingle();
@@ -107,7 +107,7 @@ namespace MikuMikuLibrary.Materials
 
         public MaterialTexture()
         {
-            TextureId = -1;
+            TextureId = 0xFFFFFFFF;
             Field02 = 240;
             Field05 = 1f;
         }

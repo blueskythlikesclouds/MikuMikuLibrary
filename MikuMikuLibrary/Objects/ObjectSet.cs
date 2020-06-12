@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MikuMikuLibrary.Databases;
+using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
@@ -21,7 +22,7 @@ namespace MikuMikuLibrary.Objects
             {
                 if ( BinaryFormatUtilities.IsModern( Format ) )
                     return base.Endianness;
-                return Endianness.LittleEndian;
+                return Endianness.Little;
             }
 
             set
@@ -32,7 +33,7 @@ namespace MikuMikuLibrary.Objects
         }
 
         public List<Object> Objects { get; }
-        public List<int> TextureIds { get; }
+        public List<uint> TextureIds { get; }
         public TextureSet TextureSet { get; set; }
 
         public int BoneCount => Objects.Count != 0 ? 0x39393939 : -1;
@@ -87,14 +88,14 @@ namespace MikuMikuLibrary.Objects
             reader.ReadAtOffset( objectIdsOffset, () =>
             {
                 foreach ( var obj in Objects )
-                    obj.Id = reader.ReadInt32();
+                    obj.Id = reader.ReadUInt32();
             } );
 
             reader.ReadAtOffset( textureIdsOffset, () =>
             {
                 TextureIds.Capacity = textureIdCount;
                 for ( int i = 0; i < textureIdCount; i++ )
-                    TextureIds.Add( reader.ReadInt32() );
+                    TextureIds.Add( reader.ReadUInt32() );
             } );
         }
 
@@ -187,9 +188,10 @@ namespace MikuMikuLibrary.Objects
         public void Save( Stream destination, ObjectDatabase objectDatabase, TextureDatabase textureDatabase,
             BoneDatabase boneDatabase, bool leaveOpen = false )
         {
-            if ( objectDatabase != null )
-                foreach ( var obj in Objects )
-                    obj.Id = objectDatabase.GetObjectInfo( obj.Name )?.Id ?? obj.Id;
+            foreach ( var obj in Objects )
+                obj.Id = Format.IsModern()
+                    ? MurmurHash.Calculate( obj.Name )
+                    : objectDatabase?.GetObjectInfo( obj.Name )?.Id ?? obj.Id;
 
             if ( boneDatabase != null )
             {
@@ -201,66 +203,72 @@ namespace MikuMikuLibrary.Objects
                     boneDatabase.Skeletons.FirstOrDefault( x =>
                         fileName.StartsWith( x.Name, StringComparison.OrdinalIgnoreCase ) ) ??
                     boneDatabase.Skeletons.FirstOrDefault( x =>
-                        x.Name.Equals( "CMN", StringComparison.OrdinalIgnoreCase ) ) ??
-                    null;
+                        x.Name.Equals( "CMN", StringComparison.OrdinalIgnoreCase ) );
 
                 if ( skeleton != null )
+                {
                     foreach ( var skin in Objects.Where( x => x.Skin != null ).Select( x => x.Skin ) )
                     foreach ( var boneInfo in skin.Bones )
                     {
-                        int index = skin.ExData?.BoneNames?.FindIndex( x =>
-                                        x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
+                        int index = skeleton.ObjectBoneNames.FindIndex( x =>
+                            x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
 
-                        if ( index == -1 )
-                            index = skeleton.ObjectBoneNames.FindIndex( x =>
-                                x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
-                        else
-                            index = 0x8000 | index;
+                        boneInfo.IsEx = index < 0;
 
-                        if ( index == -1 )
-                            continue;
-
-                        foreach ( var childBone in skin.Bones.Where( x => x.ParentId == boneInfo.Id ) )
-                            childBone.ParentId = index;
-
-                        boneInfo.Id = index;
+                        if ( !boneInfo.IsEx )
+                            boneInfo.Id = ( uint ) index;
                     }
+                }
             }
 
-            if ( textureDatabase != null && TextureSet != null )
+            if ( TextureSet != null )
             {
-                int id = textureDatabase.Textures.Max( x => x.Id ) + 1;
-                var idDictionary = new Dictionary<int, int>( TextureSet.Textures.Count );
+                var idDictionary = new Dictionary<uint, uint>( TextureSet.Textures.Count );
+                uint baseId = textureDatabase != null && textureDatabase.Textures.Count > 0
+                    ? textureDatabase.Textures.Max( x => x.Id ) + 1
+                    : 0;
 
                 foreach ( var texture in TextureSet.Textures )
                 {
-                    var textureInfo = !string.IsNullOrEmpty( texture.Name )
-                        ? textureDatabase.GetTextureInfo( texture.Name )
-                        : textureDatabase.GetTextureInfo( texture.Id );
+                    if ( string.IsNullOrEmpty( texture.Name ) )
+                        texture.Name = Guid.NewGuid().ToString();
 
-                    if ( textureInfo == null )
+                    uint newId = MurmurHash.Calculate( texture.Name );
+
+                    if ( textureDatabase != null && !Format.IsModern() )
                     {
-                        textureDatabase.Textures.Add(
-                            textureInfo = new TextureInfo
-                            {
-                                Name = texture.Name,
-                                Id = id++
-                            } );
+                        var textureInfo = textureDatabase.GetTextureInfo( texture.Name );
+                        if ( textureInfo == null )
+                        {
+                            newId = baseId++;
 
-                        if ( string.IsNullOrEmpty( textureInfo.Name ) )
-                            textureInfo.Name = $"Unnamed {textureInfo.Id}";
+                            textureDatabase.Textures.Add( new TextureInfo
+                            {
+                                Id = newId,
+                                Name = texture.Name
+                            } );
+                        }
+                        else
+                        {
+                            newId = textureInfo.Id;
+                        }
                     }
 
-                    idDictionary[ texture.Id ] = textureInfo.Id;
+                    else if ( !Format.IsModern() )
+                        continue;
 
-                    texture.Name = textureInfo.Name;
-                    texture.Id = textureInfo.Id;
+                    idDictionary[ texture.Id ] = newId;
+                    texture.Id = newId;
                 }
 
                 foreach ( var materialTexture in Objects.SelectMany( x => x.Materials )
                     .SelectMany( x => x.MaterialTextures ) )
-                    if ( idDictionary.TryGetValue( materialTexture.TextureId, out id ) )
-                        materialTexture.TextureId = id;
+                {
+                    if ( !idDictionary.TryGetValue( materialTexture.TextureId, out uint id ) )
+                        continue;
+
+                    materialTexture.TextureId = id;
+                }
 
                 TextureIds.Clear();
                 TextureIds.AddRange( TextureSet.Textures.Select( x => x.Id ) );
@@ -277,7 +285,7 @@ namespace MikuMikuLibrary.Objects
                  filePath.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.F2nd;
-                Endianness = Endianness.BigEndian;
+                Endianness = Endianness.Big;
             }
 
             // Or reverse
@@ -285,7 +293,12 @@ namespace MikuMikuLibrary.Objects
                       filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.DT;
-                Endianness = Endianness.LittleEndian;
+                Endianness = Endianness.Little;
+            }
+
+            using ( var destination = File.Create( filePath ) )
+            {
+                Save( destination, objectDatabase, textureDatabase, boneDatabase );
             }
 
             string fileName = Path.GetFileName( filePath );
@@ -318,17 +331,12 @@ namespace MikuMikuLibrary.Objects
                 if ( !string.IsNullOrEmpty( textureOutputPath ) )
                     TextureSet.Save( textureOutputPath );
             }
-
-            using ( var destination = File.Create( filePath ) )
-            {
-                Save( destination, objectDatabase, textureDatabase, boneDatabase );
-            }
         }
 
         public ObjectSet()
         {
             Objects = new List<Object>();
-            TextureIds = new List<int>();
+            TextureIds = new List<uint>();
         }
     }
 }

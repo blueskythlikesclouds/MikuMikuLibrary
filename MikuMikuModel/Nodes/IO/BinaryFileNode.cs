@@ -330,7 +330,7 @@ namespace MikuMikuModel.Nodes.IO
             protected override void Dispose( bool disposing )
             {
                 if ( disposing )
-                    mStream?.Dispose();
+                    mStream?.Close();
 
                 base.Dispose( disposing );
             }

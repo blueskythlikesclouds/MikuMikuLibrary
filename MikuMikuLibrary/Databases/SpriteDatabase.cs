@@ -8,21 +8,21 @@ namespace MikuMikuLibrary.Databases
 {
     public class SpriteInfo
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
-        public int Index { get; set; }
+        public ushort Index { get; set; }
     }
 
     public class SpriteTextureInfo
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
-        public int Index { get; set; }
+        public ushort Index { get; set; }
     }
 
     public class SpriteSetInfo
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
         public string FileName { get; set; }
         public List<SpriteInfo> Sprites { get; }
@@ -54,10 +54,10 @@ namespace MikuMikuLibrary.Databases
                 SpriteSets.Capacity = spriteCount;
                 for ( int i = 0; i < spriteSetCount; i++ )
                 {
-                    int id = reader.ReadInt32();
+                    uint id = reader.ReadUInt32();
                     long nameOffset = reader.ReadOffset();
                     long fileNameOffset = reader.ReadOffset();
-                    int index = reader.ReadInt32();
+                    uint index = reader.ReadUInt32();
                     long endOffset = reader.Position;
 
                     SpriteSets.Add( new SpriteSetInfo
@@ -73,15 +73,15 @@ namespace MikuMikuLibrary.Databases
             {
                 for ( int i = 0; i < spriteCount; i++ )
                 {
-                    int id = reader.ReadInt32();
+                    uint id = reader.ReadUInt32();
                     long nameOffset = reader.ReadOffset();
                     int info = reader.ReadInt32();
 
                     if ( section?.Format == BinaryFormat.X )
                         reader.SeekCurrent( 4 );
 
-                    int index = ( ushort ) ( info & 0xFFFF );
-                    int setIndex = ( ushort ) ( ( info >> 16 ) & 0xFFFF );
+                    ushort index = ( ushort ) ( info & 0xFFFF );
+                    ushort setIndex = ( ushort ) ( ( info >> 16 ) & 0xFFFF );
                     string name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
                     var set = SpriteSets[ setIndex & 0xFFF ];

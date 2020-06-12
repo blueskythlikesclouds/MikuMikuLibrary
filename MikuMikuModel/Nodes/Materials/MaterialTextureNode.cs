@@ -18,9 +18,10 @@ namespace MikuMikuModel.Nodes.Materials
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/MaterialTexture.png" );
 
         [DisplayName( "Texture id" )]
-        public int TextureId
+        [TypeConverter( typeof( IdTypeConverter ) )]
+        public uint TextureId
         {
-            get => GetProperty<int>();
+            get => GetProperty<uint>();
             set => SetProperty( value );
         }
 

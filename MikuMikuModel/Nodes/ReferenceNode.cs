@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using MikuMikuModel.Configurations;
 
-namespace MikuMikuModel.Nodes.Misc
+namespace MikuMikuModel.Nodes
 {
     public class ReferenceNode : INode
     {

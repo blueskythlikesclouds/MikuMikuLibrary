@@ -9,7 +9,7 @@ namespace MikuMikuLibrary.Textures
     {
         private SubTexture[ , ] mSubTextures;
 
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; }
 
         public int Width => mSubTextures[ 0, 0 ].Width;
@@ -92,7 +92,8 @@ namespace MikuMikuLibrary.Textures
             mSubTextures = new SubTexture[ depth, mipMapCount ];
             for ( int i = 0; i < depth; i++ )
             for ( int j = 0; j < mipMapCount; j++ )
-                mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, i * mipMapCount + j );
+                mSubTextures[ i, j ] =
+                    new SubTexture( width >> j, height >> j, format, ( uint ) ( i * mipMapCount + j ) );
         }
 
         internal Texture( EndianBinaryReader reader )

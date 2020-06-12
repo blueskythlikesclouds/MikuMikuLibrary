@@ -4,12 +4,12 @@ using MikuMikuLibrary.IO.Common;
 namespace MikuMikuLibrary.IO.Sections.Objects
 {
     [Section( "OIDX" )]
-    public class MeshIndexDataSection : Section<object>
+    public class IndexDataSection : Section<object>
     {
         private readonly List<ushort[]> mIndices;
         private long mCurrentOffset;
 
-        public override SectionFlags Flags => SectionFlags.None;
+        public override SectionFlags Flags => SectionFlags.HasNoRelocationTable;
 
         public long AddIndices( ushort[] indices )
         {
@@ -17,7 +17,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
             {
                 mIndices.Add( indices );
                 mCurrentOffset += indices.Length * 2;
-                mCurrentOffset = AlignmentUtilities.Align( mCurrentOffset, 4 );
+                mCurrentOffset = AlignmentHelper.Align( mCurrentOffset, 4 );
             }
 
             return current;
@@ -36,7 +36,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
             }
         }
 
-        public MeshIndexDataSection( SectionMode mode, object data = null ) : base( mode, data )
+        public IndexDataSection( SectionMode mode, object data = null ) : base( mode, data )
         {
             if ( mode == SectionMode.Write )
                 mIndices = new List<ushort[]>();

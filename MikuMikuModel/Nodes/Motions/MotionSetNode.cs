@@ -7,8 +7,8 @@ using System.Xml.Serialization;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
+using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
-using MikuMikuModel.Nodes.Misc;
 using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.Nodes.Motions
@@ -71,7 +71,7 @@ namespace MikuMikuModel.Nodes.Motions
             } );
             RegisterCustomHandler( "Copy motion database info to clipboard", () =>
             {
-                int id = -1;
+                uint id = 0xFFFFFFFF;
 
                 using ( var inputDialog = new InputDialog
                 {
@@ -81,9 +81,9 @@ namespace MikuMikuModel.Nodes.Motions
                 {
                     while ( inputDialog.ShowDialog() == DialogResult.OK )
                     {
-                        bool result = int.TryParse( inputDialog.Input, out id );
+                        bool result = uint.TryParse( inputDialog.Input, out id );
 
-                        if ( !result || id < 0 )
+                        if ( !result || id == 0xFFFFFFFF )
                             MessageBox.Show( "Please enter a correct id number.", "Miku Miku Model",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error );
                         else
@@ -91,7 +91,7 @@ namespace MikuMikuModel.Nodes.Motions
                     }
                 }
 
-                if ( id < 0 )
+                if ( id == 0xFFFFFFFF )
                     return;
 
                 var motionSetInfo = new MotionSetInfo
