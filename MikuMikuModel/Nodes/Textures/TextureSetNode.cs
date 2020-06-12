@@ -103,7 +103,7 @@ namespace MikuMikuModel.Nodes.Textures
             foreach ( var texture in Data.Textures )
                 textureDatabase.Textures.Add( new TextureInfo
                 {
-                    Id = MurmurHash.Calculate( texture.Name ),
+                    Id = texture.Id,
                     Name = texture.Name
                 } );
 

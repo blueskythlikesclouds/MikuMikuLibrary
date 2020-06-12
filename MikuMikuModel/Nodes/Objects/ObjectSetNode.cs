@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using Assimp;
 using MikuMikuLibrary.Extensions;
+using MikuMikuLibrary.Hashes;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Objects;
 using MikuMikuLibrary.Objects.Extra;
 using MikuMikuLibrary.Objects.Extra.Blocks;
@@ -431,8 +433,10 @@ namespace MikuMikuModel.Nodes.Objects
 
         protected override void SynchronizeCore()
         {
-            if ( mTextureSetNode != null )
-                Data.TextureSet = ( TextureSet ) mTextureSetNode.Data;
+            if ( mTextureSetNode == null ) 
+                return;
+
+            Data.TextureSet = ( TextureSet ) mTextureSetNode.Data;
         }
 
         protected override void OnReplace( ObjectSet previousData )
@@ -453,6 +457,42 @@ namespace MikuMikuModel.Nodes.Objects
 
                 newObject.Name = oldObject.Name;
                 newObject.Id = oldObject.Id;
+            }
+
+            if ( previousData.Format.IsModern() && Data.TextureSet != null )
+            {
+                Dictionary<uint, uint> idDictionary = null;
+
+                foreach ( var texture in Data.TextureSet.Textures )
+                {
+                    if ( string.IsNullOrEmpty( texture.Name ) )
+                        texture.Name = Guid.NewGuid().ToString();
+
+                    uint id = MurmurHash.Calculate( texture.Name );
+                    if ( id == texture.Id )
+                        continue;
+
+                    if ( idDictionary == null )
+                        idDictionary = new Dictionary<uint, uint>( Data.TextureSet.Textures.Count );
+
+                    idDictionary[ texture.Id ] = id;
+                    texture.Id = id;
+                }
+
+                if ( idDictionary != null )
+                {
+                    foreach ( var materialTexture in Data.Objects.SelectMany( x => x.Materials )
+                        .SelectMany( x => x.MaterialTextures ) )
+                    {
+                        if ( !idDictionary.TryGetValue( materialTexture.TextureId, out uint id ) )
+                            continue;
+
+                        materialTexture.TextureId = id;
+                    }
+
+                    Data.TextureIds.Clear();
+                    Data.TextureIds.AddRange( Data.TextureSet.Textures.Select( x => x.Id ) );
+                }
             }
 
             if ( mTextureSetNode != null && Data.TextureSet != null )
