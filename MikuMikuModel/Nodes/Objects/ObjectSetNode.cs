@@ -488,8 +488,7 @@ namespace MikuMikuModel.Nodes.Objects
             if ( Data.Objects.Count == 1 && previousData.Objects.Count == 1 )
                 Data.Objects[ 0 ].Name = previousData.Objects[ 0 ].Name;
 
-            var materialConflictMap = new Dictionary<string, 
-                (Object Object, int MaterialIndex, Material ConflictingMaterial)>( StringComparer.OrdinalIgnoreCase );
+            var materialOverrideMap = new Dictionary<Material, (Object SourceObject, Material MatchingMaterial)>();
 
             foreach ( var newObject in Data.Objects )
             {
@@ -505,31 +504,28 @@ namespace MikuMikuModel.Nodes.Objects
                 newObject.Name = oldObject.Name;
                 newObject.Id = oldObject.Id;
 
-                for ( int i = 0; i < newObject.Materials.Count; i++ )
+                foreach ( var material in newObject.Materials )
                 {
-                    var material = newObject.Materials[ i ];
-
-                    var conflictingMaterial = oldObject.Materials.FirstOrDefault( x => 
+                    var matchingMaterial = oldObject.Materials.FirstOrDefault( x => 
                         x.Name.Equals( material.Name, StringComparison.OrdinalIgnoreCase ) );
 
-                    if ( conflictingMaterial == null )
+                    if ( matchingMaterial == null )
                         continue;
 
-                    string materialName = material.Name;
-
-                    if ( Data.Objects.Count > 1 || materialConflictMap.ContainsKey( materialName ) )
-                        materialName += " (" + newObject.Name + ")";
-
-                    materialConflictMap.Add( materialName, ( newObject, i, conflictingMaterial ) );
+                    materialOverrideMap.Add( material, ( newObject, matchingMaterial ) );
                 }
             }
 
-            if ( materialConflictMap.Count > 0 )
+            if ( materialOverrideMap.Count > 0 )
             {
-                // TODO: Make a better algorithm, this is way too long and wasteful
+                using ( var itemSelectForm = new ItemSelectForm<Material>( materialOverrideMap.OrderBy( x => x.Key.Name ).Select( x =>
+                {
+                    string name = x.Key.Name;
+                    if ( Data.Objects.Count > 1 )
+                        name += " (" + x.Value.SourceObject.Name + ")";
 
-                using ( var itemSelectForm = new ItemSelectForm( 
-                    materialConflictMap.Keys.OrderBy( x => x ) )
+                    return ( x.Key, name );
+                } ) )
                 {
                     Text = "Please select the materials you want to override.",
                     GroupBoxText = "Materials",
@@ -538,72 +534,106 @@ namespace MikuMikuModel.Nodes.Objects
                 {
                     if ( itemSelectForm.ShowDialog() == DialogResult.OK )
                     {
-                        var overridenTextureIds = new HashSet<uint>();
+                        var selectedMaterials = itemSelectForm.CheckedItems.ToHashSet();
 
-                        if ( itemSelectForm.CheckBoxChecked )
+                        var texturesToAdd = new HashSet<uint>();
+                        var texturesToRemove = new HashSet<uint>();
+
+                        foreach ( var obj in Data.Objects )
                         {
-                            foreach ( string materialName in itemSelectForm.CheckedItems )
+                            for ( int i = 0; i < obj.Materials.Count; i++ )
                             {
-                                var tuple = materialConflictMap[ materialName ];
-                                var newMaterial = tuple.Object.Materials[ tuple.MaterialIndex ];
+                                var material = obj.Materials[ i ];
 
-                                for ( int i = 0; i < tuple.ConflictingMaterial.MaterialTextures.Length; i++ )
+                                if ( !materialOverrideMap.TryGetValue( material, out var entry ) )
+                                    continue;
+
+                                bool @override = selectedMaterials.Contains( material );
+
+                                // I made all the if statements separate to make everything clear.
+                                if ( itemSelectForm.CheckBoxChecked )
                                 {
-                                    var newMaterialTexture = newMaterial.MaterialTextures[ i ];
+                                    for ( int j = 0; j < 8; j++ )
+                                    {
+                                        var newMaterialTexture = material.MaterialTextures[ j ];
+                                        var oldMaterialTexture = entry.MatchingMaterial.MaterialTextures[ j ];
 
-                                    if ( newMaterialTexture.Type == MaterialTextureType.None || newMaterialTexture.TextureId == 0xFFFFFFFF )
+                                        if ( newMaterialTexture.TextureId == oldMaterialTexture.TextureId )
+                                            continue;
+
+                                        if ( @override )
+                                        {
+                                            if ( oldMaterialTexture.Type != MaterialTextureType.None )
+                                            {
+                                                if ( newMaterialTexture.Type != MaterialTextureType.None )
+                                                    oldMaterialTexture.TextureId = newMaterialTexture.TextureId;
+
+                                                else
+                                                    texturesToAdd.Add( oldMaterialTexture.TextureId );
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if ( newMaterialTexture.Type != MaterialTextureType.None )
+                                                texturesToRemove.Add( newMaterialTexture.TextureId );
+
+                                            if ( oldMaterialTexture.Type != MaterialTextureType.None )
+                                                texturesToAdd.Add( oldMaterialTexture.TextureId );
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if ( @override )
                                         continue;
 
-                                    tuple.ConflictingMaterial.MaterialTextures[ i ].TextureId = newMaterialTexture.TextureId;
-                                    overridenTextureIds.Add( newMaterialTexture.TextureId );
+                                    for ( int j = 0; j < 8; j++ )
+                                    {
+                                        var newMaterialTexture = material.MaterialTextures[ j ];
+                                        var oldMaterialTexture = entry.MatchingMaterial.MaterialTextures[ j ];
+
+                                        if ( newMaterialTexture.TextureId == oldMaterialTexture.TextureId )
+                                            continue;
+
+                                        if ( newMaterialTexture.Type != MaterialTextureType.None )
+                                            texturesToRemove.Add( newMaterialTexture.TextureId );
+
+                                        if ( oldMaterialTexture.Type != MaterialTextureType.None )
+                                            texturesToAdd.Add( oldMaterialTexture.TextureId );
+                                    }
                                 }
 
-                                tuple.Object.Materials[ tuple.MaterialIndex ] = tuple.ConflictingMaterial;
-                            }
-                        }
-                        else
-                        {
-                            foreach ( string materialName in materialConflictMap.Keys.Except( 
-                                itemSelectForm.CheckedItems ) )
-                            {
-                                var tuple = materialConflictMap[ materialName ];
-                                tuple.Object.Materials[ tuple.MaterialIndex ] = tuple.ConflictingMaterial;
+                                obj.Materials[ i ] = entry.MatchingMaterial;
                             }
                         }
 
-                        var textures = new List<Texture>();
-                        foreach ( var kvp in materialConflictMap )
+                        var allIds = Data.Objects.SelectMany( x => x.Materials ).SelectMany( x => x.MaterialTextures )
+                            .Where( x => x.Type != MaterialTextureType.None ).Select( x => x.TextureId ).ToHashSet();
+
+                        foreach ( uint textureToRemove in texturesToRemove.Except( allIds ) )
+                            Data.TextureSet.Textures.RemoveAll( x => x.Id == textureToRemove );
+
+                        foreach ( uint textureToAdd in texturesToAdd )
                         {
-                            var material = kvp.Value.Object.Materials[ kvp.Value.MaterialIndex ];
+                            var oldTexture = previousData.TextureSet.Textures
+                                .FirstOrDefault( x => x.Id == textureToAdd );
 
-                            foreach ( var materialTexture in material.MaterialTextures )
-                            {
-                                if ( materialTexture.Type == MaterialTextureType.None || materialTexture.TextureId == 0xFFFFFFFF )
-                                    continue;
+                            if ( oldTexture == null )
+                                continue;
 
-                                var sourceTextureSet = Data.TextureSet;
+                            var newTexture = Data.TextureSet.Textures
+                                .FirstOrDefault( x => x.Id == textureToAdd );
 
-                                if ( sourceTextureSet == null ||
-                                     ( !overridenTextureIds.Contains( materialTexture.TextureId ) && material == kvp.Value.ConflictingMaterial ) )
-                                    sourceTextureSet = previousData.TextureSet;
+                            if ( newTexture != null )
+                                continue;
 
-                                var texture = sourceTextureSet?.Textures.FirstOrDefault( x => x.Id == materialTexture.TextureId );
-
-                                if ( texture == null || textures.Contains( texture ) )
-                                    continue;
-
-                                textures.Add( texture );
-                            }
+                            Data.TextureSet.Textures.Add( oldTexture );
                         }
 
-                        if ( textures.Count > 0 )
-                        {
-                            if ( Data.TextureSet == null )
-                                Data.TextureSet = new TextureSet();
+                        Data.TextureSet.Textures.Sort( ( x, y ) => string.Compare( x.Name, y.Name, StringComparison.Ordinal ) );
 
-                            Data.TextureSet.Textures.Clear();
-                            Data.TextureSet.Textures.AddRange( textures );
-                        }
+                        Data.TextureIds.Clear();
+                        Data.TextureIds.AddRange( Data.TextureSet.Textures.Select( x => x.Id ) );
                     }
                 }
             }

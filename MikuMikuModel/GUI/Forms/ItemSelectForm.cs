@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -7,10 +8,10 @@ using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Forms
 {
-    public partial class ItemSelectForm : Form
+    public partial class ItemSelectForm<T> : Form
     {
-        public IEnumerable<string> CheckedItems => 
-            from object checkedItem in mListView.CheckedItems select ( ( ListViewItem ) checkedItem ).Name;
+        public IEnumerable<T> CheckedItems =>
+            from object checkedItem in mListView.CheckedItems select ( T ) ( ( ListViewItem ) checkedItem ).Tag;
 
         public string GroupBoxText
         {
@@ -58,7 +59,7 @@ namespace MikuMikuModel.GUI.Forms
                 mListView.Items[ index ].Checked = false;
         }
 
-        public ItemSelectForm( IEnumerable<string> items )
+        public ItemSelectForm( IEnumerable<(T Item, string Name)> items )
         {
             InitializeComponent();
 
@@ -70,8 +71,8 @@ namespace MikuMikuModel.GUI.Forms
             // Why won't you be set in the designerrrrrr
             mListView.Columns[ 0 ].Width = -1;
 
-            foreach ( string item in items )
-                mListView.Items.Add( new ListViewItem { Name = item, Text = item, Checked = true } );
+            foreach ( ( T item, string name ) in items )
+                mListView.Items.Add( new ListViewItem { Name = name, Text = name, Tag = item, Checked = true } );
         }
     }
 }

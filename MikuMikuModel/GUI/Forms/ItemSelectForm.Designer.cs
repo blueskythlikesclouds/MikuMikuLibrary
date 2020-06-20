@@ -1,6 +1,6 @@
 ﻿namespace MikuMikuModel.GUI.Forms
 {
-    partial class ItemSelectForm
+    partial class ItemSelectForm<T>
     {
         /// <summary>
         /// Required designer variable.
