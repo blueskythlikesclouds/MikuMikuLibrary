@@ -7,12 +7,6 @@ namespace MikuMikuLibrary.Geometry
         public Vector3 Center;
         public float Radius;
 
-        public void Merge( BoundingSphere bSphere )
-        {
-            Center = bSphere.Center;
-            Radius = bSphere.Radius;
-        }
-
         public BoundingBox ToBoundingBox()
         {
             return new BoundingBox
@@ -24,9 +18,7 @@ namespace MikuMikuLibrary.Geometry
             };
         }
 
-        public override string ToString()
-        {
-            return $"[{Center}, {Radius}]";
-        }
+        public override string ToString() => 
+            $"[{Center}, {Radius}]";
     }
 }

@@ -1,4 +1,5 @@
-﻿using NvTriStripDotNet;
+﻿using System;
+using NvTriStripDotNet;
 
 namespace MikuMikuLibrary.Objects.Processing
 {
@@ -9,13 +10,15 @@ namespace MikuMikuLibrary.Objects.Processing
             CacheSize = NvStripifier.CACHESIZE_RSX
         };
 
-        public static ushort[] Stripify( ushort[] indices )
+        public static uint[] Stripify( uint[] indices )
         {
-            sStripifier.GenerateStrips( indices, out var primitiveGroups );
+            // TODO: Make NvTriStrip operate on unsigned integers.
+
+            sStripifier.GenerateStrips( Array.ConvertAll( indices, x => ( ushort ) x ), out var primitiveGroups );
 
             if ( primitiveGroups.Length == 1 &&
                  primitiveGroups[ 0 ].Type == NvTriStripDotNet.PrimitiveType.TriangleStrip )
-                return primitiveGroups[ 0 ].Indices;
+                return Array.ConvertAll( primitiveGroups[ 0 ].Indices, x => x == 0xFFFF ? 0xFFFFFFFF : ( uint ) x );
 
             return null;
         }

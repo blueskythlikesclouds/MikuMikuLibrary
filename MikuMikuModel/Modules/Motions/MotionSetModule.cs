@@ -14,8 +14,7 @@ namespace MikuMikuModel.Modules.Motions
         public override bool Match( string fileName )
         {
             return Path.GetFileNameWithoutExtension( fileName )
-                       .StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) &&
-                   base.Match( fileName );
+                .StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) && base.Match( fileName );
         }
 
         public override MotionSet Import( string filePath )

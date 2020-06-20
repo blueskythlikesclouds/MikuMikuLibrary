@@ -14,8 +14,10 @@ namespace MikuMikuModel.Nodes.Motions
         {
             if ( Data.X != null )
                 Nodes.Add( new KeySetNode( "X", Data.X ) );
+
             if ( Data.Y != null )
                 Nodes.Add( new KeySetNode( "Y", Data.Y ) );
+
             if ( Data.Z != null )
                 Nodes.Add( new KeySetNode( "Z", Data.Z ) );
         }

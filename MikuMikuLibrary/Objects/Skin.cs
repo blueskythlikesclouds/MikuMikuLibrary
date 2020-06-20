@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
@@ -9,23 +11,34 @@ namespace MikuMikuLibrary.Objects
 {
     public class Skin
     {
-        public const int BYTE_SIZE = 0x40;
+        internal static readonly IReadOnlyDictionary<string, Func<IBlock>> BlockFactory =
+            new Dictionary<string, Func<IBlock>>
+            {
+                { "OSG", () => new OsageBlock() },
+                { "EXP", () => new ExpressionBlock() },
+                { "MOT", () => new MotionBlock() },
+                { "CNS", () => new ConstraintBlock() },
+                { "CLS", () => new ClothBlock() }
+            };
 
         public List<BoneInfo> Bones { get; }
-        public List<Block> Blocks { get; }
+        public List<IBlock> Blocks { get; }
 
         internal void Read( EndianBinaryReader reader )
         {
             long boneIdsOffset = reader.ReadOffset();
             long boneMatricesOffset = reader.ReadOffset();
             long boneNamesOffset = reader.ReadOffset();
-            long meshExDataOffset = reader.ReadOffset();
+            long exDataOffset = reader.ReadOffset();
             int boneCount = reader.ReadInt32();
             long boneParentIdsOffset = reader.ReadOffset();
+
+            reader.SkipNulls( 2 * sizeof( uint ) );
 
             reader.ReadAtOffset( boneIdsOffset, () =>
             {
                 Bones.Capacity = boneCount;
+
                 for ( int i = 0; i < boneCount; i++ )
                 {
                     uint id = reader.ReadUInt32();
@@ -45,17 +58,20 @@ namespace MikuMikuLibrary.Objects
                     bone.Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             } );
 
-            reader.ReadAtOffset( meshExDataOffset, () =>
+            reader.ReadAtOffset( exDataOffset, () =>
             {
                 int osageNameCount = reader.ReadInt32();
                 int osageBoneCount = reader.ReadInt32();
-                reader.SeekCurrent( 4 );
+                reader.SkipNulls( sizeof( uint ) );
                 long osageBonesOffset = reader.ReadOffset();
                 long osageNamesOffset = reader.ReadOffset();
                 long blocksOffset = reader.ReadOffset();
                 int stringCount = reader.ReadInt32();
                 long stringsOffset = reader.ReadOffset();
                 long osageSiblingInfosOffset = reader.ReadOffset();
+                int clothCount = reader.ReadInt32();
+
+                reader.SkipNulls( 7 * reader.AddressSpace.GetByteSize() );
 
                 var stringSet = new StringSet( reader, stringsOffset, stringCount );
                 var osageBones = new List<OsageBone>( osageBoneCount );
@@ -82,15 +98,20 @@ namespace MikuMikuLibrary.Objects
 
                         reader.ReadAtOffset( blockOffset, () =>
                         {
-                            if ( !Block.BlockFactory.TryGetValue( blockSignature, out var blockConstructor ) )
+                            if ( !BlockFactory.TryGetValue( blockSignature, out var blockConstructor ) )
+                            {
+                                Debug.WriteLine( "Skin.Read(): Unimplemented block ({0}) at 0x{1:X}", blockSignature, blockOffset );
                                 return;
+                            }
 
                             var block = blockConstructor();
                             block.Read( reader, stringSet );
 
                             if ( block is OsageBlock osageNode )
+                            {
                                 for ( int i = 0; i < osageNode.Count; i++ )
                                     osageNode.Bones.Add( osageBones[ osageNode.StartIndex + i ] );
+                            }
 
                             Blocks.Add( block );
                         } );
@@ -102,6 +123,7 @@ namespace MikuMikuLibrary.Objects
                     while ( true )
                     {
                         string boneName = stringSet.ReadString( reader );
+
                         if ( boneName == null )
                             break;
 
@@ -109,6 +131,7 @@ namespace MikuMikuLibrary.Objects
                         float siblingDistance = reader.ReadSingle();
 
                         var osageBone = osageBones.FirstOrDefault( x => x.Name.Equals( boneName ) );
+
                         if ( osageBone == null )
                             continue;
 
@@ -123,6 +146,7 @@ namespace MikuMikuLibrary.Objects
                 foreach ( var bone in Bones )
                 {
                     uint parentId = reader.ReadUInt32();
+
                     if ( parentId != 0xFFFFFFFF )
                         bone.Parent = Bones.FirstOrDefault( x => x.Id == parentId );
                 }
@@ -171,7 +195,7 @@ namespace MikuMikuLibrary.Objects
                 writer.Write( osageNames.Count );
                 writer.Write( osageBones.Count );
 
-                writer.WriteNulls( 4 );
+                writer.WriteNulls( sizeof( uint ) );
 
                 writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
                 {
@@ -183,7 +207,7 @@ namespace MikuMikuLibrary.Objects
                     foreach ( string value in osageNames )
                         writer.AddStringToStringTable( value );
                 } );
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+                writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
                 {
                     foreach ( var block in Blocks )
                     {
@@ -211,9 +235,10 @@ namespace MikuMikuLibrary.Objects
                         writer.Write( osageBone.SiblingDistance );
                     }
 
-                    writer.WriteNulls( 12 );
+                    writer.WriteNulls( 3 * sizeof( uint ) );
                 } );
-                writer.WriteNulls( 32 );
+                writer.Write( Blocks.OfType<ClothBlock>().Count() );
+                writer.WriteNulls( 7 * writer.AddressSpace.GetByteSize() );
             } );
             writer.Write( Bones.Count );
             writer.ScheduleWriteOffsetIf( Bones.Any( x => x.Parent != null ), 16, AlignmentMode.Center, () =>
@@ -221,13 +246,13 @@ namespace MikuMikuLibrary.Objects
                 foreach ( var bone in Bones )
                     writer.Write( bone.Parent?.Id ?? 0xFFFFFFFF );
             } );
-            writer.WriteNulls( writer.AddressSpace == AddressSpace.Int64 ? 32 : 40 );
+            writer.WriteNulls( 3 * sizeof( uint ) );
         }
 
         public Skin()
         {
             Bones = new List<BoneInfo>();
-            Blocks = new List<Block>();
+            Blocks = new List<IBlock>();
         }
     }
 }

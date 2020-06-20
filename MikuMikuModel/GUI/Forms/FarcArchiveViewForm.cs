@@ -4,6 +4,8 @@ using MikuMikuLibrary.Archives;
 using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.Wrappers;
+using MikuMikuModel.Resources;
+using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Forms
 {
@@ -34,23 +36,21 @@ namespace MikuMikuModel.GUI.Forms
             }
         }
 
-        protected override void OnFormClosing( FormClosingEventArgs e )
-        {
-            if ( DialogResult == DialogResult.OK && mNodeTreeView.SelectedNode == null )
-            {
-                MessageBox.Show( "Please select a node.", Program.Name, MessageBoxButtons.OK,
-                    MessageBoxIcon.Error );
-
-                e.Cancel = true;
-            }
-
-            base.OnFormClosing( e );
-        }
-
         private void OnNodeMouseDoubleClick( object sender, TreeNodeMouseClickEventArgs e )
         {
             DialogResult = DialogResult.OK;
             Close();
+        }
+
+        protected override void OnFormClosing( FormClosingEventArgs e )
+        {
+            if ( DialogResult == DialogResult.OK && mNodeTreeView.SelectedNode == null )
+            {
+                MessageBox.Show( "Please select a node.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
+                e.Cancel = true;
+            }
+
+            base.OnFormClosing( e );
         }
 
         protected override void Dispose( bool disposing )
@@ -70,13 +70,17 @@ namespace MikuMikuModel.GUI.Forms
         {
             InitializeComponent();
 
+            if ( StyleSet.CurrentStyle != null )
+                StyleHelpers.ApplyStyle( this, StyleSet.CurrentStyle );
+
+            Icon = ResourceStore.LoadIcon( "Icons/Application.ico" );
+
             mFarcArchive = farcArchive;
             mRootNode = new FarcArchiveNode( "FARC Archive", mFarcArchive );
             mRootNode.Populate();
 
             foreach ( var node in mRootNode.Nodes.Where( x => x.DataType == typeof( T ) ) )
-                mNodeTreeView.Nodes.Add( new NodeAsTreeNode( new ReferenceNode( node ), true )
-                    { HideContextMenuStrip = true } );
+                mNodeTreeView.Nodes.Add( new NodeAsTreeNode( new ReferenceNode( node ), true ) { HideContextMenuStrip = true } );
         }
     }
 }

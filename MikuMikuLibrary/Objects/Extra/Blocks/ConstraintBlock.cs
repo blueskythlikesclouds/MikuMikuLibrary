@@ -2,7 +2,7 @@
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
 {
-    public class ConstraintBlock : Block
+    public class ConstraintBlock : NodeBlock
     {
         public override string Signature => "CNS";
 

@@ -25,30 +25,26 @@ namespace MikuMikuModel.Configurations
         public string BoneDatabaseFilePath { get; set; }
         public string MotionDatabaseFilePath { get; set; }
 
-        public DirectoryInfo BaseDirectory =>
-            new DirectoryInfo( ResourceStore.GetPath( Path.Combine( "Configurations", Name ) ) );
+        public DirectoryInfo BaseDirectory => new DirectoryInfo( ResourceStore.GetPath( Path.Combine( "Configurations", Name ) ) );
 
         [XmlIgnore]
         public ObjectDatabase ObjectDatabase
         {
-            get => mObjectDatabase ??
-                   ( mObjectDatabase = Load( ObjectDatabaseFilePath, BinaryFile.Load<ObjectDatabase> ) );
+            get => mObjectDatabase ?? ( mObjectDatabase = Load( ObjectDatabaseFilePath, BinaryFile.Load<ObjectDatabase> ) );
             set => mObjectDatabase = value;
         }
 
         [XmlIgnore]
         public TextureDatabase TextureDatabase
         {
-            get => mTextureDatabase ??
-                   ( mTextureDatabase = Load( TextureDatabaseFilePath, BinaryFile.Load<TextureDatabase> ) );
+            get => mTextureDatabase ?? ( mTextureDatabase = Load( TextureDatabaseFilePath, BinaryFile.Load<TextureDatabase> ) );
             set => mTextureDatabase = value;
         }
 
         [XmlIgnore]
         public BoneDatabase BoneDatabase
         {
-            get => mBoneDatabase ??
-                   ( mBoneDatabase = Load( BoneDatabaseFilePath, BinaryFile.Load<BoneDatabase> ) );
+            get => mBoneDatabase ?? ( mBoneDatabase = Load( BoneDatabaseFilePath, BinaryFile.Load<BoneDatabase> ) );
             set => mBoneDatabase = value;
         }
 
@@ -134,21 +130,30 @@ namespace MikuMikuModel.Configurations
                 return null;
 
             string xmlFilePath = GetPath( $"{typeof( T ).Name}.xml" );
-            if ( !File.Exists( xmlFilePath ) )
+
+            if ( File.Exists( xmlFilePath ) )
             {
-                BackupFile( filePath );
-                var obj = loader( filePath );
+                try
                 {
-                    Save( obj );
+                    var serializer = GetSerializer<T>();
+
+                    using ( var reader = new StreamReader( xmlFilePath, Encoding.UTF8 ) )
+                        return ( T ) serializer.Deserialize( reader );
                 }
-                return obj;
+                catch
+                {
+                    // ignored
+                }
             }
 
-            var serializer = GetSerializer<T>();
-            using ( var reader = new StreamReader( xmlFilePath, Encoding.UTF8 ) )
+            BackupFile( filePath );
+
+            var obj = loader( filePath );
             {
-                return ( T ) serializer.Deserialize( reader );
+                Save( obj );
             }
+
+            return obj;
         }
 
         private void Save<T>( T obj ) where T : class
@@ -157,23 +162,21 @@ namespace MikuMikuModel.Configurations
                 return;
 
             var serializer = GetSerializer<T>();
-            using ( var writer = new StreamWriter( GetPath( $"{typeof( T ).Name}.xml" ), false, Encoding.UTF8 ) )
-            {
+
+            using ( var writer = new StreamWriter( GetPath( $"{typeof( T ).Name}.xml" ), false, Encoding.UTF8 ) ) 
                 serializer.Serialize( writer, obj );
-            }
         }
 
         private void Delete<T>()
         {
             string filePath = Path.Combine( BaseDirectory.FullName, $"{typeof( T ).Name}.xml" );
+
             if ( File.Exists( filePath ) )
                 File.Delete( filePath );
         }
 
-        private void BackupFile( string filePath )
-        {
+        private void BackupFile( string filePath ) => 
             File.Copy( filePath, GetPath( Path.Combine( "Sources", Path.GetFileName( filePath ) ) ), true );
-        }
 
         private string GetPath( string relativePath )
         {

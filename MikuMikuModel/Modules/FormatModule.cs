@@ -13,8 +13,8 @@ namespace MikuMikuModel.Modules
 
         public virtual bool Match( string fileName )
         {
-            return Extensions.Contains( "*" ) || Extensions.Contains( Path.GetExtension( fileName ).Trim( '.' ),
-                       StringComparer.OrdinalIgnoreCase );
+            return Extensions.Contains( "*" ) || Extensions.Contains( 
+                Path.GetExtension( fileName ).Trim( '.' ), StringComparer.OrdinalIgnoreCase );
         }
 
         public virtual bool Match( byte[] buffer )
@@ -36,9 +36,7 @@ namespace MikuMikuModel.Modules
                 throw new NotSupportedException( "FormatModule can't import" );
 
             using ( var stream = File.OpenRead( filePath ) )
-            {
                 return ImportCore( stream, Path.GetFileName( filePath ) );
-            }
         }
 
         public virtual void Export( T model, Stream destination, string fileName = null )
@@ -54,10 +52,8 @@ namespace MikuMikuModel.Modules
             if ( !Flags.HasFlag( FormatModuleFlags.Export ) )
                 throw new NotSupportedException( "FormatModule can't export" );
 
-            using ( var stream = File.Create( filePath ) )
-            {
+            using ( var stream = File.Create( filePath ) ) 
                 ExportCore( model, stream, Path.GetFileName( filePath ) );
-            }
         }
 
         protected abstract T ImportCore( Stream source, string fileName );

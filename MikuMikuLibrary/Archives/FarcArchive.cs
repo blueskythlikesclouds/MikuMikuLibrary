@@ -20,13 +20,7 @@ namespace MikuMikuLibrary.Archives
         public int Alignment
         {
             get => mAlignment;
-            set
-            {
-                if ( ( value & ( value - 1 ) ) != 0 )
-                    mAlignment = AlignmentHelper.AlignToNextPowerOfTwo( value );
-                else
-                    mAlignment = value;
-            }
+            set => mAlignment = ( value & ( value - 1 ) ) != 0 ? AlignmentHelper.AlignToNextPowerOfTwo( value ) : value;
         }
 
         public bool IsCompressed { get; set; }
@@ -41,10 +35,10 @@ namespace MikuMikuLibrary.Archives
 
         public IEnumerable<string> Entries => mEntries.Keys;
 
-        public void Add( string handle, Stream source, bool leaveOpen,
-            ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
+        public void Add( string handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
         {
             if ( mEntries.TryGetValue( handle, out var entry ) )
+            {
                 switch ( conflictPolicy )
                 {
                     case ConflictPolicy.RaiseError:
@@ -62,20 +56,21 @@ namespace MikuMikuLibrary.Archives
                     case ConflictPolicy.Ignore:
                         break;
                 }
+            }
 
             else
+            {
                 mEntries.Add( handle, new Entry
                 {
                     Handle = handle,
                     Stream = source,
                     OwnsStream = !leaveOpen
                 } );
+            }
         }
 
-        public void Add( string handle, string fileName, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
-        {
+        public void Add( string handle, string fileName, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError ) => 
             Add( handle, File.OpenRead( fileName ), false, conflictPolicy );
-        }
 
         public void Remove( string handle )
         {
@@ -111,26 +106,20 @@ namespace MikuMikuLibrary.Archives
             mEntries.Clear();
         }
 
-        public bool Contains( string handle )
-        {
-            return mEntries.ContainsKey( handle );
-        }
+        public bool Contains( string handle ) => 
+            mEntries.ContainsKey( handle );
 
-        public IEnumerator<string> GetEnumerator()
-        {
-            return mEntries.Keys.GetEnumerator();
-        }
+        public IEnumerator<string> GetEnumerator() => 
+            mEntries.Keys.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return mEntries.Keys.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => 
+            mEntries.Keys.GetEnumerator();
 
         public override void Read( EndianBinaryReader reader, ISection section = null )
         {
             string signature = reader.ReadString( StringBinaryFormat.FixedLength, 4 );
             if ( signature != "FARC" && signature != "FArC" && signature != "FArc" )
-                throw new InvalidDataException( "Invalid signature, excepted FARC/FArC/FArc" );
+                throw new InvalidDataException( "Invalid signature (excepted FARC/FArC/FArc)" );
 
             uint headerSize = reader.ReadUInt32() + 0x08;
             var originalStream = reader.BaseStream;
@@ -181,23 +170,15 @@ namespace MikuMikuLibrary.Archives
                     }
 
                     long fixedSize = 0;
+
                     if ( isEncrypted )
-                    {
-                        if ( isCompressed )
-                            fixedSize = AlignmentHelper.Align( compressedSize, 16 );
-                        else
-                            fixedSize = AlignmentHelper.Align( uncompressedSize, 16 );
-                    }
+                        fixedSize = AlignmentHelper.Align( isCompressed ? compressedSize : uncompressedSize, 16 );
 
                     else if ( isCompressed )
-                    {
                         fixedSize = compressedSize;
-                    }
 
                     else
-                    {
                         fixedSize = uncompressedSize;
-                    }
 
                     fixedSize = Math.Min( fixedSize, originalStream.Length - offset );
 
@@ -284,7 +265,7 @@ namespace MikuMikuLibrary.Archives
                     writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
                     writer.ScheduleWriteOffset( OffsetMode.OffsetAndSize, () =>
                     {
-                        writer.WriteAlignmentPadding( mAlignment, 0x78 );
+                        writer.Align( mAlignment, 0x78 );
 
                         long position = writer.Position;
 
@@ -294,6 +275,7 @@ namespace MikuMikuLibrary.Archives
                         entry.Length = writer.Position - position;
 
                         entry.IsCompressed = IsCompressed;
+
                         if ( IsCompressed )
                         {
                             entry.CompressedLength = entry.Length;
@@ -326,7 +308,7 @@ namespace MikuMikuLibrary.Archives
             } );
 
             writer.PerformScheduledWrites();
-            writer.WriteAlignmentPadding( mAlignment, 0x78 );
+            writer.Align( mAlignment, 0x78 );
         }
 
         protected override void Dispose( bool disposing )
@@ -406,6 +388,7 @@ namespace MikuMikuLibrary.Archives
                     return Stream.Null;
 
                 var stream = source;
+
                 stream.Seek( Position, SeekOrigin.Begin );
 
                 if ( IsEncrypted )
@@ -415,8 +398,9 @@ namespace MikuMikuLibrary.Archives
                     stream = GetDecompressingStream( stream, stream == source );
 
                 long position = Position;
+
                 if ( IsFutureTone && IsEncrypted )
-                    position += 16; // Skip the IV
+                    position += 16;
 
                 return new StreamView( stream, source, position, UnpackedLength, stream == source );
             }
@@ -440,22 +424,20 @@ namespace MikuMikuLibrary.Archives
 
                 Stream sourceStream;
 
-                long position = Position;
-                if ( IsFutureTone && IsEncrypted )
-                    position += 16; // Skip the IV
-
                 if ( IsEncrypted )
                 {
-                    var streamView = new StreamView( source, position, Length, true );
+                    var streamView = new StreamView( source, Position, Length, true );
                     sourceStream = new StreamView( GetDecryptingStream( streamView ), streamView, 0, IsCompressed ? CompressedLength : UnpackedLength );
                 }
+
                 else if ( IsCompressed )
                 {
-                    sourceStream = new StreamView( source, position, CompressedLength, true );
+                    sourceStream = new StreamView( source, Position, CompressedLength, true );
                 }
+
                 else
                 {
-                    sourceStream = new StreamView( source, position, UnpackedLength, true );
+                    sourceStream = new StreamView( source, Position, UnpackedLength, true );
                 }
 
                 if ( IsCompressed && !compress )
@@ -468,12 +450,17 @@ namespace MikuMikuLibrary.Archives
                 void CopyCompressedIf( bool condition, Stream stream )
                 {
                     if ( condition )
+                    {
                         using ( var gzipStream = new GZipStream( destination, CompressionMode.Compress, true ) )
                         {
                             stream.CopyTo( gzipStream );
                         }
+                    }
+
                     else
+                    {
                         stream.CopyTo( destination );
+                    }
                 }
             }
 
@@ -497,10 +484,8 @@ namespace MikuMikuLibrary.Archives
                 return new NonClosingCryptoStream( stream, decryptor, CryptoStreamMode.Read, leaveOpen );
             }
 
-            internal static GZipStream GetDecompressingStream( Stream stream, bool leaveOpen = false )
-            {
-                return new GZipStream( stream, CompressionMode.Decompress, leaveOpen );
-            }
+            internal static GZipStream GetDecompressingStream( Stream stream, bool leaveOpen = false ) => 
+                new GZipStream( stream, CompressionMode.Decompress, leaveOpen );
 
             private class NonClosingCryptoStream : CryptoStream
             {
@@ -514,8 +499,7 @@ namespace MikuMikuLibrary.Archives
                     base.Dispose( !mLeaveOpen );
                 }
 
-                public NonClosingCryptoStream( Stream stream, ICryptoTransform transform, CryptoStreamMode mode,
-                    bool leaveOpen )
+                public NonClosingCryptoStream( Stream stream, ICryptoTransform transform, CryptoStreamMode mode, bool leaveOpen )
                     : base( stream, transform, mode )
                 {
                     mLeaveOpen = leaveOpen;

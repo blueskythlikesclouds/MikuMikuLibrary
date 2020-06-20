@@ -48,6 +48,7 @@ namespace MikuMikuLibrary.Skeletons
             reader.ReadAtOffset( positionsOffset, () =>
             {
                 Positions.Capacity = positionCount;
+
                 for ( int i = 0; i < positionCount; i++ )
                     Positions.Add( reader.ReadVector3() );
             } );
@@ -57,6 +58,7 @@ namespace MikuMikuLibrary.Skeletons
             reader.ReadAtOffset( objectBoneNamesOffset, () =>
             {
                 ObjectBoneNames.Capacity = objectBoneNameCount;
+
                 for ( int i = 0; i < objectBoneNameCount; i++ )
                     ObjectBoneNames.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
@@ -64,6 +66,7 @@ namespace MikuMikuLibrary.Skeletons
             reader.ReadAtOffset( motionBoneNamesOffset, () =>
             {
                 MotionBoneNames.Capacity = motionBoneNameCount;
+
                 for ( int i = 0; i < motionBoneNameCount; i++ )
                     MotionBoneNames.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
@@ -71,6 +74,7 @@ namespace MikuMikuLibrary.Skeletons
             reader.ReadAtOffset( parentIndicesOffset, () =>
             {
                 ParentIndices.Capacity = motionBoneNameCount;
+
                 for ( int i = 0; i < motionBoneNameCount; i++ )
                     ParentIndices.Add( reader.ReadInt16() );
             } );
@@ -78,7 +82,7 @@ namespace MikuMikuLibrary.Skeletons
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( var bone in Bones )
                     bone.Write( writer );
@@ -94,36 +98,34 @@ namespace MikuMikuLibrary.Skeletons
                 writer.AddStringToStringTable( "End" );
             } );
             writer.Write( Positions.Count );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( var position in Positions )
                     writer.Write( position );
             } );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => writer.Write( UnknownValue ) );
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () => writer.Write( UnknownValue ) );
             writer.Write( ObjectBoneNames.Count );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( string boneName in ObjectBoneNames )
                     writer.AddStringToStringTable( boneName );
             } );
             writer.Write( MotionBoneNames.Count );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( string boneName in MotionBoneNames )
                     writer.AddStringToStringTable( boneName );
             } );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( short parentId in ParentIndices )
                     writer.Write( parentId );
             } );
-            writer.WriteNulls( 32 );
+            writer.WriteNulls( 8 * sizeof( uint ) );
         }
 
-        public Bone GetBone( string boneName )
-        {
-            return Bones.FirstOrDefault( x => x.Name.Equals( boneName, StringComparison.OrdinalIgnoreCase ) );
-        }
+        public Bone GetBone( string boneName ) => 
+            Bones.FirstOrDefault( x => x.Name.Equals( boneName, StringComparison.OrdinalIgnoreCase ) );
 
         public Skeleton()
         {

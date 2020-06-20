@@ -24,11 +24,13 @@ namespace TxpConverter
             string destinationFileName = null;
 
             foreach ( string arg in args )
+            {
                 if ( sourceFileName == null )
                     sourceFileName = arg;
 
                 else if ( destinationFileName == null )
                     destinationFileName = arg;
+            }
 
             if ( destinationFileName == null )
                 destinationFileName = sourceFileName;
@@ -39,11 +41,14 @@ namespace TxpConverter
 
                 var textureSet = new TextureSet();
                 var textures = new SortedList<int, Texture>();
+
                 foreach ( string textureFileName in Directory.EnumerateFiles( sourceFileName ) )
+                {
                     if ( textureFileName.EndsWith( ".dds", StringComparison.OrdinalIgnoreCase ) ||
                          textureFileName.EndsWith( ".png", StringComparison.OrdinalIgnoreCase ) )
                     {
                         string cleanFileName = Path.GetFileNameWithoutExtension( textureFileName );
+
                         if ( int.TryParse( cleanFileName, out int index ) )
                         {
                             Texture texture;
@@ -69,13 +74,14 @@ namespace TxpConverter
 
                         else
                         {
-                            Console.WriteLine(
-                                "WARNING: Skipped '{0}' because it didn't match the expected name format",
+                            Console.WriteLine( "WARNING: Skipped '{0}' because it didn't match the expected name format", 
                                 Path.GetFileName( textureFileName ) );
                         }
                     }
+                }
 
                 textureSet.Textures.Capacity = textures.Count;
+
                 foreach ( var texture in textures.Values )
                     textureSet.Textures.Add( texture );
 
@@ -90,6 +96,7 @@ namespace TxpConverter
                 var textureSet = BinaryFile.Load<TextureSet>( sourceFileName );
 
                 Directory.CreateDirectory( destinationFileName );
+
                 for ( int i = 0; i < textureSet.Textures.Count; i++ )
                 {
                     var texture = textureSet.Textures[ i ];

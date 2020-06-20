@@ -21,10 +21,8 @@ namespace MikuMikuLibrary.Geometry
             };
         }
 
-        public override string ToString()
-        {
-            return $"[{Center}, <{Width}, {Height}, {Depth}>]";
-        }
+        public override string ToString() => 
+            $"[{Center}, <{Width}, {Height}, {Depth}>]";
 
         public BoundingBox( AxisAlignedBoundingBox aabb )
         {

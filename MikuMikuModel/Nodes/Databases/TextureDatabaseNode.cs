@@ -16,8 +16,8 @@ namespace MikuMikuModel.Nodes.Databases
 
         protected override void Initialize()
         {
-            RegisterExportHandler<TextureDatabase>( filePath => Data.Save( filePath ) );
-            RegisterReplaceHandler<TextureDatabase>( BinaryFile.Load<TextureDatabase> );
+            AddExportHandler<TextureDatabase>( filePath => Data.Save( filePath ) );
+            AddReplaceHandler<TextureDatabase>( BinaryFile.Load<TextureDatabase> );
 
             base.Initialize();
         }

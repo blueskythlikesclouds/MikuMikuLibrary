@@ -14,7 +14,7 @@ namespace MikuMikuModel.Modules.Databases
         public override bool Match( string fileName )
         {
             return base.Match( fileName ) && Path.GetFileNameWithoutExtension( fileName )
-                       .Equals( "mot_db", StringComparison.OrdinalIgnoreCase );
+                .Equals( "mot_db", StringComparison.OrdinalIgnoreCase );
         }
 
         protected override MotionDatabase ImportCore( Stream source, string fileName )

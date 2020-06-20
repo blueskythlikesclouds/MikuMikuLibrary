@@ -14,7 +14,7 @@ namespace MikuMikuModel.Modules.Databases
         public override bool Match( string fileName )
         {
             return base.Match( fileName ) && Path.GetFileNameWithoutExtension( fileName )
-                       .Equals( "bone_data", StringComparison.OrdinalIgnoreCase );
+                .Equals( "bone_data", StringComparison.OrdinalIgnoreCase );
         }
 
         protected override BoneDatabase ImportCore( Stream source, string fileName )

@@ -27,10 +27,8 @@ namespace MikuMikuLibrary.IO.Common
             set => mSubPosition = value;
         }
 
-        public override void Flush()
-        {
+        public override void Flush() => 
             mSourceStream.Flush();
-        }
 
         public override long Seek( long offset, SeekOrigin origin )
         {
@@ -53,10 +51,8 @@ namespace MikuMikuLibrary.IO.Common
             return mSubPosition;
         }
 
-        public override void SetLength( long value )
-        {
+        public override void SetLength( long value ) => 
             mLength = value;
-        }
 
         public override int Read( byte[] buffer, int offset, int count )
         {
@@ -78,10 +74,8 @@ namespace MikuMikuLibrary.IO.Common
             return result;
         }
           
-        public override void Write( byte[] buffer, int offset, int count )
-        {
+        public override void Write( byte[] buffer, int offset, int count ) => 
             throw new NotSupportedException();
-        }
 
         protected override void Dispose( bool disposing )
         {

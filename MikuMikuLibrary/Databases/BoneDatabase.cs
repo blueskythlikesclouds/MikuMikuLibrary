@@ -23,13 +23,16 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( skeletonsOffset, () =>
             {
                 Skeletons.Capacity = skeletonCount;
+
                 for ( int i = 0; i < skeletonCount; i++ )
+                {
                     reader.ReadAtOffset( reader.ReadUInt32(), () =>
                     {
                         var skeleton = new Skeleton();
                         skeleton.Read( reader );
                         Skeletons.Add( skeleton );
                     } );
+                }
             } );
 
             reader.ReadAtOffset( skeletonNamesOffset, () =>
@@ -43,17 +46,17 @@ namespace MikuMikuLibrary.Databases
         {
             writer.Write( 0x09102720 );
             writer.Write( Skeletons.Count );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( var skeleton in Skeletons )
                     writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () => skeleton.Write( writer ) );
             } );
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( var skeleton in Skeletons )
                     writer.AddStringToStringTable( skeleton.Name );
             } );
-            writer.WriteNulls( 20 );
+            writer.WriteNulls( 5 * sizeof( uint ) );
         }
 
         public BoneDatabase()

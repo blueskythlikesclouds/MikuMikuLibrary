@@ -21,6 +21,7 @@ namespace MikuMikuLibrary.IO.Sections
             data.Sort();
 
             long currentOffset = 0;
+
             foreach ( long offset in data )
             {
                 long distance = ( offset - currentOffset ) >> 2;
@@ -50,7 +51,7 @@ namespace MikuMikuLibrary.IO.Sections
             foreach ( byte val in bytes )
                 writer.Write( val );
 
-            writer.WriteAlignmentPadding( 4 );
+            writer.Align( 4 );
         }
 
         public RelocationTableSectionInt32( SectionMode mode, List<long> data = null ) : base( mode, data )
@@ -76,6 +77,7 @@ namespace MikuMikuLibrary.IO.Sections
             data.Sort();
 
             long currentOffset = 0;
+
             foreach ( long offset in data )
             {
                 long distance = ( offset - currentOffset ) >> 3;
@@ -105,7 +107,7 @@ namespace MikuMikuLibrary.IO.Sections
             foreach ( byte val in bytes )
                 writer.Write( val );
 
-            writer.WriteAlignmentPadding( 8 );
+            writer.Align( 8 );
         }
 
         public RelocationTableSectionInt64( SectionMode mode, List<long> data = null ) : base( mode, data )

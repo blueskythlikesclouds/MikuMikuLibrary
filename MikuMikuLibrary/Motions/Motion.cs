@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
@@ -51,8 +52,7 @@ namespace MikuMikuLibrary.Motions
                 reader.ReadAtOffset( boneInfosOffset, () =>
                 {
                     for ( int i = 0; i < boneInfoCount; i++ )
-                        BoneInfos.Add( new BoneInfo
-                            { Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) } );
+                        BoneInfos.Add( new BoneInfo { Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) } );
                 } );
 
                 reader.ReadAtOffset( boneIdsOffset, () =>
@@ -66,6 +66,7 @@ namespace MikuMikuLibrary.Motions
                 reader.ReadAtOffset( boneInfosOffset, () =>
                 {
                     uint index = reader.ReadUInt16();
+
                     do
                     {
                         BoneInfos.Add( new BoneInfo { Id = index } );
@@ -82,6 +83,7 @@ namespace MikuMikuLibrary.Motions
                 FrameCount = reader.ReadUInt16();
 
                 KeySets.Capacity = keySetCount;
+
                 reader.ReadAtOffset( keySetTypesOffset, () =>
                 {
                     for ( int i = 0, b = 0; i < keySetCount; i++ )
@@ -117,6 +119,7 @@ namespace MikuMikuLibrary.Motions
                 writer.Write( ( ushort ) ( ( HighBits << 14 ) | KeySets.Count ) );
                 writer.Write( FrameCount );
             } );
+
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 for ( int i = 0, b = 0; i < KeySets.Count; i++ )
@@ -143,11 +146,13 @@ namespace MikuMikuLibrary.Motions
                     b = 0;
                 }
             } );
+
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var keySet in KeySets )
                     keySet.Write( writer, section != null );
             } );
+
             if ( section != null )
             {
                 writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
@@ -155,13 +160,15 @@ namespace MikuMikuLibrary.Motions
                     foreach ( var boneInfo in BoneInfos )
                         writer.AddStringToStringTable( boneInfo.Name );
                 } );
+
                 writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
                 {
                     foreach ( var boneInfo in BoneInfos )
                         writer.Write( ( long ) boneInfo.Id );
                 } );
+
                 writer.Write( BoneInfos.Count );
-                writer.WriteAlignmentPadding( 16 );
+                writer.Align( 16 );
             }
             else
             {
@@ -187,6 +194,7 @@ namespace MikuMikuLibrary.Motions
             var binding = new MotionBinding( this );
 
             int index = 0;
+
             foreach ( var boneInfo in BoneInfos )
             {
                 if ( motionDatabase != null && boneInfo.Id >= motionDatabase.BoneNames.Count )
@@ -243,10 +251,8 @@ namespace MikuMikuLibrary.Motions
 
         public void Load( string filePath, Skeleton skeleton )
         {
-            using ( var stream = File.OpenRead( filePath ) )
-            {
+            using ( var stream = File.OpenRead( filePath ) ) 
                 Load( stream, skeleton );
-            }
         }
 
         public void Save( Stream destination, Skeleton skeleton, bool leaveOpen = false )
@@ -261,23 +267,16 @@ namespace MikuMikuLibrary.Motions
             if ( !string.IsNullOrEmpty( Name ) )
                 Id = MurmurHash.Calculate( Name );
 
-            foreach ( var boneInfo in BoneInfos )
-            {
-                if ( string.IsNullOrEmpty( boneInfo.Name ) )
-                    continue;
-
+            foreach ( var boneInfo in BoneInfos.Where( boneInfo => !string.IsNullOrEmpty( boneInfo.Name ) ) )
                 boneInfo.Id = MurmurHash.Calculate( boneInfo.Name );
-            }
 
             Save( destination, leaveOpen );
         }
 
         public void Save( string filePath, Skeleton skeleton )
         {
-            using ( var stream = File.Create( filePath ) )
-            {
+            using ( var stream = File.Create( filePath ) ) 
                 Save( stream, skeleton );
-            }
         }
 
         public Motion()

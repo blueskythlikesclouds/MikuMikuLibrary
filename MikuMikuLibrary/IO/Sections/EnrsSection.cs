@@ -17,9 +17,10 @@ namespace MikuMikuLibrary.IO.Sections
         protected override void Write( List<ScopeDescriptor> data, EndianBinaryWriter writer )
         {
             // Thanks to korenkonder for figuring the structure out.
-            writer.WriteNulls( 4 );
+
+            writer.WriteNulls( sizeof( uint ) );
             writer.Write( data.Count );
-            writer.WriteNulls( 8 );
+            writer.WriteNulls( 2 * sizeof( uint ) );
 
             ScopeDescriptor.WriteDescriptors( writer, data );
         }

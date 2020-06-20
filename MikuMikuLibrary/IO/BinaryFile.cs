@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MikuMikuLibrary.Cryptography;
-using MikuMikuLibrary.Exceptions;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 
@@ -50,11 +49,13 @@ namespace MikuMikuLibrary.IO
                 long current = source.Position;
                 {
                     string signature = ReadSignature();
+
                     if ( signature == "DIVA" )
                     {
                         string signatureOtherHalf = ReadSignature();
+
                         if ( signatureOtherHalf != "FILE" )
-                            throw new InvalidSignatureException( $"{signature}{signatureOtherHalf}", "DIVAFILE" );
+                            throw new InvalidDataException( $"Invalid signature (expected DIVAFILE)" );
 
                         stream = DivafileDecryptor.DecryptToMemoryStream( source, true, true );
                         signature = ReadSignature();
@@ -77,8 +78,8 @@ namespace MikuMikuLibrary.IO
 
                                     if ( siblingSection is EndOfFileSection )
                                         break;
-                                    if ( section.SectionInfo.SubSectionInfos.TryGetValue( sectionInfo,
-                                        out var subSectionInfo ) )
+
+                                    if ( section.SectionInfo.SubSectionInfos.TryGetValue( sectionInfo, out var subSectionInfo ) )
                                         subSectionInfo.ProcessPropertyForReading( siblingSection, section );
                                 }
                             }
@@ -94,12 +95,13 @@ namespace MikuMikuLibrary.IO
                 }
 
                 source.Seek( current, SeekOrigin.Begin );
+
                 return false;
             }
 
             void ReadClassic()
             {
-                using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, true, Endianness ) )
+                using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, Endianness, true ) )
                 {
                     reader.PushBaseOffset();
                     {
@@ -139,6 +141,7 @@ namespace MikuMikuLibrary.IO
 
                 mStream.Flush();
             }
+
             else if ( !leaveOpen )
             {
                 destination.Close();
@@ -153,16 +156,14 @@ namespace MikuMikuLibrary.IO
                     foreach ( var subSection in section.Sections.Where( x => x.SectionInfo.IsBinaryFile ) )
                         subSection.Write( destination );
 
-                    using ( var eofSection = new EndOfFileSection( SectionMode.Write, this ) )
-                    {
+                    using ( var eofSection = new EndOfFileSection( SectionMode.Write, this ) ) 
                         eofSection.Write( destination );
-                    }
                 }
             }
 
             void WriteClassic()
             {
-                using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, true, Endianness ) )
+                using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, Endianness, true ) )
                 {
                     writer.PushBaseOffset();
                     {
@@ -272,7 +273,7 @@ namespace MikuMikuLibrary.IO
         /// <summary>
         ///     Cleans up resources used by the object.
         /// </summary>
-        /// <param name="disposing">Whether or not the managed objects are going to be disposed.</param>
+        /// <param name="disposing">Whether the managed objects are going to be disposed.</param>
         protected virtual void Dispose( bool disposing )
         {
             if ( disposing && Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && mOwnsStream )

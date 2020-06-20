@@ -19,30 +19,19 @@ namespace MikuMikuLibrary.Archives
 
         public override long Length => Source.Length;
 
-        public override void Flush()
-        {
-            Source.Flush();
-        }
+        public override void Flush() => Source.Flush();
 
-        public override int Read( byte[] buffer, int offset, int count )
-        {
-            return Source.Read( buffer, 0, count );
-        }
+        public override int Read( byte[] buffer, int offset, int count ) => 
+            Source.Read( buffer, 0, count );
 
-        public override long Seek( long offset, SeekOrigin origin )
-        {
-            return Source.Seek( offset, origin );
-        }
+        public override long Seek( long offset, SeekOrigin origin ) => 
+            Source.Seek( offset, origin );
 
-        public override void SetLength( long value )
-        {
+        public override void SetLength( long value ) => 
             Source.SetLength( value );
-        }
 
-        public override void Write( byte[] buffer, int offset, int count )
-        {
+        public override void Write( byte[] buffer, int offset, int count ) => 
             Source.Write( buffer, 0, count );
-        }
 
         public EntryStream( THandle entry, Stream source )
         {

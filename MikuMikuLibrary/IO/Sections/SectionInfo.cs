@@ -18,16 +18,15 @@ namespace MikuMikuLibrary.IO.Sections
 
         public IReadOnlyDictionary<SectionInfo, SubSectionInfo> SubSectionInfos => mSubSectionInfos;
 
-        public ISection Create( SectionMode mode, object obj = null )
-        {
-            return ( ISection ) Activator.CreateInstance( SectionType, mode, obj );
-        }
+        public ISection Create( SectionMode mode, object obj = null ) => 
+            ( ISection ) Activator.CreateInstance( SectionType, mode, obj );
 
         internal SectionInfo( Type sectionType )
         {
             SectionType = sectionType;
 
             var attribute = sectionType.GetCustomAttribute<SectionAttribute>();
+
             if ( attribute == null )
                 throw new ArgumentException( "Section type is missing section attribute", nameof( sectionType ) );
 
@@ -36,6 +35,7 @@ namespace MikuMikuLibrary.IO.Sections
             for ( var type = sectionType.BaseType; type != null; type = type.BaseType )
             {
                 var genericTypeDefinition = type.GetGenericTypeDefinition();
+
                 if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof( Section<> ) )
                 {
                     DataType = type.GetGenericArguments()[ 0 ];
@@ -51,6 +51,7 @@ namespace MikuMikuLibrary.IO.Sections
             foreach ( var propertyInfo in sectionType.GetProperties() )
             {
                 var subSectionAttribute = propertyInfo.GetCustomAttribute<SubSectionAttribute>();
+
                 if ( subSectionAttribute == null )
                     continue;
 
@@ -129,11 +130,13 @@ namespace MikuMikuLibrary.IO.Sections
 
             Type genericType = null;
             for ( var type = propertyInfo.PropertyType; type != null; type = type.BaseType )
+            {
                 if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof( List<> ) )
                 {
                     genericType = type.GetGenericArguments()[ 0 ];
                     break;
                 }
+            }
 
             if ( genericType != null )
             {
@@ -171,8 +174,8 @@ namespace MikuMikuLibrary.IO.Sections
             Priority = priority;
         }
 
-        public SubSectionAttribute( Type sectionType, [CallerLineNumber] int priority = int.MaxValue ) :
-            this( priority )
+        public SubSectionAttribute( Type sectionType, [CallerLineNumber] int priority = int.MaxValue ) 
+            : this( priority )
         {
             SectionType = sectionType;
         }

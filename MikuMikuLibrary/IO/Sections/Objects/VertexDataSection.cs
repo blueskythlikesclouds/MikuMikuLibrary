@@ -19,7 +19,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
             long current = mCurrentOffset;
             {
                 mMeshes.Add( mesh );
-                mCurrentOffset += mesh.Vertices.Length * stride;
+                mCurrentOffset += mesh.Positions.Length * stride;
             }
 
             return current;
@@ -32,16 +32,16 @@ namespace MikuMikuLibrary.IO.Sections.Objects
         protected override void Write( object data, EndianBinaryWriter writer )
         {
             foreach ( var mesh in mMeshes )
-                for ( int i = 0; i < mesh.Vertices.Length; i++ )
+            {
+                for ( int i = 0; i < mesh.Positions.Length; i++ )
                 {
-                    writer.Write( ( Vector3 ) mesh.Vertices?[ i ] );
+                    writer.Write( ( Vector3 ) mesh.Positions?[ i ] );
                     writer.Write( mesh.Normals?[ i ] ?? Vector3.Zero, VectorBinaryFormat.Int16 );
-                    writer.WriteNulls( 2 );
+                    writer.WriteNulls( sizeof( ushort ) );
                     writer.Write( mesh.Tangents?[ i ] ?? Vector4.Zero, VectorBinaryFormat.Int16 );
-                    writer.Write( mesh.UVChannel1?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
-                    writer.Write( mesh.UVChannel2?[ i ] ?? mesh.UVChannel2?[ i ] ?? Vector2.Zero,
-                        VectorBinaryFormat.Half );
-                    writer.Write( mesh.Colors?[ i ] ?? Color.White, VectorBinaryFormat.Half );
+                    writer.Write( mesh.TexCoords0?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
+                    writer.Write( mesh.TexCoords1?[ i ] ?? mesh.TexCoords0?[ i ] ?? Vector2.Zero, VectorBinaryFormat.Half );
+                    writer.Write( mesh.Colors0?[ i ] ?? Color.White, VectorBinaryFormat.Half );
 
                     if ( mesh.BoneWeights == null ) 
                         continue;
@@ -50,11 +50,13 @@ namespace MikuMikuLibrary.IO.Sections.Objects
                     writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight2 * 32767f ) );
                     writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight3 * 32767f ) );
                     writer.Write( ( ushort ) ( mesh.BoneWeights[ i ].Weight4 * 32767f ) );
+
                     writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index1 * 3 ) );
                     writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index2 * 3 ) );
                     writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index3 * 3 ) );
                     writer.Write( ( byte ) ( mesh.BoneWeights[ i ].Index4 * 3 ) );
                 }
+            }
         }
 
         public VertexDataSection( SectionMode mode, object data = null ) : base( mode, data )

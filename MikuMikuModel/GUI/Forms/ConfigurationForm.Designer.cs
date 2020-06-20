@@ -316,11 +316,11 @@
             this.Controls.Add(this.mOkButton);
             this.Controls.Add(this.mGroupBox2);
             this.Controls.Add(this.mGroupBox1);
+            this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ConfigurationForm";
-            this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Configurations";
             this.mGroupBox1.ResumeLayout(false);

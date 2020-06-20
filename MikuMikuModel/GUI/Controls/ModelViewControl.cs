@@ -1,5 +1,8 @@
-﻿using System;
+﻿#define USE_ORBIT_CAMERA_CONTROL
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using MikuMikuLibrary.Geometry;
@@ -35,13 +38,26 @@ namespace MikuMikuModel.GUI.Controls
         private readonly GLShaderProgram mGridShader;
 
         private Color4 mBackgroundColor = Color4.LightGray;
+
+#if USE_ORBIT_CAMERA_CONTROL
+        private Vector3 mCamViewPoint = Vector3.Zero;
+        private Vector3 mCamInterest = Vector3.Zero;
+
+        private Vector2 mCamOrbitRotation = Vector2.Zero;
+        private float mCamOrbitDistance = 0.0f;
+
+        private float mCamOrbitDistanceMin = 0.1f;
+        private float mCamOrbitDistanceMax = 100000.0f;
+#else
         private Vector3 mCamDirection = new Vector3( 0, 0, -1 );
 
         private Vector3 mCamPosition = Vector3.Zero;
         private Vector3 mCamRotation = new Vector3( -90, 0, 0 );
+#endif
+
         private bool mComputeProjectionMatrix = true;
         private bool mFocused = true;
-        private Color4 mGridColor = new Color4( 0.1f, 0.1f, 0.1f, 1 );
+        private Color4 mGridColor = new Color4( 0.5f, 0.5f, 0.5f, 1 );
 
         private int mGridVertexArrayId;
         private GLBuffer<Vector3> mGridVertexBuffer;
@@ -65,6 +81,18 @@ namespace MikuMikuModel.GUI.Controls
             sInstance?.Dispose();
         }
 
+        public Color GridColor
+        {
+            get => Color.FromArgb( mGridColor.ToArgb() );
+            set => mGridColor = new Color4( value.R, value.G, value.B, value.A );
+        }        
+        
+        public Color BackgroundColor
+        {
+            get => Color.FromArgb( mBackgroundColor.ToArgb() );
+            set => mBackgroundColor = new Color4( value.R, value.G, value.B, value.A );
+        }
+
         public void SetModel( ObjectSet objectSet, TextureSet textureSet )
         {
             if ( !CanRender )
@@ -75,8 +103,14 @@ namespace MikuMikuModel.GUI.Controls
             mModel = new GLObjectSet( objectSet, textureSet );
 
             var boundingSphere = new BoundingSphere();
+
             foreach ( var mesh in objectSet.Objects )
-                boundingSphere.Merge( mesh.BoundingSphere );
+            {
+                boundingSphere.Center += mesh.BoundingSphere.Center;
+                boundingSphere.Radius = Math.Max( boundingSphere.Radius, mesh.BoundingSphere.Radius );
+            }
+
+            boundingSphere.Center /= objectSet.Objects.Count;
 
             SetCamera( boundingSphere );
         }
@@ -102,9 +136,10 @@ namespace MikuMikuModel.GUI.Controls
             var dictionary = new Dictionary<uint, GLTexture>();
 
             foreach ( var subMesh in mesh.SubMeshes )
-                if ( materials[ subMesh.MaterialIndex ] == null )
-                    materials[ subMesh.MaterialIndex ] = new GLMaterial( obj.Materials[ subMesh.MaterialIndex ],
-                        dictionary, textureSet );
+            {
+                if ( materials[ ( int ) subMesh.MaterialIndex ] == null )
+                    materials[ ( int ) subMesh.MaterialIndex ] = new GLMaterial( obj.Materials[ ( int ) subMesh.MaterialIndex ], dictionary, textureSet );
+            }
 
             mModel = new GLMesh( mesh, materials );
             SetCamera( mesh.BoundingSphere );
@@ -114,10 +149,17 @@ namespace MikuMikuModel.GUI.Controls
         {
             float distance = ( float ) ( boundingSphere.Radius * 2f / Math.Tan( sFieldOfView ) ) + 0.75f;
 
+#if USE_ORBIT_CAMERA_CONTROL
+            mCamInterest = boundingSphere.Center.ToGL();
+            mCamOrbitRotation = Vector2.Zero;
+            mCamOrbitDistance = distance;
+            mCamViewPoint = mCamInterest + CalculateCameraOrbitPosition();
+#else
             mCamPosition = new Vector3(
                 boundingSphere.Center.X,
                 boundingSphere.Center.Y,
                 boundingSphere.Center.Z + distance );
+#endif
         }
 
         private void Reset()
@@ -131,13 +173,55 @@ namespace MikuMikuModel.GUI.Controls
 
         private void ResetCamera()
         {
+#if USE_ORBIT_CAMERA_CONTROL
+            mCamViewPoint = new Vector3( 3.45f, 1.0f, 0.0f );
+            mCamInterest = new Vector3( 0.0f, 1.0f, 0.0f );
+            mCamOrbitRotation = new Vector2( 0.0f, 5.0f );
+            mCamOrbitDistance = 5.0f;
+#else
             mCamPosition = Vector3.Zero;
             mCamRotation = new Vector3( -90, 0, 0 );
             mCamDirection = new Vector3( 0, 0, -1 );
+#endif
         }
+
+#if USE_ORBIT_CAMERA_CONTROL
+        private Vector3 CalculateCameraOrbitPosition()
+        {
+            return new Vector3(
+                Matrix4.CreateRotationY( MathHelper.DegreesToRadians( mCamOrbitRotation.X ) ) *
+                Matrix4.CreateRotationX( MathHelper.DegreesToRadians( mCamOrbitRotation.Y ) ) *
+                new Vector4( 0.0f, 0.0f, mCamOrbitDistance, 1.0f ) );
+        }
+#endif
 
         private void UpdateCamera()
         {
+#if USE_ORBIT_CAMERA_CONTROL
+            var frontDirection = mCamInterest - mCamViewPoint;
+            frontDirection.Y = 0.0f;
+            frontDirection = Vector3.Normalize( frontDirection );
+
+            float cameraSpeed = ( ModifierKeys & SPEED_UP_KEY ) != 0 ? CAMERA_SPEED_FAST :
+                ( ModifierKeys & SLOW_DOWN_KEY ) != 0 ? CAMERA_SPEED_SLOW : CAMERA_SPEED;
+
+            if ( mFront && !mBack )
+                mCamInterest += frontDirection * cameraSpeed;
+            else if ( mBack && !mFront )
+                mCamInterest -= frontDirection * cameraSpeed;
+
+            if ( mLeft && !mRight )
+                mCamInterest -= Vector3.Normalize( Vector3.Cross( frontDirection, sCamUp ) ) * cameraSpeed;
+            else if ( mRight && !mLeft )
+                mCamInterest += Vector3.Normalize( Vector3.Cross( frontDirection, sCamUp ) ) * cameraSpeed;
+
+            if ( mUp && !mDown )
+                mCamInterest += Vector3.UnitY * cameraSpeed / 2;
+            else if ( !mUp && mDown )
+                mCamInterest -= Vector3.UnitY * cameraSpeed / 2;
+
+            mCamViewPoint = mCamInterest + CalculateCameraOrbitPosition();
+#else
             float x = MathHelper.DegreesToRadians( mCamRotation.X );
             float y = MathHelper.DegreesToRadians( mCamRotation.Y );
             float yCos = ( float ) Math.Cos( y );
@@ -168,18 +252,34 @@ namespace MikuMikuModel.GUI.Controls
                 mCamPosition += Vector3.UnitY * cameraSpeed / 2;
             else if ( !mUp && mDown )
                 mCamPosition -= Vector3.UnitY * cameraSpeed / 2;
+#endif
 
             mShouldRedraw |= mLeft | mRight | mUp | mDown | mFront | mBack;
         }
 
         private void GetViewMatrix( out Matrix4 view )
         {
+#if USE_ORBIT_CAMERA_CONTROL
+            view = Matrix4.LookAt( mCamViewPoint, mCamInterest, sCamUp );
+#else
             view = Matrix4.LookAt( mCamPosition, mCamPosition + mCamDirection, sCamUp );
+#endif
         }
 
         private void GetProjectionMatrix( out Matrix4 projection )
         {
-            projection = Matrix4.CreatePerspectiveFieldOfView( sFieldOfView, ( float ) Width / Height, 0.1f, 1000000f );
+            projection = Matrix4.CreatePerspectiveFieldOfView( sFieldOfView, ( float ) Width / Height, 0.001f, 1000f );
+        }
+
+        private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
+        {
+            if ( eventArgs.Style != null )
+                StyleHelpers.ApplyStyle( this, eventArgs.Style );
+            else
+                StyleHelpers.RestoreDefaultStyle( this );
+
+            Refresh();
+            mShouldRedraw = true;
         }
 
         protected override void OnLoad( EventArgs e )
@@ -196,8 +296,10 @@ namespace MikuMikuModel.GUI.Controls
                 Invalidate();
             };
 
+            StyleHelpers.StoreDefaultStyle( this );
+
             if ( StyleSet.CurrentStyle != null )
-                ApplyStyle( StyleSet.CurrentStyle );
+                StyleHelpers.ApplyStyle( this, StyleSet.CurrentStyle );
 
             StyleSet.StyleChanged += OnStyleChanged;
 
@@ -219,31 +321,10 @@ namespace MikuMikuModel.GUI.Controls
             mGridVertexArrayId = GL.GenVertexArray();
             GL.BindVertexArray( mGridVertexArrayId );
 
-            mGridVertexBuffer = new GLBuffer<Vector3>( BufferTarget.ArrayBuffer, vertices.ToArray(),
-                BufferUsageHint.StaticDraw );
+            mGridVertexBuffer = new GLBuffer<Vector3>( BufferTarget.ArrayBuffer, vertices.ToArray(), BufferUsageHint.StaticDraw );
 
             GL.VertexAttribPointer( 0, 3, VertexAttribPointerType.Float, false, mGridVertexBuffer.Stride, 0 );
             GL.EnableVertexAttribArray( 0 );
-        }
-
-        private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
-        {
-            ApplyStyle( eventArgs.Style );
-        }
-
-        private void ApplyStyle( Style style )
-        {
-            mBackgroundColor = style != null
-                ? new Color4( style.ViewportBackground.R, style.ViewportBackground.G, style.ViewportBackground.B,
-                    style.ViewportBackground.A )
-                : Color4.LightGray;
-
-            mGridColor = style != null
-                ? new Color4( style.ViewportForeground.R, style.ViewportForeground.G, style.ViewportForeground.B,
-                    style.ViewportForeground.A )
-                : new Color4( 0.1f, 0.1f, 0.1f, 1 );
-
-            mShouldRedraw = true;
         }
 
         private void DrawModel( ref Matrix4 view, ref Matrix4 projection )
@@ -251,8 +332,13 @@ namespace MikuMikuModel.GUI.Controls
             mDefaultShader.Use();
             mDefaultShader.SetUniform( "uView", view );
             mDefaultShader.SetUniform( "uProjection", projection );
+#if USE_ORBIT_CAMERA_CONTROL
+            mDefaultShader.SetUniform( "uViewPosition", mCamViewPoint );
+            mDefaultShader.SetUniform( "uLightPosition", mCamViewPoint );
+#else
             mDefaultShader.SetUniform( "uViewPosition", mCamPosition );
             mDefaultShader.SetUniform( "uLightPosition", mCamPosition );
+#endif
 
             mModel.Draw( mDefaultShader );
         }
@@ -302,6 +388,16 @@ namespace MikuMikuModel.GUI.Controls
 
             switch ( e.Button )
             {
+#if USE_ORBIT_CAMERA_CONTROL
+                case MouseButtons.Left:
+                {
+                    const float cameraSpeed = 0.18f;
+                    mCamOrbitRotation.X += deltaX * cameraSpeed;
+                    mCamOrbitRotation.Y += deltaY * cameraSpeed;
+                    mCamOrbitRotation.Y = MathHelper.Clamp( mCamOrbitRotation.Y, -89.9f, +89.9f );
+                    break;
+                }
+#else
                 case MouseButtons.Left:
                 {
                     float cameraSpeed = ModifierKeys.HasFlag( Keys.Shift ) ? 0.04f :
@@ -317,6 +413,7 @@ namespace MikuMikuModel.GUI.Controls
                     mCamRotation.X += deltaX * 0.1f;
                     mCamRotation.Y -= deltaY * 0.1f;
                     break;
+#endif
             }
 
             if ( e.Button != MouseButtons.None )
@@ -332,9 +429,14 @@ namespace MikuMikuModel.GUI.Controls
             float cameraSpeed = ( ModifierKeys & SPEED_UP_KEY ) != 0 ? WHEEL_CAMERA_SPEED_FAST :
                 ( ModifierKeys & SLOW_DOWN_KEY ) != 0 ? WHEEL_CAMERA_SPEED_SLOW : WHEEL_CAMERA_SPEED;
 
+#if USE_ORBIT_CAMERA_CONTROL
+            mCamOrbitDistance = MathHelper.Clamp( mCamOrbitDistance - ( cameraSpeed * e.Delta ), mCamOrbitDistanceMin,
+                mCamOrbitDistanceMax );
+#else
             mCamPosition += mCamDirection * cameraSpeed * e.Delta;
-            mShouldRedraw = true;
+#endif
 
+            mShouldRedraw = true;
             base.OnMouseWheel( e );
         }
 
@@ -496,7 +598,7 @@ namespace MikuMikuModel.GUI.Controls
             GL.Enable( EnableCap.CullFace );
             GL.Enable( EnableCap.DepthTest );
             GL.Enable( EnableCap.PrimitiveRestart );
-            GL.PrimitiveRestartIndex( 0xFFFF );
+            GL.PrimitiveRestartIndex( 0xFFFFFFFF );
         }
     }
 }

@@ -27,6 +27,7 @@ namespace MikuMikuModel.Nodes.Textures
             }
         }
 
+        [Category( "General" )]
         [TypeConverter( typeof( IdTypeConverter ) )]
         public uint Id
         {
@@ -34,9 +35,9 @@ namespace MikuMikuModel.Nodes.Textures
             set => SetProperty( value );
         }
 
-        public int Width => GetProperty<int>();
-        public int Height => GetProperty<int>();
-        public TextureFormat Format => GetProperty<TextureFormat>();
+        [Category( "General" )] public int Width => GetProperty<int>();
+        [Category( "General" )] public int Height => GetProperty<int>();
+        [Category( "General" )] public TextureFormat Format => GetProperty<TextureFormat>();
 
         private Texture ReplaceBitmap( string filePath, bool flipped = false )
         {
@@ -91,27 +92,29 @@ namespace MikuMikuModel.Nodes.Textures
 
         protected override void Initialize()
         {
-            RegisterExportHandler<Bitmap>( filePath => TextureDecoder.DecodeToPNG( Data, filePath ) );
-            RegisterExportHandler<Texture>( filePath => TextureDecoder.DecodeToDDS( Data, filePath ) );
-            RegisterReplaceHandler<Texture>( TextureEncoder.Encode );
-            RegisterReplaceHandler<Bitmap>( filePath => ReplaceBitmap( filePath ) );
-            RegisterCustomHandler( "Export flipped", () =>
+            AddExportHandler<Bitmap>( filePath => TextureDecoder.DecodeToPNG( Data, filePath ) );
+            AddExportHandler<Texture>( filePath => TextureDecoder.DecodeToDDS( Data, filePath ) );
+            AddReplaceHandler<Texture>( TextureEncoder.Encode );
+            AddReplaceHandler<Bitmap>( filePath => ReplaceBitmap( filePath ) );
+            AddCustomHandler( "Export flipped", () =>
             {
                 string filePath = ModuleExportUtilities.SelectModuleExport<Bitmap>();
-                if ( !string.IsNullOrEmpty( filePath ) )
-                {
-                    var imageFormat = GetImageFormat( filePath );
 
-                    using ( Bitmap oBitmap = TextureDecoder.Decode( Data ) )
-                    {
-                        oBitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
-                        oBitmap.Save( filePath, imageFormat );
-                    }
+                if ( string.IsNullOrEmpty( filePath ) ) 
+                    return;
+
+                var imageFormat = GetImageFormat( filePath );
+
+                using ( var bitmap = TextureDecoder.Decode( Data ) )
+                {
+                    bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
+                    bitmap.Save( filePath, imageFormat );
                 }
             } );
-            RegisterCustomHandler( "Replace flipped", () =>
+            AddCustomHandler( "Replace flipped", () =>
             {
                 string filePath = ModuleImportUtilities.SelectModuleImport<Bitmap>();
+
                 if ( !string.IsNullOrEmpty( filePath ) )
                     Replace( ReplaceBitmap( filePath, true ) );
             } );

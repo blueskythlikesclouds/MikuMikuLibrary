@@ -52,6 +52,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( spriteSetsOffset, () =>
             {
                 SpriteSets.Capacity = spriteCount;
+
                 for ( int i = 0; i < spriteSetCount; i++ )
                 {
                     uint id = reader.ReadUInt32();
@@ -85,21 +86,26 @@ namespace MikuMikuLibrary.Databases
                     string name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
                     var set = SpriteSets[ setIndex & 0xFFF ];
+
                     if ( ( setIndex & 0x1000 ) == 0x1000 )
+                    {
                         set.Textures.Add( new SpriteTextureInfo
                         {
                             Id = id,
                             Name = name,
                             Index = index
                         } );
+                    }
 
                     else
+                    {
                         set.Sprites.Add( new SpriteInfo
                         {
                             Id = id,
                             Name = name,
                             Index = index
                         } );
+                    }
                 }
             } );
         }
@@ -124,6 +130,7 @@ namespace MikuMikuLibrary.Databases
                 for ( int i = 0; i < SpriteSets.Count; i++ )
                 {
                     var spriteSetInfo = SpriteSets[ i ];
+
                     foreach ( var spriteInfo in spriteSetInfo.Sprites )
                     {
                         writer.Write( spriteInfo.Id );
@@ -131,7 +138,7 @@ namespace MikuMikuLibrary.Databases
                         writer.Write( spriteInfo.Index | ( i << 16 ) );
 
                         if ( section?.Format == BinaryFormat.X )
-                            writer.WriteNulls( 4 );
+                            writer.WriteNulls( sizeof( uint ) );
                     }
 
                     foreach ( var spriteTextureInfo in spriteSetInfo.Textures )
@@ -141,7 +148,7 @@ namespace MikuMikuLibrary.Databases
                         writer.Write( spriteTextureInfo.Index | ( ( i | 0x1000 ) << 16 ) );
 
                         if ( section?.Format == BinaryFormat.X )
-                            writer.WriteNulls( 4 );
+                            writer.WriteNulls( sizeof( uint ) );
                     }
                 }
             } );

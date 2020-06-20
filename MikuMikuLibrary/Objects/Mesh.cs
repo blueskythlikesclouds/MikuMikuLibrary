@@ -9,17 +9,28 @@ using MikuMikuLibrary.Misc;
 
 namespace MikuMikuLibrary.Objects
 {
+    [Flags]
+    public enum MeshFlags
+    {
+        FaceCameraPosition = 1 << 1,
+        FaceCameraView = 1 << 3
+    }
+
     public class Mesh
     {
         public BoundingSphere BoundingSphere { get; set; }
         public List<SubMesh> SubMeshes { get; }
-        public Vector3[] Vertices { get; set; }
+        public Vector3[] Positions { get; set; }
         public Vector3[] Normals { get; set; }
         public Vector4[] Tangents { get; set; }
-        public Vector2[] UVChannel1 { get; set; }
-        public Vector2[] UVChannel2 { get; set; }
-        public Color[] Colors { get; set; }
+        public Vector2[] TexCoords0 { get; set; }
+        public Vector2[] TexCoords1 { get; set; }
+        public Vector2[] TexCoords2 { get; set; }
+        public Vector2[] TexCoords3 { get; set; }
+        public Color[] Colors0 { get; set; }
+        public Color[] Colors1 { get; set; }
         public BoneWeight[] BoneWeights { get; set; }
+        public MeshFlags Flags { get; set; }
         public string Name { get; set; }
 
         public static int GetByteSize( BinaryFormat format )
@@ -41,29 +52,42 @@ namespace MikuMikuLibrary.Objects
 
         internal void Read( EndianBinaryReader reader, ObjectSection section = null )
         {
-            reader.SeekCurrent( 4 );
+            reader.SeekCurrent( 4 ); // Unused flags
+
             BoundingSphere = reader.ReadBoundingSphere();
+
             int subMeshCount = reader.ReadInt32();
             long subMeshesOffset = reader.ReadOffset();
-            var attributes = ( VertexFormatAttribute ) reader.ReadUInt32();
-            int stride = reader.ReadInt32();
+
+            var vertexFormat = ( VertexFormatAttributes ) reader.ReadUInt32();
+            int vertexSize = reader.ReadInt32();
             int vertexCount = reader.ReadInt32();
-            var elemItems = reader.ReadUInt32s( section?.Format == BinaryFormat.X ? 49 : 28 );
+            var attributeOffsets = reader.ReadOffsets( 20 );
+
+            Flags = ( MeshFlags ) reader.ReadInt32();
+
+            uint attributeFlags = reader.ReadUInt32();
+
+            reader.SkipNulls( 6 * sizeof( uint ) );
+
             Name = reader.ReadString( StringBinaryFormat.FixedLength, 64 );
 
             SubMeshes.Capacity = subMeshCount;
+
             for ( int i = 0; i < subMeshCount; i++ )
-                reader.ReadAtOffset( subMeshesOffset + i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ),
-                    () =>
-                    {
-                        var subMesh = new SubMesh();
-                        subMesh.Read( reader, section );
-                        SubMeshes.Add( subMesh );
-                    } );
+            {
+                reader.ReadAtOffset( subMeshesOffset + i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ), () =>
+                {
+                    var subMesh = new SubMesh();
+                    subMesh.Read( reader, section );
+                    SubMeshes.Add( subMesh );
+                } );
+            }
 
             // Modern Format
             if ( section != null )
                 ReadVertexAttributesModern();
+
             else
                 ReadVertexAttributesClassic();
 
@@ -72,43 +96,55 @@ namespace MikuMikuLibrary.Objects
                 Vector4[] boneWeights = null;
                 Vector4[] boneIndices = null;
 
-                for ( int i = 0; i < 28; i++ )
+                for ( int i = 0; i < attributeOffsets.Length; i++ )
                 {
-                    var attribute = ( VertexFormatAttribute ) ( 1 << i );
+                    var attribute = ( VertexFormatAttributes ) ( 1 << i );
 
-                    reader.ReadAtOffsetIf( ( attributes & attribute ) != 0, elemItems[ i ], () =>
+                    reader.ReadAtOffsetIf( ( vertexFormat & attribute ) != 0, attributeOffsets[ i ], () =>
                     {
                         switch ( attribute )
                         {
-                            case VertexFormatAttribute.Vertex:
-                                Vertices = reader.ReadVector3s( vertexCount );
+                            case VertexFormatAttributes.Position:
+                                Positions = reader.ReadVector3s( vertexCount );
                                 break;
 
-                            case VertexFormatAttribute.Normal:
+                            case VertexFormatAttributes.Normal:
                                 Normals = reader.ReadVector3s( vertexCount );
                                 break;
 
-                            case VertexFormatAttribute.Tangent:
+                            case VertexFormatAttributes.Tangent:
                                 Tangents = reader.ReadVector4s( vertexCount );
                                 break;
 
-                            case VertexFormatAttribute.UVChannel1:
-                                UVChannel1 = reader.ReadVector2s( vertexCount );
+                            case VertexFormatAttributes.TexCoord0:
+                                TexCoords0 = reader.ReadVector2s( vertexCount );
                                 break;
 
-                            case VertexFormatAttribute.UVChannel2:
-                                UVChannel2 = reader.ReadVector2s( vertexCount );
+                            case VertexFormatAttributes.TexCoord1:
+                                TexCoords1 = reader.ReadVector2s( vertexCount );
                                 break;
 
-                            case VertexFormatAttribute.Color:
-                                Colors = reader.ReadColors( vertexCount );
+                            case VertexFormatAttributes.TexCoord2:
+                                TexCoords2 = reader.ReadVector2s( vertexCount );
                                 break;
 
-                            case VertexFormatAttribute.BoneWeight:
+                            case VertexFormatAttributes.TexCoord3:
+                                TexCoords3 = reader.ReadVector2s( vertexCount );
+                                break;
+
+                            case VertexFormatAttributes.Color0:
+                                Colors0 = reader.ReadColors( vertexCount );
+                                break;
+
+                            case VertexFormatAttributes.Color1:
+                                Colors1 = reader.ReadColors( vertexCount );
+                                break;
+
+                            case VertexFormatAttributes.BoneWeight:
                                 boneWeights = reader.ReadVector4s( vertexCount );
                                 break;
 
-                            case VertexFormatAttribute.BoneIndex:
+                            case VertexFormatAttributes.BoneIndex:
                                 boneIndices = reader.ReadVector4s( vertexCount );
                                 break;
 
@@ -119,64 +155,65 @@ namespace MikuMikuLibrary.Objects
                     } );
                 }
 
-                if ( boneWeights != null && boneIndices != null )
+                if ( boneWeights == null || boneIndices == null )
+                    return;
+
+                BoneWeights = new BoneWeight[ vertexCount ];
+
+                for ( int i = 0; i < vertexCount; i++ )
                 {
-                    BoneWeights = new BoneWeight[ vertexCount ];
-                    for ( int i = 0; i < vertexCount; i++ )
+                    var weight4 = boneWeights[ i ];
+                    var index4 = Vector4.Divide( boneIndices[ i ], 3 );
+
+                    var boneWeight = new BoneWeight
                     {
-                        var weight4 = boneWeights[ i ];
-                        var index4 = Vector4.Divide( boneIndices[ i ], 3 );
+                        Weight1 = weight4.X,
+                        Weight2 = weight4.Y,
+                        Weight3 = weight4.Z,
+                        Weight4 = weight4.W,
+                        Index1 = ( int ) index4.X,
+                        Index2 = ( int ) index4.Y,
+                        Index3 = ( int ) index4.Z,
+                        Index4 = ( int ) index4.W
+                    };
 
-                        var boneWeight = new BoneWeight
-                        {
-                            Weight1 = weight4.X,
-                            Weight2 = weight4.Y,
-                            Weight3 = weight4.Z,
-                            Weight4 = weight4.W,
-                            Index1 = ( int ) index4.X,
-                            Index2 = ( int ) index4.Y,
-                            Index3 = ( int ) index4.Z,
-                            Index4 = ( int ) index4.W
-                        };
-                        boneWeight.Validate();
+                    boneWeight.Validate();
 
-                        BoneWeights[ i ] = boneWeight;
-                    }
+                    BoneWeights[ i ] = boneWeight;
                 }
             }
 
             void ReadVertexAttributesModern()
             {
-                uint dataOffset = elemItems[ section.Format == BinaryFormat.X ? 27 : 13 ];
-                uint attributeFlags = elemItems[ section.Format == BinaryFormat.X ? 42 : 21 ];
-
                 if ( attributeFlags == 2 || attributeFlags == 4 )
                 {
-                    Vertices = new Vector3[ vertexCount ];
+                    Positions = new Vector3[ vertexCount ];
                     Normals = new Vector3[ vertexCount ];
                     Tangents = new Vector4[ vertexCount ];
-                    UVChannel1 = new Vector2[ vertexCount ];
-                    UVChannel2 = new Vector2[ vertexCount ];
-                    Colors = new Color[ vertexCount ];
+                    TexCoords0 = new Vector2[ vertexCount ];
+                    TexCoords1 = new Vector2[ vertexCount ];
+                    Colors0 = new Color[ vertexCount ];
 
                     if ( attributeFlags == 4 )
                         BoneWeights = new BoneWeight[ vertexCount ];
 
                     bool hasTangents = false;
-                    bool hasUVChannel2 = false;
+                    bool hasTexCoord1 = false;
                     bool hasColors = false;
 
                     var vertexReader = section.VertexData.Reader;
+
                     for ( int i = 0; i < vertexCount; i++ )
                     {
-                        vertexReader.SeekBegin( section.VertexData.DataOffset + dataOffset + stride * i );
-                        Vertices[ i ] = vertexReader.ReadVector3();
+                        vertexReader.SeekBegin( section.VertexData.DataOffset + attributeOffsets[ 13 ] + vertexSize * i );
+
+                        Positions[ i ] = vertexReader.ReadVector3();
                         Normals[ i ] = vertexReader.ReadVector3( VectorBinaryFormat.Int16 );
                         vertexReader.SeekCurrent( 2 );
                         Tangents[ i ] = vertexReader.ReadVector4( VectorBinaryFormat.Int16 );
-                        UVChannel1[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
-                        UVChannel2[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
-                        Colors[ i ] = vertexReader.ReadColor( VectorBinaryFormat.Half );
+                        TexCoords0[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+                        TexCoords1[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+                        Colors0[ i ] = vertexReader.ReadColor( VectorBinaryFormat.Half );
 
                         if ( attributeFlags == 4 )
                         {
@@ -191,6 +228,7 @@ namespace MikuMikuLibrary.Objects
                                 Index3 = vertexReader.ReadByte() / 3,
                                 Index4 = vertexReader.ReadByte() / 3
                             };
+
                             boneWeight.Validate();
 
                             BoneWeights[ i ] = boneWeight;
@@ -201,24 +239,25 @@ namespace MikuMikuLibrary.Objects
 
                         // Checks to get rid of useless data after reading
                         if ( Tangents[ i ] != Vector4.Zero ) hasTangents = true;
-                        if ( UVChannel1[ i ] != UVChannel2[ i ] ) hasUVChannel2 = true;
-                        if ( !Colors[ i ].Equals( Color.White ) ) hasColors = true;
+                        if ( TexCoords0[ i ] != TexCoords1[ i ] ) hasTexCoord1 = true;
+                        if ( !Colors0[ i ].Equals( Color.White ) ) hasColors = true;
                     }
 
                     if ( !hasTangents ) Tangents = null;
-                    if ( !hasUVChannel2 ) UVChannel2 = null;
-                    if ( !hasColors ) Colors = null;
+                    if ( !hasTexCoord1 ) TexCoords1 = null;
+                    if ( !hasColors ) Colors0 = null;
                 }
 
-                if ( Tangents != null )
-                    for ( int i = 0; i < Tangents.Length; i++ )
-                    {
-                        int direction = Math.Sign( Tangents[ i ].W );
-                        var tangent =
-                            Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
+                if ( Tangents == null ) 
+                    return;
 
-                        Tangents[ i ] = new Vector4( tangent, direction );
-                    }
+                for ( int i = 0; i < Tangents.Length; i++ )
+                {
+                    int direction = Math.Sign( Tangents[ i ].W );
+                    var tangent = Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
+
+                    Tangents[ i ] = new Vector4( tangent, direction );
+                }
             }
         }
 
@@ -227,115 +266,150 @@ namespace MikuMikuLibrary.Objects
             writer.Write( 0 );
             writer.Write( BoundingSphere );
             writer.Write( SubMeshes.Count );
+
             writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
             {
                 foreach ( var subMesh in SubMeshes )
                     subMesh.Write( writer, section );
             } );
 
-            int stride = 0;
-            VertexFormatAttribute attributes = default;
+            int vertexSize = 0;
+            VertexFormatAttributes vertexFormat = default;
 
             if ( section != null )
             {
-                attributes = VertexFormatAttribute.UsesModernStorage;
-                if ( BoneWeights != null )
-                    stride = 56;
-                else
-                    stride = 44;
+                vertexFormat = VertexFormatAttributes.UsesModernStorage;
+                vertexSize = BoneWeights != null ? 56 : 44;
             }
 
             else
             {
-                if ( Vertices != null )
+                if ( Positions != null )
                 {
-                    attributes |= VertexFormatAttribute.Vertex;
-                    stride += 12;
+                    vertexFormat |= VertexFormatAttributes.Position;
+                    vertexSize += 12;
                 }
 
                 if ( Normals != null )
                 {
-                    attributes |= VertexFormatAttribute.Normal;
-                    stride += 12;
+                    vertexFormat |= VertexFormatAttributes.Normal;
+                    vertexSize += 12;
                 }
 
                 if ( Tangents != null )
                 {
-                    attributes |= VertexFormatAttribute.Tangent;
-                    stride += 16;
+                    vertexFormat |= VertexFormatAttributes.Tangent;
+                    vertexSize += 16;
                 }
 
-                if ( UVChannel1 != null )
+                if ( TexCoords0 != null )
                 {
-                    attributes |= VertexFormatAttribute.UVChannel1;
-                    stride += 8;
+                    vertexFormat |= VertexFormatAttributes.TexCoord0;
+                    vertexSize += 8;
                 }
 
-                if ( UVChannel2 != null )
+                if ( TexCoords1 != null )
                 {
-                    attributes |= VertexFormatAttribute.UVChannel2;
-                    stride += 8;
+                    vertexFormat |= VertexFormatAttributes.TexCoord1;
+                    vertexSize += 8;
+                }                
+                
+                if ( TexCoords2 != null )
+                {
+                    vertexFormat |= VertexFormatAttributes.TexCoord2;
+                    vertexSize += 8;
+                }                
+                
+                if ( TexCoords3 != null )
+                {
+                    vertexFormat |= VertexFormatAttributes.TexCoord3;
+                    vertexSize += 8;
                 }
 
-                if ( Colors != null )
+                if ( Colors0 != null )
                 {
-                    attributes |= VertexFormatAttribute.Color;
-                    stride += 16;
+                    vertexFormat |= VertexFormatAttributes.Color0;
+                    vertexSize += 16;
+                }               
+                
+                if ( Colors1 != null )
+                {
+                    vertexFormat |= VertexFormatAttributes.Color1;
+                    vertexSize += 16;
                 }
 
                 if ( BoneWeights != null )
                 {
-                    attributes |= VertexFormatAttribute.BoneWeight | VertexFormatAttribute.BoneIndex;
-                    stride += 32;
+                    vertexFormat |= VertexFormatAttributes.BoneWeight | VertexFormatAttributes.BoneIndex;
+                    vertexSize += 32;
                 }
             }
 
-            writer.Write( ( int ) attributes );
-            writer.Write( stride );
-            writer.Write( Vertices.Length );
+            writer.Write( ( int ) vertexFormat );
+            writer.Write( vertexSize );
+            writer.Write( Positions.Length );
 
             if ( section != null )
                 WriteVertexAttributesModern();
+
             else
                 WriteVertexAttributesClassic();
+
+            writer.Write( ( int ) Flags );
+
+            writer.Write( section != null ? ( BoneWeights != null ? 4 : 2 ) : 0 );
+
+            writer.WriteNulls( 6 * sizeof( uint ) ); // Reserved
 
             writer.Write( Name, StringBinaryFormat.FixedLength, 64 );
 
             void WriteVertexAttributesClassic()
             {
-                for ( int i = 0; i < 28; i++ )
+                for ( int i = 0; i < 20; i++ )
                 {
-                    var attribute = ( VertexFormatAttribute ) ( 1 << i );
+                    var attribute = ( VertexFormatAttributes ) ( 1 << i );
 
-                    writer.ScheduleWriteOffsetIf( ( attributes & attribute ) != 0, 4, AlignmentMode.Left, () =>
+                    writer.ScheduleWriteOffsetIf( ( vertexFormat & attribute ) != 0, 4, AlignmentMode.Left, () =>
                     {
                         switch ( attribute )
                         {
-                            case VertexFormatAttribute.Vertex:
-                                writer.Write( Vertices );
+                            case VertexFormatAttributes.Position:
+                                writer.Write( Positions );
                                 break;
 
-                            case VertexFormatAttribute.Normal:
+                            case VertexFormatAttributes.Normal:
                                 writer.Write( Normals );
                                 break;
 
-                            case VertexFormatAttribute.Tangent:
+                            case VertexFormatAttributes.Tangent:
                                 writer.Write( Tangents );
                                 break;
 
-                            case VertexFormatAttribute.UVChannel1:
-                                writer.Write( UVChannel1 );
+                            case VertexFormatAttributes.TexCoord0:
+                                writer.Write( TexCoords0 );
                                 break;
 
-                            case VertexFormatAttribute.UVChannel2:
-                                writer.Write( UVChannel2 );
+                            case VertexFormatAttributes.TexCoord1:
+                                writer.Write( TexCoords1 );
+                                break;                            
+                            
+                            case VertexFormatAttributes.TexCoord2:
+                                writer.Write( TexCoords2 );
                                 break;
 
-                            case VertexFormatAttribute.Color:
-                                writer.Write( Colors );
+                            case VertexFormatAttributes.TexCoord3:
+                                writer.Write( TexCoords3 );
                                 break;
 
-                            case VertexFormatAttribute.BoneWeight:
+                            case VertexFormatAttributes.Color0:
+                                writer.Write( Colors0 );
+                                break;                            
+                            
+                            case VertexFormatAttributes.Color1:
+                                writer.Write( Colors1 );
+                                break;
+
+                            case VertexFormatAttributes.BoneWeight:
                                 foreach ( var weight in BoneWeights )
                                 {
                                     writer.Write( weight.Weight1 );
@@ -346,7 +420,7 @@ namespace MikuMikuLibrary.Objects
 
                                 break;
 
-                            case VertexFormatAttribute.BoneIndex:
+                            case VertexFormatAttributes.BoneIndex:
                                 foreach ( var weight in BoneWeights )
                                 {
                                     writer.Write( weight.Index1 < 0 ? -1f : weight.Index1 * 3.0f );
@@ -363,11 +437,12 @@ namespace MikuMikuLibrary.Objects
 
             void WriteVertexAttributesModern()
             {
-                writer.WriteNulls( section.Format == BinaryFormat.X ? 0x6C : 0x34 );
-                writer.Write( ( uint ) section.VertexData.AddSubMesh( this, stride ) );
-                writer.WriteNulls( section.Format == BinaryFormat.X ? 0x38 : 0x1C );
-                writer.Write( BoneWeights != null ? 4 : 2 );
-                writer.WriteNulls( 0x18 );
+                int byteSize = writer.AddressSpace.GetByteSize();
+
+                writer.Align( byteSize );
+                writer.WriteNulls( 13 * byteSize );
+                writer.WriteOffset( section.VertexData.AddSubMesh( this, vertexSize ) );
+                writer.WriteNulls( 6 * byteSize );
             }
         }
 
@@ -377,16 +452,20 @@ namespace MikuMikuLibrary.Objects
         }
 
         [Flags]
-        private enum VertexFormatAttribute
+        private enum VertexFormatAttributes
         {
-            Vertex = 1 << 0,
+            Position = 1 << 0,
             Normal = 1 << 1,
             Tangent = 1 << 2,
-            UVChannel1 = 1 << 4,
-            UVChannel2 = 1 << 5,
-            Color = 1 << 8,
+            TexCoord0 = 1 << 4,
+            TexCoord1 = 1 << 5,
+            TexCoord2 = 1 << 6,
+            TexCoord3 = 1 << 7,
+            Color0 = 1 << 8,
+            Color1 = 1 << 9,
             BoneWeight = 1 << 10,
             BoneIndex = 1 << 11,
+            VertexData = 1 << 13,
             UsesModernStorage = 1 << 31
         }
     }

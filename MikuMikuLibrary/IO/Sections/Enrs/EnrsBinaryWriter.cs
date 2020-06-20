@@ -18,10 +18,8 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
             base.Write( value );
         }
 
-        public override unsafe void Write( ushort value )
-        {
+        public override unsafe void Write( ushort value ) => 
             Write( *( short* ) &value );
-        }
 
         public override void Write( int value )
         {
@@ -31,10 +29,8 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
             base.Write( value );
         }
 
-        public override unsafe void Write( uint value )
-        {
+        public override unsafe void Write( uint value ) => 
             Write( *( int* ) &value );
-        }
 
         public override void Write( long value )
         {
@@ -44,20 +40,14 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
             base.Write( value );
         }
 
-        public override unsafe void Write( ulong value )
-        {
+        public override unsafe void Write( ulong value ) => 
             Write( *( long* ) &value );
-        }
 
-        public override unsafe void Write( float value )
-        {
+        public override unsafe void Write( float value ) => 
             Write( *( int* ) &value );
-        }
 
-        public override unsafe void Write( double value )
-        {
+        public override unsafe void Write( double value ) => 
             Write( *( long* ) &value );
-        }
 
         public List<ScopeDescriptor> CreateScopeDescriptors( long minPosition, long maxPosition )
         {
@@ -68,11 +58,12 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
             long previousPosition = minPosition;
             int previousByteSize = 0;
 
-            foreach ( var kvp in mPositionMap.OrderBy( x => x.Key )
-                .Where( x => x.Key >= minPosition && x.Key < maxPosition ) )
+            foreach ( var kvp in mPositionMap.OrderBy( x => x.Key ).Where( 
+                x => x.Key >= minPosition && x.Key < maxPosition ) )
             {
                 long position = kvp.Key;
                 int byteSize = kvp.Value;
+
                 var valueType =
                     byteSize == 2 ? ValueType.Int16 :
                     byteSize == 4 ? ValueType.Int32 :
@@ -81,14 +72,19 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
 
                 if ( previousFieldDescriptor == null || previousFieldDescriptor.ValueType != valueType ||
                      previousPosition + previousByteSize != position )
+                {
                     fieldDescriptors.Add( previousFieldDescriptor = new FieldDescriptor
                     {
                         Position = position - minPosition,
                         RepeatCount = 1,
                         ValueType = valueType
                     } );
+                }
+
                 else
+                {
                     previousFieldDescriptor.RepeatCount++;
+                }
 
                 previousPosition = position;
                 previousByteSize = byteSize;
@@ -96,14 +92,15 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
 
             // TODO: Optimize
             var scopeDescriptor = new ScopeDescriptor { Position = fieldDescriptors[ 0 ].Position, RepeatCount = 1 };
+
             scopeDescriptor.FieldDescriptors.AddRange( fieldDescriptors );
             scopeDescriptors.Add( scopeDescriptor );
 
             return scopeDescriptors;
         }
 
-        public EnrsBinaryWriter( Stream input, Encoding encoding, bool leaveOpen, Endianness endianness ) : base( input,
-            encoding, leaveOpen, endianness )
+        public EnrsBinaryWriter( Stream input, Encoding encoding, Endianness endianness, bool leaveOpen ) 
+            : base( input, encoding, endianness, leaveOpen )
         {
             mPositionMap = new Dictionary<long, int>( 1024 * 1024 );
         }

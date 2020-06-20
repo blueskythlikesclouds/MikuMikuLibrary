@@ -21,6 +21,7 @@ namespace MikuMikuLibrary.Textures
             reader.PushBaseOffset();
 
             int signature = reader.ReadInt32();
+
             if ( signature != 0x03505854 )
             {
                 reader.Endianness = Endianness = Endianness.Big;
@@ -34,6 +35,7 @@ namespace MikuMikuLibrary.Textures
             int textureCountWithRubbish = reader.ReadInt32();
 
             Textures.Capacity = textureCount;
+
             for ( int i = 0; i < textureCount; i++ )
                 reader.ReadOffset( () => { Textures.Add( new Texture( reader ) ); } );
 
@@ -54,24 +56,25 @@ namespace MikuMikuLibrary.Textures
             writer.PopBaseOffset();
         }
 
-        protected override ISection GetSectionInstanceForWriting()
-        {
-            return new TextureSetSection( SectionMode.Write, this );
-        }
+        protected override ISection GetSectionInstanceForWriting() => 
+            new TextureSetSection( SectionMode.Write, this );
 
         public override void Load( string filePath )
         {
             base.Load( filePath );
 
-            if ( filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
+            if ( !filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) ) 
+                return;
+
+            var textureDatabase = LoadIfExist<TextureDatabase>( Path.ChangeExtension( filePath, "txi" ) );
+
+            if ( Textures.Count != textureDatabase.Textures.Count ) 
+                return;
+
+            for ( int i = 0; i < Textures.Count; i++ )
             {
-                var textureDatabase = LoadIfExist<TextureDatabase>( Path.ChangeExtension( filePath, "txi" ) );
-                if ( Textures.Count == textureDatabase.Textures.Count )
-                    for ( int i = 0; i < Textures.Count; i++ )
-                    {
-                        Textures[ i ].Id = textureDatabase.Textures[ i ].Id;
-                        Textures[ i ].Name = textureDatabase.Textures[ i ].Name;
-                    }
+                Textures[ i ].Id = textureDatabase.Textures[ i ].Id;
+                Textures[ i ].Name = textureDatabase.Textures[ i ].Name;
             }
         }
 
@@ -85,7 +88,7 @@ namespace MikuMikuLibrary.Textures
                 Endianness = Endianness.Big;
             }
 
-            // Or reverse
+            // Or vice versa
             else if ( BinaryFormatUtilities.IsModern( Format ) &&
                       filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
@@ -97,12 +100,15 @@ namespace MikuMikuLibrary.Textures
             if ( filePath.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
             {
                 var textureDatabase = new TextureDatabase();
+
                 foreach ( var texture in Textures )
+                {
                     textureDatabase.Textures.Add( new TextureInfo
                     {
                         Id = texture.Id,
                         Name = texture.Name ?? Guid.NewGuid().ToString()
                     } );
+                }
 
                 textureDatabase.Format = Format;
                 textureDatabase.Endianness = Endianness;

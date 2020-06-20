@@ -13,14 +13,13 @@ namespace MikuMikuModel.Resources
         private static readonly string sResourcesDirectory =
             Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Resources" );
 
-        public static string GetPath( string relativePath )
-        {
-            return Path.GetFullPath( Path.Combine( sResourcesDirectory, relativePath ) );
-        }
+        public static string GetPath( string relativePath ) => 
+            Path.GetFullPath( Path.Combine( sResourcesDirectory, relativePath ) );
 
         public static string GetPathIfExist( string relativePath )
         {
             string fullPath = GetPath( relativePath );
+
             if ( !File.Exists( fullPath ) )
                 throw new FileNotFoundException( "Requested resource path does not exist", fullPath );
 
@@ -43,10 +42,11 @@ namespace MikuMikuModel.Resources
             return ( T ) obj;
         }
 
-        public static Bitmap LoadBitmap( string relativePath )
-        {
-            return Load( relativePath, path => new Bitmap( path ) );
-        }
+        public static Bitmap LoadBitmap( string relativePath ) => 
+            Load( relativePath, path => new Bitmap( path ) );
+
+        public static Icon LoadIcon( string relativePath ) =>
+            Load( relativePath, path => new Icon( path ) );
 
         static ResourceStore()
         {

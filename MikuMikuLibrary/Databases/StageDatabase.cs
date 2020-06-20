@@ -81,28 +81,36 @@ namespace MikuMikuLibrary.Databases
         {
             Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Auth3dName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+
             for ( int i = 0; i < 7; i++ )
                 Objects[ i ].Read( reader );
+
             LensFlareScaleX = reader.ReadInt32();
             LensFlareScaleY = reader.ReadInt32();
             LensFlareScaleZ = reader.ReadInt32();
             Field00 = reader.ReadSingle();
             Field01 = reader.ReadInt32();
             RenderTextureId = reader.ReadUInt32();
+
             if ( format > BinaryFormat.DT )
                 MovieTextureId = reader.ReadUInt32();
+
             CollisionFilePath = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Field04 = reader.ReadInt32();
             Field05 = reader.ReadInt32();
+
             reader.ReadOffset( () =>
             {
                 Field06 = reader.ReadInt32();
                 Field07 = reader.ReadInt32();
                 Field08 = reader.ReadInt32();
             } );
+
             Field09 = reader.ReadInt32();
+
             if ( format == BinaryFormat.FT )
                 Field10 = reader.ReadInt32();
+
             RingRectangleX = reader.ReadSingle();
             RingRectangleY = reader.ReadSingle();
             RingRectangleWidth = reader.ReadSingle();
@@ -115,29 +123,36 @@ namespace MikuMikuLibrary.Databases
         {
             writer.AddStringToStringTable( Name );
             writer.AddStringToStringTable( Auth3dName );
+
             foreach ( var objectInfo in Objects )
                 objectInfo.Write( writer );
+
             writer.Write( LensFlareScaleX );
             writer.Write( LensFlareScaleY );
             writer.Write( LensFlareScaleZ );
             writer.Write( Field00 );
             writer.Write( Field01 );
             writer.Write( RenderTextureId );
+
             if ( format > BinaryFormat.DT )
                 writer.Write( MovieTextureId );
+
             writer.AddStringToStringTable( CollisionFilePath );
             writer.Write( Field04 );
             writer.Write( Field05 );
-            writer.ScheduleWriteOffsetIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentMode.Left,
-                () =>
-                {
-                    writer.Write( Field06 );
-                    writer.Write( Field07 );
-                    writer.Write( Field08 );
-                } );
+
+            writer.ScheduleWriteOffsetIf( !( Field06 == 0 && Field07 == 0 && Field08 == 0 ), 4, AlignmentMode.Left, () =>
+            {
+                writer.Write( Field06 );
+                writer.Write( Field07 );
+                writer.Write( Field08 );
+            } );
+
             writer.Write( Field09 );
+
             if ( format == BinaryFormat.FT )
                 writer.Write( Field10 );
+
             writer.Write( RingRectangleX );
             writer.Write( RingRectangleY );
             writer.Write( RingRectangleWidth );
@@ -156,6 +171,7 @@ namespace MikuMikuLibrary.Databases
             Field16 = reader.ReadInt32();
             Field17 = reader.ReadInt32();
             Field18 = reader.ReadInt32();
+
             for ( int i = 0; i < 16; i++ )
                 StageEffects[ i ] = ( StageEffect ) reader.ReadInt32();
         }
@@ -170,6 +186,7 @@ namespace MikuMikuLibrary.Databases
             writer.Write( Field16 );
             writer.Write( Field17 );
             writer.Write( Field18 );
+
             foreach ( var stageEffect in StageEffects )
                 writer.Write( ( int ) stageEffect );
         }
@@ -181,6 +198,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadOffset( () =>
             {
                 Auth3dIds.Capacity = count;
+
                 for ( int i = 0; i < count; i++ )
                     Auth3dIds.Add( reader.ReadUInt32() );
 
@@ -226,6 +244,7 @@ namespace MikuMikuLibrary.Databases
             {
                 Format = ( BinaryFormat ) reader.ReadByte();
             }
+
             else
             {
                 long size = ( stageEffectsOffset - stagesOffset ) / count;
@@ -238,6 +257,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( stagesOffset, () =>
             {
                 Stages.Capacity = count;
+
                 for ( int i = 0; i < count; i++ )
                 {
                     var stage = new Stage();
@@ -257,6 +277,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( auth3dIdCountsOffset, () =>
             {
                 var auth3dIdCounts = reader.ReadInt32s( count );
+
                 reader.ReadAtOffset( auth3dIdsOffset, () =>
                 {
                     for ( int i = 0; i < count; i++ )

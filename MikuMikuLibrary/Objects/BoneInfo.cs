@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace MikuMikuLibrary.Objects
 {
@@ -26,55 +27,35 @@ namespace MikuMikuLibrary.Objects
         public float Weight1, Weight2, Weight3, Weight4;
         public int Index1, Index2, Index3, Index4;
 
-        public bool IsValid => Weight1 + Weight2 + Weight3 + Weight4 == 1.0f;
-
         public void Validate()
         {
-            if ( Weight1 != 0 )
-            {
-                if ( Weight2 != 0 )
-                {
-                    if ( Weight3 != 0 )
-                    {
-                        if ( Weight4 == 0 )
-                        {
-                            Index4 = -1;
-                            Weight4 = 0;
-                        }
-                    }
-                    else
-                    {
-                        Index3 = -1;
-                        Index4 = -1;
-                        Weight3 = 0;
-                        Weight4 = 0;
-                    }
-                }
-                else
-                {
-                    Index2 = -1;
-                    Index3 = -1;
-                    Index4 = -1;
-                    Weight2 = 0;
-                    Weight3 = 0;
-                    Weight4 = 0;
-                }
+            var copy = this;
 
-                float sum = Weight1 + Weight2 + Weight3 + Weight4;
-                if ( sum != 1f )
-                    Weight1 = Weight1 + ( 1f - sum );
-            }
-            else
-            {
-                Index1 = -1;
-                Index2 = -1;
-                Index3 = -1;
-                Index4 = -1;
-                Weight1 = 0;
-                Weight2 = 0;
-                Weight3 = 0;
-                Weight4 = 0;
-            }
+            Index1 = -1;
+            Weight1 = 0;
+            Index2 = -1;
+            Weight2 = 0;
+            Index3 = -1;
+            Weight3 = 0;
+            Index4 = -1;
+            Weight4 = 0;
+
+            if ( copy.Weight1 > 0 )
+                AddWeight( copy.Index1, copy.Weight1 );
+
+            if ( copy.Weight2 > 0 )
+                AddWeight( copy.Index2, copy.Weight2 );
+
+            if ( copy.Weight3 > 0 )
+                AddWeight( copy.Index3, copy.Weight3 );
+
+            if ( copy.Weight4 > 0 )
+                AddWeight( copy.Index4, copy.Weight4 );
+
+            Weight4 = 1.0f - Weight1 - Weight2 - Weight3;
+
+            if ( Math.Abs( Weight4 - 1.0f ) < 0.00001f || Math.Abs( Weight4 ) < 0.00001f )
+                Weight4 = 0.0f;
         }
 
         public void AddWeight( int index, float weight )

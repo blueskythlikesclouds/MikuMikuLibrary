@@ -39,6 +39,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public void RegisterUniforms()
         {
             GL.GetProgram( Id, GetProgramParameterName.ActiveUniforms, out int count );
+
             for ( int i = 0; i < count; i++ )
             {
                 GL.GetActiveUniform( Id, i, 32, out _, out _, out _, out string name );
@@ -47,44 +48,31 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             }
         }
 
-        public void SetUniform( string name, Matrix4 value )
-        {
+        public void SetUniform( string name, Matrix4 value ) => 
             GL.UniformMatrix4( GetUniformLocation( name ), false, ref value );
-        }
 
-        public void SetUniform( string name, bool value )
-        {
+        public void SetUniform( string name, bool value ) => 
             GL.Uniform1( GetUniformLocation( name ), value ? 1 : 0 );
-        }
 
-        public void SetUniform( string name, Vector4 value )
-        {
+        public void SetUniform( string name, Vector4 value ) => 
             GL.Uniform4( GetUniformLocation( name ), value );
-        }
 
-        public void SetUniform( string name, Color4 value )
-        {
+        public void SetUniform( string name, Color4 value ) => 
             GL.Uniform4( GetUniformLocation( name ), value );
-        }
 
-        public void SetUniform( string name, Vector3 value )
-        {
+        public void SetUniform( string name, Vector3 value ) => 
             GL.Uniform3( GetUniformLocation( name ), value );
-        }
 
-        public void SetUniform( string name, float value )
-        {
+        public void SetUniform( string name, float value ) => 
             GL.Uniform1( GetUniformLocation( name ), value );
-        }
 
-        public void SetUniform( string name, int value )
-        {
+        public void SetUniform( string name, int value ) => 
             GL.Uniform1( GetUniformLocation( name ), value );
-        }
 
         public int GetUniformLocation( string name )
         {
-            if ( mUniforms.TryGetValue( name, out int location ) ) return location;
+            if ( mUniforms.TryGetValue( name, out int location ) ) 
+                return location;
 
             Debug.WriteLine( $"GetUniformLocation: {name}" );
 
@@ -114,14 +102,17 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 return null;
 
             int fragmentShader = CreateShader( ShaderType.FragmentShader, File.ReadAllText( fragmentShaderFilePath ) );
+
             if ( fragmentShader == -1 )
                 return null;
 
             int vertexShader = CreateShader( ShaderType.VertexShader, File.ReadAllText( vertexShaderFilePath ) );
+
             if ( vertexShader == -1 )
                 return null;
 
             int shaderProgramId = GL.CreateProgram();
+
             GL.AttachShader( shaderProgramId, fragmentShader );
             GL.AttachShader( shaderProgramId, vertexShader );
             GL.LinkProgram( shaderProgramId );
@@ -130,7 +121,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             GL.DeleteShader( vertexShader );
 
             shaderProgram = new GLShaderProgram( shaderName, shaderProgramId );
+
             sShaderPrograms.Add( shaderName, shaderProgram );
+
             return shaderProgram;
         }
 
@@ -141,15 +134,15 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             GL.CompileShader( shader );
 
             GL.GetShader( shader, ShaderParameter.CompileStatus, out int compileStatus );
-            if ( compileStatus == 0 )
-            {
-                Debug.WriteLine(
-                    $"Shader compilation failed for {shaderType}, error message: {GL.GetShaderInfoLog( shader )}" );
-                GL.DeleteShader( shader );
-                return -1;
-            }
 
-            return shader;
+            if ( compileStatus != 0 ) 
+                return shader;
+
+            Debug.WriteLine( $"Shader compilation failed for {shaderType}, error message: {GL.GetShaderInfoLog( shader )}" );
+            GL.DeleteShader( shader );
+
+            return -1;
+
         }
 
         ~GLShaderProgram()

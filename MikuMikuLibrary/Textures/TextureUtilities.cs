@@ -10,67 +10,6 @@ namespace MikuMikuLibrary.Textures
 {
     public class TextureUtilities
     {
-        public static void RenameTexture( Texture texture, TextureSet textures, TextureDatabase textureDatabase = null )
-        {
-            bool empty = string.IsNullOrEmpty( texture.Name );
-
-            if ( textureDatabase == null )
-            {
-                if ( empty )
-                    texture.Name = string.Format( "Texture_{0}", textures.Textures.IndexOf( texture ) );
-            }
-            else
-            {
-                var info = textureDatabase.Textures.FirstOrDefault( x => x.Id == texture.Id );
-                if ( info != null )
-                    texture.Name = info.Name;
-                else if ( empty )
-                    texture.Name = string.Format( "Texture_{0}", textures.Textures.IndexOf( texture ) );
-            }
-        }
-
-        public static void RenameTextures( TextureSet textures, TextureDatabase textureDatabase = null )
-        {
-            foreach ( var texture in textures.Textures )
-                RenameTexture( texture, textures, textureDatabase );
-        }
-
-        public static string GetFileName( Texture texture )
-        {
-            if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
-                return texture.Name + ".png";
-            return texture.Name + ".dds";
-        }
-
-        public static void SaveTextures( TextureSet textures, string outputDirectory )
-        {
-            Directory.CreateDirectory( outputDirectory );
-
-            foreach ( var texture in textures.Textures )
-                if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
-                    TextureDecoder.DecodeToPNG( texture, Path.Combine( outputDirectory, texture.Name + ".png" ) );
-                else
-                    TextureDecoder.DecodeToDDS( texture, Path.Combine( outputDirectory, texture.Name + ".dds" ) );
-        }
-
-        public static void ReAssignTextureIDs( ObjectSet model, List<uint> newTextureIds )
-        {
-            var dictionary = new Dictionary<uint, uint>( model.TextureIds.Count );
-            for ( int i = 0; i < model.TextureIds.Count; i++ )
-            {
-                dictionary.Add( model.TextureIds[ i ], newTextureIds[ i ] );
-                model.TextureIds[ i ] = newTextureIds[ i ];
-                model.TextureSet.Textures[ i ].Id = newTextureIds[ i ];
-            }
-
-            foreach ( var materialTexture in model.Objects.SelectMany( x => x.Materials )
-                .SelectMany( x => x.MaterialTextures ) )
-                if ( dictionary.TryGetValue( materialTexture.TextureId, out uint id ) )
-                    materialTexture.TextureId = id;
-                else
-                    materialTexture.TextureId = 0xFFFFFFFF;
-        }
-
         public static DDSPixelFormatFourCC GetDDSPixelFormat( TextureFormat textureFormat )
         {
             switch ( textureFormat )

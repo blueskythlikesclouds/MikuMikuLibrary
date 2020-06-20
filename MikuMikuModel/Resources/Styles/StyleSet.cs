@@ -13,7 +13,6 @@ namespace MikuMikuModel.Resources.Styles
         private static Style sCurrentStyle;
 
         private static readonly string sStylesDirectory = ResourceStore.GetPath( "Styles" );
-        private static readonly string sCurrentStyleFilePath = ResourceStore.GetPath( "Style.txt" );
 
         public static IReadOnlyList<Style> Styles => sStyles;
 
@@ -27,10 +26,8 @@ namespace MikuMikuModel.Resources.Styles
 
                 if ( !sStyles.Contains( value ) && value != null )
                 {
-                    using ( var stream = File.CreateText( Path.Combine( sStylesDirectory, value.Name + ".xml" ) ) )
-                    {
+                    using ( var stream = File.CreateText( Path.Combine( sStylesDirectory, value.Name + ".xml" ) ) ) 
                         sStyleSerializer.Serialize( stream, value );
-                    }
 
                     sStyles.Add( value );
                 }
@@ -38,7 +35,7 @@ namespace MikuMikuModel.Resources.Styles
                 sCurrentStyle = value;
                 StyleChanged?.Invoke( null, new StyleChangedEventArgs( value ) );
 
-                File.WriteAllText( sCurrentStyleFilePath, sCurrentStyle?.Name );
+                ValueCache.Set( "CurrentStyle", sCurrentStyle?.Name );
             }
         }
 
@@ -47,15 +44,13 @@ namespace MikuMikuModel.Resources.Styles
         static StyleSet()
         {
             foreach ( string filePath in Directory.GetFiles( sStylesDirectory, "*.xml" ) )
-                using ( var stream = File.OpenText( filePath ) )
-                {
+            {
+                using ( var stream = File.OpenText( filePath ) ) 
                     sStyles.Add( ( Style ) sStyleSerializer.Deserialize( stream ) );
-                }
+            }
 
-            if ( !File.Exists( sCurrentStyleFilePath ) )
-                return;
+            string currentStyleName = ValueCache.Get<string>( "CurrentStyle" );
 
-            string currentStyleName = File.ReadAllText( sCurrentStyleFilePath );
             sCurrentStyle = !string.IsNullOrEmpty( currentStyleName )
                 ? sStyles.FirstOrDefault( x => x.Name.Equals( currentStyleName ) )
                 : null;

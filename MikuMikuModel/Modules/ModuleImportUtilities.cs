@@ -8,18 +8,14 @@ namespace MikuMikuModel.Modules
 {
     public static class ModuleImportUtilities
     {
-        public static IFormatModule GetModule( IEnumerable<IFormatModule> modulesToMatch, string fileName,
-            Func<Stream> streamGetter )
+        public static IFormatModule GetModule( IEnumerable<IFormatModule> modulesToMatch, string fileName, Func<Stream> streamGetter )
         {
             fileName = Path.GetFileName( fileName );
             string extension = Path.GetExtension( fileName ).Trim( '.' );
 
-            var moduleList = modulesToMatch
-                .Where( x =>
-                    x.Flags.HasFlag( FormatModuleFlags.Import ) &&
-                    ( x.Extensions.Contains( "*" ) ||
-                      x.Extensions.Contains( extension, StringComparer.OrdinalIgnoreCase ) ) )
-                .ToList();
+            var moduleList = modulesToMatch.Where( x =>
+                x.Flags.HasFlag( FormatModuleFlags.Import ) &&
+                ( x.Extensions.Contains( "*" ) || x.Extensions.Contains( extension, StringComparer.OrdinalIgnoreCase ) ) ).ToList();
 
             if ( moduleList.Count > 1 )
                 moduleList.RemoveAll( x => x.Extensions.Contains( "*" ) || !x.Match( fileName ) );
@@ -28,20 +24,17 @@ namespace MikuMikuModel.Modules
                 return moduleList.Count == 0 ? null : moduleList[ 0 ];
 
             var buffer = new byte[ 16 ];
-            using ( var stream = streamGetter() )
-            {
+
+            using ( var stream = streamGetter() ) 
                 stream.Read( buffer, 0, 16 );
-            }
 
             moduleList.RemoveAll( x => !x.Match( buffer ) );
             return moduleList.Count != 1 ? null : moduleList[ 0 ];
         }
 
-        public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string fileName,
-            Func<Stream> streamGetter )
+        public static IFormatModule GetModule( IEnumerable<Type> modelTypesToMatch, string fileName, Func<Stream> streamGetter )
         {
-            return GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName,
-                streamGetter );
+            return GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName, streamGetter );
         }
 
         public static IFormatModule GetModule( IEnumerable<IFormatModule> modulesToMatch, string filePath )

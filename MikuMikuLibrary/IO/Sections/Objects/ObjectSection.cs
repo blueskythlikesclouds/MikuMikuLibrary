@@ -19,15 +19,11 @@ namespace MikuMikuLibrary.IO.Sections.Objects
 
         [SubSection] public VertexDataSection VertexData { get; set; }
 
-        protected override void Read( Object data, EndianBinaryReader reader, long length )
-        {
+        protected override void Read( Object data, EndianBinaryReader reader, long length ) => 
             data.Read( reader, this );
-        }
 
-        protected override void Write( Object data, EndianBinaryWriter writer )
-        {
+        protected override void Write( Object data, EndianBinaryWriter writer ) => 
             data.Write( writer, this );
-        }
 
         public ObjectSection( SectionMode mode, Object data = null ) : base( mode, data )
         {

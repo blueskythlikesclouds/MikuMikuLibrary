@@ -15,10 +15,12 @@ namespace MikuMikuModel.Nodes
     public class NodeAddEventArgs : EventArgs
     {
         public INode AddedNode { get; }
+        public int Index { get; }
 
-        public NodeAddEventArgs( INode addedNode )
+        public NodeAddEventArgs( INode addedNode, int index )
         {
             AddedNode = addedNode;
+            Index = index;
         }
     }
 

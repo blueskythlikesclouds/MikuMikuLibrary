@@ -31,9 +31,10 @@ namespace MikuMikuLibrary.Sprites
             reader.ReadAtOffsetIf( section == null, texturesOffset,
                 () => { TextureSet.Load( reader.BaseStream, true ); } );
 
-            Sprites.Capacity = spriteCount;
             reader.ReadAtOffset( spritesOffset, () =>
             {
+                Sprites.Capacity = spriteCount;
+
                 for ( int i = 0; i < spriteCount; i++ )
                 {
                     var sprite = new Sprite();
@@ -100,6 +101,7 @@ namespace MikuMikuLibrary.Sprites
                 return;
 
             string spriteDatabaseFilePath = Path.ChangeExtension( filePath, "spi" );
+
             if ( !File.Exists( spriteDatabaseFilePath ) )
                 return;
 

@@ -6,14 +6,14 @@ in vec3 fPosition;
 in vec3 fNormal;
 in vec3 fTangent;
 in vec3 fBitangent;
+in vec2 fTexCoord0;
 in vec2 fTexCoord1;
-in vec2 fTexCoord2;
-in vec4 fColor;
+in vec4 fColor0;
 
 uniform bool uHasNormal;
+uniform bool uHasTexCoord0;
 uniform bool uHasTexCoord1;
-uniform bool uHasTexCoord2;
-uniform bool uHasColor;
+uniform bool uHasColor0;
 uniform bool uHasTangent;
 
 uniform bool uHasDiffuseTexture;
@@ -21,20 +21,18 @@ uniform bool uHasAmbientTexture;
 uniform bool uHasNormalTexture;
 uniform bool uHasSpecularTexture;
 uniform bool uHasReflectionTexture;
-uniform bool uHasTangentTexture;
 
 uniform sampler2D uDiffuseTexture;
 uniform sampler2D uAmbientTexture;
 uniform sampler2D uNormalTexture;
 uniform sampler2D uSpecularTexture;
 uniform samplerCube uReflectionTexture;
-uniform sampler2D uTangentTexture;
 
 uniform vec4 uDiffuseColor;
+uniform vec4 uAmbientColor;
 uniform vec4 uSpecularColor;
-uniform float uSpecularPower;
-
-uniform bool uUseAniso;
+uniform float uShininess;
+uniform int uAnisoDirection;
 
 uniform vec3 uViewPosition;
 uniform vec3 uLightPosition;
@@ -51,64 +49,58 @@ void main()
 
     vec4 diffuseColor = uDiffuseColor;
     vec4 specularColor = uSpecularColor;
+    vec3 ambientColor = uAmbientColor.rgb;
 
-    vec3 normal = fNormal;
-    mat3 tbn = transpose( mat3( fTangent, fBitangent, fNormal ) );
+    if ( uHasDiffuseTexture && uHasTexCoord0 )
+        diffuseColor *= pow( texture( uDiffuseTexture, fTexCoord0 ), GAMMA );
 
-    if ( uHasDiffuseTexture && uHasTexCoord1 )
-        diffuseColor *= pow( texture( uDiffuseTexture, fTexCoord1 ), GAMMA );
-
-    if ( uHasColor )
-        diffuseColor *= fColor;
+    if ( uHasColor0 )
+        diffuseColor *= fColor0;
 
     if ( diffuseColor.a < ALPHA_THRESHOLD )
         discard;
 
+    if ( uHasSpecularTexture && uHasTexCoord0 )
+        specularColor *= texture( uSpecularTexture, fTexCoord0 );
+
+    if ( uHasAmbientTexture && uHasTexCoord1 )
+        ambientColor *= texture( uAmbientTexture, fTexCoord1 ).rgb;
+
+    vec3 directLighting = vec3( 0 );
+
+    vec3 normal = normalize( fNormal );
     if ( uHasNormal )
     {
-        if ( uHasTangent && uHasNormalTexture && uHasTexCoord1 )
+        if ( uHasTangent && uHasNormalTexture && uHasTexCoord0 )
         {
-            normal = texture( uNormalTexture, fTexCoord1 ).xyz * 2 - 1;
-            normal.z = sqrt( 1 - normal.x * normal.x - normal.y * normal.y );
-            normal *= tbn;
-            normal = normalize( normal );
+            mat3 tangentToWorldMatrix = transpose( mat3( normalize( fTangent ), normalize( fBitangent ), normalize( fNormal ) ) );
+            
+            normal = texture( uNormalTexture, fTexCoord0 ).xyz * 2 - 1;
+            normal.z = sqrt( 1 - normal.x * normal.y - normal.y * normal.y );
+            normal = normalize( normal * tangentToWorldMatrix );
         }
 
-        diffuseColor.xyz *= mix( 0.25, 1, dot( normal, lightDirection ) );
-    }
-
-    if ( uHasNormal )
-    {
-        if ( uHasTangentTexture && uHasTexCoord1 )
-            specularColor *= texture( uTangentTexture, fTexCoord1 );
-
-        else if ( uHasSpecularTexture && uHasTexCoord1 )
-            specularColor *= texture( uSpecularTexture, fTexCoord1 );
-
-        if ( dot( normal, lightDirection ) <= 0 )
+        directLighting += vec3( max( 0, dot( normal, lightDirection ) ) ) * diffuseColor.rgb;
+        
+        if ( uAnisoDirection != 0 && uHasTangent && uHasTexCoord0 )
         {
-            specularColor = vec4( 0 );
-        }
-        else if ( uUseAniso && uHasTangent && uHasTexCoord1 )
-        {
-            float dotTH = dot( fBitangent, halfwayDirection );
+            float dotTH = dot( uAnisoDirection == 2 ? normalize( fBitangent ) : normalize( fTangent ), halfwayDirection );
             float sinTH = sqrt( 1 - dotTH * dotTH );
             float dirAtten = smoothstep( -1, 0, dotTH );
-            specularColor.xyz *= dirAtten * pow( sinTH, uSpecularPower );
+            directLighting += ( dirAtten * pow( sinTH, uShininess ) ) * specularColor.rgb;
         }
         else
         {
-            specularColor.xyz *= pow( dot( normal, halfwayDirection ), uSpecularPower );
+            directLighting += pow( max( 0, dot( normal, halfwayDirection ) ), uShininess ) * specularColor.rgb;
         }
     }
 
-    vec4 color = vec4( ( diffuseColor + specularColor ).xyz, diffuseColor.w );
+    vec3 indirectLighting = ambientColor;
 
-    if ( uHasReflectionTexture )
-        color.xyz += pow( texture( uReflectionTexture, reflect( -viewDirection, normal ) ), GAMMA ).xyz * specularColor.w * 0.05;
+    if ( uHasNormal && uHasReflectionTexture )
+        indirectLighting += texture( uReflectionTexture, reflect( -viewDirection, normal ) ).rgb * specularColor.w;
 
-    if ( uHasAmbientTexture && uHasTexCoord2 )
-        color *= pow( texture( uAmbientTexture, fTexCoord2 ), GAMMA );
+    indirectLighting *= diffuseColor.rgb;
 
-    oColor = pow( color, INVERSE_GAMMA );
+    oColor = pow( vec4( directLighting + indirectLighting, diffuseColor.a ), INVERSE_GAMMA );
 }

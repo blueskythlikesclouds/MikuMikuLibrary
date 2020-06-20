@@ -20,9 +20,17 @@ namespace MikuMikuModel.Nodes.Motions
 
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/Motion.png" );
 
+        [Category( "General" )]
+        [DisplayName( "Frame count" )]
+        public ushort FrameCount
+        {
+            get => GetProperty<ushort>();
+            set => SetProperty( value );
+        }
+
         protected override void Initialize()
         {
-            RegisterReplaceHandler<Motion>( filePath =>
+            AddReplaceHandler<Motion>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 var motion = new Motion();
@@ -31,14 +39,14 @@ namespace MikuMikuModel.Nodes.Motions
                 }
                 return motion;
             } );
-            RegisterExportHandler<Motion>( filePath =>
+            AddExportHandler<Motion>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 {
                     Data.Save( filePath, configuration?.BoneDatabase?.Skeletons?[ 0 ] );
                 }
             } );
-            RegisterExportHandler<MotionSet>( filePath =>
+            AddExportHandler<MotionSet>( filePath =>
             {
                 using ( var motionSet = new MotionSet() )
                 {
@@ -46,12 +54,11 @@ namespace MikuMikuModel.Nodes.Motions
 
                     var configuration = ConfigurationList.Instance.CurrentConfiguration;
                     {
-                        motionSet.Save( filePath,
-                            configuration?.BoneDatabase?.Skeletons?[ 0 ], configuration?.MotionDatabase );
+                        motionSet.Save( filePath, configuration?.BoneDatabase?.Skeletons?[ 0 ], configuration?.MotionDatabase );
                     }
                 }
             } );
-            RegisterCustomHandler( "Copy bone names to clipboard",
+            AddCustomHandler( "Copy bone names to clipboard",
                 () => Clipboard.SetText( string.Join( "\n", Data.BoneInfos.Select( x => x.Name ) ) ) );
         }
 
@@ -71,6 +78,7 @@ namespace MikuMikuModel.Nodes.Motions
                 {
                     Data.Bind( skeleton, motionDatabase );
                 }
+
                 catch ( ArgumentNullException )
                 {
                 }
@@ -80,6 +88,7 @@ namespace MikuMikuModel.Nodes.Motions
             {
                 Nodes.Add( new MotionBindingNode( "Binding", Data.Bind() ) );
             }
+
             else
             {
                 Nodes.Add( new ListNode<KeySet>( "Key sets", Data.KeySets ) );
@@ -104,6 +113,7 @@ namespace MikuMikuModel.Nodes.Motions
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
+        [Category( "General" )]
         [TypeConverter( typeof( IdTypeConverter ) )]
         public uint Id
         {

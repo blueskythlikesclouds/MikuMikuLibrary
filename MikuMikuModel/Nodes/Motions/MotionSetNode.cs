@@ -22,7 +22,7 @@ namespace MikuMikuModel.Nodes.Motions
 
         protected override void Initialize()
         {
-            RegisterImportHandler<Motion>( filePath =>
+            AddImportHandler<Motion>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 var motion = new Motion();
@@ -31,7 +31,7 @@ namespace MikuMikuModel.Nodes.Motions
                 }
                 Data.Motions.Add( motion );
             } );
-            RegisterImportHandler<MotionSet>( filePath =>
+            AddImportHandler<MotionSet>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 var motionSet = new MotionSet();
@@ -41,7 +41,7 @@ namespace MikuMikuModel.Nodes.Motions
                 }
                 Data.Motions.AddRange( motionSet.Motions );
             } );
-            RegisterReplaceHandler<MotionSet>( filePath =>
+            AddReplaceHandler<MotionSet>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 var motionSet = new MotionSet();
@@ -51,7 +51,7 @@ namespace MikuMikuModel.Nodes.Motions
                 }
                 return motionSet;
             } );
-            RegisterReplaceHandler<Motion>( filePath =>
+            AddReplaceHandler<Motion>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 var motion = new Motion();
@@ -62,14 +62,14 @@ namespace MikuMikuModel.Nodes.Motions
                 }
                 return motionSet;
             } );
-            RegisterExportHandler<MotionSet>( filePath =>
+            AddExportHandler<MotionSet>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 {
                     Data.Save( filePath, configuration?.BoneDatabase?.Skeletons?[ 0 ], configuration?.MotionDatabase );
                 }
             } );
-            RegisterCustomHandler( "Copy motion database info to clipboard", () =>
+            AddCustomHandler( "Copy motion database info to clipboard", () =>
             {
                 uint id = 0xFFFFFFFF;
 
@@ -84,8 +84,8 @@ namespace MikuMikuModel.Nodes.Motions
                         bool result = uint.TryParse( inputDialog.Input, out id );
 
                         if ( !result || id == 0xFFFFFFFF )
-                            MessageBox.Show( "Please enter a correct id number.", Program.Name,
-                                MessageBoxButtons.OK, MessageBoxIcon.Error );
+                            MessageBox.Show( "Please enter a correct id number.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
+
                         else
                             break;
                     }
@@ -104,16 +104,17 @@ namespace MikuMikuModel.Nodes.Motions
                     motionSetInfo.Name = motionSetInfo.Name.Remove( 0, 4 );
 
                 foreach ( var motion in Data.Motions )
+                {
                     motionSetInfo.Motions.Add( new MotionInfo
                     {
                         Name = motion.Name,
                         Id = id++
                     } );
+                }
 
                 using ( var stringWriter = new StringWriter() )
-                using ( var xmlWriter =
-                    XmlWriter.Create( stringWriter,
-                        new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true } ) )
+                using ( var xmlWriter = XmlWriter.Create( stringWriter, 
+                    new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true } ) )
                 {
                     sMotionSetInfoSerializer.Serialize( xmlWriter, motionSetInfo,
                         new XmlSerializerNamespaces( new[] { XmlQualifiedName.Empty } ) );
@@ -125,29 +126,30 @@ namespace MikuMikuModel.Nodes.Motions
             base.Initialize();
         }
 
-        protected override void Load( MotionSet data, Stream source )
-        {
-            data.Load( source,
-                SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ],
-                SourceConfiguration?.MotionDatabase );
-        }
+        protected override void Load( MotionSet data, Stream source ) => 
+            data.Load( source, SourceConfiguration?.BoneDatabase?.Skeletons?[ 0 ], SourceConfiguration?.MotionDatabase );
 
         protected override void PopulateCore()
         {
             var motionDatabase = SourceConfiguration?.MotionDatabase;
+
             if ( motionDatabase != null )
             {
                 string motionSetName = Path.GetFileNameWithoutExtension( Name );
+
                 if ( motionSetName.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
                     motionSetName = motionSetName.Substring( 4 );
 
                 var motionSetInfo = motionDatabase.GetMotionSetInfo( motionSetName );
+
                 if ( motionSetInfo != null && Data.Motions.Count == motionSetInfo.Motions.Count )
+                {
                     for ( int i = 0; i < motionSetInfo.Motions.Count; i++ )
                     {
                         Data.Motions[ i ].Name = motionSetInfo.Motions[ i ].Name;
                         Data.Motions[ i ].Id = motionSetInfo.Motions[ i ].Id;
                     }
+                }
             }
 
             Nodes.Add( new ListNode<Motion>( "Motions", Data.Motions, x => x.Name ) );

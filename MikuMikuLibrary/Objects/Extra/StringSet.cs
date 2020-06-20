@@ -5,7 +5,7 @@ using MikuMikuLibrary.Objects.Extra.Blocks;
 
 namespace MikuMikuLibrary.Objects.Extra
 {
-    internal class StringSet
+    public class StringSet
     {
         private readonly List<string> mStrings;
 
@@ -42,6 +42,7 @@ namespace MikuMikuLibrary.Objects.Extra
         public StringSet( Skin skin ) : this()
         {
             foreach ( var block in skin.Blocks )
+            {
                 switch ( block )
                 {
                     case ConstraintBlock constraintBlock:
@@ -78,6 +79,7 @@ namespace MikuMikuLibrary.Objects.Extra
                         break;
                     }
                 }
+            }
 
             foreach ( var node in skin.Bones.Where( node => node.IsEx ) )
                 AddString( node.Name );

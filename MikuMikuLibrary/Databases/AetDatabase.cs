@@ -44,6 +44,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( aetSetsOffset, () =>
             {
                 AetSets.Capacity = aetSetCount;
+
                 for ( int i = 0; i < aetSetCount; i++ )
                 {
                     uint id = reader.ReadUInt32();
@@ -106,6 +107,7 @@ namespace MikuMikuLibrary.Databases
                 for ( int i = 0; i < AetSets.Count; i++ )
                 {
                     var aetSetInfo = AetSets[ i ];
+
                     foreach ( var aetInfo in aetSetInfo.Aets )
                     {
                         writer.Write( aetInfo.Id );

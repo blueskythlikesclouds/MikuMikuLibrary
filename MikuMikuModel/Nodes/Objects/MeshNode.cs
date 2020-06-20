@@ -28,6 +28,7 @@ namespace MikuMikuModel.Nodes.Objects
             }
         }
 
+        [Category( "General" )]
         [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
         {
@@ -35,49 +36,89 @@ namespace MikuMikuModel.Nodes.Objects
             set => SetProperty( value );
         }
 
-        public Vector3[] Vertices
+        [Category( "General" )]
+        public Vector3[] Positions
         {
             get => GetProperty<Vector3[]>();
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
         public Vector3[] Normals
         {
             get => GetProperty<Vector3[]>();
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
         public Vector4[] Tangents
         {
             get => GetProperty<Vector4[]>();
             set => SetProperty( value );
         }
 
-        [DisplayName( "UV channel 1" )]
-        public Vector2[] UVChannel1
+        [Category( "General" )]
+        [DisplayName( "Texture coordinates 1" )]
+        public Vector2[] TexCoords0
         {
             get => GetProperty<Vector2[]>();
             set => SetProperty( value );
         }
 
-        [DisplayName( "UV channel 2" )]
-        public Vector2[] UVChannel2
+        [Category( "General" )]
+        [DisplayName( "Texture coordinates 2" )]
+        public Vector2[] TexCoords1
         {
             get => GetProperty<Vector2[]>();
             set => SetProperty( value );
         }
 
-        public Color[] Colors
+        [Category( "General" )]
+        [DisplayName( "Texture coordinates 3" )]
+        public Vector2[] TexCoords2
+        {
+            get => GetProperty<Vector2[]>();
+            set => SetProperty( value );
+        }
+
+        [Category( "General" )]
+        [DisplayName( "Texture coordinates 4" )]
+        public Vector2[] TexCoords3
+        {
+            get => GetProperty<Vector2[]>();
+            set => SetProperty( value );
+        }
+
+        [Category( "General" )]
+        [DisplayName( "Colors 1" )]
+        public Color[] Colors0
         {
             get => GetProperty<Color[]>();
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
+        [DisplayName( "Colors 2" )]
+        public Color[] Colors1
+        {
+            get => GetProperty<Color[]>();
+            set => SetProperty( value );
+        }
+
+        [Category( "General" )]
         [DisplayName( "Bone weights" )]
         public BoneWeight[] BoneWeights
         {
             get => GetProperty<BoneWeight[]>();
             set => SetProperty( value );
+        }
+
+        [Category( "General" )]
+        [DisplayName( "Flags" )]
+        public MeshFlags MeshFlags
+        {
+            get => GetProperty<MeshFlags>( nameof( Mesh.Flags ) );
+            set => SetProperty( value, nameof( Mesh.Flags ) );
         }
 
         protected override void Initialize()

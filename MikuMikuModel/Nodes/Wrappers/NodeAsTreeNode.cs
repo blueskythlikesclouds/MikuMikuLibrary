@@ -54,23 +54,45 @@ namespace MikuMikuModel.Nodes.Wrappers
 
         private void OnNodeMoved( object sender, NodeMoveEventArgs args )
         {
+            var treeView = TreeView;
+            treeView?.BeginUpdate();
+
             var movedNode = Nodes[ args.PreviousIndex ];
             Nodes.RemoveAt( args.PreviousIndex );
             Nodes.Insert( args.NewIndex, movedNode );
             TreeView.SelectedNode = movedNode;
+
+            treeView?.EndUpdate();
         }
 
         private void OnNodeRemoved( object sender, NodeRemoveEventArgs args )
         {
+            var treeView = TreeView;
+            treeView?.BeginUpdate();
+
             var removedNode = Nodes.OfType<NodeAsTreeNode>()
                 .FirstOrDefault( x => x.Node == args.RemovedNode );
 
-            if ( removedNode != null ) Nodes.Remove( removedNode );
+            if ( removedNode != null )
+                Nodes.Remove( removedNode );
+
+            treeView?.EndUpdate();
         }
 
         private void OnNodeAdded( object sender, NodeAddEventArgs args )
         {
-            Nodes.Add( new NodeAsTreeNode( args.AddedNode ) { HideContextMenuStrip = HideContextMenuStrip } );
+            var treeView = TreeView;
+            treeView?.BeginUpdate();
+
+            var node = new NodeAsTreeNode( args.AddedNode ) { HideContextMenuStrip = HideContextMenuStrip };
+
+            if ( args.Index < Nodes.Count )
+                Nodes.Insert( args.Index, node );
+
+            else
+                Nodes.Add( node );
+
+            treeView?.EndUpdate();
         }
 
         private void OnNodeRenamed( object sender, NodeRenameEventArgs args )

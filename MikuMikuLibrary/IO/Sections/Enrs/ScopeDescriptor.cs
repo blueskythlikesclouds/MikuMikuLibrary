@@ -25,12 +25,10 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
 
                 foreach ( var fieldDescriptor in scopeDescriptor.FieldDescriptors )
                 {
-                    WritePackedValue( writer, ( int ) ( fieldDescriptor.Position - lastFieldEndPosition ),
-                        fieldDescriptor.ValueType );
+                    WritePackedValue( writer, ( int ) ( fieldDescriptor.Position - lastFieldEndPosition ), fieldDescriptor.ValueType );
                     WritePackedValue( writer, fieldDescriptor.RepeatCount );
 
-                    lastFieldEndPosition = fieldDescriptor.Position +
-                                           ( 2 << ( int ) fieldDescriptor.ValueType ) * fieldDescriptor.RepeatCount;
+                    lastFieldEndPosition = fieldDescriptor.Position + ( 2 << ( int ) fieldDescriptor.ValueType ) * fieldDescriptor.RepeatCount;
                 }
 
                 lastScopePosition = scopeDescriptor.Position;

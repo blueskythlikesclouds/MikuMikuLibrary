@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using MikuMikuLibrary.Textures;
 using OpenTK.Graphics.OpenGL;
 
@@ -7,6 +8,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
     public class GLTexture : IDisposable
     {
         private static readonly int[] sCubeMapIndices = { 0, 1, 2, 3, 5, 4 };
+
+        private readonly long mLength;
 
         public int Id { get; }
         public TextureTarget Target { get; }
@@ -25,6 +28,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         protected void Dispose( bool disposing )
         {
             GL.DeleteTexture( Id );
+            GC.RemoveMemoryPressure( mLength );
         }
 
         ~GLTexture()
@@ -35,7 +39,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public GLTexture( Texture texture )
         {
             Id = GL.GenTexture();
-            if ( texture.UsesDepth )
+            if ( texture.UsesArraySize )
             {
                 Target = TextureTarget.TextureCubeMap;
                 GL.BindTexture( TextureTarget.TextureCubeMap, Id );
@@ -51,9 +55,10 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
                 for ( int i = 0; i < sCubeMapIndices.Length; i++ )
                 for ( int j = 0; j < texture.MipMapCount; j++ )
-                    GL.CompressedTexImage2D( TextureTarget.TextureCubeMapPositiveX + sCubeMapIndices[ i ], j, format,
-                        texture[ i, j ].Width, texture[ i, j ].Height, 0, texture[ i, j ].Data.Length,
-                        texture[ i, j ].Data );
+                {
+                    GL.CompressedTexImage2D( TextureTarget.TextureCubeMapPositiveX + sCubeMapIndices[ i ], j, format, texture[ i, j ].Width,
+                        texture[ i, j ].Height, 0, texture[ i, j ].Data.Length, texture[ i, j ].Data );
+                }
             }
 
             else
@@ -64,16 +69,22 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int ) TextureWrapMode.Repeat );
                 GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int ) TextureWrapMode.Repeat );
                 GL.TexParameter( Target, TextureParameterName.TextureMagFilter, ( int ) TextureMagFilter.Linear );
-                GL.TexParameter( Target, TextureParameterName.TextureMinFilter,
-                    ( int ) TextureMinFilter.LinearMipmapLinear );
+                GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.LinearMipmapLinear );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
                 var format = GetGLInternalFormat( texture.Format );
+
                 for ( int i = 0; i < texture.MipMapCount; i++ )
-                    GL.CompressedTexImage2D(
-                        TextureTarget.Texture2D, i, format, texture[ i ].Width, texture[ i ].Height, 0,
-                        texture[ i ].Data.Length, texture[ i ].Data );
+                {
+                    GL.CompressedTexImage2D( TextureTarget.Texture2D, i, format, texture[ i ].Width, texture[ i ].Height, 0, texture[ i ].Data.Length,
+                        texture[ i ].Data );
+                }
             }
+
+            mLength = texture.EnumerateLevels()
+                .SelectMany( x => x ).Sum( x => x.Data.Length );
+
+            GC.AddMemoryPressure( mLength );
 
             InternalFormat GetGLInternalFormat( TextureFormat textureFormat )
             {

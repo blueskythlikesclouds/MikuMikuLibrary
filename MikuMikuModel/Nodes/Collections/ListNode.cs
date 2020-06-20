@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using MikuMikuModel.Resources;
@@ -14,21 +15,22 @@ namespace MikuMikuModel.Nodes.Collections
         public override NodeFlags Flags => NodeFlags.Add | NodeFlags.Remove | NodeFlags.Move;
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/Folder.png" );
 
-        public int Count => GetProperty<int>();
+        [Category( "General" )] public int Count => GetProperty<int>();
 
         protected override void Initialize()
         {
-            RegisterCustomHandler( "Replace substring in node names", () =>
+            AddCustomHandler( "Replace substring in node names", () =>
             {
-                using ( var inputDialog1 = new InputDialog
-                    { WindowTitle = "Type the substring to be replaced." } )
+                using ( var inputDialog1 = new InputDialog { WindowTitle = "Type the substring to be replaced." } )
                 {
                     while ( inputDialog1.ShowDialog() == DialogResult.OK )
+                    {
                         if ( string.IsNullOrEmpty( inputDialog1.Input ) )
                         {
                             MessageBox.Show( "Please enter a valid substring.", Program.Name,
                                 MessageBoxButtons.OK, MessageBoxIcon.Error );
                         }
+
                         else
                         {
                             using ( var inputDialog2 = new InputDialog
@@ -45,6 +47,7 @@ namespace MikuMikuModel.Nodes.Collections
 
                             break;
                         }
+                    }
                 }
             } );
         }

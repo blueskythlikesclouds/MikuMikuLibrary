@@ -57,8 +57,10 @@ namespace MikuMikuLibrary.Misc
         public static string GetName( string s )
         {
             int index = s.IndexOf( '@' );
+
             if ( index != -1 )
                 return s.Substring( 0, index );
+
             return s;
         }
 

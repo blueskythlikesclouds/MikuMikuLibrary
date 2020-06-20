@@ -25,6 +25,7 @@ namespace MikuMikuLibrary.Motions
                     if ( reader.ReadOffset() == 0 )
                         break;
                 }
+
                 reader.SeekBegin( current );
 
                 var motion = new Motion();
@@ -40,7 +41,7 @@ namespace MikuMikuLibrary.Motions
             foreach ( var motion in Motions )
                 motion.Write( writer );
 
-            writer.WriteNulls( 16 );
+            writer.WriteNulls( 4 * sizeof( uint ) );
         }
 
         public void Load( Stream source, Skeleton skeleton, MotionDatabase motionDatabase, bool leaveOpen = false )
@@ -56,19 +57,19 @@ namespace MikuMikuLibrary.Motions
 
         public void Load( string filePath, Skeleton skeleton, MotionDatabase motionDatabase )
         {
-            using ( var stream = File.OpenRead( filePath ) )
-            {
+            using ( var stream = File.OpenRead( filePath ) ) 
                 Load( stream, skeleton, motionDatabase );
-            }
 
             if ( motionDatabase == null )
                 return;
 
             string motionSetName = Path.GetFileNameWithoutExtension( filePath );
+
             if ( motionSetName.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
                 motionSetName = motionSetName.Substring( 4 );
 
             var motionSetInfo = motionDatabase.GetMotionSetInfo( motionSetName );
+
             if ( motionSetInfo == null || Motions.Count != motionSetInfo.Motions.Count )
                 return;
 
@@ -82,18 +83,18 @@ namespace MikuMikuLibrary.Motions
         public void Save( Stream destination, Skeleton skeleton, MotionDatabase motionDatabase, bool leaveOpen = false )
         {
             if ( skeleton != null && motionDatabase != null )
+            {
                 foreach ( var motion in Motions.Where( x => x.HasBinding ) )
                     motion.Bind().Unbind( skeleton, motionDatabase );
+            }
 
             Save( destination, leaveOpen );
         }
 
         public void Save( string filePath, Skeleton skeleton, MotionDatabase motionDatabase )
         {
-            using ( var stream = File.Create( filePath ) )
-            {
+            using ( var stream = File.Create( filePath ) ) 
                 Save( stream, skeleton, motionDatabase );
-            }
         }
 
         public MotionSet()

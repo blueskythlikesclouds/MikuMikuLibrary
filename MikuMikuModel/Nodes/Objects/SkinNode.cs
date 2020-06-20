@@ -10,9 +10,9 @@ namespace MikuMikuModel.Nodes.Objects
     {
         public override NodeFlags Flags => NodeFlags.Add;
 
+        [Category( "General" )]
         [DisplayName( "Ex data blocks" )]
-        public List<Block> Blocks =>
-            GetProperty<List<Block>>();
+        public List<IBlock> Blocks => GetProperty<List<IBlock>>();
 
         protected override void Initialize()
         {

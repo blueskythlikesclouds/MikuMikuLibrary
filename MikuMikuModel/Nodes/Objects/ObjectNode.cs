@@ -24,6 +24,7 @@ namespace MikuMikuModel.Nodes.Objects
             get
             {
                 var objectSetParent = FindParent<ObjectSetNode>();
+
                 if ( objectSetParent == null )
                     return null;
 
@@ -32,6 +33,7 @@ namespace MikuMikuModel.Nodes.Objects
             }
         }
 
+        [Category( "General" )]
         [TypeConverter( typeof( IdTypeConverter ) )]
         public uint Id
         {
@@ -39,11 +41,21 @@ namespace MikuMikuModel.Nodes.Objects
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
         [DisplayName( "Bounding sphere" )]
         public BoundingSphere BoundingSphere
         {
             get => GetProperty<BoundingSphere>();
             set => SetProperty( value );
+        }
+
+        [Category( "General" )]
+        [DisplayName( "Flags" )]
+        [TypeConverter( typeof( UInt32HexTypeConverter ) )]
+        public uint ObjectFlags
+        {
+            get => GetProperty<uint>( nameof( Object.Flags ) );
+            set => SetProperty( value, nameof( Object.Flags ) );
         }
 
         protected override void Initialize()

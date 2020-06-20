@@ -3,7 +3,7 @@ using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
 {
-    public class MotionBlock : Block
+    public class MotionBlock : NodeBlock
     {
         public override string Signature => "MOT";
 

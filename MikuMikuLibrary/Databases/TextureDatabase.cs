@@ -30,11 +30,13 @@ namespace MikuMikuLibrary.Databases
                 Textures.Capacity = textureCount;
 
                 for ( int i = 0; i < textureCount; i++ )
+                {
                     Textures.Add( new TextureInfo
                     {
                         Id = reader.ReadUInt32(),
                         Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
                     } );
+                }
             } );
         }
 
@@ -54,15 +56,15 @@ namespace MikuMikuLibrary.Databases
         public override void Save( string filePath )
         {
             // Assume it's being exported for F2nd PS3
-            if ( BinaryFormatUtilities.IsClassic( Format ) &&
+            if ( BinaryFormatUtilities.IsClassic( Format ) && 
                  filePath.EndsWith( ".txi", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.F2nd;
                 Endianness = Endianness.Big;
             }
 
-            // Or reverse
-            else if ( BinaryFormatUtilities.IsModern( Format ) &&
+            // Or vice versa
+            else if ( BinaryFormatUtilities.IsModern( Format ) && 
                       filePath.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase ) )
             {
                 Format = BinaryFormat.DT;
@@ -72,15 +74,11 @@ namespace MikuMikuLibrary.Databases
             base.Save( filePath );
         }
 
-        public TextureInfo GetTextureInfo( string textureName )
-        {
-            return Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
-        }
+        public TextureInfo GetTextureInfo( string textureName ) => 
+            Textures.FirstOrDefault( x => x.Name.Equals( textureName, StringComparison.OrdinalIgnoreCase ) );
 
-        public TextureInfo GetTextureInfo( uint textureId )
-        {
-            return Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
-        }
+        public TextureInfo GetTextureInfo( uint textureId ) => 
+            Textures.FirstOrDefault( x => x.Id.Equals( textureId ) );
 
         public TextureDatabase()
         {

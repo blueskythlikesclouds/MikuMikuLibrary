@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
@@ -9,15 +10,30 @@ namespace MikuMikuLibrary.Objects
 {
     public enum PrimitiveType
     {
+        Points = 0,
+        Lines = 1,
+        LineStrip = 2,
+        LineLoop = 3,
         Triangles = 4,
-        TriangleStrip = 5
+        TriangleStrip = 5,
+        TriangleFan = 6,
+        Quads = 7,
+        QuadStrip = 8,
+        Polygon = 9
+    }
+
+    public enum IndexFormat
+    {
+        UInt8 = 0,
+        UInt16 = 1,
+        UInt32 = 2
     }
 
     public struct Triangle
     {
-        public ushort A, B, C;
+        public uint A, B, C;
 
-        public Triangle( ushort a, ushort b, ushort c )
+        public Triangle( uint a, uint b, uint c )
         {
             A = a;
             B = b;
@@ -25,18 +41,27 @@ namespace MikuMikuLibrary.Objects
         }
     }
 
+    [Flags]
+    public enum SubMeshFlags
+    {
+        ReceiveShadow = 1 << 0,
+        CastShadow = 1 << 1,
+        Transparent = 1 << 2
+    }
+
     public class SubMesh
     {
         public BoundingSphere BoundingSphere { get; set; }
-        public ushort[] Indices { get; set; }
+        public uint MaterialIndex { get; set; }
+        public byte[] TexCoordIndices { get; set; }
         public ushort[] BoneIndices { get; set; }
-        public int MaterialIndex { get; set; }
-        public byte[] MaterialUVIndices { get; set; }
+        public uint BonesPerVertex { get; set; }
         public PrimitiveType PrimitiveType { get; set; }
-
-        // Modern Formats
+        public IndexFormat IndexFormat { get; set; }
+        public uint[] Indices { get; set; }
+        public SubMeshFlags Flags { get; set; }
+        public uint IndexOffset { get; set; }
         public BoundingBox BoundingBox { get; set; }
-        public int Field00 { get; set; }
 
         public static int GetByteSize( BinaryFormat format )
         {
@@ -59,42 +84,86 @@ namespace MikuMikuLibrary.Objects
 
         internal void Read( EndianBinaryReader reader, ObjectSection section = null )
         {
-            reader.SeekCurrent( 4 );
+            reader.SeekCurrent( 4 ); // Unused flags
+
             BoundingSphere = reader.ReadBoundingSphere();
-            MaterialIndex = reader.ReadInt32();
-            MaterialUVIndices = reader.ReadBytes( 8 );
+
+            MaterialIndex = reader.ReadUInt32();
+            TexCoordIndices = reader.ReadBytes( 8 );
+
             int boneIndexCount = reader.ReadInt32();
             long boneIndicesOffset = reader.ReadOffset();
-            uint field00 = reader.ReadUInt32();
+            BonesPerVertex = reader.ReadUInt32();
+
             PrimitiveType = ( PrimitiveType ) reader.ReadUInt32();
-            int field01 = reader.ReadInt32();
+            IndexFormat = ( IndexFormat ) reader.ReadInt32();
             int indexCount = reader.ReadInt32();
-            uint indicesOffset = reader.ReadUInt32();
+            long indicesOffset = reader.ReadOffset();
+            Flags = ( SubMeshFlags ) reader.ReadInt32();
 
             if ( section != null )
             {
-                reader.SeekCurrent( section.Format == BinaryFormat.X ? 0x18 : 0x14 );
+                reader.SkipNulls( 4 * sizeof( uint ) );
                 BoundingBox = reader.ReadBoundingBox();
-                Field00 = reader.ReadInt32();
             }
+
             else
             {
                 BoundingBox = BoundingSphere.ToBoundingBox();
+                reader.SkipNulls( 6 * sizeof( uint ) );
             }
 
-            reader.ReadAtOffsetIf( field00 == 4, boneIndicesOffset,
+            IndexOffset = reader.ReadUInt32();
+
+            reader.ReadAtOffsetIf( BonesPerVertex == 4, boneIndicesOffset, 
                 () => { BoneIndices = reader.ReadUInt16s( boneIndexCount ); } );
 
             if ( section == null )
             {
-                reader.ReadAtOffset( indicesOffset, () => { Indices = reader.ReadUInt16s( indexCount ); } );
+                reader.ReadAtOffset( indicesOffset, () => { ReadIndices( reader ); } );
             }
+
             else
             {
                 var indexReader = section.IndexData.Reader;
 
                 indexReader.SeekBegin( section.IndexData.DataOffset + indicesOffset );
-                Indices = indexReader.ReadUInt16s( indexCount );
+                ReadIndices( indexReader );
+            }
+
+            void ReadIndices( EndianBinaryReader r )
+            {
+                Indices = new uint[ indexCount ];
+
+                switch ( IndexFormat )
+                {
+                    case IndexFormat.UInt8:
+                        for ( int i = 0; i < Indices.Length; i++ )
+                        {
+                            byte index = r.ReadByte();
+                            Indices[ i ] = index == 0xFF ? 0xFFFFFFFF : index;
+                        }
+
+                        break;
+
+                    case IndexFormat.UInt16:
+                        for ( int i = 0; i < Indices.Length; i++ )
+                        {
+                            ushort index = r.ReadUInt16();
+                            Indices[ i ] = index == 0xFFFF ? 0xFFFFFFFF : index;
+                        }
+
+                        break;
+
+                    case IndexFormat.UInt32:
+                        for ( int i = 0; i < Indices.Length; i++ )
+                            Indices[ i ] = r.ReadUInt32();
+
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
@@ -104,36 +173,88 @@ namespace MikuMikuLibrary.Objects
             writer.Write( BoundingSphere );
             writer.Write( MaterialIndex );
 
-            if ( MaterialUVIndices?.Length == 8 )
-                writer.Write( MaterialUVIndices );
+            if ( TexCoordIndices?.Length == 8 )
+                writer.Write( TexCoordIndices );
+
             else
                 writer.WriteNulls( 8 );
 
             writer.Write( BoneIndices?.Length ?? 0 );
             writer.ScheduleWriteOffsetIf( BoneIndices != null, 4, AlignmentMode.Left,
                 () => { writer.Write( BoneIndices ); } );
-            writer.Write( BoneIndices != null ? 4 : 0 );
+            writer.Write( BonesPerVertex );
 
             writer.Write( ( int ) PrimitiveType );
-            writer.Write( 1 );
+            writer.Write( ( int ) IndexFormat );
             writer.Write( Indices.Length );
 
             // Modern Format
             if ( section != null )
             {
-                writer.Write( ( uint ) section.IndexData.AddIndices( Indices ) );
-                writer.WriteNulls( section.Format == BinaryFormat.X ? 24 : 20 );
+                writer.WriteOffset( section.IndexData.AddSubMesh( this ) );
+                writer.Write( ( int ) Flags );
+
+                writer.WriteNulls( 4 * sizeof( uint ) );
+
                 writer.Write( BoundingBox );
-                writer.Write( Field00 );
-                writer.Write( 0 );
+
+                switch ( IndexFormat )
+                {
+                    case IndexFormat.UInt8:
+                        writer.WriteNulls( 3 );
+                        writer.Write( ( byte ) Indices.Max() );
+                        break;
+
+                    case IndexFormat.UInt16:
+                        writer.WriteNulls( 2 );
+                        writer.Write( ( ushort ) Indices.Max() );
+                        break;
+
+                    case IndexFormat.UInt32:
+                        writer.Write( Indices.Max() );
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
 
             else
             {
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { writer.Write( Indices ); } );
+                writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
+                {
+                    switch ( IndexFormat )
+                    {
+                        case IndexFormat.UInt8:
+                            foreach ( uint index in Indices )
+                                writer.Write( ( byte ) index );
 
-                writer.WriteNulls( 32 );
+                            break;
+
+                        case IndexFormat.UInt16:
+                            foreach ( uint index in Indices )
+                                writer.Write( ( ushort ) index );
+
+                            break;
+
+                        case IndexFormat.UInt32:
+                            foreach ( uint index in Indices )
+                                writer.Write( index );
+
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                } );
+                writer.Write( ( int ) Flags );
+                writer.WriteNulls( 6 * sizeof( uint ) );
             }
+
+            writer.Write( IndexOffset );
+
+            if ( section?.Format == BinaryFormat.X )
+                writer.WriteNulls( sizeof( uint ) );
         }
 
         public unsafe List<Triangle> GetTriangles()
@@ -142,7 +263,7 @@ namespace MikuMikuLibrary.Objects
             if ( Indices == null || Indices.Length == 0 )
                 return triangles;
 
-            fixed ( ushort* indicesPtr = Indices )
+            fixed ( uint* indicesPtr = Indices )
             {
                 var start = indicesPtr;
                 var end = start + Indices.Length;
@@ -154,18 +275,18 @@ namespace MikuMikuLibrary.Objects
                     while ( start < end )
                         triangles.Add( new Triangle( *start++, *start++, *start++ ) );
                 }
+
                 else if ( PrimitiveType == PrimitiveType.TriangleStrip )
                 {
-                    ushort a = *start++;
-                    ushort b = *start++;
-                    ushort c = 0;
+                    uint a = *start++;
+                    uint b = *start++;
                     int direction = -1;
 
                     while ( start < end )
                     {
-                        c = *start++;
+                        uint c = *start++;
 
-                        if ( c == 0xFFFF )
+                        if ( c == 0xFFFFFFFF )
                         {
                             a = *start++;
                             b = *start++;
@@ -176,12 +297,7 @@ namespace MikuMikuLibrary.Objects
                         {
                             direction *= -1;
                             if ( a != b && b != c && c != a )
-                            {
-                                if ( direction > 0 )
-                                    triangles.Add( new Triangle( a, b, c ) );
-                                else
-                                    triangles.Add( new Triangle( a, c, b ) );
-                            }
+                                triangles.Add( direction > 0 ? new Triangle( a, b, c ) : new Triangle( a, c, b ) );
 
                             a = b;
                             b = c;
@@ -195,7 +311,7 @@ namespace MikuMikuLibrary.Objects
 
         public SubMesh()
         {
-            MaterialUVIndices = new byte[ 8 ];
+            TexCoordIndices = new byte[ 8 ];
             PrimitiveType = PrimitiveType.Triangles;
         }
     }

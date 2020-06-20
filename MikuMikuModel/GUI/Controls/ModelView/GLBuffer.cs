@@ -31,6 +31,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             }
 
             GL.DeleteBuffer( Id );
+            GC.RemoveMemoryPressure( Stride * Array.Length );
         }
 
         ~GLBuffer()
@@ -48,6 +49,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
             GL.BindBuffer( Target, Id );
             GL.BufferData( Target, Length * Stride, Array, UsageHint );
+            
+            GC.AddMemoryPressure( Stride * Array.Length );
         }
     }
 }

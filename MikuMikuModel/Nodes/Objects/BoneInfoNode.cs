@@ -9,9 +9,12 @@ namespace MikuMikuModel.Nodes.Objects
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
-        [DisplayName( "Parent name" )] public string ParentBone => 
+        [Category( "General" )]
+        [DisplayName( "Parent name" )] 
+        public string ParentBone => 
             GetProperty<BoneInfo>( nameof( BoneInfo.Parent ) )?.Name;
 
+        [Category( "General" )]
         [TypeConverter( typeof( IdTypeConverter ) )]
         public uint Id
         {
@@ -19,6 +22,7 @@ namespace MikuMikuModel.Nodes.Objects
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
         [DisplayName( "Inverse bind pose matrix" )]
         public Matrix4x4 InverseBindPoseMatrix
         {
@@ -26,7 +30,9 @@ namespace MikuMikuModel.Nodes.Objects
             set => SetProperty( value );
         }
 
-        [DisplayName( "Belongs in ex data" )] public bool IsEx => GetProperty<bool>();
+        [Category( "General" )]
+        [DisplayName( "Belongs in ex data" )] 
+        public bool IsEx => GetProperty<bool>();
 
         protected override void Initialize()
         {

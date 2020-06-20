@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 using DatabaseConverter.Properties;
 using MikuMikuLibrary.Databases;
@@ -30,16 +31,14 @@ namespace DatabaseConverter
             string extension = Path.GetExtension( fileName ).Trim( '.' );
 
             fileName = Path.GetFileNameWithoutExtension( fileName ).Replace( "_", "" );
+
             if ( fileName.StartsWith( "mdata", StringComparison.OrdinalIgnoreCase ) )
                 fileName = fileName.Substring( 5 );
 
-            foreach ( var databaseInfo in sDatabaseInfos )
-                if ( !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) &&
-                     databaseInfo.ModernFileExtension.Equals( extension, StringComparison.OrdinalIgnoreCase ) ||
-                     databaseInfo.ClassicFileName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) )
-                    return databaseInfo;
-
-            return null;
+            return sDatabaseInfos.FirstOrDefault( databaseInfo =>
+                databaseInfo.ClassicFileName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) ||
+                !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) &&
+                databaseInfo.ModernFileExtension.Equals( extension, StringComparison.OrdinalIgnoreCase ) );
         }
 
         private static void Main( string[] args )
@@ -55,16 +54,19 @@ namespace DatabaseConverter
             string destinationFileName = null;
 
             foreach ( string arg in args )
+            {
                 if ( sourceFileName == null )
                     sourceFileName = arg;
 
                 else if ( destinationFileName == null )
                     destinationFileName = arg;
+            }
 
             if ( destinationFileName == null )
                 destinationFileName = sourceFileName;
 
             var databaseInfo = GetDatabaseInfo( sourceFileName );
+
             if ( databaseInfo != null )
             {
                 if ( sourceFileName.EndsWith( "xml", StringComparison.OrdinalIgnoreCase ) )
@@ -72,15 +74,13 @@ namespace DatabaseConverter
                     var serializer = new XmlSerializer( databaseInfo.Type );
 
                     IBinaryFile database;
-                    using ( var source = File.OpenText( sourceFileName ) )
-                    {
-                        database = ( IBinaryFile ) serializer.Deserialize( source );
-                    }
 
-                    if ( BinaryFormatUtilities.IsModern( database.Format ) &&
-                         !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) )
-                        destinationFileName =
-                            Path.ChangeExtension( destinationFileName, null );
+                    using ( var source = File.OpenText( sourceFileName ) ) 
+                        database = ( IBinaryFile ) serializer.Deserialize( source );
+
+                    if ( BinaryFormatUtilities.IsModern( database.Format ) && !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) )
+                        destinationFileName = Path.ChangeExtension( destinationFileName, null );
+
                     else
                         destinationFileName = Path.ChangeExtension( destinationFileName, "bin" );
 
@@ -92,17 +92,15 @@ namespace DatabaseConverter
                     database.Load( sourceFileName );
 
                     if ( BinaryFormatUtilities.IsModern( database.Format ) )
-                        destinationFileName =
-                            Path.ChangeExtension( destinationFileName, databaseInfo.ModernFileExtension ) + ".xml";
+                        destinationFileName = Path.ChangeExtension( destinationFileName, databaseInfo.ModernFileExtension ) + ".xml";
+
                     else
                         destinationFileName = Path.ChangeExtension( destinationFileName, "xml" );
 
                     var serializer = new XmlSerializer( databaseInfo.Type );
 
-                    using ( var destination = File.CreateText( destinationFileName ) )
-                    {
+                    using ( var destination = File.CreateText( destinationFileName ) ) 
                         serializer.Serialize( destination, database );
-                    }
                 }
             }
             else

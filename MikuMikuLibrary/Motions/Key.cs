@@ -6,9 +6,7 @@
         public float Tangent { get; set; }
         public ushort Frame { get; set; }
 
-        public override string ToString()
-        {
-            return $"{Frame}, {Value}, {Tangent}";
-        }
+        public override string ToString() => 
+            $"{Frame}, {Value}, {Tangent}";
     }
 }

@@ -29,13 +29,16 @@ namespace MikuMikuLibrary.Databases
             Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
             Motions.Capacity = motionCount;
+
             reader.ReadAtOffset( motionNameOffsetsOffset, () =>
             {
                 for ( int i = 0; i < motionCount; i++ )
+                {
                     Motions.Add( new MotionInfo
                     {
                         Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated )
                     } );
+                }
             } );
 
             reader.ReadAtOffset( motionIdsOffset, () =>
@@ -86,6 +89,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( motionSetsOffset, () =>
             {
                 MotionSets.Capacity = motionSetCount;
+
                 for ( int i = 0; i < motionSetCount; i++ )
                 {
                     var motionSetInfo = new MotionSetInfo();
@@ -103,6 +107,7 @@ namespace MikuMikuLibrary.Databases
             reader.ReadAtOffset( boneNameOffsetsOffset, () =>
             {
                 BoneNames.Capacity = boneNameCount;
+
                 for ( int i = 0; i < boneNameCount; i++ )
                     BoneNames.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
             } );
@@ -116,7 +121,7 @@ namespace MikuMikuLibrary.Databases
                 foreach ( var motionSetInfo in MotionSets )
                     motionSetInfo.Write( writer );
 
-                writer.WriteNulls( 16 );
+                writer.WriteNulls( 4 * sizeof( uint ) );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
@@ -130,13 +135,11 @@ namespace MikuMikuLibrary.Databases
                     writer.AddStringToStringTable( boneName );
             } );
             writer.Write( BoneNames.Count );
-            writer.WriteAlignmentPadding( 64 );
+            writer.Align( 64 );
         }
 
-        public MotionSetInfo GetMotionSetInfo( string name )
-        {
-            return MotionSets.FirstOrDefault( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
-        }
+        public MotionSetInfo GetMotionSetInfo( string name ) => 
+            MotionSets.FirstOrDefault( x => x.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
 
         public MotionDatabase()
         {

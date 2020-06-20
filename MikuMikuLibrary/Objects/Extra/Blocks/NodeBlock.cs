@@ -1,22 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
+﻿using System.Numerics;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Objects.Extra.Blocks;
 
-namespace MikuMikuLibrary.Objects.Extra
+namespace MikuMikuLibrary.Objects.Extra.Blocks
 {
-    public abstract class Block
+    public abstract class NodeBlock : IBlock
     {
-        internal static readonly IReadOnlyDictionary<string, Func<Block>> BlockFactory =
-            new Dictionary<string, Func<Block>>
-            {
-                { "OSG", () => new OsageBlock() },
-                { "EXP", () => new ExpressionBlock() },
-                { "MOT", () => new MotionBlock() },
-                { "CNS", () => new ConstraintBlock() }
-            };
-
         public abstract string Signature { get; }
 
         public string ParentName { get; set; }
@@ -24,21 +13,29 @@ namespace MikuMikuLibrary.Objects.Extra
         public Vector3 Rotation { get; set; }
         public Vector3 Scale { get; set; }
 
-        internal virtual void Read( EndianBinaryReader reader, StringSet stringSet )
+        public virtual void Read( EndianBinaryReader reader, StringSet stringSet )
         {
             ParentName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Position = reader.ReadVector3();
             Rotation = reader.ReadVector3();
             Scale = reader.ReadVector3();
+
+            if ( reader.AddressSpace == AddressSpace.Int64 )
+                reader.SeekCurrent( 4 );
+
             ReadBody( reader, stringSet );
         }
 
-        internal virtual void Write( EndianBinaryWriter writer, StringSet stringSet )
+        public virtual void Write( EndianBinaryWriter writer, StringSet stringSet )
         {
             writer.AddStringToStringTable( ParentName );
             writer.Write( Position );
             writer.Write( Rotation );
             writer.Write( Scale );
+
+            if ( writer.AddressSpace == AddressSpace.Int64 )
+                writer.WriteNulls( sizeof( uint ) );
+
             WriteBody( writer, stringSet );
         }
 

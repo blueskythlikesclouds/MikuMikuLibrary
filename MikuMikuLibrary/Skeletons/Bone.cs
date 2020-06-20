@@ -43,7 +43,7 @@ namespace MikuMikuLibrary.Skeletons
             writer.Write( Field02 );
             writer.Write( Field03 );
             writer.Write( Field04 );
-            writer.WriteNulls( 2 );
+            writer.WriteNulls( sizeof( ushort ) );
             writer.AddStringToStringTable( Name );
         }
     }

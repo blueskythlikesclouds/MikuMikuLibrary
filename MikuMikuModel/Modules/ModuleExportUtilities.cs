@@ -13,12 +13,9 @@ namespace MikuMikuModel.Modules
             fileName = Path.GetFileName( fileName );
             string extension = Path.GetExtension( fileName ).Trim( '.' );
 
-            var moduleList = modulesToMatch
-                .Where( x =>
-                    x.Flags.HasFlag( FormatModuleFlags.Export ) &&
-                    ( x.Extensions.Contains( "*" ) ||
-                      x.Extensions.Contains( extension, StringComparer.OrdinalIgnoreCase ) ) )
-                .ToList();
+            var moduleList = modulesToMatch.Where( x =>
+                x.Flags.HasFlag( FormatModuleFlags.Export ) &&
+                ( x.Extensions.Contains( "*" ) || x.Extensions.Contains( extension, StringComparer.OrdinalIgnoreCase ) ) ).ToList();
 
             if ( moduleList.Count > 1 )
                 moduleList.RemoveAll( x => x.Extensions.Contains( "*" ) || !x.Match( fileName ) );
@@ -31,8 +28,7 @@ namespace MikuMikuModel.Modules
             return GetModule( modelTypesToMatch.Select( x => FormatModuleRegistry.ModulesByType[ x ] ), fileName );
         }
 
-        public static string SelectModuleExport<T>( string title = "Select a file to export to.",
-            string filePath = null )
+        public static string SelectModuleExport<T>( string title = "Select a file to export to.", string filePath = null )
         {
             using ( var dialog = new SaveFileDialog() )
             {

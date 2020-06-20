@@ -32,6 +32,7 @@ namespace MikuMikuLibrary.Databases
 
                 // Try to determine endianness (apparently DT uses big endian string arrays)
                 uint stringOffset = reader.ReadUInt32();
+
                 if ( stringOffset >= reader.Length )
                 {
                     reader.Endianness = Endianness.Big;
@@ -47,6 +48,7 @@ namespace MikuMikuLibrary.Databases
                 } while ( reader.Position < offsets[ 0 ] && stringOffset != 0 );
 
                 Strings.Capacity = offsets.Count;
+
                 for ( int i = 0; i < offsets.Count; i++ )
                 {
                     long offset = offsets[ i ];
@@ -65,12 +67,15 @@ namespace MikuMikuLibrary.Databases
                 reader.ReadOffset( () =>
                 {
                     Strings.Capacity = count;
+
                     for ( int i = 0; i < count; i++ )
+                    {
                         Strings.Add( new StringEntry
                         {
                             Value = reader.ReadStringOffset( StringBinaryFormat.NullTerminated ),
                             Id = reader.ReadUInt32()
                         } );
+                    }
                 } );
             }
         }
@@ -90,6 +95,7 @@ namespace MikuMikuLibrary.Databases
                 {
                     for ( int i = 0; i < stringEntry.Id - previousId - 1; i++ )
                         writer.AddStringToStringTable( string.Empty );
+
                     previousId = stringEntry.Id;
 
                     writer.AddStringToStringTable( stringEntry.Value );

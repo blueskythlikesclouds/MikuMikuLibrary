@@ -25,6 +25,7 @@ namespace MikuMikuModel.Nodes.IO
             get
             {
                 var internalData = base.InternalData;
+
                 if ( mLoaded || mStreamGetter == null )
                     return internalData;
 
@@ -38,12 +39,14 @@ namespace MikuMikuModel.Nodes.IO
             }
         }
 
+        [Category( "Binary serialization" )]
         public Endianness Endianness
         {
             get => GetProperty<Endianness>();
             set => SetProperty( value );
         }
 
+        [Category( "Binary serialization" )]
         public BinaryFormat Format
         {
             get => GetProperty<BinaryFormat>();
@@ -52,6 +55,7 @@ namespace MikuMikuModel.Nodes.IO
 
         public event EventHandler DirtyStateChanged;
 
+        [Category( "Debug" )]
         [Browsable( false )]
         public virtual bool IsDirty
         {
@@ -68,6 +72,7 @@ namespace MikuMikuModel.Nodes.IO
                     return;
 
                 OnDirtyStateChanged();
+
                 if ( mDirty )
                     IsPendingSynchronization = true;
             }
@@ -86,7 +91,7 @@ namespace MikuMikuModel.Nodes.IO
             data.Load( source );
         }
 
-        private void InitializeSubscription( INode node, bool unsubscribe )
+        private void SetSubscription( INode node, bool unsubscribe = false )
         {
             if ( node.IsPopulated || unsubscribe && node.IsPopulated )
                 IsDirty = true;
@@ -97,16 +102,18 @@ namespace MikuMikuModel.Nodes.IO
                 {
                     dirtyNode.DirtyStateChanged -= OnNodeDirtyStateChanged;
                 }
+
                 else
                 {
                     node.PropertyChanged -= OnNodePropertyChanged;
                     node.Added -= OnNodeAdded;
                     node.Removed -= OnNodeRemoved;
+                    node.Imported -= OnNodeImported;
                     node.Replaced -= OnNodeReplaced;
                     node.Moved -= OnNodeMoved;
 
                     foreach ( var childNode in node.Nodes )
-                        InitializeSubscription( childNode, true );
+                        SetSubscription( childNode, true );
                 }
             }
             else
@@ -115,45 +122,50 @@ namespace MikuMikuModel.Nodes.IO
                 {
                     dirtyNode.DirtyStateChanged += OnNodeDirtyStateChanged;
                 }
+
                 else
                 {
                     node.PropertyChanged += OnNodePropertyChanged;
                     node.Added += OnNodeAdded;
                     node.Removed += OnNodeRemoved;
+                    node.Imported += OnNodeImported;
                     node.Replaced += OnNodeReplaced;
                     node.Moved += OnNodeMoved;
                 }
             }
 
-            void OnNodeDirtyStateChanged( object sender, EventArgs args )
-            {
+            void OnNodeDirtyStateChanged( object sender, EventArgs args ) => 
                 IsDirty = ( ( IDirtyNode ) sender ).IsDirty || IsDirty;
-            }
 
-            void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args )
-            {
+            void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args ) => 
                 IsDirty = true;
-            }
 
-            void OnNodeAdded( object sender, NodeAddEventArgs args )
-            {
-                InitializeSubscription( args.AddedNode, false );
-            }
+            void OnNodeAdded( object sender, NodeAddEventArgs args ) => 
+                SetSubscription( args.AddedNode );
 
             void OnNodeRemoved( object sender, NodeRemoveEventArgs args )
             {
                 IsDirty = true;
+                SetSubscription( args.RemovedNode, true );
             }
 
-            void OnNodeReplaced( object sender, NodeReplaceEventArgs args )
-            {
+            void OnNodeImported( object sender, NodeImportEventArgs args ) =>
                 IsDirty = true;
-            }
 
-            void OnNodeMoved( object sender, NodeMoveEventArgs args )
-            {
+            void OnNodeReplaced( object sender, NodeReplaceEventArgs args ) => 
                 IsDirty = true;
-            }
+
+            void OnNodeMoved( object sender, NodeMoveEventArgs args ) => 
+                IsDirty = true;
+        }
+
+        protected void AddDirtyCustomHandler( string name, Func<bool> func,
+            Keys shortcutKeys = Keys.None, CustomHandlerFlags flags = CustomHandlerFlags.None )
+        {
+            AddCustomHandler( name, () =>
+            {
+                IsDirty |= func();
+            }, shortcutKeys, flags );
         }
 
         protected override void OnPropertyChanged( string propertyName = null )
@@ -168,15 +180,15 @@ namespace MikuMikuModel.Nodes.IO
             base.OnRename( previousName );
         }
 
-        protected override void OnAdd( INode addedNode )
+        protected override void OnAdd( INode addedNode, int index )
         {
-            InitializeSubscription( addedNode, false );
-            base.OnAdd( addedNode );
+            SetSubscription( addedNode );
+            base.OnAdd( addedNode, index );
         }
 
         protected override void OnRemove( INode removedNode )
         {
-            InitializeSubscription( removedNode, true );
+            SetSubscription( removedNode, true );
             base.OnRemove( removedNode );
         }
 
@@ -202,34 +214,49 @@ namespace MikuMikuModel.Nodes.IO
             base.OnMove( movedNode, previousIndex, newIndex );
         }
 
-        protected virtual void OnDirtyStateChanged()
-        {
+        protected virtual void OnDirtyStateChanged() => 
             DirtyStateChanged?.Invoke( this, EventArgs.Empty );
-        }
 
         protected override void Initialize()
         {
-            RegisterReplaceHandler<FarcArchive>( filePath =>
+            AddReplaceHandler<FarcArchive>( filePath =>
             {
                 var farcArchive = BinaryFile.Load<FarcArchive>( filePath );
+
                 using ( var farcArchiveViewForm = new FarcArchiveViewForm<T>( farcArchive ) )
                 {
                     farcArchiveViewForm.Text = "Select a node to replace with.";
 
                     if ( farcArchiveViewForm.NodeCount == 0 )
-                        MessageBox.Show( "This archive has no entries that you could replace the node with.",
-                            Program.Name,
-                            MessageBoxButtons.OK, MessageBoxIcon.Information );
+                    {
+                        MessageBox.Show( "This archive has no entries that you could replace the node with.", 
+                            Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Information );
+                    }
 
                     else if ( farcArchiveViewForm.NodeCount == 1 )
+                    {
                         return ( T ) farcArchiveViewForm.TopNode.Data;
+                    }
 
                     else if ( farcArchiveViewForm.ShowDialog() == DialogResult.OK )
+                    {
                         return ( T ) farcArchiveViewForm.SelectedNode.Data;
+                    }
                 }
 
                 return null;
             } );
+        }
+
+        protected override void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                foreach ( var node in Nodes )
+                    SetSubscription( node, true );
+            }
+
+            base.Dispose( disposing );
         }
 
         protected BinaryFileNode( string name, T data ) : base( name, data )

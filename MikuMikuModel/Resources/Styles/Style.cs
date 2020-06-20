@@ -12,12 +12,15 @@ namespace MikuMikuModel.Resources.Styles
         private StyleToolStripRenderer mToolStripRenderer;
 
         public string Name { get; set; }
+
         public SerializableColor Text { get; set; }
         public SerializableColor SelectedText { get; set; }
+
         public SerializableColor Foreground { get; set; }
         public SerializableColor Background { get; set; }
-        public SerializableColor BaseBackground { get; set; }
+
         public SerializableColor Border { get; set; }
+
         public SerializableColor ToolStripDropDownBackground { get; set; }
         public SerializableColor MenuItemSelected { get; set; }
         public SerializableColor MenuBorder { get; set; }
@@ -34,6 +37,10 @@ namespace MikuMikuModel.Resources.Styles
         public SerializableColor ImageMarginGradientEnd { get; set; }
         public SerializableColor SeparatorDark { get; set; }
         public SerializableColor SeparatorLight { get; set; }
+
+        public SerializableColor ButtonColor { get; set; }
+        public SerializableColor ButtonBorderColor { get; set; }
+
         public SerializableColor ViewportBackground { get; set; }
         public SerializableColor ViewportForeground { get; set; }
 
@@ -75,15 +82,11 @@ namespace MikuMikuModel.Resources.Styles
             writer.WriteAttributeString( "A", Color.A.ToString( CultureInfo.InvariantCulture ) );
         }
 
-        public static implicit operator SerializableColor( Color color )
-        {
-            return new SerializableColor( color );
-        }
+        public static implicit operator SerializableColor( Color color ) => 
+            new SerializableColor( color );
 
-        public static implicit operator Color( SerializableColor serializableColor )
-        {
-            return serializableColor.Color;
-        }
+        public static implicit operator Color( SerializableColor serializableColor ) => 
+            serializableColor.Color;
 
         public SerializableColor( Color color )
         {

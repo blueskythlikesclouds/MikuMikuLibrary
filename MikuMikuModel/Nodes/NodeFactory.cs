@@ -39,7 +39,7 @@ namespace MikuMikuModel.Nodes
         {
             var module = ModuleImportUtilities.GetModule( filePath );
             if ( module == null || !NodeTypes.ContainsKey( module.ModelType ) )
-                return new StreamNode( Path.GetFileName( filePath ), File.OpenRead( filePath ) );
+                throw new InvalidDataException( "File type could not be determined." );
 
             ConfigurationList.Instance.DetermineCurrentConfiguration( filePath );
             return Create( module.ModelType, Path.GetFileName( filePath ), module.Import( filePath ) );

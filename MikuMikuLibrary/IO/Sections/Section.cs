@@ -98,36 +98,43 @@ namespace MikuMikuLibrary.IO.Sections
             {
                 case SectionMode.Read when BaseStream == null || Reader == null:
                     throw new InvalidOperationException( "Section has not been read yet, cannot process data object" );
+
                 case SectionMode.Read:
                 {
                     if ( mData == null )
                         mData = new T();
 
                     foreach ( var section in mSections )
+                    {
                         if ( SectionInfo.SubSectionInfos.TryGetValue( section.SectionInfo, out var subSectionInfo ) )
                             subSectionInfo.ProcessPropertyForReading( section, this );
+                    }
 
                     Reader.SeekBegin( DataOffset );
                     {
                         Read( mData, Reader, DataSize );
                     }
                     Reader.SeekBegin( DataOffset + SectionSize );
+
                     break;
                 }
 
                 case SectionMode.Write when BaseStream == null || Writer == null:
-                    throw new InvalidOperationException(
-                        "Data object has not been written yet, cannot process data object" );
+                    throw new InvalidOperationException( "Data object has not been written yet, cannot process data object" );
+
                 case SectionMode.Write:
                 {
                     mSections.Clear();
+
                     if ( IsRelocationTableWorthWriting() )
                     {
                         ISection relocationTableSection;
 
                         var offsets = Writer.OffsetPositions.Select( x => x - Writer.BaseOffset ).ToList();
+
                         if ( AddressSpace == AddressSpace.Int64 )
                             relocationTableSection = new RelocationTableSectionInt64( SectionMode.Write, offsets );
+
                         else
                             relocationTableSection = new RelocationTableSectionInt32( SectionMode.Write, offsets );
 
@@ -135,14 +142,14 @@ namespace MikuMikuLibrary.IO.Sections
                     }
 
                     if ( DataSize > 0 && Writer is EnrsBinaryWriter enrsWriter )
-                        mSections.Add( new EnrsSection( SectionMode.Write,
-                            enrsWriter.CreateScopeDescriptors( DataOffset, DataOffset + DataSize ) ) );
+                        mSections.Add( new EnrsSection( SectionMode.Write, enrsWriter.CreateScopeDescriptors( DataOffset, DataOffset + DataSize ) ) );
 
                     foreach ( var subSectionInfo in SectionInfo.SubSectionInfos.Values.OrderBy( x => x.Priority ) )
                         mSections.AddRange( subSectionInfo.ProcessPropertyForWriting( this ) );
 
                     if ( mSections.Count > 0 )
                         mSections.Add( new EndOfFileSection( SectionMode.Write, this ) );
+
                     break;
                 }
             }
@@ -160,17 +167,19 @@ namespace MikuMikuLibrary.IO.Sections
                 throw new InvalidOperationException( "Section has already been read before" );
 
             BaseStream = source;
-            Reader = new EndianBinaryReader( BaseStream, Encoding.UTF8, true, Endianness.Little );
+            Reader = new EndianBinaryReader( BaseStream, Encoding.UTF8, Endianness.Little, true );
 
             if ( skipSignature )
             {
                 Reader.PushBaseOffset( Reader.Position - 4 );
             }
+
             else
             {
                 Reader.PushBaseOffset();
 
                 string signature = Reader.ReadString( StringBinaryFormat.FixedLength, 4 );
+
                 if ( signature != Signature )
                     throw new InvalidDataException( $"Invalid signature (expected {Signature}, got {signature})" );
             }
@@ -227,12 +236,12 @@ namespace MikuMikuLibrary.IO.Sections
             BaseStream = destination;
 
             Writer = IsEnrsWorthWriting()
-                ? new EnrsBinaryWriter( BaseStream, Encoding.UTF8, true, Endianness.Little )
-                : new EndianBinaryWriter( BaseStream, Encoding.UTF8, true, Endianness.Little );
+                ? new EnrsBinaryWriter( BaseStream, Encoding.UTF8, Endianness.Little, true )
+                : new EndianBinaryWriter( BaseStream, Encoding.UTF8, Endianness.Little, true );
 
             long headerOffset = Writer.Position;
             {
-                Writer.WriteNulls( 32 );
+                Writer.WriteNulls( 8 * sizeof( uint ) );
             }
 
             DataOffset = Writer.Position;
@@ -251,7 +260,7 @@ namespace MikuMikuLibrary.IO.Sections
                 }
                 Writer.Endianness = Endianness.Little;
                 Writer.AddressSpace = AddressSpace.Int32;
-                Writer.WriteAlignmentPadding( 16 );
+                Writer.Align( 16 );
             }
 
             DataSize = Writer.Position - DataOffset;

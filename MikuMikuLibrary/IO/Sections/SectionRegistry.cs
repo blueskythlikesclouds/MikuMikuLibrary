@@ -25,21 +25,19 @@ namespace MikuMikuLibrary.IO.Sections
 
         public static SectionInfo GetOrRegisterSectionInfo( Type sectionType )
         {
-            if ( !SectionInfosBySectionType.TryGetValue( sectionType, out var sectionInfo ) )
-            {
-                sectionInfo = new SectionInfo( sectionType );
-                sSectionInfosBySectionType[ sectionType ] = sectionInfo;
-                sSectionInfosBySignature[ sectionInfo.Signature ] = sectionInfo;
-                sSingleSectionInfosByDataType[ sectionInfo.DataType ] = sectionInfo;
-            }
+            if ( SectionInfosBySectionType.TryGetValue( sectionType, out var sectionInfo ) ) 
+                return sectionInfo;
+
+            sectionInfo = new SectionInfo( sectionType );
+            sSectionInfosBySectionType[ sectionType ] = sectionInfo;
+            sSectionInfosBySignature[ sectionInfo.Signature ] = sectionInfo;
+            sSingleSectionInfosByDataType[ sectionInfo.DataType ] = sectionInfo;
 
             return sectionInfo;
         }
 
-        public static SectionInfo Register<T>() where T : ISection
-        {
-            return GetOrRegisterSectionInfo( typeof( T ) );
-        }
+        public static SectionInfo Register<T>() where T : ISection => 
+            GetOrRegisterSectionInfo( typeof( T ) );
 
         static SectionRegistry()
         {

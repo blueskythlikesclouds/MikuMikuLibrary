@@ -1,115 +1,177 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Materials
 {
+    public enum MaterialTextureType
+    {
+        None = 0,
+        Color = 1,
+        Normal = 2,
+        Specular = 3,
+        Height = 4,
+        Reflection = 5,
+        Translucency = 6,
+        Transparency = 7,
+        EnvironmentSphere = 8,
+        EnvironmentCube = 9
+    }
+
+    public enum MaterialTextureCoordinateTranslationType
+    {
+        None = 0,
+        UV = 1,
+        Sphere = 2,
+        Cube = 3
+    }
+
     public class MaterialTexture
     {
-        public int Field00 { get; set; }
-        public int Field01 { get; set; }
-        public uint TextureId { get; set; }
-        public int Field02 { get; set; }
-        public float Field03 { get; set; }
-        public float Field04 { get; set; }
-        public float Field05 { get; set; }
-        public float Field06 { get; set; }
-        public float Field07 { get; set; }
-        public float Field08 { get; set; }
-        public float Field09 { get; set; }
-        public float Field10 { get; set; }
-        public float Field11 { get; set; }
-        public float Field12 { get; set; }
-        public float Field13 { get; set; }
-        public float Field14 { get; set; }
-        public float Field15 { get; set; }
-        public float Field16 { get; set; }
-        public float Field17 { get; set; }
-        public float Field18 { get; set; }
-        public float Field19 { get; set; }
-        public float Field20 { get; set; }
-        public float Field21 { get; set; }
-        public float Field22 { get; set; }
-        public float Field23 { get; set; }
-        public float Field24 { get; set; }
-        public float Field25 { get; set; }
-        public float Field26 { get; set; }
-        public float Field27 { get; set; }
-        public float Field28 { get; set; }
+        public static readonly IReadOnlyDictionary<MaterialTextureType, int[]> PreferredIndices =
+            new Dictionary<MaterialTextureType, int[]>
+            {
+                { MaterialTextureType.Color, new[] { 0, 1, 4 } },
+                { MaterialTextureType.Normal, new[] { 2 } },
+                { MaterialTextureType.Specular, new[] { 3 } },
+                { MaterialTextureType.Reflection, new[] { 5 } },
+                { MaterialTextureType.Translucency, new[] { 6 } },
+                { MaterialTextureType.Transparency, new[] { 4 } },
+                { MaterialTextureType.EnvironmentSphere, new[] { 5 } },
+                { MaterialTextureType.EnvironmentCube, new[] { 5 } }
+            };
 
-        public bool IsActive => Field02 != 240;
+        public uint SamplerFlags { get; set; }
+        public uint TextureId { get; set; }
+        public uint TextureFlags { get; set; }
+        public string ExtraShaderName { get; set; }
+        public float Weight { get; set; }
+        public Matrix4x4 TextureCoordinateMatrix { get; set; }
+
+        public bool RepeatU
+        {
+            get => BitHelper.Unpack( SamplerFlags, 0, 1 ) != 0;
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value ? 1u : 0, 0, 1 );
+        }
+
+        public bool RepeatV
+        {
+            get => BitHelper.Unpack( SamplerFlags, 1, 2 ) != 0;
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value ? 1u : 0, 1, 2 );
+        }
+
+        public bool MirrorU
+        {
+            get => BitHelper.Unpack( SamplerFlags, 2, 3 ) != 0;
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value ? 1u : 0, 2, 3 );
+        }
+
+        public bool MirrorV
+        {
+            get => BitHelper.Unpack( SamplerFlags, 3, 4 ) != 0;
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value ? 1u : 0, 3, 4 );
+        }
+
+        public bool IgnoreAlpha
+        {
+            get => BitHelper.Unpack( SamplerFlags, 4, 5 ) != 0;
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value ? 1u : 0, 4, 5 );
+        }
+
+        public uint Blend
+        {
+            get => BitHelper.Unpack( SamplerFlags, 5, 10 );
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value, 5, 10 );
+        }
+
+        public uint AlphaBlend
+        {
+            get => BitHelper.Unpack( SamplerFlags, 10, 15 );
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value, 10, 15 );
+        }
+
+        public bool Border
+        {
+            get => BitHelper.Unpack( SamplerFlags, 15, 16 ) != 0;
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value ? 1u : 0, 15, 16 );
+        }
+
+        public bool ClampToEdge
+        {
+            get => BitHelper.Unpack( SamplerFlags, 16, 17 ) != 0;
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value ? 1u : 0, 16, 17 );
+        }
+
+        public uint Filter
+        {
+            get => BitHelper.Unpack( SamplerFlags, 17, 20 );
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value, 17, 20 );
+        }
+
+        public uint MipMap
+        {
+            get => BitHelper.Unpack( SamplerFlags, 20, 22 );
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value, 20, 22 );
+        }
+
+        public uint MipMapBias
+        {
+            get => BitHelper.Unpack( SamplerFlags, 22, 30 );
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value, 22, 30 );
+        }
+
+        public uint AnisotropicFilter
+        {
+            get => BitHelper.Unpack( SamplerFlags, 30, 32 );
+            set => SamplerFlags = BitHelper.Pack( SamplerFlags, value, 30, 32 );
+        }
+
+        public MaterialTextureType Type
+        {
+            get => ( MaterialTextureType ) BitHelper.Unpack( TextureFlags, 0, 4 );
+            set => TextureFlags = BitHelper.Pack( TextureFlags, ( uint ) value, 0, 4 );
+        }
+
+        public uint TextureCoordinateIndex
+        {
+            get => BitHelper.Unpack( TextureFlags, 4, 8 );
+            set => TextureFlags = BitHelper.Pack( TextureFlags, value, 4, 8 );
+        }
+
+        public MaterialTextureCoordinateTranslationType TextureCoordinateTranslationType
+        {
+            get => ( MaterialTextureCoordinateTranslationType ) BitHelper.Unpack( TextureFlags, 8, 11 );
+            set => TextureFlags = BitHelper.Pack( TextureFlags, ( uint ) value, 8, 11 );
+        }
 
         internal void Read( EndianBinaryReader reader )
         {
-            Field00 = reader.ReadInt32();
-            Field01 = reader.ReadInt32();
+            SamplerFlags = reader.ReadUInt32();
             TextureId = reader.ReadUInt32();
-            Field02 = reader.ReadInt32();
-            Field03 = reader.ReadSingle();
-            Field04 = reader.ReadSingle();
-            Field05 = reader.ReadSingle();
-            Field06 = reader.ReadSingle();
-            Field07 = reader.ReadSingle();
-            Field08 = reader.ReadSingle();
-            Field09 = reader.ReadSingle();
-            Field10 = reader.ReadSingle();
-            Field11 = reader.ReadSingle();
-            Field12 = reader.ReadSingle();
-            Field13 = reader.ReadSingle();
-            Field14 = reader.ReadSingle();
-            Field15 = reader.ReadSingle();
-            Field16 = reader.ReadSingle();
-            Field17 = reader.ReadSingle();
-            Field18 = reader.ReadSingle();
-            Field19 = reader.ReadSingle();
-            Field20 = reader.ReadSingle();
-            Field21 = reader.ReadSingle();
-            Field22 = reader.ReadSingle();
-            Field23 = reader.ReadSingle();
-            Field24 = reader.ReadSingle();
-            Field25 = reader.ReadSingle();
-            Field26 = reader.ReadSingle();
-            Field27 = reader.ReadSingle();
-            Field28 = reader.ReadSingle();
+            TextureFlags = reader.ReadUInt32();
+            ExtraShaderName = reader.ReadString( StringBinaryFormat.FixedLength, 8 );
+            Weight = reader.ReadSingle();
+            TextureCoordinateMatrix = reader.ReadMatrix4x4();
+            reader.SkipNulls( 8 * sizeof( float ) );
         }
 
         internal void Write( EndianBinaryWriter writer )
         {
-            writer.Write( Field00 );
-            writer.Write( Field01 );
+            writer.Write( SamplerFlags );
             writer.Write( TextureId );
-            writer.Write( Field02 );
-            writer.Write( Field03 );
-            writer.Write( Field04 );
-            writer.Write( Field05 );
-            writer.Write( Field06 );
-            writer.Write( Field07 );
-            writer.Write( Field08 );
-            writer.Write( Field09 );
-            writer.Write( Field10 );
-            writer.Write( Field11 );
-            writer.Write( Field12 );
-            writer.Write( Field13 );
-            writer.Write( Field14 );
-            writer.Write( Field15 );
-            writer.Write( Field16 );
-            writer.Write( Field17 );
-            writer.Write( Field18 );
-            writer.Write( Field19 );
-            writer.Write( Field20 );
-            writer.Write( Field21 );
-            writer.Write( Field22 );
-            writer.Write( Field23 );
-            writer.Write( Field24 );
-            writer.Write( Field25 );
-            writer.Write( Field26 );
-            writer.Write( Field27 );
-            writer.Write( Field28 );
+            writer.Write( TextureFlags );
+            writer.Write( ExtraShaderName, StringBinaryFormat.FixedLength, 8 );
+            writer.Write( Weight );
+            writer.Write( TextureCoordinateMatrix );
+            writer.WriteNulls( 8 * sizeof( float ) );
         }
 
         public MaterialTexture()
         {
             TextureId = 0xFFFFFFFF;
-            Field02 = 240;
-            Field05 = 1f;
+            TextureFlags = 0xF0;
+            Weight = 1.0f;
+            TextureCoordinateMatrix = Matrix4x4.Identity;
         }
     }
 }

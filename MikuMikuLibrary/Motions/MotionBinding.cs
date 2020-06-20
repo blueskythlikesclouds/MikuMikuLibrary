@@ -20,14 +20,12 @@ namespace MikuMikuLibrary.Motions
             Parent.BoneInfos.Clear();
 
             foreach ( var boneBinding in skeleton.MotionBoneNames
-                .Where( x =>
-                    motionDatabase == null || motionDatabase.BoneNames.Contains( x, StringComparer.OrdinalIgnoreCase ) )
-                .Select( x =>
-                    BoneBindings.Find( y => y.Name.Equals( x, StringComparison.OrdinalIgnoreCase ) ) ??
-                    new BoneBinding { Name = x } )
+                .Where( x => motionDatabase == null || motionDatabase.BoneNames.Contains( x, StringComparer.OrdinalIgnoreCase ) )
+                .Select( x => BoneBindings.Find( y => y.Name.Equals( x, StringComparison.OrdinalIgnoreCase ) ) ?? new BoneBinding { Name = x } )
                 .OrderBy( x => sReferenceIndices.TryGetValue( x.Name, out int index ) ? index : int.MaxValue ) )
             {
                 var bone = skeleton.GetBone( boneBinding.Name );
+
                 if ( bone != null )
                 {
                     if ( bone.Type != BoneType.Rotation )
@@ -67,7 +65,7 @@ namespace MikuMikuLibrary.Motions
                 Parent.BoneInfos.Add( new BoneInfo
                 {
                     Name = name,
-                    Id = ( uint? ) motionDatabase?.BoneNames?.FindIndex(
+                    Id = ( uint? ) motionDatabase?.BoneNames?.FindIndex( 
                         x => x.Equals( name, StringComparison.OrdinalIgnoreCase ) ) ?? MurmurHash.Calculate( name )
                 } );
             }
@@ -82,6 +80,7 @@ namespace MikuMikuLibrary.Motions
 
                 if ( baseBoneBinding == null )
                     BoneBindings.Add( boneBinding );
+
                 else
                     baseBoneBinding.Merge( boneBinding );
             }

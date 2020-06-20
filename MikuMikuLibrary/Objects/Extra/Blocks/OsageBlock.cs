@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
 {
-    public class OsageBlock : Block
+    public class OsageBlock : NodeBlock
     {
         public override string Signature => "OSG";
 
@@ -17,27 +19,25 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
         internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
         {
-            if ( reader.AddressSpace == AddressSpace.Int64 )
-                reader.SeekCurrent( 4 );
-
             StartIndex = reader.ReadInt32();
             Count = reader.ReadInt32();
             ExternalName = stringSet.ReadString( reader );
             InternalName = stringSet.ReadString( reader );
+
+            reader.SeekCurrent( reader.AddressSpace.GetByteSize() ); // Integrated skin parameter
+            reader.SkipNulls( 3 * sizeof( uint ) );
 
             Bones.Capacity = Count;
         }
 
         internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
         {
-            if ( writer.AddressSpace == AddressSpace.Int64 )
-                writer.WriteNulls( 4 );
-
             writer.Write( StartIndex );
             writer.Write( Bones.Count );
             stringSet.WriteString( writer, ExternalName );
             stringSet.WriteString( writer, InternalName );
-            writer.WriteNulls( 40 );
+            writer.WriteNulls( writer.AddressSpace.GetByteSize() );
+            writer.WriteNulls( 3 * sizeof( uint ) );
         }
 
         public OsageBlock()

@@ -72,12 +72,15 @@ namespace FarcPack
                     var farcArchive = BinaryFile.Load<FarcArchive>( stream );
 
                     Directory.CreateDirectory( destinationFileName );
+
                     foreach ( string fileName in farcArchive )
+                    {
                         using ( var destination = File.Create( Path.Combine( destinationFileName, fileName ) ) )
                         using ( var source = farcArchive.Open( fileName, EntryStreamMode.OriginalStream ) )
                         {
                             source.CopyTo( destination );
                         }
+                    }
                 }
             }
         }

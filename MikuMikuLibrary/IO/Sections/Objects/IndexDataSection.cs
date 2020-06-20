@@ -1,22 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.Objects;
 
 namespace MikuMikuLibrary.IO.Sections.Objects
 {
     [Section( "OIDX" )]
     public class IndexDataSection : Section<object>
     {
-        private readonly List<ushort[]> mIndices;
+        private readonly List<SubMesh> mSubMeshes;
         private long mCurrentOffset;
 
         public override SectionFlags Flags => SectionFlags.HasNoRelocationTable;
 
-        public long AddIndices( ushort[] indices )
+        public long AddSubMesh( SubMesh subMesh )
         {
             long current = mCurrentOffset;
             {
-                mIndices.Add( indices );
-                mCurrentOffset += indices.Length * 2;
+                mSubMeshes.Add( subMesh );
+                mCurrentOffset += subMesh.Indices.Length * ( 1 << ( int ) subMesh.IndexFormat );
                 mCurrentOffset = AlignmentHelper.Align( mCurrentOffset, 4 );
             }
 
@@ -29,17 +31,41 @@ namespace MikuMikuLibrary.IO.Sections.Objects
 
         protected override void Write( object data, EndianBinaryWriter writer )
         {
-            foreach ( var indices in mIndices )
+            foreach ( var subMesh in mSubMeshes )
             {
-                writer.Write( indices );
-                writer.WriteAlignmentPadding( 4 );
+                switch ( subMesh.IndexFormat )
+                {
+                    case IndexFormat.UInt8:
+                        foreach ( uint index in subMesh.Indices )
+                            writer.Write( ( byte ) index );
+
+                        break;                   
+                    
+                    case IndexFormat.UInt16:
+                        foreach ( uint index in subMesh.Indices )
+                            writer.Write( ( ushort ) index );
+
+                        break;                   
+                    
+                    case IndexFormat.UInt32:
+                        foreach ( uint index in subMesh.Indices )
+                            writer.Write( index );
+
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+
+                writer.Align( 4 );
             }
         }
 
         public IndexDataSection( SectionMode mode, object data = null ) : base( mode, data )
         {
             if ( mode == SectionMode.Write )
-                mIndices = new List<ushort[]>();
+                mSubMeshes = new List<SubMesh>();
         }
     }
 }

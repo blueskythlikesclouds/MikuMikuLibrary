@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using MikuMikuLibrary.Textures;
@@ -14,10 +15,7 @@ namespace MikuMikuModel.GUI.Controls
         private Bitmap[ , ] mBitmaps;
         private Bitmap mYcbcrBitmap;
         private int mMipMapIndex;
-        private int mLevelIndex;
-
-        private Color mOriginalForeColor;
-        private Color mOriginalBackColor;
+        private int mArrayIndex;
 
         public static TextureViewControl Instance => sInstance ?? ( sInstance = new TextureViewControl() );
 
@@ -41,18 +39,18 @@ namespace MikuMikuModel.GUI.Controls
 
         public int CurrentLevelIndex
         {
-            get => mLevelIndex;
+            get => mArrayIndex;
             set
             {
                 if ( mTexture.IsYCbCr )
                     return;
 
-                value = Math.Max( 0, Math.Min( value, mTexture.Depth - 1 ) );
+                value = Math.Max( 0, Math.Min( value, mTexture.ArraySize - 1 ) );
 
-                if ( value == mLevelIndex )
+                if ( value == mArrayIndex )
                     return;
 
-                mLevelIndex = value;
+                mArrayIndex = value;
                 SetAll();
             }
         }
@@ -73,7 +71,7 @@ namespace MikuMikuModel.GUI.Controls
         {
             mSizeLabel.Text = mTexture.IsYCbCr
                 ? $"Size: {mTexture.Width}x{mTexture.Height}"
-                : $"Size: {mTexture[ mLevelIndex, mMipMapIndex ].Width}x{mTexture[ mLevelIndex, mMipMapIndex ].Height}";
+                : $"Size: {mTexture[ mArrayIndex, mMipMapIndex ].Width}x{mTexture[ mArrayIndex, mMipMapIndex ].Height}";
         }
 
         private void SetMipMapText()
@@ -83,18 +81,16 @@ namespace MikuMikuModel.GUI.Controls
 
         private void SetLevelText()
         {
-            mLevelLabel.Text =
-                mTexture.IsYCbCr ? "Level: 1/1" : $"Level: {mLevelIndex + 1}/{mTexture.Depth}";
+            mLevelLabel.Text = mTexture.IsYCbCr ? "Level: 1/1" : $"Level: {mArrayIndex + 1}/{mTexture.ArraySize}";
         }
 
         private void SetControlBackground()
         {
-            BackgroundImage = mTexture.IsYCbCr ? mYcbcrBitmap : mBitmaps[ mLevelIndex, mMipMapIndex ];
+            BackgroundImage = mTexture.IsYCbCr ? mYcbcrBitmap : mBitmaps[ mArrayIndex, mMipMapIndex ];
 
-            BackgroundImageLayout =
-                ClientSize.Width < BackgroundImage.Width || ClientSize.Height < BackgroundImage.Height
-                    ? ImageLayout.Zoom
-                    : ImageLayout.Center;
+            BackgroundImageLayout = ClientSize.Width < BackgroundImage.Width || ClientSize.Height < BackgroundImage.Height
+                ? ImageLayout.Zoom
+                : ImageLayout.Center;
 
             Refresh();
         }
@@ -110,6 +106,9 @@ namespace MikuMikuModel.GUI.Controls
 
         public void SetTexture( Texture texture )
         {
+            if ( mTexture == texture )
+                return;
+
             DisposeBitmaps();
 
             mTexture = texture;
@@ -121,11 +120,14 @@ namespace MikuMikuModel.GUI.Controls
 
             else
             {
-                mBitmaps = new Bitmap[ texture.Depth, texture.MipMapCount ];
-                for ( int i = 0; i < texture.Depth; i++ )
+                mBitmaps = new Bitmap[ texture.ArraySize, texture.MipMapCount ];
+                for ( int i = 0; i < texture.ArraySize; i++ )
                 for ( int j = 0; j < texture.MipMapCount; j++ )
                     mBitmaps[ i, j ] = TextureDecoder.Decode( texture[ i, j ] );
             }
+
+            mArrayIndex = 0;
+            mMipMapIndex = 0;
 
             SetAll();
         }
@@ -139,30 +141,26 @@ namespace MikuMikuModel.GUI.Controls
             mYcbcrBitmap?.Dispose();
         }
 
+        private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
+        {
+            if ( eventArgs.Style != null )
+                StyleHelpers.ApplyStyle( this, eventArgs.Style );
+            else
+                StyleHelpers.RestoreDefaultStyle( this );
+
+            Refresh();
+        }
+
         protected override void OnLoad( EventArgs eventArgs )
         {
-            mOriginalForeColor = mStatusStrip.ForeColor;
-            mOriginalBackColor = mStatusStrip.BackColor;
+            StyleHelpers.StoreDefaultStyle( this );
 
             if ( StyleSet.CurrentStyle != null )
-                ApplyStyle( StyleSet.CurrentStyle );
+                StyleHelpers.ApplyStyle( this, StyleSet.CurrentStyle );
 
             StyleSet.StyleChanged += OnStyleChanged;
 
             base.OnLoad( eventArgs );
-        }
-
-        private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
-        {
-            ApplyStyle( eventArgs.Style );
-        }
-
-        private void ApplyStyle( Style style )
-        {
-            mStatusStrip.BackColor = style?.Background ?? mOriginalBackColor;
-            mStatusStrip.ForeColor = style?.Foreground ?? mOriginalForeColor;
-
-            Refresh();
         }
 
         protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
@@ -200,6 +198,7 @@ namespace MikuMikuModel.GUI.Controls
             {
                 mComponents?.Dispose();
                 DisposeBitmaps();
+                StyleSet.StyleChanged -= OnStyleChanged;
             }
 
             base.Dispose( disposing );

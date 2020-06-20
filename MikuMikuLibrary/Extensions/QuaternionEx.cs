@@ -16,19 +16,13 @@ namespace MikuMikuLibrary.Extensions
             return ( float ) Math.Atan2( y, x );
         }
 
-        public static float GetRoll( this Quaternion q )
-        {
-            return ( float ) Math.Atan2( 2 * ( q.X * q.Y + q.W * q.Z ), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z );
-        }
+        public static float GetRoll( this Quaternion q ) => 
+            ( float ) Math.Atan2( 2 * ( q.X * q.Y + q.W * q.Z ), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z );
 
-        public static float GetYaw( this Quaternion q )
-        {
-            return ( float ) Math.Asin( Math.Max( -1, Math.Min( 1, -2 * ( q.X * q.Z - q.W * q.Y ) ) ) );
-        }
+        public static float GetYaw( this Quaternion q ) => 
+            ( float ) Math.Asin( Math.Max( -1, Math.Min( 1, -2 * ( q.X * q.Z - q.W * q.Y ) ) ) );
 
-        public static Vector3 ToEulerAngles( this Quaternion q )
-        {
-            return new Vector3( q.GetPitch(), q.GetYaw(), q.GetRoll() );
-        }
+        public static Vector3 ToEulerAngles( this Quaternion q ) => 
+            new Vector3( q.GetPitch(), q.GetYaw(), q.GetRoll() );
     }
 }

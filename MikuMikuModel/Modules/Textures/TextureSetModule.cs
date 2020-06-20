@@ -14,8 +14,7 @@ namespace MikuMikuModel.Modules.Textures
         public override bool Match( string fileName )
         {
             return fileName.EndsWith( ".bin", StringComparison.OrdinalIgnoreCase )
-                ? fileName.EndsWith( "_tex.bin",
-                    StringComparison.OrdinalIgnoreCase ) // TODO: Should this check be done?
+                ? fileName.EndsWith( "_tex.bin", StringComparison.OrdinalIgnoreCase ) // TODO: Should this check be done?
                 : base.Match( fileName );
         }
 

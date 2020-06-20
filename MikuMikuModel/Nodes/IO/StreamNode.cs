@@ -14,7 +14,7 @@ namespace MikuMikuModel.Nodes.IO
 
         protected override void Initialize()
         {
-            RegisterExportHandler<Stream>( filePath =>
+            AddExportHandler<Stream>( filePath =>
             {
                 using ( var stream = File.Create( filePath ) )
                 {
@@ -24,7 +24,7 @@ namespace MikuMikuModel.Nodes.IO
                     Data.CopyTo( stream );
                 }
             } );
-            RegisterReplaceHandler<Stream>( File.OpenRead );
+            AddReplaceHandler<Stream>( File.OpenRead );
         }
 
         protected override void PopulateCore()

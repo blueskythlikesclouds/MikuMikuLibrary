@@ -4,7 +4,7 @@ using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
 {
-    public class ExpressionBlock : Block
+    public class ExpressionBlock : NodeBlock
     {
         public override string Signature => "EXP";
 
@@ -18,6 +18,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             int expressionCount = reader.ReadInt32();
 
             Expressions.Capacity = expressionCount;
+
             for ( int i = 0; i < expressionCount; i++ )
                 Expressions.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
         }

@@ -30,19 +30,13 @@
 
     public static class BinaryFormatEx
     {
-        public static bool IsClassic( this BinaryFormat format )
-        {
-            return BinaryFormatUtilities.IsClassic( format );
-        }
+        public static bool IsClassic( this BinaryFormat format ) => 
+            BinaryFormatUtilities.IsClassic( format );
 
-        public static bool IsModern( this BinaryFormat format )
-        {
-            return BinaryFormatUtilities.IsModern( format );
-        }
+        public static bool IsModern( this BinaryFormat format ) => 
+            BinaryFormatUtilities.IsModern( format );
 
-        public static AddressSpace GetAddressSpace( this BinaryFormat format )
-        {
-            return BinaryFormatUtilities.GetAddressSpace( format );
-        }
+        public static AddressSpace GetAddressSpace( this BinaryFormat format ) => 
+            BinaryFormatUtilities.GetAddressSpace( format );
     }
 }

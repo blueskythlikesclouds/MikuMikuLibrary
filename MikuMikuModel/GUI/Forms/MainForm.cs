@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,10 +10,13 @@ using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
+using MikuMikuModel.Mementos;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes;
+using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Wrappers;
+using MikuMikuModel.Resources;
 using MikuMikuModel.Resources.Styles;
 using Ookii.Dialogs.WinForms;
 
@@ -28,236 +30,97 @@ namespace MikuMikuModel.GUI.Forms
 
         private string mCurrentlyOpenFilePath;
 
-        private OriginalStyle mOriginalStyle;
-
-        /// <summary>
-        ///     Returns true when cancel is selected
-        /// </summary>
-        private bool AskForSavingChanges()
-        {
-            if ( mNodeTreeView.TopDataNode == null || !( ( IDirtyNode ) mNodeTreeView.TopDataNode ).IsDirty )
-                return false;
-
-            var result = MessageBox.Show(
-                "You have unsaved changes. Do you want to save them?", Program.Name, MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question );
-
-            if ( result == DialogResult.Cancel )
-                return true;
-
-            if ( result == DialogResult.OK )
-                SaveFile();
-
-            return false;
-        }
-
-        private static bool CheckKeyPressRecursively( object item, Keys keys )
-        {
-            if ( !( item is ToolStripMenuItem menuItem ) )
-                return false;
-
-            if ( menuItem.ShortcutKeys == keys )
-            {
-                menuItem.PerformClick();
-                return true;
-            }
-
-            foreach ( var subItem in menuItem.DropDownItems )
-                if ( CheckKeyPressRecursively( subItem, keys ) )
-                    return true;
-
-            return false;
-        }
-
-        protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
-        {
-            if ( mControl != null && mControl.Focused )
-                return false;
-
-            foreach ( var menuItem in mMenuStrip.Items )
-                if ( CheckKeyPressRecursively( menuItem, keyData ) )
-                    return true;
-
-            var strip = mNodeTreeView.SelectedNode?.ContextMenuStrip;
-            if ( strip != null )
-                foreach ( var menuItem in strip.Items )
-                    if ( CheckKeyPressRecursively( menuItem, keyData ) )
-                        return true;
-
-            return base.ProcessCmdKey( ref msg, keyData );
-        }
-
-        /// <summary>
-        ///     Returns true if file was closed
-        /// </summary>
-        private bool CloseFile()
-        {
-            if ( AskForSavingChanges() )
-                return false;
-
-            Reset();
-            return true;
-        }
-
-        private void OnAbout( object sender, EventArgs e )
+        private void SetTitle( string fileName = null )
         {
             mStringBuilder.Clear();
-            mStringBuilder.AppendLine( Program.Name );
-            mStringBuilder.AppendFormat( "Version: {0}", Program.Version );
-#if DEBUG
-            mStringBuilder.Append( " - Debug" );
-#endif
-            mStringBuilder.AppendLine();
-            mStringBuilder.AppendLine( "This program was created by Skyth." );
-            mStringBuilder.Append( "Please see README.md for additional information." );
+            mStringBuilder.Append( Program.Name );
+            mStringBuilder.AppendFormat( " ({0})", Program.Version );
 
-            MessageBox.Show( mStringBuilder.ToString(), "About", MessageBoxButtons.OK );
+#if DEBUG
+            mStringBuilder.Append( " (Debug)" );
+#endif
+            if ( !string.IsNullOrEmpty( fileName ) )
+                mStringBuilder.AppendFormat( " - {0}", fileName );
+
+            mStringBuilder.AppendFormat( " - {0}",
+                ConfigurationList.Instance.CurrentConfiguration?.Name ?? "No configuration" );
+
+            Text = mStringBuilder.ToString();
         }
 
-        private void OnAfterSelect( object sender, TreeViewEventArgs e )
+        private void SetSplitContainerControl( Control control )
         {
-            if ( mNodeTreeView.SelectedDataNode is ReferenceNode referenceNode )
-                mPropertyGrid.SelectedObject = referenceNode.Node;
-            else
-                mPropertyGrid.SelectedObject = mNodeTreeView.SelectedDataNode;
-
-            // Set the control on the left to the node's control
             mMainSplitContainer.Panel1.Controls.Clear();
 
-            if ( ( mControl = mNodeTreeView.ControlOfSelectedDataNode ) != null )
-            {
-                mControl.Dock = DockStyle.Fill;
-                mMainSplitContainer.Panel1.Controls.Add( mControl );
-            }
-        }
-
-        private void OnConfigurations( object sender, EventArgs e )
-        {
-            using ( var configurationsForm = new ConfigurationForm() )
-            {
-                configurationsForm.ShowDialog( this );
-            }
-        }
-
-        protected override void OnDragDrop( DragEventArgs drgevent )
-        {
-            var filePaths = ( string[] ) drgevent.Data.GetData( DataFormats.FileDrop, false );
-            if ( filePaths.Length >= 1 && !AskForSavingChanges() )
-                OpenFile( filePaths[ 0 ] );
-
-            base.OnDragDrop( drgevent );
-        }
-
-        protected override void OnDragEnter( DragEventArgs drgevent )
-        {
-            drgevent.Effect = drgevent.Data.GetDataPresent( DataFormats.FileDrop )
-                ? DragDropEffects.Copy
-                : DragDropEffects.None;
-
-            base.OnDragEnter( drgevent );
-        }
-
-        private void OnExit( object sender, EventArgs e )
-        {
-            Close();
-        }
-
-        protected override void OnFormClosing( FormClosingEventArgs e )
-        {
-            e.Cancel = AskForSavingChanges();
-            base.OnFormClosing( e );
-        }
-
-        private void OnHelp( object sender, EventArgs e )
-        {
-            Process.Start( "https://github.com/blueskythlikesclouds/MikuMikuLibrary/wiki/Miku-Miku-Model" );
-        }
-
-        private void OnNodeClose( object sender, EventArgs e )
-        {
-            CloseFile();
-        }
-
-        private void OnOpen( object sender, EventArgs e )
-        {
-            OpenFile();
-        }
-
-        private void OnSave( object sender, EventArgs e )
-        {
-            SaveFile();
-        }
-
-        private void OnSaveAs( object sender, EventArgs e )
-        {
-            SaveFileAs();
-        }
-
-        public void OpenFile()
-        {
-            using ( var dialog = new OpenFileDialog() )
-            {
-                dialog.AutoUpgradeEnabled = true;
-                dialog.CheckFileExists = true;
-                dialog.CheckPathExists = true;
-                dialog.Filter = ModuleFilterGenerator.GenerateFilter(
-                    FormatModuleRegistry.ModelTypes.Where( x =>
-                        typeof( IBinaryFile ).IsAssignableFrom( x ) && x.IsClass && !x.IsAbstract &&
-                        NodeFactory.NodeTypes.ContainsKey( x ) ),
-                    FormatModuleFlags.Import );
-                dialog.Title = "Select a file to open.";
-                dialog.ValidateNames = true;
-                dialog.AddExtension = true;
-
-                if ( dialog.ShowDialog() == DialogResult.OK )
-                    OpenFile( dialog.FileName );
-            }
-        }
-
-        public void OpenFile( string filePath )
-        {
-            Reset();
-
-#if DEBUG
-            var node = NodeFactory.Create( filePath );
-#else
-
-            bool errorsOccured = false;
-
-            INode node = null;
-            try
-            {
-                node = NodeFactory.Create( filePath );
-            }
-            catch
-            {
-                errorsOccured = true;
-            }
-
-            if ( errorsOccured || !typeof( IBinaryFile ).IsAssignableFrom( node.DataType ) )
-            {
-                MessageBox.Show( "File could not be opened.", Program.Name, MessageBoxButtons.OK,
-                    MessageBoxIcon.Error );
-
-                node?.Dispose();
+            if ( control == null )
                 return;
-            }
-#endif
 
-            node.Exported += OnNodeExported;
+            mControl = control;
+            mControl.Dock = DockStyle.Fill;
+            mMainSplitContainer.Panel1.Controls.Add( mControl );
+        }
 
-            var treeNode = new NodeAsTreeNode( node );
+        private void RefreshNodeControls()
+        {
+            // Refresh the node control every time a change is made
+            SetSplitContainerControl( mNodeTreeView.ControlOfSelectedDataNode );
+
+            // Refresh the property grid
+            mPropertyGrid.Refresh();
+        }
+
+        private void SetSubscription( INode node, bool unsubscribe = false )
+        {
+            if ( unsubscribe )
             {
-                mNodeTreeView.Nodes.Add( treeNode );
+                node.Renamed -= OnNodeRenamed;
+                node.PropertyChanged -= OnNodePropertyChanged;
+                node.Added -= OnNodeAdded;
+                node.Removed -= OnNodeRemoved;
+                node.Imported -= OnNodeImported;
+                node.Replaced -= OnNodeReplaced;
+                node.Moved -= OnNodeMoved;
+
+                foreach ( var childNode in node.Nodes )
+                    SetSubscription( childNode, true );
             }
-            treeNode.Expand();
+            else
+            {
+                node.Renamed += OnNodeRenamed;
+                node.PropertyChanged += OnNodePropertyChanged;
+                node.Added += OnNodeAdded;
+                node.Removed += OnNodeRemoved;
+                node.Imported += OnNodeImported;
+                node.Replaced += OnNodeReplaced;
+                node.Moved += OnNodeMoved;
+            }
 
-            mCurrentlyOpenFilePath = filePath;
-            mSaveToolStripMenuItem.Enabled = true;
-            mSaveAsToolStripMenuItem.Enabled = true;
-            mCloseToolStripMenuItem.Enabled = true;
+            void OnNodeRenamed( object sender, NodeRenameEventArgs args ) =>
+                RefreshNodeControls();
 
-            SetTitle( Path.GetFileName( filePath ) );
+            void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args ) =>
+                RefreshNodeControls();
+
+            void OnNodeAdded( object sender, NodeAddEventArgs args )
+            {
+                SetSubscription( args.AddedNode );
+                RefreshNodeControls();
+            }
+
+            void OnNodeRemoved( object sender, NodeRemoveEventArgs args )
+            {
+                SetSubscription( args.RemovedNode, true );
+                RefreshNodeControls();
+            }
+
+            void OnNodeImported( object sender, NodeImportEventArgs args ) =>
+                RefreshNodeControls();
+
+            void OnNodeReplaced( object sender, NodeReplaceEventArgs args ) =>
+                RefreshNodeControls();
+
+            void OnNodeMoved( object sender, NodeMoveEventArgs args ) =>
+                RefreshNodeControls();
         }
 
         private void OnNodeExported( object sender, NodeExportEventArgs e )
@@ -270,6 +133,8 @@ namespace MikuMikuModel.GUI.Forms
         {
             if ( mNodeTreeView.TopNode != null )
             {
+                SetSubscription( mNodeTreeView.TopDataNode, true );
+
                 mNodeTreeView.TopNode.Dispose();
                 mNodeTreeView.TopDataNode.Exported -= OnNodeExported;
                 mNodeTreeView.TopDataNode.DisposeData();
@@ -285,7 +150,100 @@ namespace MikuMikuModel.GUI.Forms
             mCloseToolStripMenuItem.Enabled = false;
             mCurrentlyOpenFilePath = null;
 
+            MementoStack.Clear();
+
             SetTitle();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        public void OpenFile( string filePath )
+        {
+            Reset();
+
+#if DEBUG
+            var node = NodeFactory.Create( filePath );
+#else
+            INode node = null;
+            string exceptionMessage = null;
+
+            try
+            {
+                node = NodeFactory.Create( filePath );
+            }
+            catch ( Exception exception )
+            {
+                exceptionMessage = exception.Message;
+            }
+
+            if ( node != null && !typeof( IBinaryFile ).IsAssignableFrom( node.DataType ) )
+                exceptionMessage = "File type could not be determined.";
+
+            if ( node == null || !string.IsNullOrEmpty( exceptionMessage ) )
+            {
+                MessageBox.Show( $"Failed to open {Path.GetFileName( filePath )}.\nReason: {exceptionMessage}", Program.Name, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error );
+
+                return;
+            }
+#endif
+
+            SetSubscription( node );
+
+            node.Exported += OnNodeExported;
+
+            var treeNode = new NodeAsTreeNode( node );
+            {
+                mNodeTreeView.Nodes.Add( treeNode );
+            }
+
+            treeNode.Expand();
+
+            if ( node is FarcArchiveNode && node.Nodes.Count > 0 )
+                mNodeTreeView.SelectedNode = treeNode.Nodes[ 0 ] as NodeAsTreeNode;
+
+            mCurrentlyOpenFilePath = filePath;
+            mSaveToolStripMenuItem.Enabled = true;
+            mSaveAsToolStripMenuItem.Enabled = true;
+            mCloseToolStripMenuItem.Enabled = true;
+
+            SetTitle( Path.GetFileName( filePath ) );
+        }
+
+        public void OpenFile()
+        {
+            using ( var dialog = new OpenFileDialog() )
+            {
+                dialog.AutoUpgradeEnabled = true;
+                dialog.CheckFileExists = true;
+                dialog.CheckPathExists = true;
+                dialog.Filter = ModuleFilterGenerator.GenerateFilter(
+                    FormatModuleRegistry.ModelTypes.Where( x =>
+                        typeof( IBinaryFile ).IsAssignableFrom( x ) && x.IsClass && !x.IsAbstract && NodeFactory.NodeTypes.ContainsKey( x ) ),
+                    FormatModuleFlags.Import );
+                dialog.Title = "Select a file to open.";
+                dialog.ValidateNames = true;
+                dialog.AddExtension = true;
+
+                if ( dialog.ShowDialog() == DialogResult.OK )
+                    OpenFile( dialog.FileName );
+            }
+        }
+
+        private void OnOpen( object sender, EventArgs e )
+        {
+            OpenFile();
+        }
+
+        private bool SaveFileAs()
+        {
+            string path = mNodeTreeView.TopDataNode?.Export();
+            if ( string.IsNullOrEmpty( path ) )
+                return false;
+
+            mCurrentlyOpenFilePath = path;
+            return true;
         }
 
         private void SaveFile( string filePath )
@@ -309,34 +267,86 @@ namespace MikuMikuModel.GUI.Forms
             return true;
         }
 
-        private bool SaveFileAs()
+        private void OnSave( object sender, EventArgs e )
         {
-            string path = mNodeTreeView.TopDataNode?.Export();
-            if ( string.IsNullOrEmpty( path ) )
+            SaveFile();
+        }
+
+        private void OnSaveAs( object sender, EventArgs e )
+        {
+            SaveFileAs();
+        }
+
+        /// <summary>
+        ///     Returns true when cancel is selected
+        /// </summary>
+        private bool AskForSavingChanges()
+        {
+            if ( mNodeTreeView.TopDataNode == null || !( ( IDirtyNode ) mNodeTreeView.TopDataNode ).IsDirty )
                 return false;
 
-            mCurrentlyOpenFilePath = path;
+            var result = MessageBox.Show( "You have unsaved changes. Do you want to save them?", Program.Name, MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question );
+
+            if ( result == DialogResult.Cancel )
+                return true;
+
+            if ( result == DialogResult.OK )
+                SaveFile();
+
+            return false;
+        }
+
+        /// <summary>
+        ///     Returns true if file was closed
+        /// </summary>
+        private bool CloseFile()
+        {
+            if ( AskForSavingChanges() )
+                return false;
+
+            Reset();
             return true;
         }
 
-        private void SetTitle( string fileName = null )
+        private void OnNodeClose( object sender, EventArgs e )
         {
-            mStringBuilder.Clear();
-            mStringBuilder.Append( Program.Name );
-            mStringBuilder.AppendFormat( " ({0})", Program.Version );
-
-#if DEBUG
-            mStringBuilder.Append( " (Debug)" );
-#endif
-            if ( !string.IsNullOrEmpty( fileName ) )
-                mStringBuilder.AppendFormat( " - {0}", fileName );
-
-            mStringBuilder.AppendFormat( " - {0}",
-                ConfigurationList.Instance.CurrentConfiguration?.Name ?? "No configuration" );
-
-            Text = mStringBuilder.ToString();
+            CloseFile();
         }
 
+        private void OnExit( object sender, EventArgs e )
+        {
+            Close();
+        }
+
+        private void OnEditDropDownOpening( object sender, EventArgs e )
+        {
+            mUndoToolStripMenuItem.Enabled = MementoStack.IsPendingUndo;
+            mRedoToolStripMenuItem.Enabled = MementoStack.IsPendingRedo;
+        }
+
+        private void OnEditDropDownClosed( object sender, EventArgs e )
+        {
+            // Have them enabled for shortcut keys to work
+            mUndoToolStripMenuItem.Enabled = true;
+            mRedoToolStripMenuItem.Enabled = true;
+        }
+
+        private void OnUndo( object sender, EventArgs e )
+        {
+            MementoStack.Undo();
+        }
+
+        private void OnRedo( object sender, EventArgs e )
+        {
+            MementoStack.Redo();
+        }
+
+        private void OnConfigurations( object sender, EventArgs e )
+        {
+            using ( var configurationsForm = new ConfigurationForm() )
+                configurationsForm.ShowDialog( this );
+        }
 
         private void OnCombineMotions( object sender, EventArgs e )
         {
@@ -347,6 +357,7 @@ namespace MikuMikuModel.GUI.Forms
                 return;
 
             var configuration = ConfigurationList.Instance.FindConfiguration( filePath );
+
             if ( configuration?.BoneDatabase == null )
             {
                 MessageBox.Show( "Could not find suitable configuration for the file.", Program.Name,
@@ -390,92 +401,61 @@ namespace MikuMikuModel.GUI.Forms
             }
         }
 
-        private void StoreOriginalStyle()
+        private void OnGenerateMurmurHashes( object sender, EventArgs e )
         {
-            if ( mOriginalStyle != null )
-                return;
-
-            mOriginalStyle = new OriginalStyle
+            while ( true )
             {
-                ForeColor = base.ForeColor,
-                BackColor = base.BackColor,
+                using ( var inputDialog = new InputDialog() { WindowTitle = "Enter input" } )
+                {
+                    if ( inputDialog.ShowDialog() != DialogResult.OK )
+                        break;
 
-                TreeViewBackColor = mNodeTreeView.BackColor,
-                TreeViewForeColor = mNodeTreeView.ForeColor,
-                TreeViewLineColor = mNodeTreeView.LineColor,
+                    uint hash = MurmurHash.Calculate( inputDialog.Input );
 
-                PropertyGridLineColor = mPropertyGrid.LineColor,
-                PropertyGridSelectedItemWithFocusBackColor = mPropertyGrid.SelectedItemWithFocusBackColor,
-                PropertyGridViewBackColor = mPropertyGrid.ViewBackColor,
-                PropertyGridViewForeColor = mPropertyGrid.ViewForeColor
-            };
-        }
-
-        private void RestoreOriginalStyle()
-        {
-            if ( mOriginalStyle == null )
-                return;
-
-            mMenuStrip.Renderer = null;
-
-            base.BackColor = mOriginalStyle.BackColor;
-            base.ForeColor = mOriginalStyle.ForeColor;
-
-            mNodeTreeView.BackColor = mOriginalStyle.TreeViewBackColor;
-            mNodeTreeView.ForeColor = mOriginalStyle.TreeViewForeColor;
-            mNodeTreeView.LineColor = mOriginalStyle.TreeViewLineColor;
-
-            mPropertyGrid.LineColor = mOriginalStyle.PropertyGridLineColor;
-            mPropertyGrid.SelectedItemWithFocusBackColor = mOriginalStyle.PropertyGridSelectedItemWithFocusBackColor;
-            mPropertyGrid.ViewBackColor = mOriginalStyle.PropertyGridViewBackColor;
-            mPropertyGrid.ViewForeColor = mOriginalStyle.PropertyGridViewForeColor;
-
-            Refresh();
-        }
-
-        protected override void OnLoad( EventArgs eventArgs )
-        {
-            if ( Type.GetType( "Mono.Runtime" ) == null )
-            {
-                StoreOriginalStyle();
-
-                if ( StyleSet.CurrentStyle != null )
-                    ApplyStyle( StyleSet.CurrentStyle );
-
-                StyleSet.StyleChanged += OnStyleChanged;
-
-                InitializeStylesToolStripMenuItem();
+                    MessageBox.Show( $"{inputDialog.Input}: 0x{hash:X8} ({hash})", Program.Name,
+                        MessageBoxButtons.OK, MessageBoxIcon.None );
+                }
             }
+        }
 
-            base.OnLoad( eventArgs );
+        private void OnHelp( object sender, EventArgs e )
+        {
+            Process.Start( "https://github.com/blueskythlikesclouds/MikuMikuLibrary/wiki/Miku-Miku-Model" );
+        }
+
+        private void OnAbout( object sender, EventArgs e )
+        {
+            mStringBuilder.Clear();
+            mStringBuilder.AppendLine( Program.Name );
+            mStringBuilder.AppendFormat( "Version: {0}", Program.Version );
+#if DEBUG
+            mStringBuilder.Append( " - Debug" );
+#endif
+            mStringBuilder.AppendLine();
+            mStringBuilder.AppendLine( "This program was created by Skyth." );
+            mStringBuilder.Append( "Please see README.md for additional information." );
+
+            MessageBox.Show( mStringBuilder.ToString(), "About", MessageBoxButtons.OK );
+        }
+
+        private void OnAfterSelect( object sender, TreeViewEventArgs e )
+        {
+            if ( mNodeTreeView.SelectedDataNode is ReferenceNode referenceNode )
+                mPropertyGrid.SelectedObject = referenceNode.Node;
+
+            else
+                mPropertyGrid.SelectedObject = mNodeTreeView.SelectedDataNode;
+
+            // Set the control on the left to the node's control
+            SetSplitContainerControl( mNodeTreeView.ControlOfSelectedDataNode );
         }
 
         private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
         {
-            ApplyStyle( eventArgs.Style );
-        }
-
-        private void ApplyStyle( Style style )
-        {
-            if ( style == null )
-            {
-                RestoreOriginalStyle();
-                return;
-            }
-
-            mMenuStrip.Renderer = style.ToolStripRenderer;
-
-            base.BackColor = style.Background;
-            base.ForeColor = style.Foreground;
-
-            mNodeTreeView.BackColor = style.Background;
-            mNodeTreeView.ForeColor = style.Foreground;
-            mNodeTreeView.LineColor = style.SeparatorLight;
-
-            mPropertyGrid.LineColor = style.Border;
-            mPropertyGrid.SelectedItemWithFocusBackColor = style.Border;
-            mPropertyGrid.ViewBackColor = style.Background;
-            mPropertyGrid.ViewForeColor = style.Foreground;
+            if ( eventArgs.Style != null )
+                StyleHelpers.ApplyStyle( this, eventArgs.Style );
+            else
+                StyleHelpers.RestoreDefaultStyle( this );
 
             Refresh();
         }
@@ -492,10 +472,101 @@ namespace MikuMikuModel.GUI.Forms
                     ( s, e ) => StyleSet.CurrentStyle = style );
         }
 
-        /// <summary>
-        ///     Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void OnLoad( EventArgs eventArgs )
+        {
+            if ( Type.GetType( "Mono.Runtime" ) == null )
+            {
+                StyleHelpers.StoreDefaultStyle( this );
+
+                if ( StyleSet.CurrentStyle != null )
+                    StyleHelpers.ApplyStyle( this, StyleSet.CurrentStyle );
+
+                StyleSet.StyleChanged += OnStyleChanged;
+
+                InitializeStylesToolStripMenuItem();
+            }
+
+            if ( !ValueCache.Get<bool>( "IsNotFirstLaunch" ) )
+            {
+                using ( var firstLaunchForm = new FirstLaunchForm() )
+                    firstLaunchForm.ShowDialog( this );
+
+                ValueCache.Set( "IsNotFirstLaunch", true );
+            }
+
+            base.OnLoad( eventArgs );
+        }
+
+        protected override void OnDragDrop( DragEventArgs drgevent )
+        {
+            var filePaths = ( string[] ) drgevent.Data.GetData( DataFormats.FileDrop, false );
+
+            if ( filePaths.Length >= 1 && !AskForSavingChanges() )
+                OpenFile( filePaths[ 0 ] );
+
+            base.OnDragDrop( drgevent );
+        }
+
+        protected override void OnDragEnter( DragEventArgs drgevent )
+        {
+            drgevent.Effect = drgevent.Data.GetDataPresent( DataFormats.FileDrop )
+                ? DragDropEffects.Copy
+                : DragDropEffects.None;
+
+            base.OnDragEnter( drgevent );
+        }
+
+        private static bool CheckKeyPressRecursively( object item, Keys keys )
+        {
+            if ( !( item is ToolStripMenuItem menuItem ) )
+                return false;
+
+            if ( menuItem.ShortcutKeys == keys )
+            {
+                menuItem.PerformClick();
+                return true;
+            }
+
+            foreach ( var subItem in menuItem.DropDownItems )
+            {
+                if ( CheckKeyPressRecursively( subItem, keys ) )
+                    return true;
+            }
+
+            return false;
+        }
+
+        protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
+        {
+            if ( mControl != null && mControl.Focused )
+                return false;
+
+            foreach ( var menuItem in mMenuStrip.Items )
+            {
+                if ( CheckKeyPressRecursively( menuItem, keyData ) )
+                    return true;
+            }
+
+            var strip = mNodeTreeView.SelectedNode?.ContextMenuStrip;
+
+            if ( strip != null )
+            {
+                foreach ( var menuItem in strip.Items )
+                {
+                    if ( CheckKeyPressRecursively( menuItem, keyData ) )
+                        return true;
+                }
+            }
+
+            return base.ProcessCmdKey( ref msg, keyData );
+        }
+
+        protected override void OnFormClosing( FormClosingEventArgs e )
+        {
+            e.Cancel = AskForSavingChanges();
+            base.OnFormClosing( e );
+        }
+
         protected override void Dispose( bool disposing )
         {
             if ( disposing )
@@ -512,41 +583,15 @@ namespace MikuMikuModel.GUI.Forms
         public MainForm()
         {
             InitializeComponent();
+
+            Icon = ResourceStore.LoadIcon( "Icons/Application.ico" );
+
             SetTitle();
             Select();
 
 #if DEBUG
             mPropertyGrid.BrowsableAttributes = new AttributeCollection();
 #endif
-        }
-
-        private class OriginalStyle
-        {
-            public Color BackColor;
-            public Color ForeColor;
-            public Color TreeViewBackColor;
-            public Color TreeViewForeColor;
-            public Color TreeViewLineColor;
-            public Color PropertyGridLineColor;
-            public Color PropertyGridSelectedItemWithFocusBackColor;
-            public Color PropertyGridViewBackColor;
-            public Color PropertyGridViewForeColor;
-        }
-
-        private void OnMurmurHashGenerator( object sender, EventArgs e )
-        {
-            while ( true )
-            {
-                using ( var inputDialog = new InputDialog() { WindowTitle = "Enter input" } )
-                {
-                    if ( inputDialog.ShowDialog() != DialogResult.OK )
-                        break;
-
-                    uint hash = MurmurHash.Calculate( inputDialog.Input );
-                    MessageBox.Show( $"{inputDialog.Input}: 0x{hash:X8} ({hash})", Program.Name,
-                        MessageBoxButtons.OK, MessageBoxIcon.None );
-                }
-            }
         }
     }
 }

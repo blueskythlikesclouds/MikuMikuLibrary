@@ -26,27 +26,29 @@ namespace MikuMikuModel.Nodes.Textures
 
         protected override void Initialize()
         {
-            RegisterImportHandler<Texture>( filePath =>
+            AddImportHandler<Texture>( filePath =>
             {
                 var texture = TextureEncoder.Encode( filePath );
                 {
                     texture.Name = Path.GetFileNameWithoutExtension( filePath );
                     texture.Id = MurmurHash.Calculate( texture.Name );
                 }
+
                 Data.Textures.Add( texture );
             } );
-            RegisterImportHandler<Bitmap>( filePath =>
+            AddImportHandler<Bitmap>( filePath =>
             {
                 var texture = TextureEncoder.Encode( filePath );
                 {
                     texture.Name = Path.GetFileNameWithoutExtension( filePath );
                     texture.Id = MurmurHash.Calculate( texture.Name );
                 }
+
                 Data.Textures.Add( texture );
             } );
-            RegisterExportHandler<TextureSet>( filePath => Data.Save( filePath ) );
-            RegisterReplaceHandler<TextureSet>( BinaryFile.Load<TextureSet> );
-            RegisterCustomHandler( "Export All", () =>
+            AddExportHandler<TextureSet>( filePath => Data.Save( filePath ) );
+            AddReplaceHandler<TextureSet>( BinaryFile.Load<TextureSet> );
+            AddCustomHandler( "Export All", () =>
             {
                 using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
                 {
@@ -57,12 +59,13 @@ namespace MikuMikuModel.Nodes.Textures
                         return;
 
                     foreach ( var texture in Data.Textures )
+                    {
                         if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
-                            TextureDecoder.DecodeToPNG( texture,
-                                Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.png" ) );
+                            TextureDecoder.DecodeToPNG( texture, Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.png" ) );
+
                         else
-                            TextureDecoder.DecodeToDDS( texture,
-                                Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.dds" ) );
+                            TextureDecoder.DecodeToDDS( texture, Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.dds" ) );
+                    }
                 }
             }, Keys.Control | Keys.Shift | Keys.E );
 
@@ -73,8 +76,7 @@ namespace MikuMikuModel.Nodes.Textures
         {
             if ( Parent != null && Name.EndsWith( ".txd", StringComparison.OrdinalIgnoreCase ) )
             {
-                var textureDatabaseNode =
-                    Parent.FindNode<TextureDatabaseNode>( Path.ChangeExtension( Name, "txi" ) );
+                var textureDatabaseNode = Parent.FindNode<TextureDatabaseNode>( Path.ChangeExtension( Name, "txi" ) );
 
                 if ( textureDatabaseNode != null && Data.Textures.Count == textureDatabaseNode.Data.Textures.Count )
                 {
@@ -100,12 +102,15 @@ namespace MikuMikuModel.Nodes.Textures
                 return;
 
             var textureDatabase = new TextureDatabase();
+
             foreach ( var texture in Data.Textures )
+            {
                 textureDatabase.Textures.Add( new TextureInfo
                 {
                     Id = texture.Id,
                     Name = texture.Name
                 } );
+            }
 
             mTextureDatabaseNode.Replace( textureDatabase );
         }

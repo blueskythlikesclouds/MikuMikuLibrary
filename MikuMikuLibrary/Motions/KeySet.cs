@@ -96,15 +96,15 @@ namespace MikuMikuLibrary.Motions
                         foreach ( var key in Keys )
                             writer.Write( key.Tangent );
 
-                    writer.WriteAlignmentPadding( 4 );
+                    writer.Align( 4 );
                     foreach ( var key in Keys )
                         writer.Write( key.Value );
 
-                    writer.WriteAlignmentPadding( 4 );
+                    writer.Align( 4 );
                     foreach ( var key in Keys )
                         writer.Write( key.Frame );
 
-                    writer.WriteAlignmentPadding( 4 );
+                    writer.Align( 4 );
                 }
 
                 void WriteClassic()
@@ -113,7 +113,7 @@ namespace MikuMikuLibrary.Motions
                     foreach ( var key in Keys )
                         writer.Write( key.Frame );
 
-                    writer.WriteAlignmentPadding( 4 );
+                    writer.Align( 4 );
                     foreach ( var key in Keys )
                     {
                         writer.Write( key.Value );

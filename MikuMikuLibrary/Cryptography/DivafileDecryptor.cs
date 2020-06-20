@@ -2,7 +2,6 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using MikuMikuLibrary.Exceptions;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Cryptography
@@ -23,8 +22,7 @@ namespace MikuMikuLibrary.Cryptography
             IV = new byte[ 16 ]
         };
 
-        public static void ReadHeader( Stream source, bool skipSignature, out uint encryptedSize,
-            out uint unencryptedSize )
+        public static void ReadHeader( Stream source, bool skipSignature, out uint encryptedSize, out uint unencryptedSize )
         {
             var header = new byte[ skipSignature ? 8 : 16 ];
             source.Read( header, 0, header.Length );
@@ -32,8 +30,9 @@ namespace MikuMikuLibrary.Cryptography
             if ( !skipSignature )
             {
                 string signature = Encoding.UTF8.GetString( header, 0, 4 );
+
                 if ( signature != "DIVAFILE" )
-                    throw new InvalidSignatureException( signature, "DIVAFILE" );
+                    throw new InvalidDataException( $"Invalid signature (expected DIVAFILE)" );
             }
 
             int offset = skipSignature ? 0 : 8;
@@ -42,8 +41,7 @@ namespace MikuMikuLibrary.Cryptography
             unencryptedSize = BitConverter.ToUInt32( header, offset + 4 );
         }
 
-        public static CryptoStream CreateDecryptorStream( Stream source, bool readHeader = true,
-            bool skipSignature = false )
+        public static CryptoStream CreateDecryptorStream( Stream source, bool readHeader = true, bool skipSignature = false )
         {
             var decryptor = sAesManaged.CreateDecryptor();
 
@@ -53,6 +51,7 @@ namespace MikuMikuLibrary.Cryptography
             ReadHeader( source, skipSignature, out uint encryptedSize, out _ );
 
             var streamView = new StreamView( source, source.Position, encryptedSize, true );
+
             return new CryptoStream( streamView, decryptor, CryptoStreamMode.Read );
         }
 
@@ -61,12 +60,11 @@ namespace MikuMikuLibrary.Cryptography
         {
             var memoryStream = new MemoryStream();
 
-            using ( var cryptoStream = CreateDecryptorStream( source, readHeader, skipSignature ) )
-            {
+            using ( var cryptoStream = CreateDecryptorStream( source, readHeader, skipSignature ) ) 
                 cryptoStream.CopyTo( memoryStream );
-            }
 
             memoryStream.Seek( 0, SeekOrigin.Begin );
+
             return memoryStream;
         }
     }

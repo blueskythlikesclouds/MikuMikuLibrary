@@ -13,6 +13,7 @@ namespace MikuMikuModel.Nodes.Sprites
     {
         public override NodeFlags Flags => NodeFlags.Rename | NodeFlags.Export;
 
+        [Category( "General" )]
         [DisplayName( "Texture index" )]
         public uint TextureIndex
         {
@@ -20,6 +21,7 @@ namespace MikuMikuModel.Nodes.Sprites
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
         [DisplayName( "Resolution mode" )]
         public ResolutionMode ResolutionMode
         {
@@ -27,43 +29,91 @@ namespace MikuMikuModel.Nodes.Sprites
             set => SetProperty( value );
         }
 
+        [Browsable( false )]
+        public float NormalizedX
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }
+
+        [Browsable( false )]
+        public float NormalizedY
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }        
+        
+        [Browsable( false )]
+        public float NormalizedWidth
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }
+
+        [Browsable( false )]
+        public float NormalizedHeight
+        {
+            get => GetProperty<float>();
+            set => SetProperty( value );
+        }
+
+        [Category( "General" )]
         public float X
         {
             get => GetProperty<float>();
             set
             {
+                BeginCompoundMemento();
+
                 SetProperty( value );
                 CalculateNormalizedValues();
+
+                EndCompoundMemento();
             }
         }
 
+        [Category( "General" )]
         public float Y
         {
             get => GetProperty<float>();
             set
             {
+                BeginCompoundMemento();
+
                 SetProperty( value );
                 CalculateNormalizedValues();
+
+                EndCompoundMemento();
             }
         }
 
+        [Category( "General" )]
         public float Width
         {
             get => GetProperty<float>();
             set
             {
+                BeginCompoundMemento();
+
                 SetProperty( value );
                 CalculateNormalizedValues();
+
+                EndCompoundMemento();
             }
         }
 
+        [Category( "General" )]
         public float Height
         {
             get => GetProperty<float>();
             set
             {
+                BeginCompoundMemento();
+
                 SetProperty( value );
                 CalculateNormalizedValues();
+
+                EndCompoundMemento();
             }
         }
 
@@ -77,22 +127,23 @@ namespace MikuMikuModel.Nodes.Sprites
 
             var texture = spriteSet.TextureSet.Textures[ ( int ) Data.TextureIndex ];
 
-            Data.NormalizedX = Data.X / texture.Width;
-            Data.NormalizedY = Data.Y / texture.Height;
-            Data.NormalizedWidth = Data.Width / texture.Width;
-            Data.NormalizedHeight = Data.Height / texture.Height;
+            NormalizedX = Data.X / texture.Width;
+            NormalizedY = Data.Y / texture.Height;
+            NormalizedWidth = Data.Width / texture.Width;
+            NormalizedHeight = Data.Height / texture.Height;
         }
 
         protected override void Initialize()
         {
-            RegisterExportHandler<Bitmap>(filePath =>
+            AddExportHandler<Bitmap>( filePath =>
             {
                 var imageFormat = ImageFormat.Png;
 
-                if (!string.IsNullOrEmpty(filePath))
+                if ( !string.IsNullOrEmpty( filePath ) )
                 {
-                    string extension = Path.GetExtension(filePath).Trim('.').ToLowerInvariant();
-                    switch (extension)
+                    string extension = Path.GetExtension( filePath ).Trim( '.' ).ToLowerInvariant();
+
+                    switch ( extension )
                     {
                         case "png":
                             imageFormat = ImageFormat.Png;
@@ -112,12 +163,13 @@ namespace MikuMikuModel.Nodes.Sprites
                             break;
 
                         default:
-                            throw new ArgumentException("Image format could not be detected", nameof(filePath));
+                            throw new ArgumentException( "Image format could not be detected", nameof( filePath ) );
                     }
                 }
 
-                using (Bitmap oBitmap = SpriteCropper.Crop(Data, FindParent<SpriteSetNode>().Data)) oBitmap.Save(filePath, imageFormat);
-            });
+                using ( var bitmap = SpriteCropper.Crop( Data, FindParent<SpriteSetNode>().Data ) )
+                    bitmap.Save( filePath, imageFormat );
+            } );
         }
 
         protected override void PopulateCore()
@@ -138,9 +190,9 @@ namespace MikuMikuModel.Nodes.Sprites
             {
                 var spriteSetNode = FindParent<SpriteSetNode>();
                 var spriteSet = spriteSetNode.Data;
-                Bitmap cropped = SpriteCropper.Crop(Data, spriteSet);
+                Bitmap cropped = SpriteCropper.Crop( Data, spriteSet );
 
-                SpriteViewControl.Instance.SetBitmap(cropped);
+                SpriteViewControl.Instance.SetBitmap( cropped );
                 return SpriteViewControl.Instance;
             }
         }

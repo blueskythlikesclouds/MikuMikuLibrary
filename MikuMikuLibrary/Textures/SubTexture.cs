@@ -15,6 +15,7 @@ namespace MikuMikuLibrary.Textures
         internal void Read( EndianBinaryReader reader )
         {
             int signature = reader.ReadInt32();
+
             if ( signature != 0x02505854 )
                 throw new InvalidDataException( "Invalid signature (expected TXP with type 2)" );
 

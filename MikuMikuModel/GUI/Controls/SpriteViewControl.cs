@@ -17,6 +17,7 @@ namespace MikuMikuModel.GUI.Controls
             // 
             // SpriteViewControl
             // 
+            this.DoubleBuffered = true;
             this.Name = "SpriteViewControl";
             this.ResumeLayout(false);
 

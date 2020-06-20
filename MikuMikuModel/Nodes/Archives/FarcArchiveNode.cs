@@ -20,12 +20,14 @@ namespace MikuMikuModel.Nodes.Archives
 
         public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/Archive.png" );
 
+        [Category( "General" )]
         public int Alignment
         {
             get => GetProperty<int>();
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
         [DisplayName( "Enable compression" )]
         public bool IsCompressed
         {
@@ -35,49 +37,51 @@ namespace MikuMikuModel.Nodes.Archives
 
         protected override void Initialize()
         {
-            RegisterImportHandler<Stream>( filePath => Data.Add( Path.GetFileName( filePath ), filePath ) );
-            RegisterExportHandler<FarcArchive>( filePath => Data.Save( filePath ) );
-            RegisterReplaceHandler<FarcArchive>( BinaryFile.Load<FarcArchive> );
-            RegisterCustomHandler( "Export All", () =>
+            AddImportHandler<Stream>( filePath => Data.Add( Path.GetFileName( filePath ), filePath ) );
+            AddExportHandler<FarcArchive>( filePath => Data.Save( filePath ) );
+            AddReplaceHandler<FarcArchive>( BinaryFile.Load<FarcArchive> );
+            AddCustomHandler( "Export All", () =>
+            {
+                using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
                 {
-                    using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
+                    folderBrowseDialog.Description = "Select a folder to export entries to.";
+                    folderBrowseDialog.UseDescriptionForTitle = true;
+
+                    if ( folderBrowseDialog.ShowDialog() != DialogResult.OK )
+                        return;
+
+                    foreach ( string handle in Data.Entries )
                     {
-                        folderBrowseDialog.Description = "Select a folder to export entries to.";
-                        folderBrowseDialog.UseDescriptionForTitle = true;
-
-                        if ( folderBrowseDialog.ShowDialog() != DialogResult.OK )
-                            return;
-
-                        foreach ( string handle in Data.Entries )
-                            using ( var source = Data.Open( handle, EntryStreamMode.OriginalStream ) )
-                            using ( var destination =
-                                File.Create( Path.Combine( folderBrowseDialog.SelectedPath, handle ) ) )
-                            {
-                                source.CopyTo( destination );
-                            }
+                        using ( var source = Data.Open( handle, EntryStreamMode.OriginalStream ) )
+                        using ( var destination = File.Create( Path.Combine( folderBrowseDialog.SelectedPath, handle ) ) )
+                            source.CopyTo( destination );
                     }
-                }, Keys.Control | Keys.Shift | Keys.E );
+                }
+            }, Keys.Control | Keys.Shift | Keys.E );
         }
 
         protected override void PopulateCore()
         {
             foreach ( string handle in Data )
             {
-                var module = ModuleImportUtilities.GetModule( handle,
-                    () => Data.Open( handle, EntryStreamMode.OriginalStream ) );
+                var module = ModuleImportUtilities.GetModule( handle, () => Data.Open( handle, EntryStreamMode.OriginalStream ) );
 
-                Nodes.Add(
-                    module != null && typeof( IBinaryFile ).IsAssignableFrom( module.ModelType ) &&
-                    NodeFactory.NodeTypes.ContainsKey( module.ModelType )
-                        ? NodeFactory.Create( module.ModelType, handle,
-                            new Func<Stream>( () => Data.Open( handle, EntryStreamMode.MemoryStream ) ) )
-                        : new StreamNode( handle, Data.Open( handle, EntryStreamMode.OriginalStream ) ) );
+                INode node;
+                
+                if ( module != null && typeof( IBinaryFile ).IsAssignableFrom( module.ModelType ) && NodeFactory.NodeTypes.ContainsKey( module.ModelType ) )
+                    node = NodeFactory.Create( module.ModelType, handle, new Func<Stream>( () => Data.Open( handle, EntryStreamMode.MemoryStream ) ) );
+
+                else
+                    node = new StreamNode( handle, Data.Open( handle, EntryStreamMode.OriginalStream ) );
+
+                Nodes.Add( node );
             }
         }
 
         protected override void SynchronizeCore()
         {
             foreach ( var node in Nodes )
+            {
                 switch ( node )
                 {
                     case IDirtyNode dirtyNode when dirtyNode.IsDirty:
@@ -87,9 +91,9 @@ namespace MikuMikuModel.Nodes.Archives
                         Data.Add( streamNode.Name, streamNode.Data, true, ConflictPolicy.Replace );
                         break;
                 }
+            }
 
-            foreach ( string entryName in Data.Entries.Except( Nodes.Select( x => x.Name ),
-                StringComparer.InvariantCultureIgnoreCase ).ToList() )
+            foreach ( string entryName in Data.Entries.Except( Nodes.Select( x => x.Name ), StringComparer.InvariantCultureIgnoreCase ).ToList() )
                 Data.Remove( entryName );
         }
 

@@ -19,7 +19,7 @@ namespace MikuMikuModel.Modules.Motions
         {
             var motion = new Motion();
             {
-                motion.Load( source,
+                motion.Load( source, 
                     ConfigurationList.Instance.CurrentConfiguration?.BoneDatabase?.Skeletons?[ 0 ], true );
             }
             return motion;
@@ -27,7 +27,7 @@ namespace MikuMikuModel.Modules.Motions
 
         protected override void ExportCore( Motion model, Stream destination, string fileName )
         {
-            model.Save( destination,
+            model.Save( destination, 
                 ConfigurationList.Instance.CurrentConfiguration?.BoneDatabase?.Skeletons?[ 0 ], true );
         }
     }

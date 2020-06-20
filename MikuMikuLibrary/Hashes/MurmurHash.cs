@@ -57,9 +57,7 @@ namespace MikuMikuLibrary.Hashes
                 return Calculate( bufferPtr, buffer.Length );
         }
 
-        public static uint Calculate( string value )
-        {
-            return Calculate( value, Encoding.UTF8 );
-        }
+        public static uint Calculate( string value ) => 
+            Calculate( value, Encoding.UTF8 );
     }
 }
