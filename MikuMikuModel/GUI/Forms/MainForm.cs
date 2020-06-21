@@ -73,53 +73,27 @@ namespace MikuMikuModel.GUI.Forms
         {
             if ( unsubscribe )
             {
-                node.Renamed -= OnNodeRenamed;
-                node.PropertyChanged -= OnNodePropertyChanged;
                 node.Added -= OnNodeAdded;
                 node.Removed -= OnNodeRemoved;
-                node.Imported -= OnNodeImported;
                 node.Replaced -= OnNodeReplaced;
-                node.Moved -= OnNodeMoved;
 
                 foreach ( var childNode in node.Nodes )
                     SetSubscription( childNode, true );
             }
             else
             {
-                node.Renamed += OnNodeRenamed;
-                node.PropertyChanged += OnNodePropertyChanged;
                 node.Added += OnNodeAdded;
                 node.Removed += OnNodeRemoved;
-                node.Imported += OnNodeImported;
                 node.Replaced += OnNodeReplaced;
-                node.Moved += OnNodeMoved;
             }
 
-            void OnNodeRenamed( object sender, NodeRenameEventArgs args ) =>
-                RefreshNodeControls();
-
-            void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args ) =>
-                RefreshNodeControls();
-
-            void OnNodeAdded( object sender, NodeAddEventArgs args )
-            {
+            void OnNodeAdded( object sender, NodeAddEventArgs args ) =>
                 SetSubscription( args.AddedNode );
-                RefreshNodeControls();
-            }
 
-            void OnNodeRemoved( object sender, NodeRemoveEventArgs args )
-            {
+            void OnNodeRemoved( object sender, NodeRemoveEventArgs args ) =>
                 SetSubscription( args.RemovedNode, true );
-                RefreshNodeControls();
-            }
-
-            void OnNodeImported( object sender, NodeImportEventArgs args ) =>
-                RefreshNodeControls();
 
             void OnNodeReplaced( object sender, NodeReplaceEventArgs args ) =>
-                RefreshNodeControls();
-
-            void OnNodeMoved( object sender, NodeMoveEventArgs args ) =>
                 RefreshNodeControls();
         }
 
@@ -151,6 +125,8 @@ namespace MikuMikuModel.GUI.Forms
             mCurrentlyOpenFilePath = null;
 
             MementoStack.Clear();
+            ModelViewControl.ResetInstance();
+            TextureViewControl.ResetInstance();
 
             SetTitle();
 

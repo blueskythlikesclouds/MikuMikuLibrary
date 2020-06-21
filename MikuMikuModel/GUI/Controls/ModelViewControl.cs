@@ -76,6 +76,11 @@ namespace MikuMikuModel.GUI.Controls
 
         private bool CanRender => mDefaultShader != null && mGridShader != null;
 
+        public static void ResetInstance()
+        {
+            sInstance?.Reset();
+        }
+
         public static void DisposeInstance()
         {
             sInstance?.Dispose();
@@ -167,6 +172,8 @@ namespace MikuMikuModel.GUI.Controls
             mShouldRedraw = true;
             mModel?.Dispose();
             mModel = null;
+
+            GL.Finish();
 
             ResetCamera();
         }
@@ -548,10 +555,6 @@ namespace MikuMikuModel.GUI.Controls
             base.OnResize( e );
         }
 
-        /// <summary>
-        ///     Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose( bool disposing )
         {
             if ( disposing )

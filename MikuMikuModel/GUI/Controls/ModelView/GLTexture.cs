@@ -30,6 +30,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             };
 
         private readonly long mLength;
+        private bool mDisposed;
 
         public int Id { get; }
         public TextureTarget Target { get; }
@@ -47,8 +48,15 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         protected void Dispose( bool disposing )
         {
+            if ( mDisposed )
+                return;
+
             GL.DeleteTexture( Id );
+            GL.Finish();
+
             GC.RemoveMemoryPressure( mLength );
+
+            mDisposed = true;
         }
 
         ~GLTexture()

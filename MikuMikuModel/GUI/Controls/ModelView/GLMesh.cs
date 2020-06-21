@@ -9,6 +9,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 {
     public class GLMesh : IDrawable
     {
+        private bool mDisposed;
+
         public int VertexArrayId { get; }
 
         public GLBuffer<Sn.Vector3> PositionBuffer { get; }
@@ -30,8 +32,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
             GL.BindVertexArray( VertexArrayId );
 
-            foreach ( var indexTable in SubMeshes )
-                indexTable.Draw( shaderProgram );
+            foreach ( var subMesh in SubMeshes )
+                subMesh.Draw( shaderProgram );
         }
 
         public void Dispose()
@@ -52,6 +54,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         protected void Dispose( bool disposing )
         {
+            if ( mDisposed )
+                return;
+
             if ( disposing )
             {
                 PositionBuffer?.Dispose();
@@ -61,11 +66,14 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 TexCoord1Buffer?.Dispose();
                 Color0Buffer?.Dispose();
 
-                foreach ( var indexTable in SubMeshes )
-                    indexTable.Dispose();
+                foreach ( var subMesh in SubMeshes )
+                    subMesh.Dispose();
             }
 
             GL.DeleteVertexArray( VertexArrayId );
+            GL.Finish();
+
+            mDisposed = true;
         }
 
         ~GLMesh()

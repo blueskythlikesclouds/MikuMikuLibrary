@@ -55,6 +55,11 @@ namespace MikuMikuModel.GUI.Controls
             }
         }
 
+        public static void ResetInstance()
+        {
+            sInstance?.DisposeBitmaps();
+        }
+
         public static void DisposeInstance()
         {
             sInstance?.Dispose();
@@ -135,10 +140,14 @@ namespace MikuMikuModel.GUI.Controls
         private void DisposeBitmaps()
         {
             if ( mBitmaps != null )
+            {
                 foreach ( var bitmap in mBitmaps )
                     bitmap.Dispose();
+            }
 
             mYcbcrBitmap?.Dispose();
+
+            mTexture = null;
         }
 
         private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )

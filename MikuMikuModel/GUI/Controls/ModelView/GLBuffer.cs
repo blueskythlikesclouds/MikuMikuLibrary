@@ -5,6 +5,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 {
     public class GLBuffer<T> : IDisposable where T : unmanaged
     {
+        private bool mDisposed;
+
         public T[] Array { get; }
         public int Id { get; }
         public BufferTarget Target { get; }
@@ -26,12 +28,15 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         protected void Dispose( bool disposing )
         {
-            if ( disposing )
-            {
-            }
+            if ( mDisposed )
+                return;
 
             GL.DeleteBuffer( Id );
+            GL.Finish();
+
             GC.RemoveMemoryPressure( Stride * Array.Length );
+
+            mDisposed = true;
         }
 
         ~GLBuffer()

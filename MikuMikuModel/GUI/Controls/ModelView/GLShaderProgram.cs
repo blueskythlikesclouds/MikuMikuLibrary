@@ -14,6 +14,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         private static readonly Dictionary<string, GLShaderProgram> sShaderPrograms;
         private readonly Dictionary<string, int> mUniforms;
 
+        private bool mDisposed;
+
         public static IReadOnlyDictionary<string, GLShaderProgram> ShaderPrograms => sShaderPrograms;
 
         public string Name { get; }
@@ -83,11 +85,13 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         protected void Dispose( bool disposing )
         {
-            if ( disposing )
-            {
-            }
+            if ( mDisposed )
+                return;
 
             GL.DeleteProgram( Id );
+            GL.Finish();
+
+            mDisposed = true;
         }
 
         public static GLShaderProgram Create( string shaderName )
