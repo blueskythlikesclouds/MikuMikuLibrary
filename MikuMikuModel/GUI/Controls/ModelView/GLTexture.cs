@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MikuMikuLibrary.Textures;
 using OpenTK.Graphics.OpenGL;
@@ -8,6 +9,25 @@ namespace MikuMikuModel.GUI.Controls.ModelView
     public class GLTexture : IDisposable
     {
         private static readonly int[] sCubeMapIndices = { 0, 1, 2, 3, 5, 4 };
+
+        private static readonly IReadOnlyDictionary<TextureFormat, InternalFormat> sInternalFormatMap =
+            new Dictionary<TextureFormat, InternalFormat>
+            {
+                { TextureFormat.A8, InternalFormat.Alpha8 },
+                { TextureFormat.RGB8, InternalFormat.Rgb8 },
+                { TextureFormat.RGBA8, InternalFormat.Rgba8 },
+                { TextureFormat.RGB5, InternalFormat.Rgb5 },
+                { TextureFormat.RGB5A1, InternalFormat.Rgb5A1 },
+                { TextureFormat.RGBA4, InternalFormat.Rgba4 },
+                { TextureFormat.DXT1, InternalFormat.CompressedRgbS3tcDxt1Ext },
+                { TextureFormat.DXT1a, InternalFormat.CompressedRgbaS3tcDxt1Ext },
+                { TextureFormat.DXT3, InternalFormat.CompressedRgbaS3tcDxt3Ext },
+                { TextureFormat.DXT5, InternalFormat.CompressedRgbaS3tcDxt5Ext },
+                { TextureFormat.ATI1, InternalFormat.CompressedRedRgtc1 },
+                { TextureFormat.ATI2, InternalFormat.CompressedRgRgtc2 },
+                { TextureFormat.L8, InternalFormat.Luminance8 },
+                { TextureFormat.L8A8, InternalFormat.Luminance8Alpha8 }
+            };
 
         private readonly long mLength;
 
@@ -51,7 +71,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.Linear );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
-                var format = GetGLInternalFormat( texture.Format );
+                var format = sInternalFormatMap[ texture.Format ];
 
                 for ( int i = 0; i < sCubeMapIndices.Length; i++ )
                 for ( int j = 0; j < texture.MipMapCount; j++ )
@@ -72,7 +92,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.LinearMipmapLinear );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
-                var format = GetGLInternalFormat( texture.Format );
+                var format = sInternalFormatMap[ texture.Format ];
 
                 for ( int i = 0; i < texture.MipMapCount; i++ )
                 {
@@ -85,35 +105,6 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 .SelectMany( x => x ).Sum( x => x.Data.Length );
 
             GC.AddMemoryPressure( mLength );
-
-            InternalFormat GetGLInternalFormat( TextureFormat textureFormat )
-            {
-                switch ( textureFormat )
-                {
-                    case TextureFormat.RGB:
-                        return InternalFormat.Rgb;
-
-                    case TextureFormat.RGBA:
-                        return InternalFormat.Rgba;
-
-                    case TextureFormat.DXT1:
-                        return InternalFormat.CompressedRgbaS3tcDxt1Ext;
-
-                    case TextureFormat.DXT3:
-                        return InternalFormat.CompressedRgbaS3tcDxt3Ext;
-
-                    case TextureFormat.DXT5:
-                        return InternalFormat.CompressedRgbaS3tcDxt5Ext;
-
-                    case TextureFormat.ATI1:
-                        return InternalFormat.CompressedRedRgtc1;
-
-                    case TextureFormat.ATI2:
-                        return InternalFormat.CompressedRgRgtc2;
-                }
-
-                throw new ArgumentException( nameof( textureFormat ) );
-            }
         }
     }
 }

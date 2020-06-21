@@ -56,10 +56,10 @@ namespace TxpConverter
                             if ( textureFileName.EndsWith( ".png", StringComparison.OrdinalIgnoreCase ) )
                             {
                                 var bitmap = new Bitmap( textureFileName );
-                                var format = TextureFormat.RGB;
+                                var format = TextureFormat.RGB8;
 
                                 if ( DDSCodec.HasTransparency( bitmap ) )
-                                    format = TextureFormat.RGBA;
+                                    format = TextureFormat.RGBA8;
 
                                 texture = TextureEncoder.Encode( new Bitmap( textureFileName ), format, false );
                             }

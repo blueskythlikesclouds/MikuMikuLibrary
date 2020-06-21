@@ -50,18 +50,19 @@ namespace MikuMikuModel.Nodes.Textures
 
                 if ( Data.IsYCbCr )
                     return TextureEncoder.Encode( bitmap,
-                        hasTransparency ? TextureFormat.RGBA : TextureFormat.RGB, false );
+                        hasTransparency ? TextureFormat.RGBA8 : TextureFormat.RGB8, false );
 
                 var format =
                     Data.Format == TextureFormat.DXT1 ||
+                    Data.Format == TextureFormat.DXT1a ||
                     Data.Format == TextureFormat.DXT3 ||
                     Data.Format == TextureFormat.DXT5 ? hasTransparency
                         ? TextureFormat.DXT5
                         : TextureFormat.DXT1 :
-                    Data.Format == TextureFormat.RGB ||
-                    Data.Format == TextureFormat.RGBA ? hasTransparency
-                        ? TextureFormat.RGBA
-                        : TextureFormat.RGB : Data.Format;
+                    Data.Format == TextureFormat.RGB8 ||
+                    Data.Format == TextureFormat.RGBA8 ? hasTransparency
+                        ? TextureFormat.RGBA8
+                        : TextureFormat.RGB8 : Data.Format;
 
                 return TextureEncoder.Encode( bitmap, format, Data.MipMapCount != 0 );
             }

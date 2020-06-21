@@ -43,7 +43,7 @@ namespace MikuMikuLibrary.Textures
 
             switch ( subTexture.Format )
             {
-                case TextureFormat.RGB:
+                case TextureFormat.RGB8:
                 {
                     var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb );
 
@@ -54,7 +54,7 @@ namespace MikuMikuLibrary.Textures
                     break;
                 }
 
-                case TextureFormat.RGBA:
+                case TextureFormat.RGBA8:
                 {
                     var bitmapData = bitmap.LockBits( rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb );
 
