@@ -192,6 +192,12 @@ namespace MikuMikuModel.Nodes.IO
             base.OnRemove( removedNode );
         }
 
+        protected override void OnImport( string filePath )
+        {
+            IsDirty = true;
+            base.OnImport( filePath );
+        }
+
         protected override void OnExport( string filePath )
         {
             IsDirty = false;
