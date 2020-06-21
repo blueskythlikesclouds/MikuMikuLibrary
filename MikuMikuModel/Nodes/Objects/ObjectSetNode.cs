@@ -576,8 +576,23 @@ namespace MikuMikuModel.Nodes.Objects
                 if ( oldObject == null )
                     continue;
 
-                if ( newObject.Skin != null && newObject.Skin.Blocks.Count == 0 && oldObject.Skin != null )
-                    newObject.Skin.Blocks.AddRange( oldObject.Skin.Blocks );
+                if ( newObject.Skin != null && oldObject.Skin != null )
+                {
+                    foreach ( var newBone in newObject.Skin.Bones )
+                    {
+                        if ( newBone.Id != 0xFFFFFFFF )
+                            continue;
+
+                        var oldBone = oldObject.Skin.Bones.FirstOrDefault( x => 
+                            x.Name.Equals( newBone.Name, StringComparison.OrdinalIgnoreCase ) );
+
+                        if ( oldBone != null )
+                            newBone.Id = oldBone.Id;
+                    }
+
+                    if ( newObject.Skin.Blocks.Count == 0 )
+                        newObject.Skin.Blocks.AddRange( oldObject.Skin.Blocks );
+                }
 
                 newObject.Name = oldObject.Name;
                 newObject.Id = oldObject.Id;

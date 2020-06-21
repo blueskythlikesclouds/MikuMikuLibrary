@@ -199,16 +199,21 @@ namespace MikuMikuLibrary.Objects
 
                 if ( skeleton != null )
                 {
-                    foreach ( var skin in Objects.Where( x => x.Skin != null ).Select( x => x.Skin ) )
-                    foreach ( var boneInfo in skin.Bones )
+                    foreach ( var obj in Objects.Where( x => x.Skin != null ) )
                     {
-                        int index = skeleton.ObjectBoneNames.FindIndex( x =>
-                            x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
+                        if ( obj.Name.StartsWith( "STG", StringComparison.OrdinalIgnoreCase ) )
+                            continue;
 
-                        boneInfo.IsEx = index < 0;
+                        foreach ( var boneInfo in obj.Skin.Bones )
+                        {
+                            int index = skeleton.ObjectBoneNames.FindIndex( x =>
+                                x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
 
-                        if ( !boneInfo.IsEx )
-                            boneInfo.Id = ( uint ) index;
+                            boneInfo.IsEx = index < 0;
+
+                            if ( !boneInfo.IsEx )
+                                boneInfo.Id = ( uint ) index;
+                        }
                     }
                 }
             }

@@ -5,9 +5,7 @@ namespace MikuMikuLibrary.Objects
 {
     public class BoneInfo
     {
-        public const uint InvalidId = 0xFFFFFFFF;
-
-        public uint Id { get; set; } = InvalidId;
+        public uint Id { get; set; } = 0xFFFFFFFF;
         public Matrix4x4 InverseBindPoseMatrix { get; set; }
         public string Name { get; set; }
         public bool IsEx { get; set; }
