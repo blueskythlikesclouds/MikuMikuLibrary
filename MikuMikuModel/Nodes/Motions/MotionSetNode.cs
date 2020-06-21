@@ -69,35 +69,47 @@ namespace MikuMikuModel.Nodes.Motions
                     Data.Save( filePath, configuration?.BoneDatabase?.Skeletons?[ 0 ], configuration?.MotionDatabase );
                 }
             } );
-            AddCustomHandler( "Copy motion database info to clipboard", () =>
+            AddCustomHandler( "Copy motion set info to clipboard", () =>
             {
-                uint id = 0xFFFFFFFF;
+                uint motionSetId = 39;
+                uint motionId = 0xFFFFFFFF;
 
-                using ( var inputDialog = new InputDialog
+                var motionDatabase = ConfigurationList.Instance.CurrentConfiguration?.MotionDatabase;
+
+                if ( motionDatabase != null && motionDatabase.MotionSets.Count > 0 )
                 {
-                    WindowTitle = "Enter base id for motions",
-                    Input = Math.Max( 0, Data.Motions.Max( x => x.Id ) + 1 ).ToString()
-                } )
+                    motionSetId = motionDatabase.MotionSets.Max( x => x.Id ) + 1;
+                    motionId = motionDatabase.MotionSets.SelectMany( x => x.Motions ).Max( x => x.Id ) + 1;
+                }
+
+                else
                 {
-                    while ( inputDialog.ShowDialog() == DialogResult.OK )
+                    using ( var inputDialog = new InputDialog
                     {
-                        bool result = uint.TryParse( inputDialog.Input, out id );
+                        WindowTitle = "Enter base id for motions",
+                        Input = Math.Max( 0, Data.Motions.Max( x => x.Id ) + 1 ).ToString()
+                    } )
+                    {
+                        while ( inputDialog.ShowDialog() == DialogResult.OK )
+                        {
+                            bool result = uint.TryParse( inputDialog.Input, out motionId );
 
-                        if ( !result || id == 0xFFFFFFFF )
-                            MessageBox.Show( "Please enter a correct id number.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
+                            if ( !result || motionId == 0xFFFFFFFF )
+                                MessageBox.Show( "Please enter a correct id number.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
 
-                        else
-                            break;
+                            else
+                                break;
+                        }
                     }
                 }
 
-                if ( id == 0xFFFFFFFF )
+                if ( motionId == 0xFFFFFFFF )
                     return;
 
                 var motionSetInfo = new MotionSetInfo
                 {
-                    Id = 39,
-                    Name = Path.GetFileNameWithoutExtension( Name )
+                    Id = motionSetId,
+                    Name = Path.GetFileNameWithoutExtension( Name ).ToUpperInvariant()
                 };
 
                 if ( motionSetInfo.Name.StartsWith( "mot_", StringComparison.OrdinalIgnoreCase ) )
@@ -108,7 +120,7 @@ namespace MikuMikuModel.Nodes.Motions
                     motionSetInfo.Motions.Add( new MotionInfo
                     {
                         Name = motion.Name,
-                        Id = id++
+                        Id = motionId++
                     } );
                 }
 

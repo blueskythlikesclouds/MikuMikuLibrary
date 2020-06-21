@@ -6,7 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Serialization;
 using Assimp;
+using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.Extensions;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
@@ -21,6 +24,7 @@ using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.GUI.Forms;
 using MikuMikuModel.Mementos;
+using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Textures;
@@ -36,6 +40,8 @@ namespace MikuMikuModel.Nodes.Objects
 {
     public class ObjectSetNode : BinaryFileNode<ObjectSet>
     {
+        private static readonly XmlSerializer sObjectSetInfoSerializer = new XmlSerializer( typeof( ObjectSetInfo ) );
+
         private INode mTextureSetNode;
 
         public override NodeFlags Flags =>
@@ -88,6 +94,78 @@ namespace MikuMikuModel.Nodes.Objects
 
                 return AssimpImporter.CreateObjectSetFromAiSceneWithSingleObject( filePath );
             } );
+
+            AddCustomHandler( "Copy object set info to clipboard", () =>
+            {
+                uint objectSetId = 39;
+                uint objectId = 0xFFFFFFFF;
+
+                var objectDatabase = ConfigurationList.Instance.CurrentConfiguration?.ObjectDatabase;
+
+                if ( objectDatabase != null && objectDatabase.ObjectSets.Count > 0 )
+                {
+                    objectSetId = objectDatabase.ObjectSets.Max( x => x.Id ) + 1;
+                    objectId = objectDatabase.ObjectSets.SelectMany( x => x.Objects ).Max( x => x.Id ) + 1;
+                }
+
+                else
+                {
+                    using ( var inputDialog = new InputDialog
+                    {
+                        WindowTitle = "Enter base id for objects",
+                        Input = Math.Max( 0, Data.Objects.Max( x => x.Id ) + 1 ).ToString()
+                    } )
+                    {
+                        while ( inputDialog.ShowDialog() == DialogResult.OK )
+                        {
+                            bool result = uint.TryParse( inputDialog.Input, out objectId );
+
+                            if ( !result || objectId == 0xFFFFFFFF )
+                                MessageBox.Show( "Please enter a correct id number.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
+
+                            else
+                                break;
+                        }
+                    }
+                }
+
+                if ( objectId == 0xFFFFFFFF )
+                    return;
+
+                string baseName = Path.ChangeExtension( Name, null );
+                if ( Data.Format.IsClassic() && baseName.EndsWith( "_obj", StringComparison.OrdinalIgnoreCase ) )
+                    baseName = baseName.Substring( 0, baseName.Length - 4 );
+
+                var objectSetInfo = new ObjectSetInfo
+                {
+                    Name = baseName.ToUpperInvariant(),
+                    Id = objectSetId,
+                    FileName = Name,
+                    TextureFileName = baseName + ( Data.Format.IsClassic() ? "_tex.bin" : ".txd" ),
+                    ArchiveFileName = Parent is FarcArchiveNode ? Parent.Name : baseName + ".farc"
+                };
+
+                foreach ( var obj in Data.Objects )
+                {
+                    objectSetInfo.Objects.Add( new ObjectInfo
+                    {
+                        Id = objectId++,
+                        Name = obj.Name.ToUpperInvariant()
+                    } );
+                }
+
+                using ( var stringWriter = new StringWriter() )
+                using ( var xmlWriter = XmlWriter.Create( stringWriter,
+                    new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true } ) )
+                {
+                    sObjectSetInfoSerializer.Serialize( xmlWriter, objectSetInfo,
+                        new XmlSerializerNamespaces( new[] { XmlQualifiedName.Empty } ) );
+
+                    Clipboard.SetText( stringWriter.ToString() );
+                }
+            } );
+
+            AddCustomHandlerSeparator();
 
             AddDirtyCustomHandler( "Combine all objects into one", () =>
             {
