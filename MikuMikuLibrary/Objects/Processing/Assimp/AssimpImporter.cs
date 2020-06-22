@@ -448,17 +448,10 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             if ( materialTextureIndex == -1 )
                 return null;
 
-            string textureFilePath = Path.GetFullPath( aiTextureSlot.FilePath );
-
-            if ( !File.Exists( textureFilePath ) )
-            {
-                textureFilePath = Path.Combine( texturesDirectoryPath, Path.GetFileName( aiTextureSlot.FilePath ) );
-
-                if ( !File.Exists( textureFilePath ) )
-                    return null;
-            }
-
-            var texture = CreateTextureFromFilePath( textureFilePath, textureSet );
+            var texture = CreateTextureFromFilePath( aiTextureSlot.FilePath, texturesDirectoryPath, textureSet );
+                    
+            if ( texture == null )
+                return null;
 
             var materialTexture = new MaterialTexture();
 
@@ -476,6 +469,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                 if ( type == MaterialTextureType.Reflection )
                     type = MaterialTextureType.EnvironmentCube;
             }
+
             else if ( aiTextureSlot.Mapping == Ai.TextureMapping.Sphere )
             {
                 materialTexture.TextureCoordinateTranslationType = MaterialTextureCoordinateTranslationType.Sphere;
@@ -497,7 +491,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             return materialTexture;
         }
 
-        private static Texture CreateTextureFromFilePath( string filePath, TextureSet textureSet )
+        private static Texture CreateTextureFromFilePath( string filePath, string texturesDirectoryPath, TextureSet textureSet )
         {
             string textureName = Path.GetFileNameWithoutExtension( filePath );
 
@@ -507,7 +501,12 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             if ( texture != null )
                 return texture;
 
-            texture = TextureEncoder.Encode( filePath );
+            string newFilePath = FindTexturePath( filePath, texturesDirectoryPath );
+
+            if ( string.IsNullOrEmpty( newFilePath ) )
+                return null;
+
+            texture = TextureEncoder.Encode( newFilePath );
 
             texture.Name = textureName;
             texture.Id = MurmurHash.Calculate( textureName );
@@ -515,6 +514,51 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             textureSet.Textures.Add( texture );
 
             return texture;
+        }
+
+        private static string FindTexturePath( string filePath, string texturesDirectoryPath )
+        {
+            // Try full path.
+            string newFilePath = TryExtensions( filePath );
+
+            if ( !string.IsNullOrEmpty( newFilePath ) )
+                return newFilePath;
+
+            // Try relative path.
+            newFilePath = TryExtensions( Path.Combine( texturesDirectoryPath, filePath ) );
+
+            if ( !string.IsNullOrEmpty( newFilePath ) )
+                return newFilePath;
+
+            // Try textures directory.
+            newFilePath = TryExtensions( Path.Combine( 
+                texturesDirectoryPath, Path.GetFileName( filePath ) ) );
+
+            if ( !string.IsNullOrEmpty( newFilePath ) )
+                return newFilePath;
+
+            return null;
+        }
+
+        private static string TryExtensions( string filePath )
+        {
+            // Try original extension.
+            if ( File.Exists( filePath ) )
+                return filePath;
+
+            // Try DDS extension.
+            filePath = Path.ChangeExtension( filePath, "dds" );
+
+            if ( File.Exists( filePath ) ) 
+                return filePath;
+
+            // Try PNG extension. 
+            filePath = Path.ChangeExtension( filePath, "png" );
+
+            if ( File.Exists( filePath ) ) 
+                return filePath;
+
+            return null;
         }
     }
 }
