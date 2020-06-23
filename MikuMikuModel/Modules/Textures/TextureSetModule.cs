@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Textures;
@@ -7,9 +8,11 @@ namespace MikuMikuModel.Modules.Textures
 {
     public class TextureSetModule : FormatModule<TextureSet>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Texture Set";
-        public override string[] Extensions => new[] { "bin", "txd" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "Texture Set (Classic)", "bin", FormatExtensionFlags.Import | FormatExtensionFlags.Export ),
+            new FormatExtension( "Texture Set (Modern)", "txd", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( string fileName )
         {

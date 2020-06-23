@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
@@ -7,9 +8,10 @@ namespace MikuMikuModel.Modules.Motions
 {
     public class MotionSetModule : FormatModule<MotionSet>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Motion Set";
-        public override string[] Extensions => new[] { "bin" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "Motion Set (Classic)", "bin", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( string fileName )
         {

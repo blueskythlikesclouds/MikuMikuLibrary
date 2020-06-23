@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Objects;
@@ -8,9 +9,11 @@ namespace MikuMikuModel.Modules.Objects
 {
     public class ObjectSetModule : FormatModule<ObjectSet>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Object Set";
-        public override string[] Extensions => new[] { "bin", "osd" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "Object Set (Classic)", "bin", FormatExtensionFlags.Import | FormatExtensionFlags.Export ),
+            new FormatExtension( "Object Set (Modern)", "osd", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( string fileName )
         {

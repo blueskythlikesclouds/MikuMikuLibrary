@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.IO;
@@ -7,9 +8,10 @@ namespace MikuMikuModel.Modules.Archives
 {
     public class FarcArchiveModule : FormatModule<FarcArchive>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "FARC Archive";
-        public override string[] Extensions => new[] { "farc" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "FARC Archive", "farc", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( byte[] buffer )
         {

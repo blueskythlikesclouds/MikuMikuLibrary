@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Sprites;
@@ -7,9 +8,11 @@ namespace MikuMikuModel.Modules.Sprites
 {
     public class SpriteSetModule : FormatModule<SpriteSet>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Sprite Set";
-        public override string[] Extensions => new[] { "bin", "spr" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "Sprite Set (Classic)", "bin", FormatExtensionFlags.Import | FormatExtensionFlags.Export ),
+            new FormatExtension( "Sprite Set (Modern)", "spr", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( string fileName )
         {

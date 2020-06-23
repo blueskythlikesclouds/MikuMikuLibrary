@@ -197,7 +197,7 @@ namespace MikuMikuModel.GUI.Forms
                 dialog.Filter = ModuleFilterGenerator.GenerateFilter(
                     FormatModuleRegistry.ModelTypes.Where( x =>
                         typeof( IBinaryFile ).IsAssignableFrom( x ) && x.IsClass && !x.IsAbstract && NodeFactory.NodeTypes.ContainsKey( x ) ),
-                    FormatModuleFlags.Import );
+                    FormatExtensionFlags.Import );
                 dialog.Title = "Select a file to open.";
                 dialog.ValidateNames = true;
                 dialog.AddExtension = true;

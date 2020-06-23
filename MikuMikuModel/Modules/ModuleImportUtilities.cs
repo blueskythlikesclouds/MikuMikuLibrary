@@ -14,18 +14,19 @@ namespace MikuMikuModel.Modules
             string extension = Path.GetExtension( fileName ).Trim( '.' );
 
             var moduleList = modulesToMatch.Where( x =>
-                x.Flags.HasFlag( FormatModuleFlags.Import ) &&
-                ( x.Extensions.Contains( "*" ) || x.Extensions.Contains( extension, StringComparer.OrdinalIgnoreCase ) ) ).ToList();
+                x.Extensions.Where( y => y.Flags.HasFlag( FormatExtensionFlags.Import ) )
+                    .Any( y => y.Extension == "*" || y.Extension.Equals( extension, StringComparison.OrdinalIgnoreCase ) ) ).ToList();
 
             if ( moduleList.Count > 1 )
-                moduleList.RemoveAll( x => x.Extensions.Contains( "*" ) || !x.Match( fileName ) );
+                moduleList.RemoveAll(
+                    x => x.Extensions.Any( y => y.Flags.HasFlag( FormatExtensionFlags.Import ) && y.Extension == "*" ) || !x.Match( fileName ) );
 
             if ( moduleList.Count <= 1 )
                 return moduleList.Count == 0 ? null : moduleList[ 0 ];
 
             var buffer = new byte[ 16 ];
 
-            using ( var stream = streamGetter() ) 
+            using ( var stream = streamGetter() )
                 stream.Read( buffer, 0, 16 );
 
             moduleList.RemoveAll( x => !x.Match( buffer ) );
@@ -65,35 +66,17 @@ namespace MikuMikuModel.Modules
             return ( T ) module.Import( filePath );
         }
 
-        public static string SelectModuleImport<T>( string title = "Select a file to import.", string filePath = null )
+        public static string SelectModuleImport<T>( string title = "Select a file to import.", string filePath = null ) =>
+            SelectModuleImport( new[] { typeof( T ) }, title, filePath );
+
+        public static string[] SelectModuleImportMultiselect<T>( string title = "Select file(s) to import.", string filePath = null )
         {
             using ( var dialog = new OpenFileDialog() )
             {
                 dialog.AutoUpgradeEnabled = true;
                 dialog.CheckPathExists = true;
                 dialog.CheckPathExists = true;
-                dialog.Filter = ModuleFilterGenerator.GenerateFilter( typeof( T ) );
-                dialog.Title = title;
-                dialog.FileName = filePath;
-                dialog.ValidateNames = true;
-                dialog.AddExtension = true;
-
-                if ( dialog.ShowDialog() == DialogResult.OK )
-                    return dialog.FileName;
-            }
-
-            return null;
-        }
-
-        public static string[] SelectModuleImportMultiselect<T>( string title = "Select file(s) to import.",
-            string filePath = null )
-        {
-            using ( var dialog = new OpenFileDialog() )
-            {
-                dialog.AutoUpgradeEnabled = true;
-                dialog.CheckPathExists = true;
-                dialog.CheckPathExists = true;
-                dialog.Filter = ModuleFilterGenerator.GenerateFilter( typeof( T ) );
+                dialog.Filter = ModuleFilterGenerator.GenerateFilter( new[] { typeof( T ) }, FormatExtensionFlags.Import );
                 dialog.Title = title;
                 dialog.FileName = filePath;
                 dialog.ValidateNames = true;
@@ -115,7 +98,7 @@ namespace MikuMikuModel.Modules
                 dialog.AutoUpgradeEnabled = true;
                 dialog.CheckPathExists = true;
                 dialog.CheckPathExists = true;
-                dialog.Filter = ModuleFilterGenerator.GenerateFilter( modelTypes, FormatModuleFlags.Import );
+                dialog.Filter = ModuleFilterGenerator.GenerateFilter( modelTypes, FormatExtensionFlags.Import );
                 dialog.Title = title;
                 dialog.FileName = filePath;
                 dialog.ValidateNames = true;

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using MikuMikuLibrary.Motions;
 using MikuMikuModel.Configurations;
 
@@ -6,9 +7,10 @@ namespace MikuMikuModel.Modules.Motions
 {
     public class MotionModule : FormatModule<Motion>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Motion";
-        public override string[] Extensions => new[] { "mot" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "Motion (Modern)", "mot", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( byte[] buffer )
         {
@@ -19,7 +21,7 @@ namespace MikuMikuModel.Modules.Motions
         {
             var motion = new Motion();
             {
-                motion.Load( source, 
+                motion.Load( source,
                     ConfigurationList.Instance.CurrentConfiguration?.BoneDatabase?.Skeletons?[ 0 ], true );
             }
             return motion;
@@ -27,7 +29,7 @@ namespace MikuMikuModel.Modules.Motions
 
         protected override void ExportCore( Motion model, Stream destination, string fileName )
         {
-            model.Save( destination, 
+            model.Save( destination,
                 ConfigurationList.Instance.CurrentConfiguration?.BoneDatabase?.Skeletons?[ 0 ], true );
         }
     }

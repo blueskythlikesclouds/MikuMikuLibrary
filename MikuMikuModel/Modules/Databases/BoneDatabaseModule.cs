@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
@@ -7,9 +8,11 @@ namespace MikuMikuModel.Modules.Databases
 {
     public class BoneDatabaseModule : FormatModule<BoneDatabase>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Bone Database";
-        public override string[] Extensions => new[] { "bin", "bon" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "Bone Database (Classic)", "bin", FormatExtensionFlags.Import | FormatExtensionFlags.Export ),
+            new FormatExtension( "Bone Database (Modern)", "bon", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( string fileName )
         {

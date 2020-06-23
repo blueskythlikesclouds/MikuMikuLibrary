@@ -143,7 +143,6 @@
     <Compile Include="Modules\Sprites\SpriteSetModule.cs" />
     <Compile Include="Modules\Textures\TextureModule.cs" />
     <Compile Include="Modules\Textures\TextureSetModule.cs" />
-    <Compile Include="Modules\Xml\XmlDocumentModule.cs" />
     <Compile Include="Nodes\Archives\FarcArchiveNode.cs" />
     <Compile Include="Nodes\Databases\SpriteDatabaseNode.cs" />
     <Compile Include="Nodes\Databases\TextureDatabaseNode.cs" />

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Assimp;
 using MikuMikuLibrary.Objects.Processing.Assimp;
 
@@ -7,9 +9,7 @@ namespace MikuMikuModel.Modules.Objects
 {
     public class AssimpSceneModule : FormatModule<Scene>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Assimp Scene";
-        public override string[] Extensions => new[] { "dae", "fbx", "obj" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; }
 
         protected override Scene ImportCore( Stream source, string fileName )
         {
@@ -24,6 +24,24 @@ namespace MikuMikuModel.Modules.Objects
                 AssimpSceneHelper.Export( model, fileStream.Name );
             else
                 throw new ArgumentException( "Assimp scene can only be exported to file stream", nameof( destination ) );
+        }
+
+        public AssimpSceneModule()
+        {
+            var aiContext = new AssimpContext();
+
+            var descriptions = aiContext.GetImporterDescriptions();
+            var extensions = new List<FormatExtension>( descriptions.Length * 2 );
+
+            extensions.Add( new FormatExtension( "Collada Exporter", "dae", FormatExtensionFlags.Export ) );
+
+            foreach ( var description in aiContext.GetImporterDescriptions() )
+                extensions.AddRange( description.FileExtensions.Select( extension =>
+                    new FormatExtension( description.Name, extension, FormatExtensionFlags.Import ) ) );
+
+            extensions.TrimExcess();
+
+            Extensions = extensions;
         }
     }
 }

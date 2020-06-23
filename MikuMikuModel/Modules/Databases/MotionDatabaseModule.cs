@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
@@ -7,9 +8,10 @@ namespace MikuMikuModel.Modules.Databases
 {
     public class MotionDatabaseModule : FormatModule<MotionDatabase>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Motion Database";
-        public override string[] Extensions => new[] { "bin" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "Motion Database (Classic)", "bin", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override bool Match( string fileName )
         {

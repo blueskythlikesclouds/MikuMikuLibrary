@@ -1,12 +1,14 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace MikuMikuModel.Modules.IO
 {
     public class StreamModule : FormatModule<Stream>
     {
-        public override FormatModuleFlags Flags => FormatModuleFlags.Import | FormatModuleFlags.Export;
-        public override string Name => "Stream";
-        public override string[] Extensions => new[] { "*" };
+        public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
+        {
+            new FormatExtension( "File Stream", "*", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+        };
 
         public override Stream Import( string fileName )
         {

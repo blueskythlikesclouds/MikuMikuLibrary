@@ -328,7 +328,7 @@ namespace MikuMikuModel.Nodes
                 {
                     AutoUpgradeEnabled = true,
                     CheckPathExists = true,
-                    Filter = ModuleFilterGenerator.GenerateFilter( mImportHandlers.Keys, FormatModuleFlags.Import ),
+                    Filter = ModuleFilterGenerator.GenerateFilter( mImportHandlers.Keys, FormatExtensionFlags.Import ),
                     Title = "Select file(s) to import from.",
                     ValidateNames = true,
                     AddExtension = true,
@@ -379,7 +379,7 @@ namespace MikuMikuModel.Nodes
                 {
                     AutoUpgradeEnabled = true,
                     CheckPathExists = true,
-                    Filter = ModuleFilterGenerator.GenerateFilter( mExportHandlers.Keys, FormatModuleFlags.Export ),
+                    Filter = ModuleFilterGenerator.GenerateFilter( mExportHandlers.Keys, FormatExtensionFlags.Export ),
                     OverwritePrompt = true,
                     Title = "Select a file to export to.",
                     ValidateNames = true,
@@ -440,7 +440,7 @@ namespace MikuMikuModel.Nodes
                     AutoUpgradeEnabled = true,
                     CheckPathExists = true,
                     CheckFileExists = true,
-                    Filter = ModuleFilterGenerator.GenerateFilter( mReplaceHandlers.Keys, FormatModuleFlags.Import ),
+                    Filter = ModuleFilterGenerator.GenerateFilter( mReplaceHandlers.Keys, FormatExtensionFlags.Import ),
                     Title = "Select a file to replace with.",
                     ValidateNames = true,
                     AddExtension = true
