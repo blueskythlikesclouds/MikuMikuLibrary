@@ -46,6 +46,8 @@ namespace MikuMikuModel.Nodes.Wrappers
             Node.Added -= OnNodeAdded;
             Node.Removed -= OnNodeRemoved;
             Node.Moved -= OnNodeMoved;
+            Node.Imported -= OnNodeImported;
+            Node.Replaced -= OnNodeReplaced;
             Node.Dispose();
 
             foreach ( var node in Nodes.OfType<NodeAsTreeNode>() )
@@ -100,6 +102,18 @@ namespace MikuMikuModel.Nodes.Wrappers
             base.Text = base.Name = Node.Name;
         }
 
+        private void OnNodeReplaced( object sender, NodeReplaceEventArgs e )
+        {
+            if ( IsExpanded )
+                Populate();
+        }
+
+        private void OnNodeImported( object sender, NodeImportEventArgs e )
+        {
+            if ( IsExpanded )
+                Populate();
+        }
+
         public void Populate()
         {
             if ( Node.IsPopulated )
@@ -131,6 +145,12 @@ namespace MikuMikuModel.Nodes.Wrappers
                 Node.Added += OnNodeAdded;
 
             Node.Removed += OnNodeRemoved;
+
+            if ( node.Flags.HasFlag( NodeFlags.Import ) )
+                Node.Imported += OnNodeImported;
+
+            if ( node.Flags.HasFlag( NodeFlags.Replace ) )
+                Node.Replaced += OnNodeReplaced;
 
             if ( node.Flags.HasFlag( NodeFlags.Move ) )
                 Node.Moved += OnNodeMoved;
