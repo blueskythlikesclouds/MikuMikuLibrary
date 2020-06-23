@@ -192,28 +192,23 @@ namespace MikuMikuLibrary.Objects
 
             if ( boneDatabase != null )
             {
-                string fileName = destination is FileStream fileStream ? Path.GetFileName( fileStream.Name ) : string.Empty;
-
-                var skeleton = boneDatabase.Skeletons.FirstOrDefault( x => fileName.StartsWith( x.Name, StringComparison.OrdinalIgnoreCase ) ) ??
-                               boneDatabase.Skeletons.FirstOrDefault( x => x.Name.Equals( "CMN", StringComparison.OrdinalIgnoreCase ) );
-
-                if ( skeleton != null )
+                foreach ( var obj in Objects.Where( x => x.Skin != null ) )
                 {
-                    foreach ( var obj in Objects.Where( x => x.Skin != null ) )
+                    var skeleton = boneDatabase.Skeletons.FirstOrDefault( x =>
+                        obj.Name.StartsWith( x.Name, StringComparison.OrdinalIgnoreCase ) );
+
+                    if ( skeleton == null )
+                        continue;
+
+                    foreach ( var boneInfo in obj.Skin.Bones )
                     {
-                        if ( obj.Name.StartsWith( "STG", StringComparison.OrdinalIgnoreCase ) )
-                            continue;
+                        int index = skeleton.ObjectBoneNames.FindIndex( x =>
+                            x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
 
-                        foreach ( var boneInfo in obj.Skin.Bones )
-                        {
-                            int index = skeleton.ObjectBoneNames.FindIndex( x =>
-                                x.Equals( boneInfo.Name, StringComparison.OrdinalIgnoreCase ) );
+                        boneInfo.IsEx = index < 0;
 
-                            boneInfo.IsEx = index < 0;
-
-                            if ( !boneInfo.IsEx )
-                                boneInfo.Id = ( uint ) index;
-                        }
+                        if ( !boneInfo.IsEx )
+                            boneInfo.Id = ( uint ) index;
                     }
                 }
             }
