@@ -22,7 +22,7 @@ void main()
 {
     fPosition = aPosition;
     fNormal = aNormal;
-    fTangent = aTangent.xyz;
+    fTangent = normalize( aTangent.xyz - dot( aTangent.xyz, aNormal ) * aNormal );
     fBitangent = cross( fNormal, fTangent ) * aTangent.w;
     fTexCoord0 = aTexCoord0;
     fTexCoord1 = aTexCoord1;

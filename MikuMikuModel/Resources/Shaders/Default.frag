@@ -73,16 +73,16 @@ void main()
     {
         if ( uHasTangent && uHasNormalTexture && uHasTexCoord0 )
         {
-            mat3 tangentToWorldMatrix = transpose( mat3( normalize( fTangent ), normalize( fBitangent ), normalize( fNormal ) ) );
+            mat3 tangentToWorldMatrix = mat3( fTangent, fBitangent, fNormal );
             
             normal = texture( uNormalTexture, fTexCoord0 ).xyz * 2 - 1;
-            normal.z = sqrt( 1 - normal.x * normal.y - normal.y * normal.y );
-            normal = normalize( normal * tangentToWorldMatrix );
+            normal.z = sqrt( 1 - normal.x * normal.x - normal.y * normal.y );
+            normal = normalize( tangentToWorldMatrix * normal );
         }
 
         directLighting += vec3( max( 0, dot( normal, lightDirection ) ) ) * diffuseColor.rgb;
         
-        if ( uAnisoDirection != 0 && uHasTangent && uHasTexCoord0 )
+        if ( uAnisoDirection > 0 && uAnisoDirection < 3 && uHasTangent && uHasTexCoord0 )
         {
             float dotTH = dot( uAnisoDirection == 2 ? normalize( fBitangent ) : normalize( fTangent ), halfwayDirection );
             float sinTH = sqrt( 1 - dotTH * dotTH );

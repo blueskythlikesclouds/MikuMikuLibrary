@@ -275,7 +275,7 @@ namespace MikuMikuModel.GUI.Controls
 
         private void GetProjectionMatrix( out Matrix4 projection )
         {
-            projection = Matrix4.CreatePerspectiveFieldOfView( sFieldOfView, ( float ) Width / Height, 0.001f, 1000f );
+            projection = Matrix4.CreatePerspectiveFieldOfView( sFieldOfView, ( float ) Width / Height, 0.1f, 100000f );
         }
 
         private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
