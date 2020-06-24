@@ -95,12 +95,10 @@ void main()
         }
     }
 
-    vec3 indirectLighting = ambientColor;
+    vec3 indirectLighting = ambientColor * diffuseColor.rgb;
 
     if ( uHasNormal && uHasReflectionTexture )
-        indirectLighting += texture( uReflectionTexture, reflect( -viewDirection, normal ) ).rgb * specularColor.w;
-
-    indirectLighting *= diffuseColor.rgb;
+        indirectLighting += texture( uReflectionTexture, reflect( -viewDirection, normal ) ).rgb * specularColor.rgb * specularColor.w;
 
     oColor = pow( vec4( directLighting + indirectLighting, diffuseColor.a ), INVERSE_GAMMA );
 }
