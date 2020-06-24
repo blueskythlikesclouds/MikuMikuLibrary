@@ -1,96 +1,302 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using System;
+using System.IO;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
 {
+    public enum ConstraintType
+    {
+        Orientation,
+        Direction,
+        Position,
+        Distance
+    }
+
     public class ConstraintBlock : NodeBlock
     {
         public override string Signature => "CNS";
 
-        public string Field10 { get; set; }
-        public string Field11 { get; set; }
-        public int Field12 { get; set; }
-        public string Field13 { get; set; }
-        public float Field14 { get; set; }
-        public float Field15 { get; set; }
-        public float Field16 { get; set; }
-        public float Field17 { get; set; }
-        public float Field18 { get; set; }
-        public float Field19 { get; set; }
-        public float Field20 { get; set; }
-        public float Field21 { get; set; }
-        public float Field22 { get; set; }
-        public float Field23 { get; set; }
-        public float Field24 { get; set; }
-        public float Field25 { get; set; }
-        public float Field26 { get; set; }
-        public float Field27 { get; set; }
-        public float Field28 { get; set; }
-        public float Field29 { get; set; }
-        public float Field30 { get; set; }
-        public float Field31 { get; set; }
-        public float Field32 { get; set; }
-        public float Field33 { get; set; }
-        public float Field34 { get; set; }
-        public float Field35 { get; set; }
+        public string BoneName { get; set; }
+        public int Field11 { get; set; }
+        public string SourceBoneName { get; set; }
+
+        public IConstraintData Data { get; set; }
 
         internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
         {
-            Field10 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            Field11 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            Field12 = reader.ReadInt32();
-            Field13 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            Field14 = reader.ReadSingle();
-            Field15 = reader.ReadSingle();
-            Field16 = reader.ReadSingle();
-            Field17 = reader.ReadSingle();
-            Field18 = reader.ReadSingle();
-            Field19 = reader.ReadSingle();
-            Field20 = reader.ReadSingle();
-            Field21 = reader.ReadSingle();
-            Field22 = reader.ReadSingle();
-            Field23 = reader.ReadSingle();
-            Field24 = reader.ReadSingle();
-            Field25 = reader.ReadSingle();
-            Field26 = reader.ReadSingle();
-            Field27 = reader.ReadSingle();
-            Field28 = reader.ReadSingle();
-            Field29 = reader.ReadSingle();
-            Field30 = reader.ReadSingle();
-            Field31 = reader.ReadSingle();
-            Field32 = reader.ReadSingle();
-            Field33 = reader.ReadSingle();
-            Field34 = reader.ReadSingle();
-            Field35 = reader.ReadSingle();
+            string type = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+
+            BoneName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Field11 = reader.ReadInt32();
+            SourceBoneName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+
+            switch ( type )
+            {
+                case "Orientation":
+                    Data = new OrientationConstraintData();
+                    break;
+
+                case "Direction":
+                    Data = new DirectionConstraintData();
+                    break;
+
+                case "Position":
+                    Data = new PositionConstraintData();
+                    break;
+
+                case "Distance":
+                    Data = new DistanceConstraintData();
+                    break;
+
+                default:
+                    throw new InvalidDataException( $"Unrecognized constraint type: {type}" );
+            }
+
+            Data.Read( reader );
         }
 
         internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
         {
-            writer.AddStringToStringTable( Field10 );
-            writer.AddStringToStringTable( Field11 );
-            writer.Write( Field12 );
-            writer.AddStringToStringTable( Field13 );
+            writer.AddStringToStringTable( Enum.GetName( typeof( ConstraintType ), Data.Type ) );
+            writer.AddStringToStringTable( BoneName );
+            writer.Write( Field11 );
+            writer.AddStringToStringTable( SourceBoneName );
+            Data.Write( writer );
+        }
+    }
+
+    public interface IConstraintData
+    {
+        ConstraintType Type { get; }
+
+        void Read( EndianBinaryReader reader );
+        void Write( EndianBinaryWriter writer );
+    }
+
+    public class OrientationConstraintData : IConstraintData
+    {
+        public ConstraintType Type => ConstraintType.Orientation;
+
+        public float Field00 { get; set; }
+        public float Field04 { get; set; }
+        public float Field08 { get; set; }
+
+        public void Read( EndianBinaryReader reader )
+        {
+            Field00 = reader.ReadSingle();
+            Field04 = reader.ReadSingle();
+            Field08 = reader.ReadSingle();
+        }
+
+        public void Write( EndianBinaryWriter writer )
+        {
+            writer.Write( Field00 );
+            writer.Write( Field04 );
+            writer.Write( Field08 );
+        }
+    }
+
+    public class DirectionConstraintData : IConstraintData
+    {
+        public ConstraintType Type => ConstraintType.Direction;
+
+        public int Field00 { get; set; }
+        public float Field04 { get; set; }
+        public float Field08 { get; set; }
+        public float Field0C { get; set; }
+        public float Field10 { get; set; }
+        public float Field14 { get; set; }
+        public float Field18 { get; set; }
+        public float Field1C { get; set; }
+        public string Field20 { get; set; }
+        public float Field24 { get; set; }
+        public float Field28 { get; set; }
+        public float Field2C { get; set; }
+        public float Field30 { get; set; }
+        public float Field34 { get; set; }
+        public float Field38 { get; set; }
+
+        public void Read( EndianBinaryReader reader )
+        {
+            Field00 = reader.ReadInt32();
+            Field04 = reader.ReadSingle();
+            Field08 = reader.ReadSingle();
+            Field0C = reader.ReadSingle();
+            Field10 = reader.ReadSingle();
+            Field14 = reader.ReadSingle();
+            Field18 = reader.ReadSingle();
+            Field1C = reader.ReadSingle();
+            Field20 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Field24 = reader.ReadSingle();
+            Field28 = reader.ReadSingle();
+            Field2C = reader.ReadSingle();
+            Field30 = reader.ReadSingle();
+            Field34 = reader.ReadSingle();
+            Field38 = reader.ReadSingle();
+        }
+
+        public void Write( EndianBinaryWriter writer )
+        {
+            writer.Write( Field00 );
+            writer.Write( Field04 );
+            writer.Write( Field08 );
+            writer.Write( Field0C );
+            writer.Write( Field10 );
             writer.Write( Field14 );
-            writer.Write( Field15 );
-            writer.Write( Field16 );
-            writer.Write( Field17 );
             writer.Write( Field18 );
-            writer.Write( Field19 );
-            writer.Write( Field20 );
-            writer.Write( Field21 );
-            writer.Write( Field22 );
-            writer.Write( Field23 );
+            writer.Write( Field1C );
+            writer.AddStringToStringTable( Field20 );
             writer.Write( Field24 );
-            writer.Write( Field25 );
-            writer.Write( Field26 );
-            writer.Write( Field27 );
             writer.Write( Field28 );
-            writer.Write( Field29 );
+            writer.Write( Field2C );
             writer.Write( Field30 );
-            writer.Write( Field31 );
-            writer.Write( Field32 );
-            writer.Write( Field33 );
             writer.Write( Field34 );
-            writer.Write( Field35 );
+            writer.Write( Field38 );
+        }
+    }
+
+    public class PositionConstraintData : IConstraintData
+    {
+        public ConstraintType Type => ConstraintType.Position;
+
+        public float Field00 { get; set; }
+        public float Field04 { get; set; }
+        public float Field08 { get; set; }
+        public float Field0C { get; set; }
+        public float Field10 { get; set; }
+        public float Field14 { get; set; }
+        public float Field18 { get; set; }
+        public float Field1C { get; set; }
+        public string Field20 { get; set; }
+        public float Field24 { get; set; }
+        public float Field28 { get; set; }
+        public float Field2C { get; set; }
+        public float Field30 { get; set; }
+        public float Field34 { get; set; }
+        public float Field38 { get; set; }
+        public float Field3C { get; set; }
+        public float Field40 { get; set; }
+        public float Field44 { get; set; }
+        public float Field48 { get; set; }
+
+        public void Read( EndianBinaryReader reader )
+        {
+            Field00 = reader.ReadSingle();
+            Field04 = reader.ReadSingle();
+            Field08 = reader.ReadSingle();
+            Field0C = reader.ReadSingle();
+            Field10 = reader.ReadSingle();
+            Field14 = reader.ReadSingle();
+            Field18 = reader.ReadSingle();
+            Field1C = reader.ReadSingle();
+            Field20 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Field24 = reader.ReadSingle();
+            Field28 = reader.ReadSingle();
+            Field2C = reader.ReadSingle();
+            Field30 = reader.ReadSingle();
+            Field34 = reader.ReadSingle();
+            Field38 = reader.ReadSingle();
+            Field3C = reader.ReadSingle();
+            Field40 = reader.ReadSingle();
+            Field44 = reader.ReadSingle();
+            Field48 = reader.ReadSingle();
+        }
+
+        public void Write( EndianBinaryWriter writer )
+        {
+            writer.Write( Field00 );
+            writer.Write( Field04 );
+            writer.Write( Field08 );
+            writer.Write( Field0C );
+            writer.Write( Field10 );
+            writer.Write( Field14 );
+            writer.Write( Field18 );
+            writer.Write( Field1C );
+            writer.AddStringToStringTable( Field20 );
+            writer.Write( Field24 );
+            writer.Write( Field28 );
+            writer.Write( Field2C );
+            writer.Write( Field30 );
+            writer.Write( Field34 );
+            writer.Write( Field38 );
+            writer.Write( Field3C );
+            writer.Write( Field40 );
+            writer.Write( Field44 );
+            writer.Write( Field48 );
+        }
+    }
+
+    public class DistanceConstraintData : IConstraintData
+    {
+        public ConstraintType Type => ConstraintType.Distance;
+
+        public float Field00 { get; set; }
+        public float Field04 { get; set; }
+        public float Field08 { get; set; }
+        public float Field0C { get; set; }
+        public float Field10 { get; set; }
+        public float Field14 { get; set; }
+        public float Field18 { get; set; }
+        public float Field1C { get; set; }
+        public float Field20 { get; set; }
+        public float Field24 { get; set; }
+        public float Field28 { get; set; }
+        public float Field2C { get; set; }
+        public float Field30 { get; set; }
+        public float Field34 { get; set; }
+        public float Field38 { get; set; }
+        public float Field3C { get; set; }
+        public float Field40 { get; set; }
+        public float Field44 { get; set; }
+        public float Field48 { get; set; }
+        public float Field4C { get; set; }
+
+        public void Read( EndianBinaryReader reader )
+        {
+            Field00 = reader.ReadSingle();
+            Field04 = reader.ReadSingle();
+            Field08 = reader.ReadSingle();
+            Field0C = reader.ReadSingle();
+            Field10 = reader.ReadSingle();
+            Field14 = reader.ReadSingle();
+            Field18 = reader.ReadSingle();
+            Field1C = reader.ReadSingle();
+            Field20 = reader.ReadSingle();
+            Field24 = reader.ReadSingle();
+            Field28 = reader.ReadSingle();
+            Field2C = reader.ReadSingle();
+            Field30 = reader.ReadSingle();
+            Field34 = reader.ReadSingle();
+            Field38 = reader.ReadSingle();
+            Field3C = reader.ReadSingle();
+            Field40 = reader.ReadSingle();
+            Field44 = reader.ReadSingle();
+            Field48 = reader.ReadSingle();
+            Field4C = reader.ReadSingle();
+        }
+
+        public void Write( EndianBinaryWriter writer )
+        {
+            writer.Write( Field00 );
+            writer.Write( Field04 );
+            writer.Write( Field08 );
+            writer.Write( Field0C );
+            writer.Write( Field10 );
+            writer.Write( Field14 );
+            writer.Write( Field18 );
+            writer.Write( Field1C );
+            writer.Write( Field20 );
+            writer.Write( Field24 );
+            writer.Write( Field28 );
+            writer.Write( Field2C );
+            writer.Write( Field30 );
+            writer.Write( Field34 );
+            writer.Write( Field38 );
+            writer.Write( Field3C );
+            writer.Write( Field40 );
+            writer.Write( Field44 );
+            writer.Write( Field48 );
+            writer.Write( Field4C );
         }
     }
 }

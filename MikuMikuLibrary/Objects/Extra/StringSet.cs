@@ -47,8 +47,20 @@ namespace MikuMikuLibrary.Objects.Extra
                 {
                     case ConstraintBlock constraintBlock:
                     {
-                        AddString( constraintBlock.Field11 );
-                        AddString( constraintBlock.Field13 );
+                        AddString( constraintBlock.BoneName );
+                        AddString( constraintBlock.SourceBoneName );
+
+                        switch ( constraintBlock.Data )
+                        {
+                            case DirectionConstraintData directionData:
+                                AddString( directionData.Field20 );
+                                break;            
+                            
+                            case PositionConstraintData positionData:
+                                AddString( positionData.Field20 );
+                                break;
+                        }
+
                         break;
                     }
 
