@@ -283,15 +283,22 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                             {
                                 boneIndex = obj.Skin.Bones.Count;
 
-                                // This is not right, but I'm not sure how to transform the bind pose matrix
-                                // while not having duplicate bones.
-                                Matrix4x4.Invert( GetWorldTransform( aiScene.RootNode.FindNode( aiBone.Name ) ), out var inverseBindPoseMatrix );
+                                var aiBoneNode = aiScene.RootNode.FindNode( aiBone.Name );
 
-                                obj.Skin.Bones.Add( new BoneInfo
+                                do
                                 {
-                                    Name = aiBone.Name,
-                                    InverseBindPoseMatrix = inverseBindPoseMatrix
-                                } );
+                                    // This is not right, but I'm not sure how to transform the bind pose matrix
+                                    // while not having duplicate bones.
+                                    Matrix4x4.Invert( GetWorldTransform( aiBoneNode ), out var inverseBindPoseMatrix );
+
+                                    obj.Skin.Bones.Add( new BoneInfo
+                                    {
+                                        Name = aiBoneNode.Name,
+                                        InverseBindPoseMatrix = inverseBindPoseMatrix
+                                    } );
+
+                                } while ( ( aiBoneNode = aiBoneNode.Parent ) != null && aiBoneNode != aiScene.RootNode &&
+                                          obj.Skin.Bones.All( x => x.Name != aiBoneNode.Name ) );
                             }
 
                             foreach ( var boneWeight in aiBone.VertexWeights )
