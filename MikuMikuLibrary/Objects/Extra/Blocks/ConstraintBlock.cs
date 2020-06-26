@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
@@ -77,22 +78,16 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
     {
         public ConstraintType Type => ConstraintType.Orientation;
 
-        public float Field00 { get; set; }
-        public float Field04 { get; set; }
-        public float Field08 { get; set; }
+        public Vector3 Offset { get; set; }
 
         public void Read( EndianBinaryReader reader )
         {
-            Field00 = reader.ReadSingle();
-            Field04 = reader.ReadSingle();
-            Field08 = reader.ReadSingle();
+            Offset = reader.ReadVector3();
         }
 
         public void Write( EndianBinaryWriter writer )
         {
-            writer.Write( Field00 );
-            writer.Write( Field04 );
-            writer.Write( Field08 );
+            writer.Write( Offset );
         }
     }
 
