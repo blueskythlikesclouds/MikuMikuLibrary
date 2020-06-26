@@ -569,9 +569,9 @@ namespace MikuMikuModel.Nodes
 
                 else
                 {
-                    BeginCompoundMemento();
+                    MementoStack.BeginCompoundMemento();
                     action();
-                    EndCompoundMemento();
+                    MementoStack.EndCompoundMemento();
                 }
 
                 if ( flags.HasFlag( CustomHandlerFlags.Repopulate ) && IsPopulated )
@@ -709,7 +709,6 @@ namespace MikuMikuModel.Nodes
             mExportHandlers = new Dictionary<Type, NodeExportHandler>();
             mReplaceHandlers = new Dictionary<Type, NodeReplaceHandler<T>>();
             mCustomHandlers = new List<ToolStripItem>();
-            mCompoundMementoStack = new Stack<List<IMemento>>();
 
             SourceConfiguration = ConfigurationList.Instance.CurrentConfiguration;
 

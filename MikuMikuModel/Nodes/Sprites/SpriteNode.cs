@@ -6,6 +6,7 @@ using System.IO;
 using System.Windows.Forms;
 using MikuMikuLibrary.Sprites;
 using MikuMikuModel.GUI.Controls;
+using MikuMikuModel.Mementos;
 
 namespace MikuMikuModel.Nodes.Sprites
 {
@@ -63,12 +64,12 @@ namespace MikuMikuModel.Nodes.Sprites
             get => GetProperty<float>();
             set
             {
-                BeginCompoundMemento();
+                MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
                 CalculateNormalizedValues();
 
-                EndCompoundMemento();
+                MementoStack.EndCompoundMemento();
             }
         }
 
@@ -78,12 +79,12 @@ namespace MikuMikuModel.Nodes.Sprites
             get => GetProperty<float>();
             set
             {
-                BeginCompoundMemento();
+                MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
                 CalculateNormalizedValues();
 
-                EndCompoundMemento();
+                MementoStack.EndCompoundMemento();
             }
         }
 
@@ -93,12 +94,12 @@ namespace MikuMikuModel.Nodes.Sprites
             get => GetProperty<float>();
             set
             {
-                BeginCompoundMemento();
+                MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
                 CalculateNormalizedValues();
 
-                EndCompoundMemento();
+                MementoStack.EndCompoundMemento();
             }
         }
 
@@ -108,12 +109,12 @@ namespace MikuMikuModel.Nodes.Sprites
             get => GetProperty<float>();
             set
             {
-                BeginCompoundMemento();
+                MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
                 CalculateNormalizedValues();
 
-                EndCompoundMemento();
+                MementoStack.EndCompoundMemento();
             }
         }
 

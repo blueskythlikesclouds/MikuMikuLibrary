@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,6 +13,7 @@ using MikuMikuModel.Mementos;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Archives;
+using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Wrappers;
 using MikuMikuModel.Resources;
@@ -416,14 +416,31 @@ namespace MikuMikuModel.GUI.Forms
 
         private void OnAfterSelect( object sender, TreeViewEventArgs e )
         {
+            MementoStack.EndCompoundMemento();
+
+            var type = mNodeTreeView.SelectedDataNode.GetType();
+
             if ( mNodeTreeView.SelectedDataNode is ReferenceNode referenceNode )
                 mPropertyGrid.SelectedObject = referenceNode.Node;
+
+            else if ( type.IsGenericType && typeof( ListNode<> ).IsAssignableFrom( type.GetGenericTypeDefinition() ) )
+            {
+                mPropertyGrid.SelectedObjects = mNodeTreeView.SelectedDataNode.Nodes.ToArray();
+
+                MementoStack.BeginCompoundMemento();
+            }
 
             else
                 mPropertyGrid.SelectedObject = mNodeTreeView.SelectedDataNode;
 
             // Set the control on the left to the node's control
             SetSplitContainerControl( mNodeTreeView.ControlOfSelectedDataNode );
+        }
+
+        private void OnPropertyValueChanged( object s, PropertyValueChangedEventArgs e )
+        {
+            MementoStack.EndCompoundMemento();
+            MementoStack.BeginCompoundMemento();
         }
 
         private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )

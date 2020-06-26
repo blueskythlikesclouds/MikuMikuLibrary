@@ -6,8 +6,6 @@ namespace MikuMikuModel.Nodes
     public abstract partial class Node<T> where T : class
     {
         // you know this whole thing is actually a p5 reference
-
-        private readonly Stack<List<IMemento>> mCompoundMementoStack;
         private int mIgnoreMementos;
 
         protected void BeginMementoExecution()
@@ -15,30 +13,12 @@ namespace MikuMikuModel.Nodes
             mIgnoreMementos++;
         }
 
-        protected void BeginCompoundMemento()
-        {
-            mCompoundMementoStack.Push( new List<IMemento>() );
-        }
-
         protected void PushMemento( IMemento memento )
         {
             if ( mIgnoreMementos > 0 )
                 return;
 
-            if ( mCompoundMementoStack.Count > 0 )
-                mCompoundMementoStack.Peek().Add( memento );
-
-            else
-                MementoStack.Push( memento );
-        }
-
-        protected void EndCompoundMemento()
-        {
-            var compoundMemento = mCompoundMementoStack.Pop();
-            if ( compoundMemento.Count == 0 )
-                return;
-
-            PushMemento( new CompoundMemento( compoundMemento ) );
+            MementoStack.Push( memento );
         }
 
         protected void EndMementoExecution()

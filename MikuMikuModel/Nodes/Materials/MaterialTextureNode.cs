@@ -11,6 +11,7 @@ using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Textures;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.GUI.Forms;
+using MikuMikuModel.Mementos;
 using MikuMikuModel.Nodes.Objects;
 using MikuMikuModel.Nodes.TypeConverters;
 using MikuMikuModel.Resources;
@@ -198,12 +199,13 @@ namespace MikuMikuModel.Nodes.Materials
             {
                 var previousType = Type;
 
-                BeginCompoundMemento();
+                MementoStack.BeginCompoundMemento();
+                
                 SetProperty( value );
 
                 if ( previousType == Type || Type == MaterialTextureType.None )
                 {
-                    EndCompoundMemento();
+                    MementoStack.EndCompoundMemento();
                     return;
                 }
 
@@ -212,7 +214,7 @@ namespace MikuMikuModel.Nodes.Materials
                 Filter = Filter == 0 ? 2 : Filter;
                 MipMap = MipMap == 0 ? 2 : MipMap;
 
-                EndCompoundMemento();
+                MementoStack.EndCompoundMemento();
             }
         }
 
