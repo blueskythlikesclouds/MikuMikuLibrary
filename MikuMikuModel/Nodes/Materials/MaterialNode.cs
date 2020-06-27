@@ -303,6 +303,9 @@ namespace MikuMikuModel.Nodes.Materials
                 if ( !materialTextureNode.PromptTextureSelector( this ) )
                     return;
 
+                if ( !IsPopulated )
+                    Populate();
+
                 Nodes.Add( materialTextureNode );
             } );
             AddCustomHandlerSeparator();

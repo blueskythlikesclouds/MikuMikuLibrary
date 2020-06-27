@@ -140,8 +140,11 @@ namespace MikuMikuModel.Nodes.IO
             void OnNodePropertyChanged( object sender, PropertyChangedEventArgs args ) => 
                 IsDirty = true;
 
-            void OnNodeAdded( object sender, NodeAddEventArgs args ) => 
+            void OnNodeAdded( object sender, NodeAddEventArgs args )
+            {
+                IsDirty |= args.AddedNode.Parent.IsPopulated;
                 SetSubscription( args.AddedNode );
+            }
 
             void OnNodeRemoved( object sender, NodeRemoveEventArgs args )
             {
