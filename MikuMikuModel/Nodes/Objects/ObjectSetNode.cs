@@ -313,7 +313,7 @@ namespace MikuMikuModel.Nodes.Objects
                             Scale = scale
                         };
 
-                        osageBlock.Bones.Add( new OsageBone { Name = bone.Name, Sensitivity = 0.08f } );
+                        osageBlock.Bones.Add( new OsageBone { Name = bone.Name, Stiffness = 0.08f } );
                         obj.Skin.Blocks.Add( osageBlock );
 
                         stringBuilder.AppendFormat(
@@ -406,7 +406,7 @@ namespace MikuMikuModel.Nodes.Objects
                             osageBlock.Position = matrix.Translation;
                             osageBlock.Rotation = rotation.ToEulerAngles();
                             osageBlock.Scale = scale;
-                            osageBlock.Bones.Add( new OsageBone { Name = bone.Name, Sensitivity = 0.17f } );
+                            osageBlock.Bones.Add( new OsageBone { Name = bone.Name, Stiffness = 0.17f } );
                             obj.Skin.Blocks.Add( osageBlock );
 
                             stringBuilder.AppendFormat(
