@@ -70,12 +70,12 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                 }
             }
 
-            var convertedBones = new HashSet<string>();
+            var convertedBones = new Dictionary<string, Ai.Node>();
 
             foreach ( var obj in objectSet.Objects )
             {
                 if ( obj.Skin != null )
-                    CreateAiNodesFromBoneInfos( obj.Skin.Bones, aiScene, null, Matrix4x4.Identity, convertedBones );
+                    CreateAiNodesFromBoneInfos( obj.Skin.Bones, aiScene, null, null, convertedBones );
 
                 aiScene.RootNode.Children.Add( CreateAiNodeFromObject( obj, aiScene ) );
             }
@@ -122,24 +122,26 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
         }
 
         private static void CreateAiNodesFromBoneInfos( List<BoneInfo> boneInfos, Ai.Scene aiScene,
-            Ai.Node aiParentBone, Matrix4x4 parentTransformation, HashSet<string> convertedBones )
+            Ai.Node aiParentBone, BoneInfo parentBoneInfo, Dictionary<string, Ai.Node> convertedBones )
         {
             foreach ( var boneInfo in boneInfos )
             {
-                if ( ( aiParentBone != null && boneInfo.Parent?.Name != aiParentBone.Name ) ||
-                     convertedBones.Contains( boneInfo.Name ) )
+                if ( boneInfo.Parent != parentBoneInfo  )
                     continue;
 
-                var aiBoneNode = CreateAiNodeFromBoneInfo( boneInfo, parentTransformation );
+                if ( !convertedBones.TryGetValue( boneInfo.Name, out var aiBoneNode ) )
+                {
+                    aiBoneNode = CreateAiNodeFromBoneInfo( boneInfo, parentBoneInfo?.InverseBindPoseMatrix ?? Matrix4x4.Identity );
 
-                if ( aiParentBone == null )
-                    aiScene.RootNode.Children.Add( aiBoneNode );
-                else
-                    aiParentBone.Children.Add( aiBoneNode );
+                    if ( aiParentBone == null )
+                        aiScene.RootNode.Children.Add( aiBoneNode );
+                    else
+                        aiParentBone.Children.Add( aiBoneNode );
 
-                convertedBones.Add( boneInfo.Name );
+                    convertedBones.Add( boneInfo.Name, aiBoneNode );
+                }
 
-                CreateAiNodesFromBoneInfos( boneInfos, aiScene, aiBoneNode, boneInfo.InverseBindPoseMatrix, convertedBones );
+                CreateAiNodesFromBoneInfos( boneInfos, aiScene, aiBoneNode, boneInfo, convertedBones );
             }
         }
 
