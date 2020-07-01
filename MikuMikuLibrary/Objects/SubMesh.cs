@@ -105,6 +105,7 @@ namespace MikuMikuLibrary.Objects
             {
                 reader.SkipNulls( 4 * sizeof( uint ) );
                 BoundingBox = reader.ReadBoundingBox();
+                reader.SeekCurrent( sizeof( uint ) ); // Max Index
             }
 
             else
