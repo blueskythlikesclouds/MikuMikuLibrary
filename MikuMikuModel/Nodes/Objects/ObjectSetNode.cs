@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
@@ -468,6 +469,59 @@ namespace MikuMikuModel.Nodes.Objects
 
                 return true;
             }, Keys.None, CustomHandlerFlags.ClearMementos );
+
+            AddCustomHandlerSeparator();
+
+            AddDirtyCustomHandler( "Generate tangents", () =>
+            {
+                foreach ( var mesh in Data.Objects.SelectMany( x => x.Meshes ) )
+                {
+                    if ( mesh.Positions == null || mesh.Normals == null || mesh.TexCoords0 == null )
+                        continue;
+
+                    var tangents = new Vector3[ mesh.Positions.Length ];
+                    var bitangents = new Vector3[ mesh.Positions.Length ];
+
+                    foreach ( var subMesh in mesh.SubMeshes )
+                    {
+                        foreach ( var triangle in subMesh.GetTriangles() )
+                        {
+                            var e1 = mesh.Positions[ triangle.C ] - mesh.Positions[ triangle.A ];
+                            var e2 = mesh.Positions[ triangle.B ] - mesh.Positions[ triangle.A ];
+
+                            var uv1 = mesh.TexCoords0[ triangle.C ] - mesh.TexCoords0[ triangle.A ];
+                            var uv2 = mesh.TexCoords0[ triangle.B ] - mesh.TexCoords0[ triangle.A ];
+
+                            float r = 1.0f / ( uv1.X * uv2.Y - uv1.Y * uv2.X );
+                            var tangent = ( e1 * uv2.Y - e2 * uv1.Y ) * r;
+                            var bitangent = ( e2 * uv1.X - e1 * uv2.X ) * r;
+
+                            tangents[ triangle.A ] += tangent;
+                            tangents[ triangle.B ] += tangent;
+                            tangents[ triangle.C ] += tangent;              
+                            
+                            bitangents[ triangle.A ] += bitangent;
+                            bitangents[ triangle.B ] += bitangent;
+                            bitangents[ triangle.C ] += bitangent;
+                        }
+                    }
+
+                    mesh.Tangents = new Vector4[ mesh.Positions.Length ];
+
+                    for ( int i = 0; i < tangents.Length; i++ )
+                    {
+                        var tangent = Vector3.Normalize( tangents[ i ] );
+                        var bitangent = Vector3.Normalize( bitangents[ i ] );
+
+                        var cross = Vector3.Normalize( Vector3.Cross( mesh.Normals[ i ], tangent ) );
+                        float dot = Vector3.Dot( cross, bitangent );
+
+                        mesh.Tangents[ i ] = new Vector4( tangent, dot > 0.0f ? 1.0f : -1.0f );
+                    }
+                }
+
+                return true;
+            } );
 
             AddCustomHandlerSeparator();
 
