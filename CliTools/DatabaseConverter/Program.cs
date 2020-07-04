@@ -32,24 +32,14 @@ namespace DatabaseConverter
 
             fileName = Path.GetFileNameWithoutExtension( fileName ).Replace( "_", "" );
 
-            if ( fileName.StartsWith( "mdata", StringComparison.OrdinalIgnoreCase ) )
-                fileName = fileName.Substring( 5 );
-
             return sDatabaseInfos.FirstOrDefault( databaseInfo =>
-                databaseInfo.ClassicFileName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) ||
+                fileName.IndexOf( databaseInfo.ClassicFileName, StringComparison.OrdinalIgnoreCase ) != -1 ||
                 !string.IsNullOrEmpty( databaseInfo.ModernFileExtension ) &&
                 databaseInfo.ModernFileExtension.Equals( extension, StringComparison.OrdinalIgnoreCase ) );
         }
 
         private static void Main( string[] args )
         {
-            if ( args.Length < 1 )
-            {
-                Console.WriteLine( Resources.HelpText );
-                Console.ReadLine();
-                return;
-            }
-
             string sourceFileName = null;
             string destinationFileName = null;
 
@@ -60,6 +50,13 @@ namespace DatabaseConverter
 
                 else if ( destinationFileName == null )
                     destinationFileName = arg;
+            }
+
+            if ( sourceFileName == null )
+            {
+                Console.WriteLine( Resources.HelpText );
+                Console.ReadLine();
+                return;
             }
 
             if ( destinationFileName == null )
