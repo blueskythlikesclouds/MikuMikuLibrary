@@ -29,7 +29,7 @@ namespace MikuMikuLibrary.Cryptography
 
             if ( !skipSignature )
             {
-                string signature = Encoding.UTF8.GetString( header, 0, 4 );
+                string signature = Encoding.UTF8.GetString( header, 0, 8 );
 
                 if ( signature != "DIVAFILE" )
                     throw new InvalidDataException( $"Invalid signature (expected DIVAFILE)" );
