@@ -42,8 +42,8 @@ namespace MikuMikuLibrary.Textures
 
             if ( TextureFormatUtilities.IsCompressed( format ) )
             {
-                width = AlignmentHelper.Align( bitmap.Width, 4 );
-                height = AlignmentHelper.Align( bitmap.Height, 4 );
+                width = AlignmentHelper.AlignToNextPowerOfTwo( bitmap.Width );
+                height = AlignmentHelper.AlignToNextPowerOfTwo( bitmap.Height );
             }
 
             Texture texture;
@@ -62,8 +62,8 @@ namespace MikuMikuLibrary.Textures
 
         public static unsafe Texture EncodeYCbCr( Bitmap bitmap )
         {
-            int width = AlignmentHelper.Align( bitmap.Width, 4 );
-            int height = AlignmentHelper.Align( bitmap.Height, 4 );
+            int width = AlignmentHelper.AlignToNextPowerOfTwo( bitmap.Width );
+            int height = AlignmentHelper.AlignToNextPowerOfTwo( bitmap.Height );
 
             var texture = new Texture( width, height, TextureFormat.ATI2, 1, 2 );
 
