@@ -19,6 +19,58 @@ namespace MikuMikuModel.Nodes.Collections
 
         protected override void Initialize()
         {
+            AddCustomHandler( "Append prefix to node names", () =>
+            {
+                using ( var inputDialog = new InputDialog() { WindowTitle = "Type the prefix." } )
+                {
+                    if ( inputDialog.ShowDialog() != DialogResult.OK )
+                        return;
+
+                    foreach ( var node in Nodes )
+                        node.Rename( inputDialog.Input + node.Name );
+                }
+            } );
+            AddCustomHandler( "Append suffix to node names", () =>
+            {
+                using ( var inputDialog = new InputDialog() { WindowTitle = "Type the suffix." } )
+                {
+                    if ( inputDialog.ShowDialog() != DialogResult.OK )
+                        return;
+
+                    foreach ( var node in Nodes )
+                        node.Rename( node.Name + inputDialog.Input );
+                }
+            } );
+
+            AddCustomHandlerSeparator();
+
+            AddCustomHandler( "Make all node names lowercase", () =>
+            {
+                foreach ( var node in Nodes )
+                    node.Rename( node.Name.ToLowerInvariant() );
+            } );
+            AddCustomHandler( "Make all node names uppercase", () =>
+            {
+                foreach ( var node in Nodes )
+                    node.Rename( node.Name.ToUpperInvariant() );
+            } );
+
+            AddCustomHandlerSeparator();
+
+            AddCustomHandler( "Set all node names", () =>
+            {
+                using ( var inputDialog = new InputDialog() { WindowTitle = "Type the node name." } )
+                {
+                    if ( inputDialog.ShowDialog() != DialogResult.OK )
+                        return;
+
+                    for ( int i = 0; i < Nodes.Count; i++ )
+                        Nodes[ i ].Rename( $"{inputDialog.Input}_{i}" );
+                }
+            } );
+
+            AddCustomHandlerSeparator();
+
             AddCustomHandler( "Replace substring in node names", () =>
             {
                 using ( var inputDialog1 = new InputDialog { WindowTitle = "Type the substring to be replaced." } )
