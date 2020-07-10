@@ -31,7 +31,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             {
                 var obj = CreateObjectFromAiNode( aiNode, aiScene, objectSet, texturesDirectoryPath );
 
-                if ( obj != null )
+                if ( obj?.Meshes?.Count > 0 )
                     objectSet.Objects.Add( obj );
             }
 
@@ -55,7 +55,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
             var obj = CreateObjectFromAiNode( aiScene.RootNode, aiScene, objectSet, texturesDirectoryPath );
 
-            if ( obj != null )
+            if ( obj?.Meshes?.Count > 0 )
                 objectSet.Objects.Add( obj );
 
             objectSet.TextureIds.AddRange( objectSet.TextureSet.Textures.Select( x => x.Id ) );
