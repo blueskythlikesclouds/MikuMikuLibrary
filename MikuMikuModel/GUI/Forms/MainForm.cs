@@ -428,13 +428,14 @@ namespace MikuMikuModel.GUI.Forms
             if ( mNodeTreeView.SelectedDataNode is ReferenceNode referenceNode )
                 mPropertyGrid.SelectedObject = referenceNode.Node;
 
+#if !DEBUG
             else if ( type.IsGenericType && typeof( ListNode<> ).IsAssignableFrom( type.GetGenericTypeDefinition() ) )
             {
                 mPropertyGrid.SelectedObjects = mNodeTreeView.SelectedDataNode.Nodes.ToArray();
 
                 MementoStack.BeginCompoundMemento();
             }
-
+#endif
             else
                 mPropertyGrid.SelectedObject = mNodeTreeView.SelectedDataNode;
 

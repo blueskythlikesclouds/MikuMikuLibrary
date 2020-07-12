@@ -31,6 +31,8 @@ namespace MikuMikuModel.Nodes.Sprites
                 return true;
             }, Keys.None, CustomHandlerFlags.Repopulate );
 
+            AddCustomHandlerSeparator();
+
             AddCustomHandler( "Export All", () =>
             {
                 using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
@@ -47,35 +49,6 @@ namespace MikuMikuModel.Nodes.Sprites
             }, Keys.Control | Keys.Shift | Keys.E );
 
             AddCustomHandlerSeparator();
-
-            AddDirtyCustomHandler( "Set all resolution modes to...", () =>
-            {
-                string input = "HDTV720";
-
-                while ( true )
-                {
-                    using ( var inputDialog = new InputDialog { WindowTitle = "Set all resolution modes", Input = input } )
-                    {
-                        if ( inputDialog.ShowDialog() != DialogResult.OK )
-                            break;
-
-                        if ( !Enum.TryParse( input = inputDialog.Input, true, out ResolutionMode mode ) )
-                        {
-                            MessageBox.Show( "Please enter a valid resolution mode.", Program.Name,
-                                MessageBoxButtons.OK, MessageBoxIcon.Error );
-
-                            continue;
-                        }
-
-                        foreach ( var sprite in Data.Sprites ) 
-                            sprite.ResolutionMode = mode;
-
-                        return true;
-                    }
-                }
-
-                return false;
-            } );
 
             AddDirtyCustomHandler( "Scale all sprites", () =>
             {
@@ -107,6 +80,35 @@ namespace MikuMikuModel.Nodes.Sprites
                                 MessageBoxIcon.Error );
 
                         input = inputDialog.Input;
+                    }
+                }
+
+                return false;
+            } );
+
+            AddDirtyCustomHandler( "Set all resolution modes to...", () =>
+            {
+                string input = "HDTV720";
+
+                while ( true )
+                {
+                    using ( var inputDialog = new InputDialog { WindowTitle = "Set all resolution modes", Input = input } )
+                    {
+                        if ( inputDialog.ShowDialog() != DialogResult.OK )
+                            break;
+
+                        if ( !Enum.TryParse( input = inputDialog.Input, true, out ResolutionMode mode ) )
+                        {
+                            MessageBox.Show( "Please enter a valid resolution mode.", Program.Name,
+                                MessageBoxButtons.OK, MessageBoxIcon.Error );
+
+                            continue;
+                        }
+
+                        foreach ( var sprite in Data.Sprites ) 
+                            sprite.ResolutionMode = mode;
+
+                        return true;
                     }
                 }
 
