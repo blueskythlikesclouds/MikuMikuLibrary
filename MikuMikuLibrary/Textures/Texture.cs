@@ -76,8 +76,10 @@ namespace MikuMikuLibrary.Textures
             for ( int i = 0; i < ArraySize; i++ )
             for ( int j = 0; j < MipMapCount; j++ )
             {
+                int id = i * MipMapCount + j;
                 var subTexture = mSubTextures[ i, j ];
-                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { subTexture.Write( writer ); } );
+
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () => { subTexture.Write( writer, id ); } );
             }
 
             writer.PopBaseOffset();
@@ -94,12 +96,17 @@ namespace MikuMikuLibrary.Textures
 
             for ( int i = 0; i < arraySize; i++ )
             for ( int j = 0; j < mipMapCount; j++ )
-                mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format, ( uint ) ( i * mipMapCount + j ) );
+                mSubTextures[ i, j ] = new SubTexture( width >> j, height >> j, format );
         }
 
         internal Texture( EndianBinaryReader reader )
         {
             Read( reader );
+        }
+
+        public Texture( SubTexture[ , ] subTextures )
+        {
+            mSubTextures = subTextures;
         }
 
         public Texture( int width, int height, TextureFormat format, int arraySize = 1, int mipMapCount = 1 )

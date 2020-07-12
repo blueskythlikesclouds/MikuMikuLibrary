@@ -45,8 +45,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Archives\ConflictPolicy.cs" />
@@ -60,6 +58,7 @@
     <Compile Include="Databases\SpriteDatabase.cs" />
     <Compile Include="Databases\StageDatabase.cs" />
     <Compile Include="Databases\StringArray.cs" />
+    <Compile Include="Extensions\BitmapEx.cs" />
     <Compile Include="Extensions\QuaternionEx.cs" />
     <Compile Include="Hashes\MurmurHash.cs" />
     <Compile Include="IO\BinaryFormat.cs" />
@@ -99,6 +98,7 @@
     <Compile Include="Misc\Half.cs" />
     <Compile Include="Misc\HalfUtilities.cs" />
     <Compile Include="Geometry\BoundingSphere.cs" />
+    <Compile Include="Native.cs" />
     <Compile Include="Objects\Extra\Blocks\ClothBlock.cs" />
     <Compile Include="Objects\Extra\Blocks\NodeBlock.cs" />
     <Compile Include="Objects\Extra\Blocks\ConstraintBlock.cs" />
@@ -113,6 +113,8 @@
     <Compile Include="Objects\Processing\Assimp\AssimpExporter.cs" />
     <Compile Include="Objects\Processing\Assimp\AssimpImporter.cs" />
     <Compile Include="Objects\Processing\Assimp\AssimpSceneHelper.cs" />
+    <Compile Include="Objects\Processing\Fbx\FbxExporter.cs" />
+    <Compile Include="Objects\Processing\Fbx\Interfaces\IFbxExporter.cs" />
     <Compile Include="Objects\Processing\Stripifier\EdgeInfo.cs" />
     <Compile Include="Objects\Processing\Stripifier\FaceInfo.cs" />
     <Compile Include="Objects\Processing\Stripifier\NvStripifier.cs" />
@@ -137,17 +139,6 @@
     <Compile Include="Skeletons\Skeleton.cs" />
     <Compile Include="Sprites\SpriteCropper.cs" />
     <Compile Include="Sprites\SpriteOrganizer.cs" />
-    <Compile Include="Textures\DDS\DDSCodec.cs" />
-    <Compile Include="Textures\DDS\DDSFormatDetails.cs" />
-    <Compile Include="Textures\DDS\DDSHeader.cs" />
-    <Compile Include="Textures\DDS\DDSHeaderCaps.cs" />
-    <Compile Include="Textures\DDS\DDSHeaderFlags.cs" />
-    <Compile Include="Textures\DDS\DDSPixelFormat.cs" />
-    <Compile Include="Textures\DDS\DDSPixelFormatFlags.cs" />
-    <Compile Include="Textures\DDS\DDSPixelFormatFourCC.cs" />
-    <Compile Include="Textures\TextureDecoder.cs" />
-    <Compile Include="Textures\TextureEncoder.cs" />
-    <Compile Include="Textures\TextureUtilities.cs" />
     <Compile Include="Sprites\Sprite.cs" />
     <Compile Include="Sprites\SpriteSet.cs" />
     <Compile Include="IO\BinaryFile.cs" />
@@ -161,6 +152,10 @@
     <Compile Include="Objects\Object.cs" />
     <Compile Include="Objects\ObjectSet.cs" />
     <Compile Include="Objects\Mesh.cs" />
+    <Compile Include="Textures\Processing\Interfaces\ITextureDecoder.cs" />
+    <Compile Include="Textures\Processing\Interfaces\ITextureEncoder.cs" />
+    <Compile Include="Textures\Processing\TextureDecoder.cs" />
+    <Compile Include="Textures\Processing\TextureEncoder.cs" />
     <Compile Include="Textures\Texture.cs" />
     <Compile Include="Textures\TextureFormat.cs" />
     <Compile Include="Textures\TextureSet.cs" />

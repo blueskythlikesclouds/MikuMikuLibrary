@@ -51,7 +51,6 @@
     <Reference Include="AssimpNet, Version=5.0.0.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
       <HintPath>..\packages\AssimpNet.5.0.0-beta1\lib\net40\AssimpNet.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Ookii.Dialogs.WinForms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.WinForms.1.1.0\lib\net45\Ookii.Dialogs.WinForms.dll</HintPath>
     </Reference>
@@ -63,13 +62,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Design" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -112,6 +106,7 @@
     <Compile Include="Mementos\MementoStack.cs" />
     <Compile Include="Mementos\IMemento.cs" />
     <Compile Include="Mementos\ValueMemento.cs" />
+    <Compile Include="Modules\Imaging\BitmapModule.cs" />
     <Compile Include="Nodes\IO\StreamNode.cs" />
     <Compile Include="Nodes\NodeList.cs" />
     <Compile Include="Nodes\NodeMementos.cs" />
@@ -131,7 +126,6 @@
     <Compile Include="Modules\FormatModule.cs" />
     <Compile Include="Modules\FormatModuleRegistry.cs" />
     <Compile Include="Modules\IFormatModule.cs" />
-    <Compile Include="Modules\Imaging\BitmapModule.cs" />
     <Compile Include="Modules\IO\StreamModule.cs" />
     <Compile Include="Modules\Objects\AssimpSceneModule.cs" />
     <Compile Include="Modules\Objects\ObjectSetModule.cs" />
@@ -334,4 +328,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>echo Copying native MML libraries...
+copy /Y "$(SolutionDir)MikuMikuLibrary.Native\bin\$(Configuration)\MikuMikuLibrary.Native.*.dll" "$(TargetDir)" &gt;nul</PostBuildEvent>
+  </PropertyGroup>
 </Project>

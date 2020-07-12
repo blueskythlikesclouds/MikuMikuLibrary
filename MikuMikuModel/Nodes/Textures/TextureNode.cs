@@ -4,8 +4,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
+using MikuMikuLibrary.Extensions;
 using MikuMikuLibrary.Textures;
-using MikuMikuLibrary.Textures.DDS;
+using MikuMikuLibrary.Textures.Processing;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes.TypeConverters;
@@ -46,25 +47,10 @@ namespace MikuMikuModel.Nodes.Textures
                 if ( flipped )
                     bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
 
-                bool hasTransparency = DDSCodec.HasTransparency( bitmap );
-
                 if ( Data.IsYCbCr )
-                    return TextureEncoder.Encode( bitmap,
-                        hasTransparency ? TextureFormat.RGBA8 : TextureFormat.RGB8, false );
+                    return TextureEncoder.EncodeFromBitmap( bitmap, TextureFormat.RGBA8, false );
 
-                var format =
-                    Data.Format == TextureFormat.DXT1 ||
-                    Data.Format == TextureFormat.DXT1a ||
-                    Data.Format == TextureFormat.DXT3 ||
-                    Data.Format == TextureFormat.DXT5 ? hasTransparency
-                        ? TextureFormat.DXT5
-                        : TextureFormat.DXT1 :
-                    Data.Format == TextureFormat.RGB8 ||
-                    Data.Format == TextureFormat.RGBA8 ? hasTransparency
-                        ? TextureFormat.RGBA8
-                        : TextureFormat.RGB8 : Data.Format;
-
-                return TextureEncoder.Encode( bitmap, format, Data.MipMapCount != 0 );
+                return TextureEncoder.EncodeFromBitmap( bitmap, Format, Data.MipMapCount != 0 );
             }
         }
 
@@ -93,20 +79,20 @@ namespace MikuMikuModel.Nodes.Textures
 
         protected override void Initialize()
         {
-            AddExportHandler<Bitmap>( filePath => TextureDecoder.DecodeToPNG( Data, filePath ) );
-            AddExportHandler<Texture>( filePath => TextureDecoder.DecodeToDDS( Data, filePath ) );
-            AddReplaceHandler<Texture>( TextureEncoder.Encode );
-            AddReplaceHandler<Bitmap>( filePath => ReplaceBitmap( filePath ) );
+            AddExportHandler<Texture>( filePath => TextureDecoder.DecodeToFile( Data, filePath ) );
+            AddReplaceHandler<Texture>( filePath =>
+                TextureEncoder.EncodeFromFile( filePath, Data.IsYCbCr ? TextureFormat.RGBA8 : Data.Format, Data.MipMapCount != 1 ) );
+
             AddCustomHandler( "Export flipped", () =>
             {
-                string filePath = ModuleExportUtilities.SelectModuleExport<Bitmap>();
+                string filePath = ModuleExportUtilities.SelectModuleExport<Bitmap>( "Select a file to export to.", Name );
 
                 if ( string.IsNullOrEmpty( filePath ) ) 
                     return;
 
                 var imageFormat = GetImageFormat( filePath );
 
-                using ( var bitmap = TextureDecoder.Decode( Data ) )
+                using ( var bitmap = TextureDecoder.DecodeToBitmap( Data ) )
                 {
                     bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
                     bitmap.Save( filePath, imageFormat );

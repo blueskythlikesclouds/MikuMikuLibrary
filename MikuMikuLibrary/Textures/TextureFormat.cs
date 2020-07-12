@@ -4,6 +4,7 @@ namespace MikuMikuLibrary.Textures
 {
     public enum TextureFormat
     {
+        Unknown = -1,
         A8 = 0,
         RGB8 = 1,
         RGBA8 = 2,
@@ -22,8 +23,14 @@ namespace MikuMikuLibrary.Textures
 
     public static class TextureFormatUtilities
     {
-        public static bool IsCompressed( TextureFormat format ) => 
+        public static bool IsBlockCompressed( TextureFormat format ) => 
             format >= TextureFormat.DXT1 && format <= TextureFormat.ATI2;
+
+        public static bool HasAlpha( TextureFormat format )
+        {
+            return format == TextureFormat.A8 || format == TextureFormat.RGBA8 || format == TextureFormat.RGB5A1 || format == TextureFormat.RGBA4 ||
+                   format == TextureFormat.DXT1a || format == TextureFormat.DXT3 || format == TextureFormat.DXT5;
+        }
 
         public static int GetBlockSize( TextureFormat format )
         {

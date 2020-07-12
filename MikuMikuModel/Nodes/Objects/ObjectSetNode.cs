@@ -20,6 +20,7 @@ using MikuMikuLibrary.Objects.Extra;
 using MikuMikuLibrary.Objects.Extra.Blocks;
 using MikuMikuLibrary.Objects.Processing;
 using MikuMikuLibrary.Objects.Processing.Assimp;
+using MikuMikuLibrary.Objects.Processing.Fbx;
 using MikuMikuLibrary.Textures;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
@@ -68,15 +69,23 @@ namespace MikuMikuModel.Nodes.Objects
         {
             AddExportHandler<ObjectSet>( filePath =>
             {
-                var configuration = ConfigurationList.Instance.CurrentConfiguration;
+                if ( filePath.EndsWith( ".fbx", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    FbxExporter.ExportToFile( Data, filePath );
+                }
 
-                var objectDatabase = configuration?.ObjectDatabase;
-                var textureDatabase = configuration?.TextureDatabase;
-                var boneDatabase = configuration?.BoneDatabase;
+                else
+                {
+                    var configuration = ConfigurationList.Instance.CurrentConfiguration;
 
-                Data.Save( filePath, objectDatabase, textureDatabase, boneDatabase );
+                    var objectDatabase = configuration?.ObjectDatabase;
+                    var textureDatabase = configuration?.TextureDatabase;
+                    var boneDatabase = configuration?.BoneDatabase;
+
+                    Data.Save( filePath, objectDatabase, textureDatabase, boneDatabase );
+                }
             } );
-            AddExportHandler<Scene>( filePath => AssimpExporter.CreateAiSceneFromObjectSet( Data, filePath ) );
+            AddExportHandler<Scene>( filePath => AssimpExporter.ExportToFile( Data, filePath ) );
             AddReplaceHandler<ObjectSet>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
@@ -91,9 +100,9 @@ namespace MikuMikuModel.Nodes.Objects
             AddReplaceHandler<Scene>( filePath =>
             {
                 if ( Data.Objects.Count > 1 )
-                    return AssimpImporter.CreateObjectSetFromAiScene( filePath );
+                    return AssimpImporter.ImportFromFile( filePath );
 
-                return AssimpImporter.CreateObjectSetFromAiSceneWithSingleObject( filePath );
+                return AssimpImporter.ImportFromFileWithSingleObject( filePath );
             } );
 
             AddCustomHandler( "Copy object set info to clipboard", () =>

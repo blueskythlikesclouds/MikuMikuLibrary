@@ -137,6 +137,8 @@ namespace MikuMikuModel.GUI.Forms
 
         public void OpenFile( string filePath )
         {
+            Enabled = false;
+
             Reset();
 
 #if DEBUG
@@ -186,6 +188,8 @@ namespace MikuMikuModel.GUI.Forms
             mCloseToolStripMenuItem.Enabled = true;
 
             SetTitle( Path.GetFileName( filePath ) );
+
+            Enabled = true;
         }
 
         public void OpenFile()

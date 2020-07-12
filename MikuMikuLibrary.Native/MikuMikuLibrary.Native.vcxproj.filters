@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Pch.h" />
+    <ClInclude Include="Utf8String.h" />
+    <ClInclude Include="FbxExporterCore.h">
+      <Filter>Objects\Processing\Fbx</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureHelper.h">
+      <Filter>Textures\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDecoderCore.h">
+      <Filter>Textures\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureEncoderCore.h">
+      <Filter>Textures\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeContext.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Pch.cpp" />
+    <ClCompile Include="FbxExporterCore.cpp">
+      <Filter>Objects\Processing\Fbx</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDecoderCore.cpp">
+      <Filter>Textures\Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureEncoderCore.cpp">
+      <Filter>Textures\Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureHelper.cpp">
+      <Filter>Textures\Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeContext.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Textures">
+      <UniqueIdentifier>{99ab449d-9e74-4654-b9ee-89f61ccde39d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{57bfa511-a5a8-4802-b030-f14a12b2e124}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Processing">
+      <UniqueIdentifier>{f3a8dcc9-d30d-45f4-8dd1-b19785c2cb83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Processing\Fbx">
+      <UniqueIdentifier>{e70c3f76-0e7d-451f-86e7-37d954352474}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Textures\Processing">
+      <UniqueIdentifier>{92004c68-2c35-43fc-b9ba-c3c19bd2c68f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -6,9 +6,11 @@ using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Textures;
+using MikuMikuLibrary.Textures.Processing;
 using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.Databases;
 using MikuMikuModel.Nodes.IO;
+using MikuMikuModel.Nodes.Sprites;
 using MikuMikuModel.Resources;
 using Ookii.Dialogs.WinForms;
 
@@ -28,17 +30,7 @@ namespace MikuMikuModel.Nodes.Textures
         {
             AddImportHandler<Texture>( filePath =>
             {
-                var texture = TextureEncoder.Encode( filePath );
-                {
-                    texture.Name = Path.GetFileNameWithoutExtension( filePath );
-                    texture.Id = MurmurHash.Calculate( texture.Name );
-                }
-
-                Data.Textures.Add( texture );
-            } );
-            AddImportHandler<Bitmap>( filePath =>
-            {
-                var texture = TextureEncoder.Encode( filePath );
+                var texture = TextureEncoder.EncodeFromFile( filePath, TextureFormat.Unknown, Parent.FindParent<SpriteSetNode>() == null );
                 {
                     texture.Name = Path.GetFileNameWithoutExtension( filePath );
                     texture.Id = MurmurHash.Calculate( texture.Name );
@@ -60,11 +52,8 @@ namespace MikuMikuModel.Nodes.Textures
 
                     foreach ( var texture in Data.Textures )
                     {
-                        if ( !TextureFormatUtilities.IsCompressed( texture.Format ) || texture.IsYCbCr )
-                            TextureDecoder.DecodeToPNG( texture, Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.png" ) );
-
-                        else
-                            TextureDecoder.DecodeToDDS( texture, Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.dds" ) );
+                        string extension = !TextureFormatUtilities.IsBlockCompressed( texture.Format ) || texture.IsYCbCr ? "png" : "dds";
+                        TextureDecoder.DecodeToFile( texture, Path.Combine( folderBrowseDialog.SelectedPath, $"{texture.Name}.{extension}" ) );
                     }
                 }
             }, Keys.Control | Keys.Shift | Keys.E );

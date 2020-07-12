@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using MikuMikuLibrary.Textures;
+using MikuMikuLibrary.Textures.Processing;
 using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Controls
@@ -119,17 +120,10 @@ namespace MikuMikuModel.GUI.Controls
             mTexture = texture;
 
             if ( texture.IsYCbCr )
-            {
-                mYcbcrBitmap = TextureDecoder.Decode( texture );
-            }
+                mYcbcrBitmap = TextureDecoder.DecodeToBitmap( texture );
 
             else
-            {
-                mBitmaps = new Bitmap[ texture.ArraySize, texture.MipMapCount ];
-                for ( int i = 0; i < texture.ArraySize; i++ )
-                for ( int j = 0; j < texture.MipMapCount; j++ )
-                    mBitmaps[ i, j ] = TextureDecoder.Decode( texture[ i, j ] );
-            }
+                mBitmaps = TextureDecoder.DecodeToBitmaps( texture );
 
             mArrayIndex = 0;
             mMipMapIndex = 0;

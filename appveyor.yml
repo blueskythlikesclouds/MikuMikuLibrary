@@ -4,24 +4,21 @@ configuration: Release
 before_build:
     - cmd: nuget restore
 
+    - ps: Start-FileDownload "https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2020-1/fbx20201_fbxsdk_vs2017_win.exe" -FileName "FBX.exe"
+    - ps: Start-Process -Wait "FBX.exe" "/S /D=$($env:APPVEYOR_BUILD_FOLDER)\MikuMikuLibrary.Native\Dependencies\FBX"
+
 build:
     project: MikuMikuLibrary.sln
 
 after_build:
     - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on MikuMikuModel.7z ./MikuMikuModel/bin/Release/*
-    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on MikuMikuLibrary.7z ./MikuMikuLibrary/bin/Release/*
     - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on DatabaseConverter.7z ./CliTools/DatabaseConverter/bin/Release/*
     - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on FarcPack.7z ./CliTools/FarcPack/bin/Release/*
-    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on TxpConverter.7z ./CliTools/TxpConverter/bin/Release/*
 
 artifacts:
     - path: MikuMikuModel.7z
       name: MikuMikuModel
-    - path: MikuMikuLibrary.7z
-      name: MikuMikuLibrary
     - path: DatabaseConverter.7z
       name: DatabaseConverter
     - path: FarcPack.7z
       name: FarcPack
-    - path: TxpConverter.7z
-      name: TxpConverter

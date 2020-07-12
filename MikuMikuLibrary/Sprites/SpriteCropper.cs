@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using MikuMikuLibrary.Textures;
+using MikuMikuLibrary.Textures.Processing;
 
 namespace MikuMikuLibrary.Sprites
 {
@@ -13,11 +14,11 @@ namespace MikuMikuLibrary.Sprites
 
             var texture = parentSet.TextureSet.Textures[ ( int ) sprite.TextureIndex ];
 
-            if ( sprite.Width <= 0 || sprite.Height <= 0 || 
+            if ( sprite.Width <= 0 || sprite.Height <= 0 ||
                  sprite.X + sprite.Width > texture.Width || sprite.Y + sprite.Height > texture.Height )
                 return null;
 
-            var bitmap = TextureDecoder.Decode( texture );
+            var bitmap = TextureDecoder.DecodeToBitmap( texture );
 
             bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
 
@@ -33,7 +34,7 @@ namespace MikuMikuLibrary.Sprites
             var bitmaps = new List<Bitmap>( spriteSet.TextureSet.Textures.Count );
             foreach ( var texture in spriteSet.TextureSet.Textures )
             {
-                var bitmap = TextureDecoder.Decode( texture );
+                var bitmap = TextureDecoder.DecodeToBitmap( texture );
                 bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
                 bitmaps.Add( bitmap );
             }

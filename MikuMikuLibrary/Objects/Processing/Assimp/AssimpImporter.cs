@@ -8,19 +8,20 @@ using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Textures;
+using MikuMikuLibrary.Textures.Processing;
 using Ai = Assimp;
 
 namespace MikuMikuLibrary.Objects.Processing.Assimp
 {
     public static class AssimpImporter
     {
-        public static ObjectSet CreateObjectSetFromAiScene( string filePath )
+        public static ObjectSet ImportFromFile( string filePath )
         {
             string texturesDirectoryPath = Path.GetDirectoryName( filePath );
-            return CreateObjectSetFromAiScene( AssimpSceneHelper.Import( filePath ), texturesDirectoryPath );
+            return ImportFromAiScene( AssimpSceneHelper.Import( filePath ), texturesDirectoryPath );
         }
 
-        public static ObjectSet CreateObjectSetFromAiScene( Ai.Scene aiScene, string texturesDirectoryPath )
+        public static ObjectSet ImportFromAiScene( Ai.Scene aiScene, string texturesDirectoryPath )
         {
             var objectSet = new ObjectSet
             {
@@ -40,13 +41,13 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             return objectSet;
         }
 
-        public static ObjectSet CreateObjectSetFromAiSceneWithSingleObject( string filePath )
+        public static ObjectSet ImportFromFileWithSingleObject( string filePath )
         {
             string texturesDirectory = Path.GetDirectoryName( filePath );
-            return CreateObjectSetFromAiSceneWithSingleObject( AssimpSceneHelper.Import( filePath ), texturesDirectory );
+            return ImportFromAiSceneWithSingleObject( AssimpSceneHelper.Import( filePath ), texturesDirectory );
         }
 
-        public static ObjectSet CreateObjectSetFromAiSceneWithSingleObject( Ai.Scene aiScene, string texturesDirectoryPath )
+        public static ObjectSet ImportFromAiSceneWithSingleObject( Ai.Scene aiScene, string texturesDirectoryPath )
         {
             var objectSet = new ObjectSet
             {
@@ -212,20 +213,12 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                         if ( !aiMesh.HasTextureCoords( i ) )
                             continue;
 
-                        var texCoords =
-                            i == 0 ? mesh.TexCoords0 :
-                            i == 1 ? mesh.TexCoords1 :
-                            i == 2 ? mesh.TexCoords2 :
-                            mesh.TexCoords3;
+                        var texCoords = mesh.GetTexCoordsChannel( i );
 
                         if ( texCoords == null )
                         {
                             texCoords = new Vector2[ vertexCount ];
-
-                            if ( i == 0 ) mesh.TexCoords0 = texCoords;
-                            else if ( i == 1 ) mesh.TexCoords1 = texCoords;
-                            else if ( i == 2 ) mesh.TexCoords2 = texCoords;
-                            else mesh.TexCoords3 = texCoords;
+                            mesh.SetTexCoordsChannel( i, texCoords );
                         }
 
                         for ( int j = 0; j < aiMesh.VertexCount; j++ )
@@ -243,7 +236,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                         if ( !aiMesh.HasVertexColors( i ) )
                             continue;
 
-                        var colors = i == 0 ? mesh.Colors0 : mesh.Colors1;
+                        var colors = mesh.GetColorsChannel( i );
 
                         if ( colors == null )
                         {
@@ -251,8 +244,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                             for ( int j = 0; j < vertexCount; j++ )
                                 colors[ j ] = Color.White;
 
-                            if ( i == 0 ) mesh.Colors0 = colors;
-                            else mesh.Colors1 = colors;
+                            mesh.SetColorsChannel( i, colors );
                         }
 
                         for ( int j = 0; j < aiMesh.VertexCount; j++ )
@@ -285,20 +277,15 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
                                 var aiBoneNode = aiScene.RootNode.FindNode( aiBone.Name );
 
-                                do
+                                // This is not right, but I'm not sure how to transform the bind pose matrix
+                                // while not having duplicate bones.
+                                Matrix4x4.Invert( GetWorldTransform( aiBoneNode ), out var inverseBindPoseMatrix );
+
+                                obj.Skin.Bones.Add( new BoneInfo
                                 {
-                                    // This is not right, but I'm not sure how to transform the bind pose matrix
-                                    // while not having duplicate bones.
-                                    Matrix4x4.Invert( GetWorldTransform( aiBoneNode ), out var inverseBindPoseMatrix );
-
-                                    obj.Skin.Bones.Add( new BoneInfo
-                                    {
-                                        Name = aiBoneNode.Name,
-                                        InverseBindPoseMatrix = inverseBindPoseMatrix
-                                    } );
-
-                                } while ( ( aiBoneNode = aiBoneNode.Parent ) != null && aiBoneNode != aiScene.RootNode &&
-                                          obj.Skin.Bones.All( x => x.Name != aiBoneNode.Name ) );
+                                    Name = aiBoneNode.Name,
+                                    InverseBindPoseMatrix = inverseBindPoseMatrix
+                                } );
                             }
 
                             foreach ( var boneWeight in aiBone.VertexWeights )
@@ -455,7 +442,8 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             if ( materialTextureIndex == -1 )
                 return null;
 
-            var texture = CreateTextureFromFilePath( aiTextureSlot.FilePath, texturesDirectoryPath, textureSet );
+            var texture = CreateTextureFromFilePath( aiTextureSlot.FilePath, 
+                type == MaterialTextureType.Normal ? TextureFormat.ATI2 : TextureFormat.Unknown, texturesDirectoryPath, textureSet );
                     
             if ( texture == null )
                 return null;
@@ -498,7 +486,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             return materialTexture;
         }
 
-        private static Texture CreateTextureFromFilePath( string filePath, string texturesDirectoryPath, TextureSet textureSet )
+        private static Texture CreateTextureFromFilePath( string filePath, TextureFormat formatHint, string texturesDirectoryPath, TextureSet textureSet )
         {
             string textureName = Path.GetFileNameWithoutExtension( filePath );
 
@@ -513,7 +501,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             if ( string.IsNullOrEmpty( newFilePath ) )
                 return null;
 
-            texture = TextureEncoder.Encode( newFilePath );
+            texture = TextureEncoder.EncodeFromFile( newFilePath, formatHint, true );
 
             texture.Name = textureName;
             texture.Id = MurmurHash.Calculate( textureName );

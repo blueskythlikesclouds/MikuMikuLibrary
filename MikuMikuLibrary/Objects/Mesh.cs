@@ -50,6 +50,74 @@ namespace MikuMikuLibrary.Objects
             throw new ArgumentException( nameof( format ) );
         }
 
+        public Vector2[] GetTexCoordsChannel( int index )
+        {
+            switch ( index )
+            {
+                case 0: return TexCoords0;
+                case 1: return TexCoords1;
+                case 2: return TexCoords2;
+                case 3: return TexCoords3;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof( index ) );
+            }
+        }
+
+        public void SetTexCoordsChannel( int index, Vector2[] texCoords )
+        {
+            switch ( index )
+            {
+                case 0:
+                    TexCoords0 = texCoords;
+                    break;
+
+                case 1:
+                    TexCoords1 = texCoords;
+                    break;
+
+                case 2:
+                    TexCoords2 = texCoords;
+                    break;
+
+                case 3:
+                    TexCoords3 = texCoords;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof( index ) );
+            }
+        }
+
+        public Color[] GetColorsChannel( int index )
+        {
+            switch ( index )
+            {
+                case 0: return Colors0;
+                case 1: return Colors1;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof( index ) );
+            }
+        }
+
+        public void SetColorsChannel( int index, Color[] colors )
+        {
+            switch ( index )
+            {
+                case 0:
+                    Colors0 = colors;
+                    break;
+
+                case 1:
+                    Colors1 = colors;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof( index ) );
+            }
+        }
+
         internal void Read( EndianBinaryReader reader, ObjectSection section = null )
         {
             reader.SeekCurrent( 4 ); // Unused flags

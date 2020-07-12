@@ -6,6 +6,7 @@ using System.Numerics;
 using Ai = Assimp;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Textures;
+using MikuMikuLibrary.Textures.Processing;
 
 namespace MikuMikuLibrary.Objects.Processing.Assimp
 {
@@ -24,9 +25,9 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                 { MaterialTextureType.EnvironmentSphere, Ai.TextureType.Reflection }
             };
 
-        public static void CreateAiSceneFromObjectSet( ObjectSet objectSet, string outputFilePath )
+        public static void ExportToFile( ObjectSet objectSet, string outputFilePath )
         {
-            AssimpSceneHelper.Export( CreateAiSceneFromObjectSet( objectSet ), outputFilePath, Ai.PostProcessSteps.FlipUVs );
+            AssimpSceneHelper.Export( ExportToAiScene( objectSet ), outputFilePath, Ai.PostProcessSteps.FlipUVs );
 
             if ( objectSet.TextureSet == null )
                 return;
@@ -35,15 +36,12 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
             foreach ( var texture in objectSet.TextureSet.Textures )
             {
-                if ( TextureFormatUtilities.IsCompressed( texture.Format ) && !texture.IsYCbCr )
-                    TextureDecoder.DecodeToDDS( texture, Path.Combine( outputDirectoryPath, texture.Name + ".dds" ) );
-
-                else
-                    TextureDecoder.DecodeToPNG( texture, Path.Combine( outputDirectoryPath, texture.Name + ".png" ) );
+                string extension = TextureFormatUtilities.IsBlockCompressed( texture.Format ) && !texture.IsYCbCr ? ".dds" : ".png";
+                TextureDecoder.DecodeToFile( texture, Path.Combine( outputDirectoryPath, texture.Name + extension ) );
             }
         }
 
-        public static Ai.Scene CreateAiSceneFromObjectSet( ObjectSet objectSet )
+        public static Ai.Scene ExportToAiScene( ObjectSet objectSet )
         {
             if ( objectSet.TextureSet != null )
             {
@@ -71,14 +69,18 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             }
 
             var convertedBones = new Dictionary<string, Ai.Node>();
+            var gblctrNode = new Ai.Node( "gblctr" );
 
             foreach ( var obj in objectSet.Objects )
             {
                 if ( obj.Skin != null )
-                    CreateAiNodesFromBoneInfos( obj.Skin.Bones, aiScene, null, null, convertedBones );
+                    CreateAiNodesFromBoneInfos( obj.Skin.Bones, aiScene, gblctrNode, null, convertedBones );
 
                 aiScene.RootNode.Children.Add( CreateAiNodeFromObject( obj, aiScene ) );
             }
+
+            if ( gblctrNode.HasChildren )
+                aiScene.RootNode.Children.Add( gblctrNode );
 
             return aiScene;
         }
@@ -126,7 +128,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
         {
             foreach ( var boneInfo in boneInfos )
             {
-                if ( boneInfo.Parent != parentBoneInfo  )
+                if ( boneInfo.Parent != parentBoneInfo )
                     continue;
 
                 if ( !convertedBones.TryGetValue( boneInfo.Name, out var aiBoneNode ) )
@@ -163,11 +165,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
             for ( int i = 0; i < 4; i++ )
             {
-                var texCoords =
-                    i == 0 ? mesh.TexCoords0 :
-                    i == 1 ? mesh.TexCoords1 :
-                    i == 2 ? mesh.TexCoords2 :
-                    mesh.TexCoords3;
+                var texCoords = mesh.GetTexCoordsChannel( i );
 
                 if ( texCoords == null )
                     continue;
@@ -178,7 +176,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
             for ( int i = 0; i < 2; i++ )
             {
-                var colors = i == 0 ? mesh.Colors0 : mesh.Colors1;
+                var colors = mesh.GetColorsChannel( i );
 
                 if ( colors == null )
                     continue;
@@ -274,7 +272,7 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
 
                 var aiTextureSlot = new Ai.TextureSlot();
 
-                if ( TextureFormatUtilities.IsCompressed( texture.Format ) && !texture.IsYCbCr )
+                if ( TextureFormatUtilities.IsBlockCompressed( texture.Format ) && !texture.IsYCbCr )
                     aiTextureSlot.FilePath = texture.Name + ".dds";
 
                 else

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Objects;
+using MikuMikuLibrary.Objects.Processing.Fbx;
 using MikuMikuModel.Configurations;
 
 namespace MikuMikuModel.Modules.Objects
@@ -12,7 +13,8 @@ namespace MikuMikuModel.Modules.Objects
         public override IReadOnlyList<FormatExtension> Extensions { get; } = new[]
         {
             new FormatExtension( "Object Set (Classic)", "bin", FormatExtensionFlags.Import | FormatExtensionFlags.Export ),
-            new FormatExtension( "Object Set (Modern)", "osd", FormatExtensionFlags.Import | FormatExtensionFlags.Export )
+            new FormatExtension( "Object Set (Modern)", "osd", FormatExtensionFlags.Import | FormatExtensionFlags.Export ),
+            new FormatExtension( "FBX Exporter", "fbx", FormatExtensionFlags.Export )
         };
 
         public override bool Match( string fileName )
@@ -36,6 +38,15 @@ namespace MikuMikuModel.Modules.Objects
                 ConfigurationList.Instance.CurrentConfiguration?.TextureDatabase );
 
             return model;
+        }
+
+        public override void Export( ObjectSet model, string filePath )
+        {
+            if ( filePath.EndsWith( ".fbx", StringComparison.OrdinalIgnoreCase ) )
+                FbxExporter.ExportToFile( model, filePath );
+
+            else
+                base.Export( model, filePath );
         }
 
         protected override ObjectSet ImportCore( Stream source, string fileName )

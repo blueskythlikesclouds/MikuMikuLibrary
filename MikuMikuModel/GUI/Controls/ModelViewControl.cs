@@ -63,6 +63,8 @@ namespace MikuMikuModel.GUI.Controls
         private GLBuffer<Vector3> mGridVertexBuffer;
 
         private bool mLeft, mRight, mUp, mDown, mFront, mBack;
+        private bool mPreviousMouseLeft, mPreviousMouseRight;
+
         private IDrawable mModel;
         private Point mPreviousMousePosition;
         private Matrix4 mProjectionMatrix;
@@ -388,15 +390,24 @@ namespace MikuMikuModel.GUI.Controls
             SwapBuffers();
         }
 
+        protected override void OnMouseUp( MouseEventArgs e )
+        {
+            mPreviousMouseLeft &= e.Button != MouseButtons.Left;
+            mPreviousMouseRight &= e.Button != MouseButtons.Right;
+
+            base.OnMouseUp( e );
+        }
+
         protected override void OnMouseMove( MouseEventArgs e )
         {
             float deltaX = e.Location.X - mPreviousMousePosition.X;
             float deltaY = e.Location.Y - mPreviousMousePosition.Y;
 
+
             switch ( e.Button )
             {
 #if USE_ORBIT_CAMERA_CONTROL
-                case MouseButtons.Left:
+                case MouseButtons.Left when mPreviousMouseLeft:
                 {
                     const float cameraSpeed = 0.18f;
                     mCamOrbitRotation.X += deltaX * cameraSpeed;
@@ -405,7 +416,7 @@ namespace MikuMikuModel.GUI.Controls
                     break;
                 }
 #else
-                case MouseButtons.Left:
+                case MouseButtons.Left when mPreviousMouseLeft:
                 {
                     float cameraSpeed = ModifierKeys.HasFlag( Keys.Shift ) ? 0.04f :
                         ModifierKeys.HasFlag( Keys.Control ) ? 0.00125f : 0.005f;
@@ -416,11 +427,17 @@ namespace MikuMikuModel.GUI.Controls
                     break;
                 }
 
-                case MouseButtons.Right:
+                case MouseButtons.Right when mPreviousMouseRight:
                     mCamRotation.X += deltaX * 0.1f;
                     mCamRotation.Y -= deltaY * 0.1f;
                     break;
 #endif
+                default:
+                {
+                    mPreviousMouseLeft |= e.Button == MouseButtons.Left;
+                    mPreviousMouseRight |= e.Button == MouseButtons.Right;
+                    break;
+                }
             }
 
             if ( e.Button != MouseButtons.None )
@@ -533,6 +550,7 @@ namespace MikuMikuModel.GUI.Controls
         {
             mTimer.Start();
             mFocused = true;
+            mShouldRedraw = true;
             base.OnGotFocus( e );
         }
 
@@ -540,6 +558,7 @@ namespace MikuMikuModel.GUI.Controls
         {
             mTimer.Stop();
             mFocused = mFront = mLeft = mUp = mDown = mBack = mRight = false;
+            mPreviousMouseLeft = mPreviousMouseRight = false;
             base.OnLostFocus( e );
         }
 
