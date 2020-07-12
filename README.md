@@ -31,9 +31,6 @@ Supported files:
 ### FARC Pack
 A program that allows you to extract .farc files or create them from folders.
 
-### TXP Converter
-A program allows you to modify _tex.bin or .txd files by extracting them to .dds or .png files.
-
 # Special thanks
 * [Brolijah](https://github.com/Brolijah)
 * [chrrox](https://www.deviantart.com/chrrox)
