@@ -71,8 +71,8 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         lElementMaterial->SetMappingMode( FbxLayerElement::eByPolygon );
         lElementMaterial->SetReferenceMode( FbxLayerElement::eIndexToDirect );
 
-        HashSet<unsigned int>^ indices = gcnew HashSet<unsigned int>( mesh->Positions->Length );
-        List<int>^ materialIndices = gcnew List<int>( materials->Count );
+        HashSet<unsigned int>^ vertexIndices = gcnew HashSet<unsigned int>( mesh->Positions->Length );
+        Dictionary<int, int>^ materialMap = gcnew Dictionary<int, int>( materials->Count );
 
         FbxSkin* lSkin = nullptr;
         Dictionary<int, IntPtr>^ clusterMap = nullptr;
@@ -88,28 +88,25 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
             SubMesh^ subMesh = mesh->SubMeshes[ i ];
             List<Triangle>^ triangles = subMesh->GetTriangles();
 
-            int materialIndex = materialIndices->IndexOf( subMesh->MaterialIndex );
-            if ( materialIndex == -1 )
-            {
-                materialIndex = materialIndices->Count;
-                materialIndices->Add( subMesh->MaterialIndex );
+            int materialIndex;
 
-                lNode->AddMaterial( ( FbxSurfacePhong* ) materials[ subMesh->MaterialIndex ].ToPointer() );
+            if ( !materialMap->TryGetValue( subMesh->MaterialIndex, materialIndex ) )
+            {
+                materialIndex = lNode->AddMaterial( ( FbxSurfacePhong* ) materials[ subMesh->MaterialIndex ].ToPointer() );
+                materialMap->Add( subMesh->MaterialIndex, materialIndex );
             }
 
             for each ( Triangle triangle in triangles )
             {
-                indices->Add( triangle.A );
-                indices->Add( triangle.B );
-                indices->Add( triangle.C );
+                vertexIndices->Add( triangle.A );
+                vertexIndices->Add( triangle.B );
+                vertexIndices->Add( triangle.C );
 
-                lMesh->BeginPolygon();
+                lMesh->BeginPolygon( materialIndex, -1, -1, false );
                 lMesh->AddPolygon( triangle.A );
                 lMesh->AddPolygon( triangle.B );
                 lMesh->AddPolygon( triangle.C );
                 lMesh->EndPolygon();
-
-                lElementMaterial->GetIndexArray().Add( subMesh->MaterialIndex );
             }
 
             if ( lSkin != nullptr && subMesh->BoneIndices != nullptr )
@@ -138,7 +135,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
                         lCluster = ( FbxCluster* ) clusterPtr.ToPointer();
                     }
 
-                    for each ( unsigned int index in indices )
+                    for each ( unsigned int index in vertexIndices )
                     {
                         BoneWeight boneWeight = mesh->BoneWeights[ index ];
 
@@ -159,7 +156,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
                 }
             }
 
-            indices->Clear();
+            vertexIndices->Clear();
         }
 
         if ( lSkin != nullptr )
@@ -172,6 +169,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         }
 
         lNode->SetNodeAttribute( lMesh );
+        lNode->SetShadingMode( FbxNode::eTextureShading );
 
         return lNode;
     }
