@@ -139,57 +139,64 @@ namespace MikuMikuModel.GUI.Forms
         {
             Enabled = false;
 
-            Reset();
-
-#if DEBUG
-            var node = NodeFactory.Create( filePath );
-#else
-            INode node = null;
-            string exceptionMessage = null;
-
             try
             {
-                node = NodeFactory.Create( filePath );
-            }
-            catch ( Exception exception )
-            {
-                exceptionMessage = exception.Message;
-            }
+                Reset();
 
-            if ( node != null && !typeof( IBinaryFile ).IsAssignableFrom( node.DataType ) )
-                exceptionMessage = "File type could not be determined.";
+#if DEBUG
+                var node = NodeFactory.Create( filePath );
+#else
+                INode node = null;
+                string exceptionMessage = null;
 
-            if ( node == null || !string.IsNullOrEmpty( exceptionMessage ) )
-            {
-                MessageBox.Show( $"Failed to open {Path.GetFileName( filePath )}.\nReason: {exceptionMessage}", Program.Name, MessageBoxButtons.OK,
-                    MessageBoxIcon.Error );
+                try
+                {
+                    node = NodeFactory.Create( filePath );
+                }
+                catch ( Exception exception )
+                {
+                    exceptionMessage = exception.Message;
+                }
 
-                return;
-            }
+                if ( node != null && !typeof( IBinaryFile ).IsAssignableFrom( node.DataType ) )
+                    exceptionMessage = "File type could not be determined.";
+
+                if ( node == null || !string.IsNullOrEmpty( exceptionMessage ) )
+                {
+                    MessageBox.Show( $"Failed to open {Path.GetFileName( filePath )}.\nReason: {exceptionMessage}", Program.Name, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error );
+
+                    Enabled = true;
+                    return;
+                }
 #endif
 
-            SetSubscription( node );
+                SetSubscription( node );
 
-            node.Exported += OnNodeExported;
+                node.Exported += OnNodeExported;
 
-            var treeNode = new NodeAsTreeNode( node );
-            {
-                mNodeTreeView.Nodes.Add( treeNode );
+                var treeNode = new NodeAsTreeNode( node );
+                {
+                    mNodeTreeView.Nodes.Add( treeNode );
+                }
+
+                treeNode.Expand();
+
+                if ( node is FarcArchiveNode && node.Nodes.Count > 0 )
+                    mNodeTreeView.SelectedNode = treeNode.Nodes[ 0 ] as NodeAsTreeNode;
+
+                mCurrentlyOpenFilePath = filePath;
+                mSaveToolStripMenuItem.Enabled = true;
+                mSaveAsToolStripMenuItem.Enabled = true;
+                mCloseToolStripMenuItem.Enabled = true;
+
+                SetTitle( Path.GetFileName( filePath ) );
             }
 
-            treeNode.Expand();
-
-            if ( node is FarcArchiveNode && node.Nodes.Count > 0 )
-                mNodeTreeView.SelectedNode = treeNode.Nodes[ 0 ] as NodeAsTreeNode;
-
-            mCurrentlyOpenFilePath = filePath;
-            mSaveToolStripMenuItem.Enabled = true;
-            mSaveAsToolStripMenuItem.Enabled = true;
-            mCloseToolStripMenuItem.Enabled = true;
-
-            SetTitle( Path.GetFileName( filePath ) );
-
-            Enabled = true;
+            finally
+            {
+                Enabled = true;
+            }
         }
 
         public void OpenFile()
