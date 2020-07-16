@@ -26,6 +26,12 @@ namespace MikuMikuModel.Modules.Objects
                 throw new ArgumentException( "Assimp scene can only be exported to file stream", nameof( destination ) );
         }
 
+        public override bool Match( byte[] buffer )
+        {
+            // If extension did not match in the first place, then the header won't match either.
+            return false;
+        }
+
         public AssimpSceneModule()
         {
             var aiContext = new AssimpContext();
