@@ -37,7 +37,7 @@ namespace MikuMikuModel.GUI.Forms
         {
             mStringBuilder.Clear();
             mStringBuilder.Append( Program.Name );
-            mStringBuilder.AppendFormat( " ({0})", Program.Version );
+            mStringBuilder.AppendFormat( " (v{0})", Program.Version );
 
 #if DEBUG
             mStringBuilder.Append( " (Debug)" );
@@ -434,14 +434,9 @@ namespace MikuMikuModel.GUI.Forms
                     int firstIndex = response.IndexOf( ':', index + 8 );
                     int lastIndex = response.IndexOf( ',', firstIndex + 1 );
 
-                    string tagName = response.Substring( firstIndex + 1, lastIndex - firstIndex - 1 ).Trim( '"', ',', 'v', ' ' );
+                    string tagName = Program.FixUpVersionString( response.Substring( firstIndex + 1, lastIndex - firstIndex - 1 ).Trim( '"', ',', 'v', ' ' ) );
 
-                    string currentVersion = Program.Version.ToString();
-
-                    while ( currentVersion.EndsWith( ".0" ) )
-                        currentVersion = currentVersion.Remove( currentVersion.Length - 2, 2 );
-
-                    if ( tagName != currentVersion )
+                    if ( tagName != Program.Version )
                     {
                         Invoke( new Action( () =>
                         {
@@ -460,7 +455,6 @@ namespace MikuMikuModel.GUI.Forms
                             MessageBox.Show( "There are no updates available.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Information );
                         } ) );
                     }
-
                 }
             }
 
@@ -485,7 +479,7 @@ namespace MikuMikuModel.GUI.Forms
         {
             mStringBuilder.Clear();
             mStringBuilder.AppendLine( Program.Name );
-            mStringBuilder.AppendFormat( "Version: {0}", Program.Version );
+            mStringBuilder.AppendFormat( "Version: v{0}", Program.Version );
 #if DEBUG
             mStringBuilder.Append( " - Debug" );
 #endif

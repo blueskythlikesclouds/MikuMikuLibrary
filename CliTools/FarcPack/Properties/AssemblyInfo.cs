@@ -5,8 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle( "FARC Pack" )]
-[assembly:
-    AssemblyDescription( "A program that can create or extract .farc files from Hatsune Miku: Project DIVA games." )]
+[assembly: AssemblyDescription( "A program that can create or extract .farc files from Hatsune Miku: Project DIVA games." )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
 [assembly: AssemblyProduct( "FARC Pack" )]
@@ -33,7 +32,7 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 #if DEBUG
-[assembly: AssemblyVersion( "1.0.*" )]
+[assembly: AssemblyVersion( "2.0.*" )]
 #else
-[assembly: AssemblyVersion( "1.0.2" )]
+[assembly: AssemblyVersion( "2.0.0" )]
 #endif

@@ -8,10 +8,33 @@ using MikuMikuModel.GUI.Forms;
 
 namespace MikuMikuModel
 {
-    internal static class Program
+    public static class Program
     {
-        public static string Name => "Miku Miku Model (Unstable)";
-        public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
+        private static string sVersion;
+
+        public static string Name => "Miku Miku Model";
+
+        public static string Version
+        {
+            get
+            {
+                if ( !string.IsNullOrEmpty( sVersion ) )
+                    return sVersion;
+
+                return sVersion = FixUpVersionString( Assembly.GetExecutingAssembly().GetName().Version.ToString() );
+            }
+        }
+
+        public static string FixUpVersionString( string version )
+        {
+            while ( version.EndsWith( ".0" ) )
+                version = version.Remove( version.Length - 2, 2 );
+
+            if ( !version.Contains( "." ) )
+                version += ".0";
+
+            return version;
+        }
 
         /// <summary>
         ///     The main entry point for the application.

@@ -278,25 +278,25 @@
             this.mAutoCheckUpdatesToolStripMenuItem.CheckOnClick = true;
             this.mAutoCheckUpdatesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.mAutoCheckUpdatesToolStripMenuItem.Name = "mAutoCheckUpdatesToolStripMenuItem";
-            this.mAutoCheckUpdatesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.mAutoCheckUpdatesToolStripMenuItem.Text = "Auto check updates";
+            this.mAutoCheckUpdatesToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.mAutoCheckUpdatesToolStripMenuItem.Text = "Auto-check for updates";
             this.mAutoCheckUpdatesToolStripMenuItem.Click += new System.EventHandler(this.OnAutoCheckUpdates);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(196, 6);
             // 
             // mStylesToolStripMenuItem
             // 
             this.mStylesToolStripMenuItem.Name = "mStylesToolStripMenuItem";
-            this.mStylesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mStylesToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.mStylesToolStripMenuItem.Text = "Styles";
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(196, 6);
             // 
             // mCamerasToolStripMenuItem
             // 
@@ -304,7 +304,7 @@
             this.mOrbitCameraToolStripMenuItem,
             this.mFreeCameraToolStripMenuItem});
             this.mCamerasToolStripMenuItem.Name = "mCamerasToolStripMenuItem";
-            this.mCamerasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mCamerasToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.mCamerasToolStripMenuItem.Text = "Cameras";
             // 
             // mOrbitCameraToolStripMenuItem

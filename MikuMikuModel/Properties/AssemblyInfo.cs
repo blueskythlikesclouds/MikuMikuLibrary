@@ -5,9 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle( "Miku Miku Model" )]
-[assembly:
-    AssemblyDescription(
-        "This program is the GUI front-end of Miku Miku Library. It allows you to view and edit formats supported by the library, such as models, textures, motions and sprites." )]
+[assembly: AssemblyDescription( "This program is the GUI front-end of Miku Miku Library. It allows you to view and edit formats supported by the library, such as models, textures, motions and sprites." )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
 [assembly: AssemblyProduct( "Miku Miku Model" )]
@@ -34,7 +32,7 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 #if DEBUG
-[assembly: AssemblyVersion( "1.1.*" )]
+[assembly: AssemblyVersion( "2.0.*" )]
 #else
-[assembly: AssemblyVersion( "1.1.2" )]
+[assembly: AssemblyVersion( "2.0.0" )]
 #endif
