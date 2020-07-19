@@ -22,27 +22,40 @@ namespace MikuMikuModel.Resources.Styles
         public SerializableColor Border { get; set; }
 
         public SerializableColor ToolStripDropDownBackground { get; set; }
+
         public SerializableColor MenuItemSelected { get; set; }
         public SerializableColor MenuBorder { get; set; }
         public SerializableColor MenuItemBorder { get; set; }
-        public SerializableColor CheckBackground { get; set; }
+
         public SerializableColor MenuStripGradientBegin { get; set; }
         public SerializableColor MenuStripGradientEnd { get; set; }
+
         public SerializableColor MenuItemSelectedGradientBegin { get; set; }
         public SerializableColor MenuItemSelectedGradientEnd { get; set; }
         public SerializableColor MenuItemPressedGradientBegin { get; set; }
-        public SerializableColor MenuItemPressedGradientEnd { get; set; }
+        public SerializableColor MenuItemPressedGradientEnd { get; set; }        
+        
         public SerializableColor ImageMarginGradientBegin { get; set; }
         public SerializableColor ImageMarginGradientMiddle { get; set; }
         public SerializableColor ImageMarginGradientEnd { get; set; }
+
         public SerializableColor SeparatorDark { get; set; }
         public SerializableColor SeparatorLight { get; set; }
 
         public SerializableColor ButtonColor { get; set; }
+        public SerializableColor ButtonMouseOverColor { get; set; }
+        public SerializableColor ButtonMouseDownColor { get; set; }
         public SerializableColor ButtonBorderColor { get; set; }
 
         public SerializableColor ViewportBackground { get; set; }
-        public SerializableColor ViewportForeground { get; set; }
+
+        public SerializableColor GridInnerColor { get; set; }
+        public SerializableColor GridOuterColor { get; set; }
+        public SerializableColor GridXColor { get; set; }
+        public SerializableColor GridZColor { get; set; }
+
+        public SerializableColor MenuStripForeground { get; set; }
+        public SerializableColor MenuStripBackground { get; set; }
 
         public StyleColorTable ColorTable => mColorTable ?? ( mColorTable = new StyleColorTable( this ) );
 

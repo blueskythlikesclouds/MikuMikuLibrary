@@ -48,8 +48,7 @@ namespace MikuMikuModel.Nodes.Wrappers
             Node.Moved -= OnNodeMoved;
             Node.Imported -= OnNodeImported;
             Node.Replaced -= OnNodeReplaced;
-            Node.Dispose();
-
+   
             foreach ( var node in Nodes.OfType<NodeAsTreeNode>() )
                 node.Dispose();
         }

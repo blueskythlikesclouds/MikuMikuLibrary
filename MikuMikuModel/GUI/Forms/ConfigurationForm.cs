@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -15,6 +16,7 @@ namespace MikuMikuModel.GUI.Forms
     public partial class ConfigurationForm : Form
     {
         private readonly ConfigurationList mConfigurationList;
+        private readonly Dictionary<Configuration, Configuration> mOriginalMap;
 
         public Configuration SelectedConfiguration =>
             mListBox.SelectedIndex < 0 ? null : mConfigurationList.Configurations[ mListBox.SelectedIndex ];
@@ -148,6 +150,9 @@ namespace MikuMikuModel.GUI.Forms
         private void OnReload( object sender, EventArgs e )
         {
             SelectedConfiguration.Clean();
+
+            if ( mOriginalMap.TryGetValue( SelectedConfiguration, out var originalConfiguration ) )
+                originalConfiguration.Clean();
         }
 
         private void OnObjectDatabasePathTextBoxTextChanged( object sender, EventArgs e )
@@ -299,6 +304,10 @@ namespace MikuMikuModel.GUI.Forms
             Icon = ResourceStore.LoadIcon( "Icons/Application.ico" );
 
             mConfigurationList = ( ConfigurationList ) ConfigurationList.Instance.Clone();
+
+            mOriginalMap = new Dictionary<Configuration, Configuration>();
+            for ( int i = 0; i < mConfigurationList.Configurations.Count; i++ )
+                mOriginalMap[ mConfigurationList.Configurations[ i ] ] = ConfigurationList.Instance.Configurations[ i ];
         }
     }
 }

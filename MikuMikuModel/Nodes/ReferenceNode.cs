@@ -203,12 +203,10 @@ namespace MikuMikuModel.Nodes
 
         public void Dispose()
         {
-            Node.Dispose();
         }
 
         public void DisposeData()
         {
-            Node.DisposeData();
         }
 
         public ReferenceNode( INode node )

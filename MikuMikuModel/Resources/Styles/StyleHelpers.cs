@@ -10,6 +10,12 @@ namespace MikuMikuModel.Resources.Styles
     {
         public static void ApplyStyle( Control control, Style style )
         {
+            if ( style == null )
+            {
+                RestoreDefaultStyle( control );
+                return;
+            }
+
             control.BackColor = style.Background;
             control.ForeColor = style.Foreground;
 
@@ -18,6 +24,8 @@ namespace MikuMikuModel.Resources.Styles
                 case Button button:
                     button.FlatStyle = FlatStyle.Flat;
                     button.FlatAppearance.BorderColor = style.ButtonBorderColor;
+                    button.FlatAppearance.MouseOverBackColor = style.ButtonMouseOverColor;
+                    button.FlatAppearance.MouseDownBackColor = style.ButtonMouseDownColor;
                     button.BackColor = style.ButtonColor;
                     break;
 
@@ -25,9 +33,18 @@ namespace MikuMikuModel.Resources.Styles
                     groupBox.FlatStyle = FlatStyle.Flat;
                     break;
 
+                case MenuStrip menuStrip:
+                    menuStrip.ForeColor = style.MenuStripForeground;
+                    menuStrip.BackColor = style.MenuStripBackground;
+                    menuStrip.Renderer = style.ToolStripRenderer;
+                    break;
+
                 case ModelViewControl modelView:
-                    modelView.GridColor = style.ViewportForeground;
                     modelView.BackgroundColor = style.ViewportBackground;
+                    modelView.GridInnerColor = style.GridInnerColor;
+                    modelView.GridOuterColor = style.GridOuterColor;
+                    modelView.GridXColor = style.GridXColor;
+                    modelView.GridZColor = style.GridZColor;
                     break;
 
                 case PropertyGrid propertyGrid:
@@ -81,8 +98,11 @@ namespace MikuMikuModel.Resources.Styles
                     break;
 
                 case ModelViewControl modelView:
-                    colorMap[ nameof( modelView.GridColor ) ] = modelView.GridColor;
                     colorMap[ nameof( modelView.BackgroundColor ) ] = modelView.BackgroundColor;
+                    colorMap[ nameof( modelView.GridInnerColor ) ] = modelView.GridInnerColor;
+                    colorMap[ nameof( modelView.GridOuterColor ) ] = modelView.GridOuterColor;
+                    colorMap[ nameof( modelView.GridXColor ) ] = modelView.GridXColor;
+                    colorMap[ nameof( modelView.GridZColor ) ] = modelView.GridZColor;
                     break;
             }
 
@@ -124,8 +144,11 @@ namespace MikuMikuModel.Resources.Styles
                         break;
 
                     case ModelViewControl modelView:
-                        modelView.GridColor = colorMap[ nameof( modelView.GridColor ) ];
                         modelView.BackgroundColor = colorMap[ nameof( modelView.BackgroundColor ) ];
+                        modelView.GridInnerColor = colorMap[ nameof( modelView.GridInnerColor ) ];
+                        modelView.GridOuterColor = colorMap[ nameof( modelView.GridOuterColor ) ];
+                        modelView.GridXColor = colorMap[ nameof( modelView.GridXColor ) ];
+                        modelView.GridZColor = colorMap[ nameof( modelView.GridZColor ) ];
                         break;
                 }
             }

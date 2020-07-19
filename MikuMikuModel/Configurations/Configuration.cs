@@ -79,11 +79,14 @@ namespace MikuMikuModel.Configurations
 
         public bool Equals( Configuration other )
         {
-            return other.Name == Name &&
-                   other.ObjectDatabaseFilePath == ObjectDatabaseFilePath &&
-                   other.TextureDatabaseFilePath == TextureDatabaseFilePath &&
-                   other.BoneDatabaseFilePath == BoneDatabaseFilePath &&
-                   other.MotionDatabaseFilePath == MotionDatabaseFilePath;
+            return StringEquals( other.Name, Name ) &&
+                   StringEquals( other.ObjectDatabaseFilePath, ObjectDatabaseFilePath ) &&
+                   StringEquals( other.TextureDatabaseFilePath, TextureDatabaseFilePath ) &&
+                   StringEquals( other.BoneDatabaseFilePath, BoneDatabaseFilePath ) &&
+                   StringEquals( other.MotionDatabaseFilePath, MotionDatabaseFilePath );
+
+            bool StringEquals( string left, string right ) => 
+                ( string.IsNullOrEmpty( left ) && string.IsNullOrEmpty( right ) ) || left == right;
         }
 
         public void Save()

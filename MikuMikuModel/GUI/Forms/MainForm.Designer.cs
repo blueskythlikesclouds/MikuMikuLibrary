@@ -36,8 +36,19 @@
             this.mCombineMotsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.mGenerateMurmurHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mAutoCheckUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.mStylesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.mCamerasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mOrbitCameraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mFreeCameraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mUserGuideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.mCheckForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
@@ -117,9 +128,8 @@
             this.editToolStripMenuItem,
             this.mConfigurationsToolStripMenuItem,
             this.mToolsToolStripMenuItem,
-            this.mStylesToolStripMenuItem,
-            this.mHelpToolStripMenuItem,
-            this.mAboutToolStripMenuItem});
+            this.mOptionsToolStripMenuItem,
+            this.mHelpToolStripMenuItem});
             this.mMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mMenuStrip.Name = "mMenuStrip";
             this.mMenuStrip.Size = new System.Drawing.Size(736, 25);
@@ -250,24 +260,110 @@
             this.mGenerateMurmurHashesToolStripMenuItem.Text = "Generate murmur hashes";
             this.mGenerateMurmurHashesToolStripMenuItem.Click += new System.EventHandler(this.OnGenerateMurmurHashes);
             // 
+            // mOptionsToolStripMenuItem
+            // 
+            this.mOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mAutoCheckUpdatesToolStripMenuItem,
+            this.toolStripSeparator4,
+            this.mStylesToolStripMenuItem,
+            this.toolStripSeparator5,
+            this.mCamerasToolStripMenuItem});
+            this.mOptionsToolStripMenuItem.Name = "mOptionsToolStripMenuItem";
+            this.mOptionsToolStripMenuItem.Size = new System.Drawing.Size(61, 21);
+            this.mOptionsToolStripMenuItem.Text = "Options";
+            // 
+            // mAutoCheckUpdatesToolStripMenuItem
+            // 
+            this.mAutoCheckUpdatesToolStripMenuItem.Checked = true;
+            this.mAutoCheckUpdatesToolStripMenuItem.CheckOnClick = true;
+            this.mAutoCheckUpdatesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.mAutoCheckUpdatesToolStripMenuItem.Name = "mAutoCheckUpdatesToolStripMenuItem";
+            this.mAutoCheckUpdatesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mAutoCheckUpdatesToolStripMenuItem.Text = "Auto check updates";
+            this.mAutoCheckUpdatesToolStripMenuItem.Click += new System.EventHandler(this.OnAutoCheckUpdates);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            // 
             // mStylesToolStripMenuItem
             // 
             this.mStylesToolStripMenuItem.Name = "mStylesToolStripMenuItem";
-            this.mStylesToolStripMenuItem.Size = new System.Drawing.Size(49, 21);
+            this.mStylesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.mStylesToolStripMenuItem.Text = "Styles";
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
+            // 
+            // mCamerasToolStripMenuItem
+            // 
+            this.mCamerasToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mOrbitCameraToolStripMenuItem,
+            this.mFreeCameraToolStripMenuItem});
+            this.mCamerasToolStripMenuItem.Name = "mCamerasToolStripMenuItem";
+            this.mCamerasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mCamerasToolStripMenuItem.Text = "Cameras";
+            // 
+            // mOrbitCameraToolStripMenuItem
+            // 
+            this.mOrbitCameraToolStripMenuItem.Checked = true;
+            this.mOrbitCameraToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.mOrbitCameraToolStripMenuItem.Name = "mOrbitCameraToolStripMenuItem";
+            this.mOrbitCameraToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.mOrbitCameraToolStripMenuItem.Text = "Orbit Camera";
+            this.mOrbitCameraToolStripMenuItem.Click += new System.EventHandler(this.OnCameraModeClicked);
+            // 
+            // mFreeCameraToolStripMenuItem
+            // 
+            this.mFreeCameraToolStripMenuItem.Name = "mFreeCameraToolStripMenuItem";
+            this.mFreeCameraToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.mFreeCameraToolStripMenuItem.Text = "Free Camera";
+            this.mFreeCameraToolStripMenuItem.Click += new System.EventHandler(this.OnCameraModeClicked);
             // 
             // mHelpToolStripMenuItem
             // 
+            this.mHelpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mUserGuideToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.mCheckForUpdatesToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.mAboutToolStripMenuItem});
             this.mHelpToolStripMenuItem.Name = "mHelpToolStripMenuItem";
             this.mHelpToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.mHelpToolStripMenuItem.Text = "Help";
-            this.mHelpToolStripMenuItem.Click += new System.EventHandler(this.OnHelp);
+            // 
+            // mUserGuideToolStripMenuItem
+            // 
+            this.mUserGuideToolStripMenuItem.Name = "mUserGuideToolStripMenuItem";
+            this.mUserGuideToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.mUserGuideToolStripMenuItem.Text = "User guide";
+            this.mUserGuideToolStripMenuItem.Click += new System.EventHandler(this.OnUserGuide);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(201, 6);
+            // 
+            // mCheckForUpdatesToolStripMenuItem
+            // 
+            this.mCheckForUpdatesToolStripMenuItem.Name = "mCheckForUpdatesToolStripMenuItem";
+            this.mCheckForUpdatesToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.mCheckForUpdatesToolStripMenuItem.Text = "Check for updates";
+            this.mCheckForUpdatesToolStripMenuItem.Click += new System.EventHandler(this.OnCheckForUpdates);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(201, 6);
             // 
             // mAboutToolStripMenuItem
             // 
             this.mAboutToolStripMenuItem.Name = "mAboutToolStripMenuItem";
-            this.mAboutToolStripMenuItem.Size = new System.Drawing.Size(52, 21);
-            this.mAboutToolStripMenuItem.Text = "About";
+            this.mAboutToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.mAboutToolStripMenuItem.Text = "About Miku Miku Model";
             this.mAboutToolStripMenuItem.Click += new System.EventHandler(this.OnAbout);
             // 
             // mPanel
@@ -322,16 +418,27 @@
         private MikuMikuModel.Nodes.Wrappers.NodeTreeView mNodeTreeView;
         private System.Windows.Forms.ToolStripMenuItem mCloseToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mConfigurationsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mAboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mHelpToolStripMenuItem;
         private System.ComponentModel.IContainer components;
         private System.Windows.Forms.ToolStripMenuItem mToolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mCombineMotsFileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mStylesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mOptionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mGenerateMurmurHashesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mUndoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mRedoToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem mUserGuideToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem mCheckForUpdatesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem mAboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mStylesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem mCamerasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mOrbitCameraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mFreeCameraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem mAutoCheckUpdatesToolStripMenuItem;
     }
 }

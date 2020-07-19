@@ -146,10 +146,7 @@ namespace MikuMikuModel.GUI.Controls
 
         private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
         {
-            if ( eventArgs.Style != null )
-                StyleHelpers.ApplyStyle( this, eventArgs.Style );
-            else
-                StyleHelpers.RestoreDefaultStyle( this );
+            StyleHelpers.ApplyStyle( this, eventArgs.Style );
 
             Refresh();
         }

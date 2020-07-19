@@ -11,7 +11,6 @@ namespace MikuMikuModel.Resources.Styles
         public override Color MenuItemSelected => Style.MenuItemSelected;
         public override Color MenuBorder => Style.MenuBorder;
         public override Color MenuItemBorder => Style.MenuItemBorder;
-        public override Color CheckBackground => Style.CheckBackground;
         public override Color MenuStripGradientBegin => Style.MenuStripGradientBegin;
         public override Color MenuStripGradientEnd => Style.MenuStripGradientEnd;
         public override Color MenuItemSelectedGradientBegin => Style.MenuItemSelectedGradientBegin;

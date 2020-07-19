@@ -58,6 +58,8 @@ namespace MikuMikuModel.GUI.Forms
             if ( disposing )
             {
                 mMainSplitContainer.Panel1.Controls.Clear(); // why tf you disposing texture view control bruh
+                mNodeTreeView.TopNode?.Dispose();
+                mNodeTreeView.TopDataNode?.Dispose();
                 components?.Dispose();
             }
 

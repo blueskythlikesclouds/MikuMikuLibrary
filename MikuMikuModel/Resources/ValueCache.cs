@@ -10,10 +10,10 @@ namespace MikuMikuModel.Resources
 
         private static readonly Dictionary<string, object> sValueCache;
 
-        public static T Get<T>( string key )
+        public static T Get<T>( string key, T fallback = default )
         {
             if ( !sValueCache.TryGetValue( key, out var value ) || !( value is T cast ) )
-                return default;
+                return fallback;
 
             return cast;
         }

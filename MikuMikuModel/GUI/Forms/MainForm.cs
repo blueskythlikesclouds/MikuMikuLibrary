@@ -3,7 +3,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
@@ -406,9 +408,77 @@ namespace MikuMikuModel.GUI.Forms
             }
         }
 
-        private void OnHelp( object sender, EventArgs e )
+        private void OnUserGuide( object sender, EventArgs e )
         {
             Process.Start( "https://github.com/blueskythlikesclouds/MikuMikuLibrary/wiki/Miku-Miku-Model" );
+        }
+
+        private void CheckForUpdates( bool notifyOnFail )
+        {
+#if DEBUG
+            return;
+#endif
+
+            try
+            {
+                using ( var client = new WebClient() )
+                {
+                    client.Headers.Add( "user-agent", Program.Name );
+                    string response = client.DownloadString( "https://api.github.com/repos/blueskythlikesclouds/MikuMikuLibrary/releases/latest" );
+
+                    // yes this is pure crackheadery
+                    // no I won't use a json library
+
+                    int index = response.IndexOf( "tag_name", StringComparison.OrdinalIgnoreCase );
+
+                    int firstIndex = response.IndexOf( ':', index + 8 );
+                    int lastIndex = response.IndexOf( ',', firstIndex + 1 );
+
+                    string tagName = response.Substring( firstIndex + 1, lastIndex - firstIndex - 1 ).Trim( '"', ',', 'v', ' ' );
+
+                    string currentVersion = Program.Version.ToString();
+
+                    while ( currentVersion.EndsWith( ".0" ) )
+                        currentVersion = currentVersion.Remove( currentVersion.Length - 2, 2 );
+
+                    if ( tagName != currentVersion )
+                    {
+                        Invoke( new Action( () =>
+                        {
+                            if ( MessageBox.Show( "There's an update available! Do you want to go to the releases page?", Program.Name, MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Question ) != DialogResult.Yes )
+                                return;
+
+                            Process.Start( "https://github.com/blueskythlikesclouds/MikuMikuLibrary/releases" );
+                        } ) );
+                    }
+
+                    else if ( notifyOnFail )
+                    {
+                        Invoke( new Action( () =>
+                        {
+                            MessageBox.Show( "There are no updates available.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Information );
+                        } ) );
+                    }
+
+                }
+            }
+
+            catch
+            {
+                if ( !notifyOnFail )
+                    return;
+
+                Invoke( new Action( () =>
+                {
+                    MessageBox.Show( "Failed to check for updates.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
+                } ) );
+            }
+        }
+
+        private void OnCheckForUpdates( object sender, EventArgs e )
+        {
+            CheckForUpdates( true );
         }
 
         private void OnAbout( object sender, EventArgs e )
@@ -421,7 +491,7 @@ namespace MikuMikuModel.GUI.Forms
 #endif
             mStringBuilder.AppendLine();
             mStringBuilder.AppendLine( "This program was created by Skyth." );
-            mStringBuilder.Append( "Please see README.md for additional information." );
+            mStringBuilder.Append( "Please see README.md, LICENSE.md and COPYRIGHT.md for additional information." );
 
             MessageBox.Show( mStringBuilder.ToString(), "About", MessageBoxButtons.OK );
         }
@@ -456,26 +526,58 @@ namespace MikuMikuModel.GUI.Forms
             MementoStack.BeginCompoundMemento();
         }
 
+        private void OnAutoCheckUpdates( object sender, EventArgs e )
+        {
+            ValueCache.Set( "AutoCheckUpdates", mAutoCheckUpdatesToolStripMenuItem.Checked );
+        }
+
         private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
         {
-            if ( eventArgs.Style != null )
-                StyleHelpers.ApplyStyle( this, eventArgs.Style );
-            else
-                StyleHelpers.RestoreDefaultStyle( this );
+            StyleHelpers.ApplyStyle( this, eventArgs.Style );
 
             Refresh();
         }
 
         private void InitializeStylesToolStripMenuItem()
         {
-            mStylesToolStripMenuItem.DropDownItems.Add( "Default", null, ( s, e ) => StyleSet.CurrentStyle = null );
+            AddMenuItem( "Default", () => StyleSet.CurrentStyle = null, StyleSet.CurrentStyle == null );
 
             if ( StyleSet.Styles.Count != 0 )
                 mStylesToolStripMenuItem.DropDownItems.Add( new ToolStripSeparator() );
 
             foreach ( var style in StyleSet.Styles )
-                mStylesToolStripMenuItem.DropDownItems.Add( style.Name, null,
-                    ( s, e ) => StyleSet.CurrentStyle = style );
+                AddMenuItem( style.Name, () => StyleSet.CurrentStyle = style, StyleSet.CurrentStyle == style );
+
+            void AddMenuItem( string text, Action onClick, bool isChecked )
+            {
+                var toolStripMenuItem = new ToolStripMenuItem { Text = text, CheckOnClick = true, Checked = isChecked };
+
+                toolStripMenuItem.Click += ( sender, args ) =>
+                {
+                    onClick();
+
+                    foreach ( var item in mStylesToolStripMenuItem.DropDownItems )
+                    {
+                        if ( item is ToolStripMenuItem menuItem )
+                            menuItem.Checked = menuItem == toolStripMenuItem;
+                    }
+                };
+
+                mStylesToolStripMenuItem.DropDownItems.Add( toolStripMenuItem );
+            }
+        }
+
+        private void UpdateCameraModeFlags()
+        {
+            mOrbitCameraToolStripMenuItem.Checked = ModelViewControl.UseOrbitCamera;
+            mFreeCameraToolStripMenuItem.Checked = !ModelViewControl.UseOrbitCamera;
+        }
+
+        private void OnCameraModeClicked( object sender, EventArgs e )
+        {
+            ModelViewControl.UseOrbitCamera = sender == mOrbitCameraToolStripMenuItem;
+            ValueCache.Set( "UseOrbitCamera", ModelViewControl.UseOrbitCamera );
+            UpdateCameraModeFlags();
         }
 
         protected override void OnLoad( EventArgs eventArgs )
@@ -499,6 +601,14 @@ namespace MikuMikuModel.GUI.Forms
 
                 ValueCache.Set( "IsNotFirstLaunch", true );
             }
+
+            ModelViewControl.UseOrbitCamera = ValueCache.Get( "UseOrbitCamera", true );
+            UpdateCameraModeFlags();
+
+            mAutoCheckUpdatesToolStripMenuItem.Checked = ValueCache.Get( "AutoCheckUpdates", true );
+
+            if ( mAutoCheckUpdatesToolStripMenuItem.Checked )
+                new Thread( () => CheckForUpdates( false ) ).Start();
 
             base.OnLoad( eventArgs );
         }
