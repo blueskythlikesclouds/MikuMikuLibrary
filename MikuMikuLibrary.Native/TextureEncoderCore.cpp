@@ -128,13 +128,17 @@ namespace MikuMikuLibrary::Textures::Processing
 
     Texture^ EncodeToTexture( const DirectX::ScratchImage& scratchImage, const TextureFormat formatHint )
     {
+        const int cubeIndexMap[] = { 0, 1, 2, 3, 5, 4 };
+
         const DirectX::TexMetadata& metadata = scratchImage.GetMetadata();
 
         array<SubTexture^, 2>^ subTextures = gcnew array<SubTexture^, 2>( ( int ) metadata.arraySize, ( int ) metadata.mipLevels );
         for ( size_t i = 0; i < metadata.arraySize; i++ )
         {
+            size_t index = metadata.arraySize == 6 ? cubeIndexMap[ i ] : index;
+
             for ( size_t j = 0; j < metadata.mipLevels; j++ )
-                subTextures[ ( int ) i, ( int ) j ] = EncodeToSubTexture( *scratchImage.GetImage( j, i, 0 ), formatHint );
+                subTextures[ ( int ) index, ( int ) j ] = EncodeToSubTexture( *scratchImage.GetImage( j, i, 0 ), formatHint );
         }
 
         return gcnew Texture( subTextures );
