@@ -65,8 +65,13 @@ namespace MikuMikuLibrary.Sprites
         public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
             writer.Write( 0 );
-            writer.ScheduleWriteOffsetIf( section == null, 1, 16, AlignmentMode.Left,
-                () => TextureSet.Save( writer.BaseStream, true ) );
+
+            if ( section != null )
+                writer.WriteNulls( sizeof( uint ) );
+
+            else
+                writer.ScheduleWriteOffset( 1, 16, AlignmentMode.Left, () => TextureSet.Save( writer.BaseStream, true ) );
+
             writer.Write( TextureSet.Textures.Count );
             writer.Write( Sprites.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
