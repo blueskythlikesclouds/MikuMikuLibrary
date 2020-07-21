@@ -135,7 +135,11 @@ namespace MikuMikuLibrary::Textures::Processing
         array<SubTexture^, 2>^ subTextures = gcnew array<SubTexture^, 2>( ( int ) metadata.arraySize, ( int ) metadata.mipLevels );
         for ( size_t i = 0; i < metadata.arraySize; i++ )
         {
-            size_t index = metadata.arraySize == 6 ? cubeIndexMap[ i ] : index;
+            size_t index;
+            if (metadata.arraySize == 6)
+                index = metadata.arraySize == 6 ? cubeIndexMap[i] : index;
+            else
+                index = i;
 
             for ( size_t j = 0; j < metadata.mipLevels; j++ )
                 subTextures[ ( int ) index, ( int ) j ] = EncodeToSubTexture( *scratchImage.GetImage( j, i, 0 ), formatHint );
