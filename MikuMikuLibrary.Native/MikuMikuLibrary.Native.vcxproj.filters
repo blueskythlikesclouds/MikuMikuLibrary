@@ -32,6 +32,9 @@
       <Filter>Textures\Processing</Filter>
     </ClCompile>
     <ClCompile Include="NativeContext.cpp" />
+    <ClCompile Include="AssemblyInfo.cpp">
+      <Filter>Properties</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Textures">
@@ -48,6 +51,9 @@
     </Filter>
     <Filter Include="Textures\Processing">
       <UniqueIdentifier>{92004c68-2c35-43fc-b9ba-c3c19bd2c68f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Properties">
+      <UniqueIdentifier>{b7562b38-9400-413c-b5d8-0b477b9986b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

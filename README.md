@@ -5,9 +5,15 @@ Format library and file editor for Hatsune Miku: Project DIVA games.
 * [Stable (release) builds](https://github.com/blueskythlikesclouds/MikuMikuLibrary/releases)
 * [Unstable (development) builds](https://ci.appveyor.com/project/blueskythlikesclouds/mikumikulibrary/build/artifacts)
 
+## Manually building
+1. Open the solution in Visual Studio 2019 (or later).
+2. Restore missing NuGet packages.
+3. Install FBX SDK. (See instructions [here.](https://github.com/blueskythlikesclouds/MikuMikuLibrary/tree/master/MikuMikuLibrary.Native/Dependencies/FBX))
+4. Build the solution.
+
 # Projects
 ## Miku Miku Library
-This is the main library of the solution, providing methods and classes to read, edit, and write file formats in Hatsune Miku: Project DIVA games.
+This is the main library of the solution, providing methods and classes to read, edit and write file formats from Hatsune Miku: Project DIVA games.
 
 ## Miku Miku Model
 A GUI front-end of the library that allows you to work with models, textures, motions and sprites.
@@ -16,7 +22,7 @@ A GUI front-end of the library that allows you to work with models, textures, mo
 These are command line front-ends for certain functionalities of the library.
 
 ### Database Converter
-A program that allows you to convert database files to .xml and vice versa.
+A program that allows you to convert database files to .xml or vice versa.
 
 Supported files:
 * aet_db.bin/.aei
@@ -29,7 +35,7 @@ Supported files:
 * tex_db.bin/.txi
 
 ### FARC Pack
-A program that allows you to extract .farc files or create them from folders.
+A program that allows you to unpack or repack .farc files.
 
 # Special thanks
 * [Brolijah](https://github.com/Brolijah)

@@ -28,6 +28,7 @@
     <ClInclude Include="TextureHelper.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="NativeContext.cpp" />
     <ClCompile Include="FbxExporterCore.cpp" />
     <ClCompile Include="Pch.cpp">
