@@ -381,16 +381,10 @@ namespace MikuMikuLibrary.IO.Common
                     if ( fixedLength == -1 )
                         throw new ArgumentException( "Invalid fixed length specified" );
 
-                    char b;
+                    var bytes = ReadBytes( fixedLength );
 
-                    for ( int i = 0; i < fixedLength; i++ )
-                    {
-                        b = ReadChar();
-                        if ( b != 0 )
-                            mStringBuilder.Append( b );
-                    }
-
-                    break;
+                    int index = Array.IndexOf( bytes, 0 );
+                    return index == -1 ? mEncoding.GetString( bytes ) : mEncoding.GetString( bytes, 0, index );
                 }
 
                 case StringBinaryFormat.PrefixedLength8:
