@@ -611,6 +611,9 @@ namespace MikuMikuModel.Nodes.Objects
 
             if ( mTextureSetNode != null )
                 Nodes.Add( mTextureSetNode );
+
+            if ( mTextureSetNode is ReferenceNode referenceNode )
+                SetSubscription( referenceNode.Node );
         }
 
         protected override void SynchronizeCore()
@@ -835,6 +838,14 @@ namespace MikuMikuModel.Nodes.Objects
                 mTextureSetNode.Replace( Data.TextureSet );
 
             base.OnReplace( previousData );
+        }
+
+        protected override void Dispose( bool disposing )
+        {
+            if ( disposing && mTextureSetNode is ReferenceNode referenceNode )
+                SetSubscription( referenceNode.Node, true );
+
+            base.Dispose( disposing );
         }
 
         public ObjectSetNode( string name, ObjectSet data ) : base( name, data )

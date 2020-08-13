@@ -91,7 +91,7 @@ namespace MikuMikuModel.Nodes.IO
             data.Load( source );
         }
 
-        private void SetSubscription( INode node, bool unsubscribe = false )
+        protected void SetSubscription( INode node, bool unsubscribe = false )
         {
             if ( node.IsPopulated || unsubscribe && node.IsPopulated )
                 IsDirty = true;
