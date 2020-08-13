@@ -335,7 +335,7 @@ namespace MikuMikuLibrary.Objects
             writer.Write( BoundingSphere );
             writer.Write( SubMeshes.Count );
 
-            writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {
                 foreach ( var subMesh in SubMeshes )
                     subMesh.Write( writer, section );
