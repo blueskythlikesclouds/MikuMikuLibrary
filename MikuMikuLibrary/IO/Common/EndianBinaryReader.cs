@@ -383,7 +383,7 @@ namespace MikuMikuLibrary.IO.Common
 
                     var bytes = ReadBytes( fixedLength );
 
-                    int index = Array.IndexOf( bytes, 0 );
+                    int index = Array.IndexOf( bytes, ( byte ) 0 );
                     return index == -1 ? mEncoding.GetString( bytes ) : mEncoding.GetString( bytes, 0, index );
                 }
 
