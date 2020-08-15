@@ -50,10 +50,15 @@ namespace MikuMikuLibrary.Objects
             if ( copy.Weight4 > 0 )
                 AddWeight( copy.Index4, copy.Weight4 );
 
-            Weight4 = 1.0f - Weight1 - Weight2 - Weight3;
+            float sum = Weight1 + Weight2 + Weight3 + Weight4;
 
-            if ( Math.Abs( Weight4 - 1.0f ) < 0.00001f || Math.Abs( Weight4 ) < 0.00001f )
-                Weight4 = 0.0f;
+            if ( sum > 0.0f )
+            {
+                Weight1 /= sum;
+                Weight2 /= sum;
+                Weight3 /= sum;
+                Weight4 /= sum;
+            }
         }
 
         public void AddWeight( int index, float weight )
