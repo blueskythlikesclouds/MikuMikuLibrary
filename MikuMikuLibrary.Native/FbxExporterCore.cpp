@@ -14,6 +14,18 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
     using namespace Textures;
     using namespace Textures::Processing;
 
+    FbxAMatrix CreateFbxAMatrixFromNumerics( Matrix4x4 matrix )
+    {
+        FbxAMatrix lMatrix;
+
+        lMatrix.mData[ 0 ][ 0 ] = matrix.M11; lMatrix.mData[ 0 ][ 1 ] = matrix.M12; lMatrix.mData[ 0 ][ 2 ] = matrix.M13; lMatrix.mData[ 0 ][ 3 ] = matrix.M14;
+        lMatrix.mData[ 1 ][ 0 ] = matrix.M21; lMatrix.mData[ 1 ][ 1 ] = matrix.M22; lMatrix.mData[ 1 ][ 2 ] = matrix.M23; lMatrix.mData[ 1 ][ 3 ] = matrix.M24;
+        lMatrix.mData[ 2 ][ 0 ] = matrix.M31; lMatrix.mData[ 2 ][ 1 ] = matrix.M32; lMatrix.mData[ 2 ][ 2 ] = matrix.M33; lMatrix.mData[ 2 ][ 3 ] = matrix.M34;
+        lMatrix.mData[ 3 ][ 0 ] = matrix.M41; lMatrix.mData[ 3 ][ 1 ] = matrix.M42; lMatrix.mData[ 3 ][ 2 ] = matrix.M43; lMatrix.mData[ 3 ][ 3 ] = matrix.M44;
+
+        return lMatrix;
+    }
+
     FbxNode* CreateFbxNodeFromMesh( Mesh^ mesh, Object^ object, FbxScene* lScene, List<IntPtr>^ materials, Dictionary<String^, IntPtr>^ convertedBones )
     {
         FbxNode* lNode = FbxNode::Create( lScene, Utf8String( mesh->Name ).ToCStr() );
@@ -126,7 +138,10 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
                         lCluster->SetLink( lBoneNode );
                         lCluster->SetLinkMode( FbxCluster::eTotalOne );
 
-                        lCluster->SetTransformLinkMatrix( lBoneNode->EvaluateGlobalTransform() );
+                        Matrix4x4 worldTransformation;
+                        Matrix4x4::Invert( boneInfo->InverseBindPoseMatrix, worldTransformation );
+
+                        lCluster->SetTransformLinkMatrix( CreateFbxAMatrixFromNumerics( worldTransformation ) );
 
                         clusterMap->Add( boneIndex, IntPtr( lCluster ) );
                     }
@@ -270,7 +285,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         return lSurfacePhong;
     }
 
-    FbxNode* CreateFbxNodeFromObject( Object^ object, TextureSet^ textureSet, String^ texturesDirectoryPath, FbxScene* lScene, Dictionary<String^, IntPtr>^ convertedBones )
+    FbxNode* CreateFbxNodeFromObject( Object^ object, TextureSet^ textureSet, String^ texturesDirectoryPath, FbxScene* lScene, FbxPose* lBindPose, Dictionary<String^, IntPtr>^ convertedBones )
     {
         FbxNode* lNode = FbxNode::Create( lScene, Utf8String( object->Name ).ToCStr() );
 
@@ -283,12 +298,15 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         {
             FbxNode* lMeshNode = CreateFbxNodeFromMesh( mesh, object, lScene, materials, convertedBones );
             lNode->AddChild( lMeshNode );
+            lBindPose->Add( lMeshNode, FbxAMatrix() );
         }
+
+        lBindPose->Add( lNode, FbxAMatrix() );
 
         return lNode;
     }
 
-    FbxNode* CreateFbxNodeFromBoneInfo( BoneInfo^ boneInfo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene )
+    FbxNode* CreateFbxNodeFromBoneInfo( BoneInfo^ boneInfo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose )
     {
         FbxNode* lNode = FbxNode::Create( lScene, Utf8String( boneInfo->Name ).ToCStr() );
 
@@ -315,11 +333,12 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         lSkeleton->LimbLength = 0.1;
 
         lNode->SetNodeAttribute( lSkeleton );
+        lBindPose->Add( lNode, CreateFbxAMatrixFromNumerics( worldTransformation ) );
 
         return lNode;
     }
 
-    void CreateFbxNodesFromBoneInfos( List<BoneInfo^>^ boneInfos, FbxScene* lScene, FbxNode* lParentNode, BoneInfo^ parentBoneInfo, Dictionary<String^, IntPtr>^ convertedBones )
+    void CreateFbxNodesFromBoneInfos( List<BoneInfo^>^ boneInfos, FbxScene* lScene, FbxNode* lParentNode, FbxPose* lBindPose, BoneInfo^ parentBoneInfo, Dictionary<String^, IntPtr>^ convertedBones )
     {
         for each ( BoneInfo^ boneInfo in boneInfos )
         {
@@ -331,7 +350,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
 
             if ( !convertedBones->TryGetValue( boneInfo->Name, nodePtr ) )
             {
-                lNode = CreateFbxNodeFromBoneInfo( boneInfo, parentBoneInfo != nullptr ? parentBoneInfo->InverseBindPoseMatrix : Matrix4x4::Identity, lScene );
+                lNode = CreateFbxNodeFromBoneInfo( boneInfo, parentBoneInfo != nullptr ? parentBoneInfo->InverseBindPoseMatrix : Matrix4x4::Identity, lScene, lBindPose );
                 lParentNode->AddChild( lNode );
 
                 convertedBones->Add( boneInfo->Name, IntPtr( lNode ) );
@@ -342,7 +361,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
                 lNode = ( FbxNode* ) nodePtr.ToPointer();
             }
 
-            CreateFbxNodesFromBoneInfos( boneInfos, lScene, lNode, boneInfo, convertedBones );
+            CreateFbxNodesFromBoneInfos( boneInfos, lScene, lNode, lBindPose, boneInfo, convertedBones );
         }
     }
 
@@ -383,6 +402,10 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
             throw gcnew Exception( String::Format( "Failed to export FBX file ({0})", destinationFilePath ) );
 
         FbxScene* lScene = FbxScene::Create( lManager, "" );
+
+        FbxPose* lBindPose = FbxPose::Create( lScene, "BindPoses" );
+        lBindPose->SetIsBindPose( true );
+
         FbxNode* lRootNode = lScene->GetRootNode();
 
         Dictionary<String^, IntPtr>^ convertedBones = gcnew Dictionary<String^, IntPtr>();
@@ -397,17 +420,22 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         for each ( Objects::Object^ object in objectSet->Objects )
         {
             if ( object->Skin != nullptr )
-                CreateFbxNodesFromBoneInfos( object->Skin->Bones, lScene, lSkeletonNode, nullptr, convertedBones );
+                CreateFbxNodesFromBoneInfos( object->Skin->Bones, lScene, lSkeletonNode, lBindPose, nullptr, convertedBones );
 
-            FbxNode* lObjectNode = CreateFbxNodeFromObject( object, objectSet->TextureSet, texturesDirectoryPath, lScene, convertedBones );
+            FbxNode* lObjectNode = CreateFbxNodeFromObject( object, objectSet->TextureSet, texturesDirectoryPath, lScene, lBindPose, convertedBones );
             lRootNode->AddChild( lObjectNode );
         }
 
         if ( convertedBones->Count > 0 )
+        {
+            lBindPose->Add( lSkeletonNode, FbxMatrix() );
             lRootNode->AddChild( lSkeletonNode );
+        }
 
         else
             lSkeletonNode->Destroy( true );
+
+        lScene->AddPose( lBindPose );
 
         lScene->GetGlobalSettings().SetAxisSystem( FbxAxisSystem::OpenGL );
         lScene->GetGlobalSettings().SetSystemUnit( FbxSystemUnit::m );
