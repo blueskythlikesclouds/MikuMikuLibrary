@@ -11,6 +11,8 @@ build:
     project: MikuMikuLibrary.sln
 
 after_build:
+    - rmdir "./MikuMikuModel/bin/Release/runtimes/linux-x64" /S /Q
+    - rmdir "./MikuMikuModel/bin/Release/runtimes/osx-x64" /S /Q
     - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on MikuMikuModel.7z ./MikuMikuModel/bin/Release/*
     - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on DatabaseConverter.7z ./CliTools/DatabaseConverter/bin/Release/*
     - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on FarcPack.7z ./CliTools/FarcPack/bin/Release/*
