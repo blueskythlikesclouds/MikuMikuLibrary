@@ -20,11 +20,10 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
             aiContext.SetConfig( new VertexCacheSizeConfig( 63 ) );
 
             return aiContext.ImportFile( filePath,
-                Ai.PostProcessSteps.CalculateTangentSpace | Ai.PostProcessSteps.JoinIdenticalVertices |
-                Ai.PostProcessSteps.Triangulate | Ai.PostProcessSteps.SplitLargeMeshes |
-                Ai.PostProcessSteps.LimitBoneWeights | Ai.PostProcessSteps.ImproveCacheLocality |
-                Ai.PostProcessSteps.SortByPrimitiveType | Ai.PostProcessSteps.SplitByBoneCount |
-                Ai.PostProcessSteps.FlipUVs );
+                Ai.PostProcessSteps.JoinIdenticalVertices | Ai.PostProcessSteps.Triangulate | 
+                Ai.PostProcessSteps.SplitLargeMeshes | Ai.PostProcessSteps.LimitBoneWeights |
+                Ai.PostProcessSteps.ImproveCacheLocality | Ai.PostProcessSteps.SortByPrimitiveType |
+                Ai.PostProcessSteps.SplitByBoneCount | Ai.PostProcessSteps.FlipUVs );
         }
 
         public static void Export( Ai.Scene aiScene, string filePath,

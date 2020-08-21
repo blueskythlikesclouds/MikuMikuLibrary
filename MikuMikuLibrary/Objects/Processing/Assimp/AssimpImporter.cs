@@ -190,24 +190,6 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                             mesh.Normals[ vertexOffset + i ] = Vector3.Normalize( Vector3.TransformNormal( aiMesh.Normals[ i ].ToNumerics(), transform ) );
                     }
 
-                    if ( aiMesh.HasTangentBasis && aiMesh.HasNormals )
-                    {
-                        if ( mesh.Tangents == null )
-                            mesh.Tangents = new Vector4[ vertexCount ];
-
-                        for ( int i = 0; i < aiMesh.VertexCount; i++ )
-                        {
-                            var normal = mesh.Normals[ vertexOffset + i ];
-                            var tangent = Vector3.Normalize( Vector3.TransformNormal( aiMesh.Tangents[ i ].ToNumerics(), transform ) );
-                            var bitangent = Vector3.Normalize( Vector3.TransformNormal( aiMesh.BiTangents[ i ].ToNumerics(), transform ) );
-
-                            var cross = Vector3.Normalize( Vector3.Cross( normal, tangent ) );
-                            float dot = Vector3.Dot( cross, bitangent );
-
-                            mesh.Tangents[ vertexOffset + i ] = new Vector4( tangent, dot > 0.0f ? -1.0f : 1.0f );
-                        }
-                    }
-
                     for ( int i = 0; i < 4; i++ )
                     {
                         if ( !aiMesh.HasTextureCoords( i ) )
@@ -330,6 +312,8 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                     for ( int i = 0; i < mesh.BoneWeights.Length; i++ )
                         mesh.BoneWeights[ i ].Validate();
                 }
+
+                mesh.GenerateTangents();
 
                 mesh.BoundingSphere = aabbMesh.ToBoundingSphere();
                 meshes.Add( mesh );

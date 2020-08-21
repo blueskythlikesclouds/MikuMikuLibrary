@@ -118,6 +118,56 @@ namespace MikuMikuLibrary.Objects
             }
         }
 
+        public void GenerateTangents()
+        {
+            if ( Positions == null || Normals == null || TexCoords0 == null )
+                return;
+
+            var tangents = new Vector3[ Positions.Length ];
+            var bitangents = new Vector3[ Positions.Length ];
+
+            foreach ( var subMesh in SubMeshes )
+            {
+                foreach ( var triangle in subMesh.GetTriangles() )
+                {
+                    var positionA = Positions[ triangle.C ] - Positions[ triangle.A ];
+                    var positionB = Positions[ triangle.B ] - Positions[ triangle.A ];
+
+                    var texCoordA = TexCoords0[ triangle.C ] - TexCoords0[ triangle.A ];
+                    var texCoordB = TexCoords0[ triangle.B ] - TexCoords0[ triangle.A ];
+
+                    float direction = texCoordA.X * texCoordB.Y - texCoordA.Y * texCoordB.X > 0.0f ? 1.0f : -1.0f;
+
+                    var tangent = ( positionA * texCoordB.Y - positionB * texCoordA.Y ) * direction;
+                    var bitangent = ( positionB * texCoordA.X - positionA * texCoordB.X ) * direction;
+
+                    tangents[ triangle.A ] += tangent;
+                    tangents[ triangle.B ] += tangent;
+                    tangents[ triangle.C ] += tangent;
+
+                    bitangents[ triangle.A ] += bitangent;
+                    bitangents[ triangle.B ] += bitangent;
+                    bitangents[ triangle.C ] += bitangent;
+                }
+            }
+
+            Tangents = new Vector4[ Positions.Length ];
+
+            for ( int i = 0; i < tangents.Length; i++ )
+            {
+                var normal = Normals[ i ];
+
+                var tangent = Vector3.Normalize( tangents[ i ] );
+                var bitangent = Vector3.Normalize( bitangents[ i ] );
+
+                tangent = Vector3.Normalize( tangent - normal * Vector3.Dot( tangent, normal ) );
+                bitangent = Vector3.Normalize( bitangent - normal * Vector3.Dot( bitangent, normal ) );
+
+                float directionCheck = Vector3.Dot( Vector3.Normalize( Vector3.Cross( normal, tangent ) ), bitangent );
+                Tangents[ i ] = new Vector4( tangent, directionCheck > 0.0f ? 1.0f : -1.0f );
+            }
+        }
+
         internal void Read( EndianBinaryReader reader, ObjectSection section = null )
         {
             reader.SeekCurrent( 4 ); // Unused flags
