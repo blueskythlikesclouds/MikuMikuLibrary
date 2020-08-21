@@ -281,7 +281,7 @@ namespace MikuMikuModel.GUI.Forms
             if ( result == DialogResult.Cancel )
                 return true;
 
-            if ( result == DialogResult.OK )
+            if ( result == DialogResult.Yes )
                 SaveFile();
 
             return false;
