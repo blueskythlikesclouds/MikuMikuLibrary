@@ -102,7 +102,7 @@ namespace MikuMikuLibrary.IO.Sections
                 currentOffset = offset;
             }
 
-            writer.Write( 4 + AlignmentHelper.Align( bytes.Count, 4 ) );
+            writer.Write( 4 + bytes.Count );
 
             foreach ( byte val in bytes )
                 writer.Write( val );
