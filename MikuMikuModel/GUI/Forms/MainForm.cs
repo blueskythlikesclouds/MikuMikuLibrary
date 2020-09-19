@@ -33,7 +33,7 @@ namespace MikuMikuModel.GUI.Forms
 
         private string mCurrentlyOpenFilePath;
 
-        private void SetTitle( string fileName = null )
+        private void SetTitle()
         {
             mStringBuilder.Clear();
             mStringBuilder.Append( Program.Name );
@@ -42,8 +42,13 @@ namespace MikuMikuModel.GUI.Forms
 #if DEBUG
             mStringBuilder.Append( " (Debug)" );
 #endif
-            if ( !string.IsNullOrEmpty( fileName ) )
-                mStringBuilder.AppendFormat( " - {0}", fileName );
+            if ( !string.IsNullOrEmpty( mCurrentlyOpenFilePath ) )
+            {
+                mStringBuilder.AppendFormat( " - {0}", Path.GetFileName( mCurrentlyOpenFilePath ) );
+
+                if ( mNodeTreeView.TopDataNode is IDirtyNode dirtyNode && dirtyNode.IsDirty )
+                    mStringBuilder.Append( '*' );
+            }
 
             mStringBuilder.AppendFormat( " - {0}",
                 ConfigurationList.Instance.CurrentConfiguration?.Name ?? "No configuration" );
@@ -80,6 +85,9 @@ namespace MikuMikuModel.GUI.Forms
                 node.Removed -= OnNodeRemoved;
                 node.Replaced -= OnNodeReplaced;
 
+                if ( node is IDirtyNode dirtyNode )
+                    dirtyNode.DirtyStateChanged -= OnDirtyStateChanged;
+
                 foreach ( var childNode in node.Nodes )
                     SetSubscription( childNode, true );
             }
@@ -88,6 +96,9 @@ namespace MikuMikuModel.GUI.Forms
                 node.Added += OnNodeAdded;
                 node.Removed += OnNodeRemoved;
                 node.Replaced += OnNodeReplaced;
+
+                if ( node is IDirtyNode dirtyNode )
+                    dirtyNode.DirtyStateChanged += OnDirtyStateChanged;
             }
 
             void OnNodeAdded( object sender, NodeAddEventArgs args ) =>
@@ -98,12 +109,16 @@ namespace MikuMikuModel.GUI.Forms
 
             void OnNodeReplaced( object sender, NodeReplaceEventArgs args ) =>
                 RefreshNodeControls();
+
+            void OnDirtyStateChanged( object sender, EventArgs args ) =>
+                SetTitle();
         }
 
         private void OnNodeExported( object sender, NodeExportEventArgs e )
         {
             ConfigurationList.Instance.CurrentConfiguration?.SaveTextureDatabase();
-            SetTitle( Path.GetFileName( e.FilePath ) );
+            mCurrentlyOpenFilePath = e.FilePath;
+            SetTitle();
         }
 
         public void Reset()
@@ -192,7 +207,7 @@ namespace MikuMikuModel.GUI.Forms
                 mSaveAsToolStripMenuItem.Enabled = true;
                 mCloseToolStripMenuItem.Enabled = true;
 
-                SetTitle( Path.GetFileName( filePath ) );
+                SetTitle();
             }
 
             finally
