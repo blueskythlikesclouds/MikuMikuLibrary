@@ -71,6 +71,7 @@ namespace MikuMikuModel.Nodes.Objects
             {
                 if ( filePath.EndsWith( ".fbx", StringComparison.OrdinalIgnoreCase ) )
                 {
+                    Data.TryFixParentBoneInfos( SourceConfiguration?.BoneDatabase );
                     FbxExporter.ExportToFile( Data, filePath );
                 }
 
@@ -85,7 +86,11 @@ namespace MikuMikuModel.Nodes.Objects
                     Data.Save( filePath, objectDatabase, textureDatabase, boneDatabase );
                 }
             } );
-            AddExportHandler<Scene>( filePath => AssimpExporter.ExportToFile( Data, filePath ) );
+            AddExportHandler<Scene>( filePath =>
+            {
+                Data.TryFixParentBoneInfos( SourceConfiguration?.BoneDatabase );
+                AssimpExporter.ExportToFile( Data, filePath );
+            } );
             AddReplaceHandler<ObjectSet>( filePath =>
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;

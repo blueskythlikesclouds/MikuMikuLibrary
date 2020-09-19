@@ -6,6 +6,7 @@ using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.Objects.Extra;
 using MikuMikuLibrary.Objects.Extra.Blocks;
+using MikuMikuLibrary.Skeletons;
 
 namespace MikuMikuLibrary.Objects
 {
@@ -23,6 +24,11 @@ namespace MikuMikuLibrary.Objects
 
         public List<BoneInfo> Bones { get; }
         public List<IBlock> Blocks { get; }
+
+        public BoneInfo GetBoneInfoByName( string boneName )
+        {
+            return Bones.FirstOrDefault( x => x.Name.Equals( boneName, StringComparison.OrdinalIgnoreCase ) );
+        }
 
         internal void Read( EndianBinaryReader reader )
         {
@@ -247,6 +253,89 @@ namespace MikuMikuLibrary.Objects
                     writer.Write( bone.Parent?.Id ?? 0xFFFFFFFF );
             } );
             writer.WriteNulls( 3 * sizeof( uint ) );
+        }
+
+        public void TryFixParentBoneInfos( Skeleton skeleton = null )
+        {
+            foreach ( var boneInfo in Bones )
+                boneInfo.Parent = boneInfo.Parent ?? FindParentBoneInfo( boneInfo.Name, skeleton );
+        }
+
+        private BoneInfo FindParentBoneInfo( string boneName, Skeleton skeleton = null )
+        {
+            int boneIndex = skeleton?.MotionBoneNames.FindIndex( x => x.Equals( boneName, StringComparison.OrdinalIgnoreCase ) ) ?? -1;
+
+            if ( boneIndex == -1 )
+            {
+                foreach ( var block in Blocks )
+                {
+                    switch ( block )
+                    {
+                        case ConstraintBlock constraintBlock:
+                        {
+                            if ( constraintBlock.BoneName.Equals( boneName, StringComparison.OrdinalIgnoreCase ) )
+                            {
+                                var parentBoneInfo = GetBoneInfoByName( constraintBlock.ParentName ) ?? FindParentBoneInfo( constraintBlock.ParentName, skeleton );
+
+                                if ( parentBoneInfo != null )
+                                    return parentBoneInfo;
+                            }
+
+                            break;
+                        }
+
+                        case ExpressionBlock expressionBlock:
+                        {
+                            // d u p l i c a t e  c o d e
+
+                            if ( expressionBlock.BoneName.Equals( boneName, StringComparison.OrdinalIgnoreCase ) )
+                            {
+                                var parentBoneInfo = GetBoneInfoByName( expressionBlock.ParentName ) ?? FindParentBoneInfo( expressionBlock.ParentName, skeleton );
+
+                                if ( parentBoneInfo != null )
+                                    return parentBoneInfo;
+                            }
+
+                            break;
+                        }
+
+                        case OsageBlock osageBlock:
+                        {
+                            if ( ( boneIndex = osageBlock.Bones.FindIndex( x => x.Name == boneName ) ) >= 0 )
+                            {
+                                string parentName = boneIndex == 0 ? osageBlock.ParentName : osageBlock.Bones[ boneIndex - 1 ].Name;
+
+                                var parentBoneInfo = GetBoneInfoByName( parentName ) ?? FindParentBoneInfo( parentName, skeleton );
+
+                                if ( parentBoneInfo != null )
+                                    return parentBoneInfo;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            else
+            {
+                for ( int i = 0; i < skeleton.ParentIndices.Count; i++ ) // Fail-safe for an infinite loop.
+                {
+                    int parentBoneIndex = skeleton.ParentIndices[ boneIndex ];
+
+                    if ( parentBoneIndex == -1 )
+                        return null;
+
+                    var parentBoneInfo = GetBoneInfoByName( skeleton.MotionBoneNames[ parentBoneIndex ] );
+
+                    if ( parentBoneInfo != null )
+                        return parentBoneInfo;
+
+                    boneIndex = parentBoneIndex;
+                }
+            }
+
+            return null;
         }
 
         public Skin()

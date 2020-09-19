@@ -329,6 +329,12 @@ namespace MikuMikuLibrary.Objects
             Save( filePath, null, null, null );
         }
 
+        public void TryFixParentBoneInfos( BoneDatabase boneDatabase = null )
+        {
+            foreach ( var obj in Objects )
+                obj.Skin?.TryFixParentBoneInfos( boneDatabase?.Skeletons.FirstOrDefault( x => obj.Name.StartsWith( x.Name, StringComparison.OrdinalIgnoreCase ) ) );
+        }
+
         public ObjectSet()
         {
             Objects = new List<Object>();
