@@ -88,6 +88,7 @@
     <Compile Include="GUI\Controls\SpriteViewControl.Designer.cs">
       <DependentUpon>SpriteViewControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\FileHistory.cs" />
     <Compile Include="GUI\Forms\FarcArchiveViewForm.cs">
       <SubType>Form</SubType>
     </Compile>

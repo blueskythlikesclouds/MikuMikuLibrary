@@ -118,6 +118,7 @@ namespace MikuMikuModel.GUI.Forms
         {
             ConfigurationList.Instance.CurrentConfiguration?.SaveTextureDatabase();
             mCurrentlyOpenFilePath = e.FilePath;
+            FileHistory.Add( e.FilePath );
             SetTitle();
         }
 
@@ -158,8 +159,6 @@ namespace MikuMikuModel.GUI.Forms
 
             try
             {
-                Reset();
-
 #if DEBUG
                 var node = NodeFactory.Create( filePath );
 #else
@@ -188,6 +187,8 @@ namespace MikuMikuModel.GUI.Forms
                 }
 #endif
 
+                Reset();
+
                 SetSubscription( node );
 
                 node.Exported += OnNodeExported;
@@ -206,6 +207,8 @@ namespace MikuMikuModel.GUI.Forms
                 mSaveToolStripMenuItem.Enabled = true;
                 mSaveAsToolStripMenuItem.Enabled = true;
                 mCloseToolStripMenuItem.Enabled = true;
+
+                FileHistory.Add( filePath );
 
                 SetTitle();
             }
@@ -312,6 +315,39 @@ namespace MikuMikuModel.GUI.Forms
 
             Reset();
             return true;
+        }
+
+        private void OnFileDropDownOpening( object sender, EventArgs e )
+        {
+            // Populate the Open Recent menu according to the file history.
+
+            mOpenRecentToolStripMenuItem.DropDownItems.Clear();
+
+            if ( !( mOpenRecentToolStripMenuItem.Enabled = FileHistory.Files.Count > 0 ) )
+                return;
+
+            int index = 0;
+
+            foreach ( string filePath in FileHistory.Files.Reverse() )
+            {
+                var menuItem = new ToolStripMenuItem
+                {
+                    Text = $"{++index}. {filePath}",
+                    Tag = filePath
+                };
+
+                menuItem.Click += OnOpenRecentDropDownItemClicked;
+
+                mOpenRecentToolStripMenuItem.DropDownItems.Add( menuItem );
+            }
+        }
+
+        private void OnOpenRecentDropDownItemClicked( object sender, EventArgs e )
+        {
+            if ( !( sender is ToolStripMenuItem menuItem ) || !( menuItem.Tag is string filePath ) )
+                return;
+
+            OpenFile( filePath );
         }
 
         private void OnNodeClose( object sender, EventArgs e )

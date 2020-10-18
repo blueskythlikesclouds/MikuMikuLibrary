@@ -51,6 +51,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
+            this.mOpenRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
             this.mMainSplitContainer.Panel2.SuspendLayout();
             this.mMainSplitContainer.SuspendLayout();
@@ -140,6 +141,7 @@
             // 
             this.mFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mOpenToolStripMenuItem,
+            this.mOpenRecentToolStripMenuItem,
             this.mSaveToolStripMenuItem,
             this.mSaveAsToolStripMenuItem,
             this.mCloseToolStripMenuItem,
@@ -148,6 +150,7 @@
             this.mFileToolStripMenuItem.Name = "mFileToolStripMenuItem";
             this.mFileToolStripMenuItem.Size = new System.Drawing.Size(37, 21);
             this.mFileToolStripMenuItem.Text = "File";
+            this.mFileToolStripMenuItem.DropDownOpening += new System.EventHandler(this.OnFileDropDownOpening);
             // 
             // mOpenToolStripMenuItem
             // 
@@ -212,7 +215,7 @@
             // 
             this.mUndoToolStripMenuItem.Name = "mUndoToolStripMenuItem";
             this.mUndoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.mUndoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.mUndoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.mUndoToolStripMenuItem.Text = "Undo";
             this.mUndoToolStripMenuItem.Click += new System.EventHandler(this.OnUndo);
             // 
@@ -220,7 +223,7 @@
             // 
             this.mRedoToolStripMenuItem.Name = "mRedoToolStripMenuItem";
             this.mRedoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.mRedoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.mRedoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.mRedoToolStripMenuItem.Text = "Redo";
             this.mRedoToolStripMenuItem.Click += new System.EventHandler(this.OnRedo);
             // 
@@ -375,6 +378,12 @@
             this.mPanel.Size = new System.Drawing.Size(736, 25);
             this.mPanel.TabIndex = 1;
             // 
+            // mOpenRecentToolStripMenuItem
+            // 
+            this.mOpenRecentToolStripMenuItem.Name = "mOpenRecentToolStripMenuItem";
+            this.mOpenRecentToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.mOpenRecentToolStripMenuItem.Text = "Open Recent";
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -440,5 +449,6 @@
         private System.Windows.Forms.ToolStripMenuItem mFreeCameraToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem mAutoCheckUpdatesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mOpenRecentToolStripMenuItem;
     }
 }
