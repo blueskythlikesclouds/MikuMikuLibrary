@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using MikuMikuLibrary.Objects.Processing.Fbx.Interfaces;
+using MikuMikuLibrary.Objects.Processing.Interfaces;
 using MikuMikuLibrary.Textures.Processing.Interfaces;
 
 namespace MikuMikuLibrary
@@ -11,6 +12,7 @@ namespace MikuMikuLibrary
         public static IFbxExporter FbxExporter { get; set; }
         public static ITextureDecoder TextureDecoder { get; }
         public static ITextureEncoder TextureEncoder { get; }
+        public static IStripifier Stripifier { get; }
 
         static Native()
         {
@@ -35,6 +37,9 @@ namespace MikuMikuLibrary
 
             TextureEncoder = ( ITextureEncoder ) Activator.CreateInstance(
                 assembly.GetType( "MikuMikuLibrary.Textures.Processing.TextureEncoderCore" ) );
+
+            Stripifier = ( IStripifier ) Activator.CreateInstance(
+                assembly.GetType( "MikuMikuLibrary.Objects.Processing.StripifierCore" ) );
         }
     }
 }

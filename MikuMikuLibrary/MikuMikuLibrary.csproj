@@ -124,16 +124,7 @@
     <Compile Include="Objects\Processing\Assimp\AssimpSceneHelper.cs" />
     <Compile Include="Objects\Processing\Fbx\FbxExporter.cs" />
     <Compile Include="Objects\Processing\Fbx\Interfaces\IFbxExporter.cs" />
-    <Compile Include="Objects\Processing\Stripifier\EdgeInfo.cs" />
-    <Compile Include="Objects\Processing\Stripifier\FaceInfo.cs" />
-    <Compile Include="Objects\Processing\Stripifier\NvStripifier.cs" />
-    <Compile Include="Objects\Processing\Stripifier\PrimitiveGroup.cs" />
-    <Compile Include="Objects\Processing\Stripifier\PrimitiveType.cs" />
-    <Compile Include="Objects\Processing\Stripifier\Stripifier.cs" />
-    <Compile Include="Objects\Processing\Stripifier\StripInfo.cs" />
-    <Compile Include="Objects\Processing\Stripifier\StripStartInfo.cs" />
-    <Compile Include="Objects\Processing\Stripifier\Utils.cs" />
-    <Compile Include="Objects\Processing\Stripifier\VertexCache.cs" />
+    <Compile Include="Objects\Processing\Interfaces\IStripifier.cs" />
     <Compile Include="Objects\Processing\Stripifier.cs" />
     <Compile Include="Motions\Key.cs" />
     <Compile Include="Motions\BoneBinding.cs" />

@@ -16,6 +16,9 @@
       <Filter>Textures\Processing</Filter>
     </ClInclude>
     <ClInclude Include="NativeContext.h" />
+    <ClInclude Include="StripifierCore.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pch.cpp" />
@@ -34,6 +37,12 @@
     <ClCompile Include="NativeContext.cpp" />
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Properties</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\stripifier.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="StripifierCore.cpp">
+      <Filter>Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +63,12 @@
     </Filter>
     <Filter Include="Properties">
       <UniqueIdentifier>{b7562b38-9400-413c-b5d8-0b477b9986b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies">
+      <UniqueIdentifier>{f1cc9f53-b35b-4d3e-9011-900b87f51701}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\meshoptimizer">
+      <UniqueIdentifier>{b15371b5-20a5-4d0f-87dc-69b5318802e5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

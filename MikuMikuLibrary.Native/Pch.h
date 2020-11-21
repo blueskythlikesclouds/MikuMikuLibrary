@@ -10,6 +10,8 @@
 #include <fbxsdk.h>
 #include <vcclr.h>
 
+#include <meshoptimizer.h>
+
 #undef min
 #undef max
 
