@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Numerics;
 using MikuMikuLibrary.IO.Common;
@@ -17,7 +18,6 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
     {
         public override string Signature => "CNS";
 
-        public string BoneName { get; set; }
         public int Field11 { get; set; }
         public string SourceBoneName { get; set; }
 
@@ -27,7 +27,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         {
             string type = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
-            BoneName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Field11 = reader.ReadInt32();
             SourceBoneName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
@@ -59,10 +59,19 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
         {
             writer.AddStringToStringTable( Enum.GetName( typeof( ConstraintType ), Data.Type ) );
-            writer.AddStringToStringTable( BoneName );
+            writer.AddStringToStringTable( Name );
             writer.Write( Field11 );
             writer.AddStringToStringTable( SourceBoneName );
             Data.Write( writer );
+        }
+
+        // Obsolete properties
+
+        [Obsolete( "This property is obsolete. Please use Name instead." ), Browsable( false )]
+        public string BoneName
+        {
+            get => Name;
+            set => Name = value;
         }
     }
 

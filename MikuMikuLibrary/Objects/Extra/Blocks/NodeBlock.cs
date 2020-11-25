@@ -12,6 +12,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         public Vector3 Position { get; set; }
         public Vector3 Rotation { get; set; }
         public Vector3 Scale { get; set; }
+        public string Name { get; set; }
 
         public virtual void Read( EndianBinaryReader reader, StringSet stringSet )
         {

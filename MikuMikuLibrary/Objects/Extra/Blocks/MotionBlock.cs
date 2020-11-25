@@ -7,7 +7,6 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
     {
         public override string Signature => "MOT";
 
-        public string Name { get; set; }
         public List<MotionBone> Bones { get; }
 
         internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )

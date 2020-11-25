@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
@@ -8,12 +10,11 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
     {
         public override string Signature => "EXP";
 
-        public string BoneName { get; set; }
         public List<string> Expressions { get; }
 
         internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
         {
-            BoneName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
             int expressionCount = reader.ReadInt32();
 
@@ -25,7 +26,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
         internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
         {
-            writer.AddStringToStringTable( BoneName );
+            writer.AddStringToStringTable( Name );
             writer.Write( Expressions.Count );
 
             foreach ( string expression in Expressions )
@@ -37,6 +38,15 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         public ExpressionBlock()
         {
             Expressions = new List<string>();
+        }
+
+        // Obsolete properties
+
+        [Obsolete( "This property has been renamed. Please use Name instead." ), Browsable( false )]
+        public string BoneName
+        {
+            get => Name;
+            set => Name = value;
         }
     }
 }

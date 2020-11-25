@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
@@ -15,14 +16,13 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
         public List<OsageBone> Bones { get; }
         public string ExternalName { get; set; }
-        public string InternalName { get; set; }
 
         internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
         {
             StartIndex = reader.ReadInt32();
             Count = reader.ReadInt32();
             ExternalName = stringSet.ReadString( reader );
-            InternalName = stringSet.ReadString( reader );
+            Name = stringSet.ReadString( reader );
 
             reader.SeekCurrent( reader.AddressSpace.GetByteSize() ); // Integrated skin parameter
             reader.SkipNulls( 3 * sizeof( uint ) );
@@ -35,7 +35,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             writer.Write( StartIndex );
             writer.Write( Bones.Count );
             stringSet.WriteString( writer, ExternalName );
-            stringSet.WriteString( writer, InternalName );
+            stringSet.WriteString( writer, Name );
             writer.WriteNulls( writer.AddressSpace.GetByteSize() );
             writer.WriteNulls( 3 * sizeof( uint ) );
         }
@@ -43,6 +43,15 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         public OsageBlock()
         {
             Bones = new List<OsageBone>();
+        }
+
+        // Obsolete properties
+        
+        [Obsolete( "This property has been renamed. Please use Name instead." ), Browsable( false )]
+        public string InternalName
+        {
+            get => Name;
+            set => Name = value;
         }
     }
 }
