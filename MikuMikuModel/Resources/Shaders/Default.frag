@@ -39,7 +39,7 @@ uniform vec3 uLightPosition;
 
 const vec4 GAMMA = vec4( vec3( 2.2 ), 1 );
 const vec4 INVERSE_GAMMA = 1.0 / GAMMA;
-const float ALPHA_THRESHOLD = 0.1;
+const float ALPHA_THRESHOLD = 0.5;
 
 void main()
 {
@@ -80,7 +80,7 @@ void main()
             normal = normalize( tangentToWorldMatrix * normal );
         }
 
-        directLighting += vec3( max( 0, dot( normal, lightDirection ) ) ) * diffuseColor.rgb;
+        directLighting += diffuseColor.rgb;
         
         if ( uAnisoDirection > 0 && uAnisoDirection < 3 && uHasTangent && uHasTexCoord0 )
         {
@@ -94,6 +94,8 @@ void main()
             directLighting += pow( max( 0, dot( normal, halfwayDirection ) ), uShininess ) * specularColor.rgb;
         }
     }
+
+    directLighting *= max( 0, dot( normal, lightDirection ) );
 
     vec3 indirectLighting = ambientColor * diffuseColor.rgb;
 
