@@ -8,6 +8,7 @@ using MikuMikuLibrary.IO;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Forms;
 using MikuMikuModel.Modules;
+using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Nodes.IO
@@ -226,35 +227,32 @@ namespace MikuMikuModel.Nodes.IO
         protected virtual void OnDirtyStateChanged() => 
             DirtyStateChanged?.Invoke( this, EventArgs.Empty );
 
+        public static T PromptFarcArchiveViewForm( string filePath, 
+            string title = "Select a file to replace with.", 
+            string errorOnEmpty = "This archive has no files that you could replace the node with." )
+        {
+            using ( var farcArchive = BinaryFile.Load<FarcArchive>( filePath ) )
+            using ( var farcArchiveNode = new FarcArchiveNode( Path.GetFileName( filePath ), farcArchive ) )
+            using ( var nodeSelectForm = new NodeSelectForm<T>( farcArchiveNode ) )
+            {
+                nodeSelectForm.Text = title;
+
+                if ( nodeSelectForm.NodeCount == 0 )
+                    MessageBox.Show( errorOnEmpty, Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
+
+                else if ( nodeSelectForm.NodeCount == 1 )
+                    return ( T ) nodeSelectForm.TopNode.Data;
+
+                else if ( nodeSelectForm.ShowDialog() == DialogResult.OK )
+                    return ( T ) nodeSelectForm.SelectedNode.Data;
+            }
+
+            return null;
+        }
+
         protected override void Initialize()
         {
-            AddReplaceHandler<FarcArchive>( filePath =>
-            {
-                var farcArchive = BinaryFile.Load<FarcArchive>( filePath );
-
-                using ( var farcArchiveViewForm = new FarcArchiveViewForm<T>( farcArchive ) )
-                {
-                    farcArchiveViewForm.Text = "Select a node to replace with.";
-
-                    if ( farcArchiveViewForm.NodeCount == 0 )
-                    {
-                        MessageBox.Show( "This archive has no entries that you could replace the node with.", 
-                            Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Information );
-                    }
-
-                    else if ( farcArchiveViewForm.NodeCount == 1 )
-                    {
-                        return ( T ) farcArchiveViewForm.TopNode.Data;
-                    }
-
-                    else if ( farcArchiveViewForm.ShowDialog() == DialogResult.OK )
-                    {
-                        return ( T ) farcArchiveViewForm.SelectedNode.Data;
-                    }
-                }
-
-                return null;
-            } );
+            AddReplaceHandler<FarcArchive>( filePath => PromptFarcArchiveViewForm( filePath ) );
         }
 
         protected override void Dispose( bool disposing )

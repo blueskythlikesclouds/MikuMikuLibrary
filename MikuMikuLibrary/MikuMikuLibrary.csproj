@@ -68,6 +68,7 @@
     <Compile Include="Databases\StageDatabase.cs" />
     <Compile Include="Databases\StringArray.cs" />
     <Compile Include="Extensions\BitmapEx.cs" />
+    <Compile Include="Extensions\BlockEx.cs" />
     <Compile Include="Extensions\QuaternionEx.cs" />
     <Compile Include="Hashes\MurmurHash.cs" />
     <Compile Include="IO\BinaryFormat.cs" />

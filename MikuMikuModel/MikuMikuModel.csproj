@@ -89,11 +89,11 @@
       <DependentUpon>SpriteViewControl.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\FileHistory.cs" />
-    <Compile Include="GUI\Forms\FarcArchiveViewForm.cs">
+    <Compile Include="GUI\Forms\NodeSelectForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GUI\Forms\FarcArchiveViewForm.Designer.cs">
-      <DependentUpon>FarcArchiveViewForm.cs</DependentUpon>
+    <Compile Include="GUI\Forms\NodeSelectForm.Designer.cs">
+      <DependentUpon>NodeSelectForm.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\Forms\FirstLaunchForm.cs">
       <SubType>Form</SubType>
@@ -232,8 +232,8 @@
     <EmbeddedResource Include="GUI\Forms\ConfigurationForm.resx">
       <DependentUpon>ConfigurationForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GUI\Forms\FarcArchiveViewForm.resx">
-      <DependentUpon>FarcArchiveViewForm.cs</DependentUpon>
+    <EmbeddedResource Include="GUI\Forms\NodeSelectForm.resx">
+      <DependentUpon>NodeSelectForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Forms\FirstLaunchForm.resx">
       <DependentUpon>FirstLaunchForm.cs</DependentUpon>

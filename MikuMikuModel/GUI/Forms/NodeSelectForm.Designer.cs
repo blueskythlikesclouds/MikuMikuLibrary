@@ -1,6 +1,6 @@
 ﻿namespace MikuMikuModel.GUI.Forms
 {
-    partial class FarcArchiveViewForm<T> where T : class
+    partial class NodeSelectForm<T> where T : class
     {
         /// <summary>
         /// Required designer variable.
@@ -58,7 +58,7 @@
             this.mNodeTreeView.TabIndex = 0;
             this.mNodeTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.OnNodeMouseDoubleClick);
             // 
-            // FarcArchiveViewForm
+            // NodeSelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -67,7 +67,7 @@
             this.Controls.Add(this.mOkButton);
             this.Controls.Add(this.mNodeTreeView);
             this.DoubleBuffered = true;
-            this.Name = "FarcArchiveViewForm";
+            this.Name = "NodeSelectForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Please select a node.";
             this.ResumeLayout(false);

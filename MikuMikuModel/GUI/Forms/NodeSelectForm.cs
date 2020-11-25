@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using MikuMikuLibrary.Archives;
 using MikuMikuModel.Nodes;
@@ -9,10 +10,9 @@ using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Forms
 {
-    public partial class FarcArchiveViewForm<T> : Form where T : class
+    public partial class NodeSelectForm<T> : Form where T : class
     {
-        private readonly FarcArchive mFarcArchive;
-        private readonly FarcArchiveNode mRootNode;
+        private readonly ReferenceNode mRootNode;
 
         public INode SelectedNode
         {
@@ -58,7 +58,6 @@ namespace MikuMikuModel.GUI.Forms
             if ( disposing )
             {
                 mComponents?.Dispose();
-                mFarcArchive?.Dispose();
                 mRootNode?.Dispose();
                 mNodeTreeView.TopNode?.Dispose();
             }
@@ -66,7 +65,7 @@ namespace MikuMikuModel.GUI.Forms
             base.Dispose( disposing );
         }
 
-        public FarcArchiveViewForm( FarcArchive farcArchive )
+        public NodeSelectForm( INode rootNode, Func<T, bool> filter = null )
         {
             InitializeComponent();
 
@@ -75,12 +74,20 @@ namespace MikuMikuModel.GUI.Forms
 
             Icon = ResourceStore.LoadIcon( "Icons/Application.ico" );
 
-            mFarcArchive = farcArchive;
-            mRootNode = new FarcArchiveNode( "FARC Archive", mFarcArchive );
+            mRootNode = new ReferenceNode( rootNode );
             mRootNode.Populate();
 
-            foreach ( var node in mRootNode.Nodes.Where( x => x.DataType == typeof( T ) ) )
-                mNodeTreeView.Nodes.Add( new NodeAsTreeNode( new ReferenceNode( node ), true ) { HideContextMenuStrip = true } );
+            foreach ( var node in mRootNode.Nodes )
+            {
+                if ( node.DataType != typeof( T ) )
+                    continue;
+
+                if ( filter != null && !filter( ( T ) node.Data ) )
+                    continue;
+
+                mNodeTreeView.Nodes.Add( new NodeAsTreeNode( new ReferenceNode( node ), true )
+                    { HideContextMenuStrip = true } );
+            }
         }
     }
 }
