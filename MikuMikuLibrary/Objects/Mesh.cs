@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Assimp.Configs;
 using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
@@ -165,6 +166,39 @@ namespace MikuMikuLibrary.Objects
 
                 float directionCheck = Vector3.Dot( Vector3.Normalize( Vector3.Cross( normal, tangent ) ), bitangent );
                 Tangents[ i ] = new Vector4( tangent, directionCheck > 0.0f ? 1.0f : -1.0f );
+            }
+
+            // Look for NaNs
+            for ( int i = 0; i < Positions.Length; i++ )
+            {
+                var position = Positions[ i ];
+                var tangent = Tangents[ i ];
+
+                if ( !float.IsNaN( tangent.X ) && !float.IsNaN( tangent.Y ) && !float.IsNaN( tangent.Z ) )
+                    continue;
+
+                int nearestVertexIndex = -1;
+                float currentDistance = float.PositiveInfinity;
+
+                for ( int j = 0; j < Positions.Length; j++ )
+                {
+                    var positionToCompare = Positions[ j ];
+                    var tangentToCompare = Tangents[ j ];
+
+                    if ( i == j || float.IsNaN( tangentToCompare.X ) || float.IsNaN( tangentToCompare.Y ) || float.IsNaN( tangentToCompare.Z ) )
+                        continue;
+
+                    float distance = Vector3.DistanceSquared( position, positionToCompare );
+
+                    if ( distance > currentDistance ) 
+                        continue;
+
+                    nearestVertexIndex = j;
+                    currentDistance = distance;
+                }
+
+                if ( nearestVertexIndex != -1 )
+                    Tangents[ i ] = Tangents[ nearestVertexIndex ];
             }
         }
 
