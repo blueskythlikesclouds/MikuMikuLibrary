@@ -12,7 +12,7 @@ namespace MikuMikuLibrary.Geometry
 
         public BoundingSphere ToBoundingSphere()
         {
-            float radius = Math.Max( Width, Math.Max( Height, Depth ) ) / 2;
+            float radius = Math.Max( Width, Math.Max( Height, Depth ) ) * ( float ) Math.Sqrt( 2.0 ) / 2.0f;
 
             return new BoundingSphere
             {

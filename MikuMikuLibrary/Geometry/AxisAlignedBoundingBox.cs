@@ -32,7 +32,7 @@ namespace MikuMikuLibrary.Geometry
             return new BoundingSphere
             {
                 Center = Center,
-                Radius = SizeMax / 2
+                Radius = SizeMax * ( float ) Math.Sqrt( 2.0 ) / 2.0f
             };
         }
 
