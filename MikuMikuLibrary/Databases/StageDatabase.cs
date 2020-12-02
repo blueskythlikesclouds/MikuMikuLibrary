@@ -83,22 +83,24 @@ namespace MikuMikuLibrary.Databases
         public int Field18 { get; set; }
         public StageEffect[] StageEffects { get; set; }
         public uint Id { get; set; }
-        public uint unkHash { get; set; }
+        public uint UnknownId { get; set; }
         public List<uint> Auth3dIds { get; }
         
 
         internal void Read( EndianBinaryReader reader, BinaryFormat format )
         {
-            if (format == BinaryFormat.F2nd || format == BinaryFormat.X)
+            if ( format == BinaryFormat.F2nd || format == BinaryFormat.X )
             {
-                reader.Seek(4, SeekOrigin.Current);
+                reader.Seek( 4, SeekOrigin.Current );
+
                 Id = reader.ReadUInt32();
-                Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
-                Auth3dName = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
-                for (int i = 0; i < 5; i++)
+                Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+                Auth3dName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+
+                for ( int i = 0; i < 5; i++ )
                 {
-                    Objects[i].Id = reader.ReadUInt32();
-                    Objects[i].SetId = reader.ReadUInt32();
+                    Objects[ i ].Id = reader.ReadUInt32();
+                    Objects[ i ].SetId = reader.ReadUInt32();
                 }
 
                 Field00 = reader.ReadSingle();
@@ -125,26 +127,30 @@ namespace MikuMikuLibrary.Databases
                 RingRectangleWidth = reader.ReadSingle();
                 RingRectangleLength = reader.ReadSingle();
                 RingRectangleHeight = reader.ReadSingle();
-                unkHash = reader.ReadUInt32();
-                ReadStageEffects(reader);
-                int Auth3dIdsCount = reader.ReadInt32();
-                long Auth3dIdsOffset = reader.ReadOffset();
-                reader.ReadAtOffset(Auth3dIdsOffset, () =>
+                UnknownId = reader.ReadUInt32();
+
+                ReadStageEffects( reader );
+
+                int auth3dIdsCount = reader.ReadInt32();
+                long auth3dIdsOffset = reader.ReadOffset();
+
+                reader.ReadAtOffset( auth3dIdsOffset, () =>
                 {
-                    for (int i = 0; i < Auth3dIdsCount; i++)
-                        Auth3dIds.Add(reader.ReadUInt32());
+                    for ( int i = 0; i < auth3dIdsCount; i++ )
+                        Auth3dIds.Add( reader.ReadUInt32() );
                 });
-                reader.Seek(4, SeekOrigin.Current);
+
+                reader.Seek( 4, SeekOrigin.Current );
             }
             else
             {
-                Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
-                Auth3dName = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
+                Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+                Auth3dName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
-                for (int i = 0; i < 7; i++)
+                for ( int i = 0; i < 7; i++ )
                 {
-                    Objects[i].Id = reader.ReadUInt16();
-                    Objects[i].SetId = reader.ReadUInt16();
+                    Objects[ i ].Id = reader.ReadUInt16();
+                    Objects[ i ].SetId = reader.ReadUInt16();
                 }
 
                 LensFlareScaleX = reader.ReadInt32();
@@ -154,23 +160,23 @@ namespace MikuMikuLibrary.Databases
                 Field01 = reader.ReadInt32();
                 RenderTextureId = reader.ReadUInt32();
 
-                if (format > BinaryFormat.DT)
+                if ( format > BinaryFormat.DT )
                     MovieTextureId = reader.ReadUInt32();
 
-                CollisionFilePath = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
+                CollisionFilePath = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                 Field04 = reader.ReadInt32();
                 Field05 = reader.ReadInt32();
 
-                reader.ReadOffset(() =>
+                reader.ReadOffset( () =>
                 {
                    Field06 = reader.ReadInt32();
                    Field07 = reader.ReadInt32();
                    Field08 = reader.ReadInt32();
-                });
+                } );
 
                 Field09 = reader.ReadInt32();
 
-                if (format == BinaryFormat.FT)
+                if ( format == BinaryFormat.FT )
                     Field10 = reader.ReadInt32();
 
                 RingRectangleX = reader.ReadSingle();
@@ -184,96 +190,100 @@ namespace MikuMikuLibrary.Databases
 
         internal void Write( EndianBinaryWriter writer, BinaryFormat format )
         {
-            if (format == BinaryFormat.F2nd || format == BinaryFormat.X)
+            if ( format == BinaryFormat.F2nd || format == BinaryFormat.X )
             {
-                writer.WriteNulls(4);
-                writer.Write(Id);
-                writer.AddStringToStringTable(Name);
-                writer.AddStringToStringTable(Auth3dName);
+                writer.WriteNulls( 4 );
+                writer.Write( Id );
+                writer.AddStringToStringTable( Name );
+                writer.AddStringToStringTable( Auth3dName );
 
-                for (int i = 0; i < 5; i++)
+                for ( int i = 0; i < 5; i++ )
                 {
-                    writer.Write(Objects[i].Id);
-                    writer.Write(Objects[i].SetId);
+                    writer.Write( Objects[ i ].Id );
+                    writer.Write( Objects[ i ].SetId );
                 }
-                writer.Write(Field00);
-                writer.Write(Field01);
-                writer.Write(RenderTextureId);
-                writer.Write(RenderTextureIdFlag);
-                writer.Write(MovieTextureId);
-                writer.Write(MovieTextureIdFlag);
-                writer.Write(Field04);
-                writer.Write(Field04Flag);
-                writer.Write(Field05);
-                writer.Write(Field05Flag);
-                writer.Write(Field06);
-                writer.Write(Field06Flag);
-                writer.Write(Field07);
-                writer.Write(Field07Flag);
-                writer.Write(Field08);
-                writer.Write(Field08Flag);
-                writer.Write(LensFlareScaleX);
-                writer.Write(LensFlareScaleY);
-                writer.Write(LensFlareScaleZ);
-                writer.Write(RingRectangleX);
-                writer.Write(RingRectangleY);
-                writer.Write(RingRectangleWidth);
-                writer.Write(RingRectangleLength);
-                writer.Write(RingRectangleHeight);
-                writer.Write(unkHash);
-                WriteStageEffects(writer);
-                writer.Write(Auth3dIds.Count);
-                writer.ScheduleWriteOffset(4, AlignmentMode.Left, () =>
-                {
-                    foreach (uint id in Auth3dIds)
-                        writer.Write(id);
-                });
 
-                writer.WriteNulls(4);
+                writer.Write( Field00 );
+                writer.Write( Field01 );
+                writer.Write( RenderTextureId );
+                writer.Write( RenderTextureIdFlag );
+                writer.Write( MovieTextureId );
+                writer.Write( MovieTextureIdFlag );
+                writer.Write( Field04 );
+                writer.Write( Field04Flag );
+                writer.Write( Field05 );
+                writer.Write( Field05Flag );
+                writer.Write( Field06 );
+                writer.Write( Field06Flag );
+                writer.Write( Field07 );
+                writer.Write( Field07Flag );
+                writer.Write( Field08 );
+                writer.Write( Field08Flag );
+                writer.Write( LensFlareScaleX );
+                writer.Write( LensFlareScaleY );
+                writer.Write( LensFlareScaleZ );
+                writer.Write( RingRectangleX );
+                writer.Write( RingRectangleY );
+                writer.Write( RingRectangleWidth );
+                writer.Write( RingRectangleLength );
+                writer.Write( RingRectangleHeight );
+                writer.Write( UnknownId );
+
+                WriteStageEffects( writer );
+
+                writer.Write( Auth3dIds.Count );
+
+                writer.ScheduleWriteOffset( 4, AlignmentMode.Left, () =>
+                {
+                    foreach ( uint id in Auth3dIds )
+                        writer.Write( id );
+                } );
+
+                writer.WriteNulls( 4 );
             }
             else
             {
-                writer.AddStringToStringTable(Name);
-                writer.AddStringToStringTable(Auth3dName);
+                writer.AddStringToStringTable( Name );
+                writer.AddStringToStringTable( Auth3dName );
 
-                for (int i = 0; i < 7; i++)
+                for ( int i = 0; i < 7; i++ )
                 {
-                    writer.Write((ushort) Objects[i].Id);
-                    writer.Write((ushort) Objects[i].SetId);
+                    writer.Write( ( ushort ) Objects[ i ].Id );
+                    writer.Write( ( ushort ) Objects[ i ].SetId );
                 }
 
-                writer.Write(LensFlareScaleX);
-                writer.Write(LensFlareScaleY);
-                writer.Write(LensFlareScaleZ);
-                writer.Write(Field00);
-                writer.Write(Field01);
-                writer.Write(RenderTextureId);
+                writer.Write( LensFlareScaleX );
+                writer.Write( LensFlareScaleY );
+                writer.Write( LensFlareScaleZ );
+                writer.Write( Field00 );
+                writer.Write( Field01 );
+                writer.Write( RenderTextureId );
 
-                if (format > BinaryFormat.DT)
-                    writer.Write(MovieTextureId);
+                if ( format > BinaryFormat.DT )
+                    writer.Write( MovieTextureId );
 
-                writer.AddStringToStringTable(CollisionFilePath);
-                writer.Write(Field04);
-                writer.Write(Field05);
+                writer.AddStringToStringTable( CollisionFilePath );
+                writer.Write( Field04 );
+                writer.Write( Field05 );
 
-                writer.ScheduleWriteOffsetIf(!(Field06 == 0 && Field07 == 0 && Field08 == 0), 4, AlignmentMode.Left, () =>
+                writer.ScheduleWriteOffsetIf( !(Field06 == 0 && Field07 == 0 && Field08 == 0), 4, AlignmentMode.Left, () =>
                 {
-                    writer.Write(Field06);
-                    writer.Write(Field07);
-                    writer.Write(Field08);
-                });
+                    writer.Write( Field06 );
+                    writer.Write( Field07 );
+                    writer.Write( Field08 );
+                } );
 
-                writer.Write(Field09);
+                writer.Write( Field09 );
 
-                if (format == BinaryFormat.FT)
-                    writer.Write(Field10);
+                if ( format == BinaryFormat.FT )
+                    writer.Write( Field10 );
 
-                writer.Write(RingRectangleX);
-                writer.Write(RingRectangleY);
-                writer.Write(RingRectangleWidth);
-                writer.Write(RingRectangleHeight);
-                writer.Write(RingRingHeight);
-                writer.Write(RingOutHeight);
+                writer.Write( RingRectangleX );
+                writer.Write( RingRectangleY );
+                writer.Write( RingRectangleWidth) ;
+                writer.Write( RingRectangleHeight );
+                writer.Write( RingRingHeight );
+                writer.Write( RingOutHeight );
             }
         }
 
@@ -355,20 +365,21 @@ namespace MikuMikuLibrary.Databases
 
             if (section != null)
             {
-                reader.ReadAtOffset(stagesOffset, () =>
+                reader.ReadAtOffset( stagesOffset, () =>
                 {
                     Stages.Capacity = count;
 
-                    for (int i = 0; i < count; i++)
+                    for ( int i = 0; i < count; i++ )
                     {
                         var stage = new Stage();
                         {
-                            stage.Read(reader, BinaryFormat.F2nd);
+                            stage.Read( reader, Format );
                         }
-                        Stages.Add(stage);
+                        Stages.Add( stage );
                     }
-                });
-                
+
+                } );
+
             }
             else
             {
@@ -376,63 +387,65 @@ namespace MikuMikuLibrary.Databases
                 long auth3dIdCountsOffset = reader.ReadOffset();
                 long auth3dIdsOffset = reader.ReadOffset();
 
-                if (reader.ReadBoolean())
+                if ( reader.ReadBoolean() )
                 {
-                    Format = (BinaryFormat)reader.ReadByte();
+                    Format = ( BinaryFormat ) reader.ReadByte();
                 }
 
                 else
                 {
-                    long size = (stageEffectsOffset - stagesOffset) / count;
+                    long size = ( stageEffectsOffset - stagesOffset ) / count;
                     Format = size == 104 ? BinaryFormat.DT :
                         size == 108 ? BinaryFormat.F :
                         size >= 112 ? BinaryFormat.FT :
                         throw new InvalidDataException();
                 }
 
-                reader.ReadAtOffset(stagesOffset, () =>
-               {
-                   Stages.Capacity = count;
+                reader.ReadAtOffset( stagesOffset, () =>
+                {
+                    Stages.Capacity = count;
 
-                   for (int i = 0; i < count; i++)
-                   {
-                       var stage = new Stage();
-                       {
-                           stage.Read(reader, Format);
-                       }
-                       Stages.Add(stage);
-                   }
-               });
+                    for ( int i = 0; i < count; i++ )
+                    {
+                        var stage = new Stage();
+                        {
+                            stage.Read( reader, Format );
+                        }
+                        Stages.Add( stage );
+                    }
+                } );
 
-                reader.ReadAtOffset(stageEffectsOffset, () =>
-               {
-                   foreach (var stage in Stages)
-                       stage.ReadStageEffects(reader);
-               });
+                reader.ReadAtOffset( stageEffectsOffset, () =>
+                {
+                    foreach ( var stage in Stages )
+                        stage.ReadStageEffects( reader );
+                } );
 
-                reader.ReadAtOffset(auth3dIdCountsOffset, () =>
-               {
-                   var auth3dIdCounts = reader.ReadInt32s(count);
+                reader.ReadAtOffset( auth3dIdCountsOffset, () =>
+                {
+                   var auth3dIdCounts = reader.ReadInt32s( count );
 
                    reader.ReadAtOffset(auth3dIdsOffset, () =>
                    {
-                       for (int i = 0; i < count; i++)
-                           Stages[i].ReadAuth3dIds(reader, auth3dIdCounts[i]);
-                   });
-               });
+                       for ( int i = 0; i < count; i++ )
+                           Stages[ i ].ReadAuth3dIds( reader, auth3dIdCounts[ i ] );
+                   } );
+                } );
             }
         }
 
         public override void Write( EndianBinaryWriter writer, ISection section = null )
         {
-            if (section != null)
+            if ( section != null )
             {
-                writer.Write(Stages.Count);
-                writer.ScheduleWriteOffset(16, AlignmentMode.Left, () =>
+                writer.Write( Stages.Count );
+
+                writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
                 {
-                    foreach (var stage in Stages)
-                        stage.Write(writer, Format);
-                });
+                    foreach ( var stage in Stages )
+                        stage.Write( writer, Format );
+                } );
+
             }
             else
             {
