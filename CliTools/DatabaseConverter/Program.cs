@@ -17,7 +17,7 @@ namespace DatabaseConverter
             new DatabaseInfo( typeof( MotionDatabase ), "motdb", null ),
             new DatabaseInfo( typeof( ObjectDatabase ), "objdb", "osi" ),
             new DatabaseInfo( typeof( SpriteDatabase ), "sprdb", "spi" ),
-            new DatabaseInfo( typeof( StageDatabase ), "stagedata", null ),
+            new DatabaseInfo( typeof( StageDatabase ), "stagedata", "stg" ),
             new DatabaseInfo( typeof( StringArray ), "strarray", "str" ),
             new DatabaseInfo( typeof( StringArray ), "stringarray", "str" ),
             new DatabaseInfo( typeof( TextureDatabase ), "texdb", "txi" )
