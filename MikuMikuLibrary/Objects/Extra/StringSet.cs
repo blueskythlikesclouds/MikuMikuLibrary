@@ -70,7 +70,6 @@ namespace MikuMikuLibrary.Objects.Extra
 
                     case MotionBlock motionBlock:
                     {
-                        AddString( motionBlock.Name );
                         foreach ( var bone in motionBlock.Bones )
                             AddString( bone.Name );
 

@@ -39,7 +39,7 @@ namespace MikuMikuLibrary.Objects
             int boneCount = reader.ReadInt32();
             long boneParentIdsOffset = reader.ReadOffset();
 
-            reader.SkipNulls( 2 * sizeof( uint ) );
+            reader.SkipNulls( 3 * reader.AddressSpace.GetByteSize() );
 
             reader.ReadAtOffset( boneIdsOffset, () =>
             {
@@ -76,6 +76,9 @@ namespace MikuMikuLibrary.Objects
                 long stringsOffset = reader.ReadOffset();
                 long osageSiblingInfosOffset = reader.ReadOffset();
                 int clothCount = reader.ReadInt32();
+
+                if ( reader.AddressSpace == AddressSpace.Int64 )
+                    reader.SkipNulls( 4 );
 
                 reader.SkipNulls( 7 * reader.AddressSpace.GetByteSize() );
 
@@ -182,8 +185,10 @@ namespace MikuMikuLibrary.Objects
             {
                 foreach ( var bone in Bones )
                     writer.AddStringToStringTable( bone.Name );
+
+                writer.WriteNulls( writer.AddressSpace.GetByteSize() );
             } );
-            writer.ScheduleWriteOffsetIf( Blocks.Count > 0, 16, AlignmentMode.Center, () =>
+            writer.ScheduleWriteOffsetIf( stringSet.Strings.Count > 0 || Blocks.Count > 0, 16, AlignmentMode.Center, () =>
             {
                 var osageNames = new List<string>( Blocks.Count / 2 );
                 var osageBones = new List<OsageBone>( Blocks.Count / 2 );
@@ -207,18 +212,22 @@ namespace MikuMikuLibrary.Objects
                 {
                     foreach ( var osageBone in osageBones )
                         osageBone.Write( writer, stringSet );
+
+                    writer.WriteNulls( 3 * sizeof( uint ) );
                 } );
                 writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
                 {
                     foreach ( string value in osageNames )
                         writer.AddStringToStringTable( value );
+
+                    writer.WriteNulls( writer.AddressSpace.GetByteSize() );
                 } );
                 writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
                 {
                     foreach ( var block in Blocks )
                     {
                         writer.AddStringToStringTable( block.Signature );
-                        writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () => block.Write( writer, stringSet ) );
+                        writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () => block.Write( writer, stringSet ) );
                     }
 
                     writer.WriteNulls( writer.AddressSpace.GetByteSize() * 2 );
@@ -228,6 +237,8 @@ namespace MikuMikuLibrary.Objects
                 {
                     foreach ( string value in stringSet.Strings )
                         writer.AddStringToStringTable( value );
+
+                    writer.WriteNulls( writer.AddressSpace.GetByteSize() );
                 } );
                 writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
                 {
@@ -244,6 +255,10 @@ namespace MikuMikuLibrary.Objects
                     writer.WriteNulls( 3 * sizeof( uint ) );
                 } );
                 writer.Write( Blocks.OfType<ClothBlock>().Count() );
+
+                if ( writer.AddressSpace == AddressSpace.Int64 )
+                    writer.WriteNulls( 4 );
+
                 writer.WriteNulls( 7 * writer.AddressSpace.GetByteSize() );
             } );
             writer.Write( Bones.Count );
@@ -252,7 +267,7 @@ namespace MikuMikuLibrary.Objects
                 foreach ( var bone in Bones )
                     writer.Write( bone.Parent?.Id ?? 0xFFFFFFFF );
             } );
-            writer.WriteNulls( 3 * sizeof( uint ) );
+            writer.WriteNulls( 3 * writer.AddressSpace.GetByteSize() );
         }
 
         public void TryFixParentBoneInfos( Skeleton skeleton = null )

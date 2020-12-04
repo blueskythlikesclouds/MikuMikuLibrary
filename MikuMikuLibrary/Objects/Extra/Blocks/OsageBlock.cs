@@ -24,8 +24,10 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             ExternalName = stringSet.ReadString( reader );
             Name = stringSet.ReadString( reader );
 
-            reader.SeekCurrent( reader.AddressSpace.GetByteSize() ); // Integrated skin parameter
-            reader.SkipNulls( 3 * sizeof( uint ) );
+            if ( reader.AddressSpace == AddressSpace.Int64 )
+                reader.SkipNulls( 5 * sizeof( ulong ) );
+            else
+                reader.SkipNulls( 6 * sizeof( uint ) );
 
             Bones.Capacity = Count;
         }
@@ -36,8 +38,11 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             writer.Write( Bones.Count );
             stringSet.WriteString( writer, ExternalName );
             stringSet.WriteString( writer, Name );
-            writer.WriteNulls( writer.AddressSpace.GetByteSize() );
-            writer.WriteNulls( 3 * sizeof( uint ) );
+
+            if ( writer.AddressSpace == AddressSpace.Int64 )
+                writer.WriteNulls( 5 * sizeof( ulong ) );
+            else
+                writer.WriteNulls( 6 * sizeof( uint ) );
         }
 
         public OsageBlock()
