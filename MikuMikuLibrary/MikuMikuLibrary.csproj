@@ -81,6 +81,7 @@
     <Compile Include="IO\Sections\Databases\BoneDatabaseSection.cs" />
     <Compile Include="IO\Sections\Databases\ObjectDatabaseSection.cs" />
     <Compile Include="IO\Sections\Databases\SpriteDatabaseSection.cs" />
+    <Compile Include="IO\Sections\Databases\StageDatabaseSection.cs" />
     <Compile Include="IO\Sections\Databases\StringArraySection.cs" />
     <Compile Include="IO\Sections\Databases\TextureDatabaseSection.cs" />
     <Compile Include="IO\Sections\EndOfFileSection.cs" />

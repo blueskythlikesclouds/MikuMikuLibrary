@@ -126,6 +126,9 @@ namespace MikuMikuLibrary.IO.Sections
                 {
                     mSections.Clear();
 
+                    if ( DataSize > 0 && Writer is EnrsBinaryWriter enrsWriter )
+                        mSections.Add( new EnrsSection( SectionMode.Write, enrsWriter.CreateScopeDescriptors( DataOffset, DataOffset + DataSize ) ) );
+
                     if ( IsRelocationTableWorthWriting() )
                     {
                         ISection relocationTableSection;
@@ -140,9 +143,6 @@ namespace MikuMikuLibrary.IO.Sections
 
                         mSections.Add( relocationTableSection );
                     }
-
-                    if ( DataSize > 0 && Writer is EnrsBinaryWriter enrsWriter )
-                        mSections.Add( new EnrsSection( SectionMode.Write, enrsWriter.CreateScopeDescriptors( DataOffset, DataOffset + DataSize ) ) );
 
                     foreach ( var subSectionInfo in SectionInfo.SubSectionInfos.Values.OrderBy( x => x.Priority ) )
                         mSections.AddRange( subSectionInfo.ProcessPropertyForWriting( this ) );
