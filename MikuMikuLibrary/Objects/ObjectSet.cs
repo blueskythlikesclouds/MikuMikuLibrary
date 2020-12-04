@@ -303,6 +303,8 @@ namespace MikuMikuLibrary.Objects
                     string textureOutputPath = Path.Combine( Path.GetDirectoryName( filePath ),
                         objectSetInfo.TextureFileName );
 
+                    TextureSet.Endianness = Endianness;
+                    TextureSet.Format = Format;
                     TextureSet.Save( textureOutputPath );
                     exported = true;
                 }
@@ -320,7 +322,11 @@ namespace MikuMikuLibrary.Objects
                     textureOutputPath = Path.ChangeExtension( filePath, "txd" );
 
                 if ( !string.IsNullOrEmpty( textureOutputPath ) )
+                {
+                    TextureSet.Endianness = Endianness;
+                    TextureSet.Format = Format;
                     TextureSet.Save( textureOutputPath );
+                }
             }
         }
 

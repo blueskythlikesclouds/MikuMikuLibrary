@@ -70,7 +70,12 @@ namespace MikuMikuLibrary.Sprites
                 writer.WriteNulls( sizeof( uint ) );
 
             else
-                writer.ScheduleWriteOffset( 1, 16, AlignmentMode.Left, () => TextureSet.Save( writer.BaseStream, true ) );
+                writer.ScheduleWriteOffset( 1, 16, AlignmentMode.Left, () =>
+                {
+                    TextureSet.Endianness = Endianness;
+                    TextureSet.Format = Format;
+                    TextureSet.Save( writer.BaseStream, true );
+                } );
 
             writer.Write( TextureSet.Textures.Count );
             writer.Write( Sprites.Count );
