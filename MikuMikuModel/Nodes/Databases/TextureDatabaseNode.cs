@@ -12,7 +12,7 @@ namespace MikuMikuModel.Nodes.Databases
     public class TextureDatabaseNode : BinaryFileNode<TextureDatabase>
     {
         public override NodeFlags Flags =>
-            NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
+            NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
 
         protected override void Initialize()
         {
@@ -44,6 +44,7 @@ namespace MikuMikuModel.Nodes.Databases
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
+        [Category( "General" )]
         [TypeConverter( typeof( IdTypeConverter ) )]
         public uint Id
         {

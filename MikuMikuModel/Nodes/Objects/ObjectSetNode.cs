@@ -28,6 +28,7 @@ using MikuMikuModel.GUI.Forms;
 using MikuMikuModel.Mementos;
 using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.Collections;
+using MikuMikuModel.Nodes.Databases;
 using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Textures;
 using MikuMikuModel.Resources;
@@ -44,6 +45,7 @@ namespace MikuMikuModel.Nodes.Objects
     {
         private static readonly XmlSerializer sObjectSetInfoSerializer = new XmlSerializer( typeof( ObjectSetInfo ) );
 
+        private ObjectDatabaseNode mObjDatabaseNode;
         private INode mTextureSetNode;
 
         public override NodeFlags Flags =>
@@ -576,6 +578,9 @@ namespace MikuMikuModel.Nodes.Objects
 
             if ( mTextureSetNode is ReferenceNode referenceNode )
                 SetSubscription( referenceNode.Node );
+
+            if ( Parent != null && Name.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
+                mObjDatabaseNode = Parent.FindNode<ObjectDatabaseNode>( Path.ChangeExtension( Name, "osi" ) );
         }
 
         protected override void SynchronizeCore()
@@ -587,6 +592,37 @@ namespace MikuMikuModel.Nodes.Objects
 
             Data.TextureIds.Clear();
             Data.TextureIds.AddRange( Data.TextureSet.Textures.Select( x => x.Id ) );
+
+            if ( mObjDatabaseNode == null )
+                return;
+
+            ObjectSetInfo objSetInfo;
+
+            if ( mObjDatabaseNode.Data.ObjectSets.Count > 0 )
+                objSetInfo = mObjDatabaseNode.Data.ObjectSets[ 0 ];
+            else
+            {
+                objSetInfo = new ObjectSetInfo();
+                objSetInfo.Name = Path.GetFileNameWithoutExtension( Name ).ToUpperInvariant();
+                objSetInfo.Id = MurmurHash.Calculate( objSetInfo.Name );
+                objSetInfo.FileName = Name;
+                objSetInfo.TextureFileName = Path.ChangeExtension( Name, "txd" );
+                objSetInfo.ArchiveFileName = Path.ChangeExtension( Name, "farc" );
+            }
+
+            objSetInfo.Objects.Clear();
+
+            foreach ( var obj in Data.Objects )
+            {
+                obj.Name = obj.Name.ToUpperInvariant();
+                obj.Id = MurmurHash.Calculate( obj.Name );
+                objSetInfo.Objects.Add( new ObjectInfo { Id = obj.Id, Name = obj.Name } );
+            }
+
+            var objDatabase = new ObjectDatabase();
+            objDatabase.ObjectSets.Add( objSetInfo );
+
+            mObjDatabaseNode.Replace( objDatabase );
         }
 
         protected override void OnReplace( ObjectSet previousData )
