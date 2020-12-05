@@ -649,8 +649,8 @@ namespace MikuMikuLibrary.IO.Common
                     break;
 
                 case VectorBinaryFormat.Int16:
-                    Write( ( short ) ( value.X * 32768f ) );
-                    Write( ( short ) ( value.Y * 32768f ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.X, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.Y, 16 ) );
                     break;
 
                 default:
@@ -688,9 +688,9 @@ namespace MikuMikuLibrary.IO.Common
                     break;
 
                 case VectorBinaryFormat.Int16:
-                    Write( ( short ) ( value.X * 32768f ) );
-                    Write( ( short ) ( value.Y * 32768f ) );
-                    Write( ( short ) ( value.Z * 32768f ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.X, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.Y, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.Z, 16 ) );
                     break;
 
                 default:
@@ -731,10 +731,10 @@ namespace MikuMikuLibrary.IO.Common
                     break;
 
                 case VectorBinaryFormat.Int16:
-                    Write( ( short ) ( value.X * 32768f ) );
-                    Write( ( short ) ( value.Y * 32768f ) );
-                    Write( ( short ) ( value.Z * 32768f ) );
-                    Write( ( short ) ( value.W * 32768f ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.X, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.Y, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.Z, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.W, 16 ) );
                     break;
 
                 default:
@@ -803,11 +803,18 @@ namespace MikuMikuLibrary.IO.Common
                     Write( ( Half ) value.A );
                     break;
 
+                case VectorBinaryFormat.UInt8:
+                    Write( ( byte ) ( value.R * 255f ) );
+                    Write( ( byte ) ( value.G * 255f ) );
+                    Write( ( byte ) ( value.B * 255f ) );
+                    Write( ( byte ) ( value.A * 255f ) );
+                    break;
+
                 case VectorBinaryFormat.Int16:
-                    Write( ( short ) ( value.R * 32768f ) );
-                    Write( ( short ) ( value.G * 32768f ) );
-                    Write( ( short ) ( value.B * 32768f ) );
-                    Write( ( short ) ( value.A * 32768f ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.R, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.G, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.B, 16 ) );
+                    Write( ( ushort ) BitHelper.QuantizeSnorm( value.A, 16 ) );
                     break;
 
                 default:

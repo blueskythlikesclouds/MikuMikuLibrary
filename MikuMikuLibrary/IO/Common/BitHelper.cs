@@ -1,4 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿//*****************************************//
+// Sources:                                //
+// https://github.com/TGEnigma/Amicitia.IO //
+// https://github.com/zeux/meshoptimizer   //
+//*****************************************//
+
+using System.Runtime.CompilerServices;
 
 namespace MikuMikuLibrary.IO.Common
 {
@@ -82,6 +88,30 @@ namespace MikuMikuLibrary.IO.Common
         {
             ulong mask = ulong.MaxValue >> ( sizeof( ulong ) * 8 - ( to - from ) );
             return ( destination & ~( mask << from ) ) | ( ( value & mask ) << from );
+        }
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static int QuantizeUnorm( float v, int n )
+        {
+            float scale = (1 << n) - 1;
+
+            v = (v >= 0) ? v : 0;
+            v = (v <= 1) ? v : 1;
+
+            return (int)(v * scale + 0.5f);
+        }      
+        
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static int QuantizeSnorm( float v, int n )
+        {
+            float scale = (1 << (n - 1)) - 1;
+
+            float round = (v >= 0 ? 0.5f : -0.5f);
+
+            v = (v >= -1) ? v : -1;
+            v = (v <= +1) ? v : +1;
+
+            return (int)(v * scale + round);
         }
     }
 }

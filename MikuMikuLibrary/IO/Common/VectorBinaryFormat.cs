@@ -4,6 +4,7 @@
     {
         Half,
         Single,
+        UInt8,
         Int16
     }
 }

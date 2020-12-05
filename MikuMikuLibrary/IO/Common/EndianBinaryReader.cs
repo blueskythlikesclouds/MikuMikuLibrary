@@ -490,7 +490,7 @@ namespace MikuMikuLibrary.IO.Common
                     return new Vector2( ReadHalf(), ReadHalf() );
 
                 case VectorBinaryFormat.Int16:
-                    return new Vector2( ReadInt16() / 32768f, ReadInt16() / 32768f );
+                    return new Vector2( ReadInt16() / 32767f, ReadInt16() / 32767f );
 
                 default:
                     throw new ArgumentException( nameof( format ) );
@@ -518,7 +518,7 @@ namespace MikuMikuLibrary.IO.Common
                     return new Vector3( ReadSingle(), ReadSingle(), ReadSingle() );
 
                 case VectorBinaryFormat.Int16:
-                    return new Vector3( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f );
+                    return new Vector3( ReadInt16() / 32767f, ReadInt16() / 32767f, ReadInt16() / 32767f );
 
                 default:
                     throw new ArgumentException( nameof( format ) );
@@ -549,8 +549,8 @@ namespace MikuMikuLibrary.IO.Common
                     return new Vector4( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
 
                 case VectorBinaryFormat.Int16:
-                    return new Vector4( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f,
-                        ReadInt16() / 32768f );
+                    return new Vector4(
+                        ReadInt16() / 32767f, ReadInt16() / 32767f, ReadInt16() / 32767f, ReadInt16() / 32767f );
 
                 default:
                     throw new ArgumentException( nameof( format ) );
@@ -612,9 +612,11 @@ namespace MikuMikuLibrary.IO.Common
                 case VectorBinaryFormat.Half:
                     return new Color( ReadHalf(), ReadHalf(), ReadHalf(), ReadHalf() );
 
+                case VectorBinaryFormat.UInt8:
+                    return new Color( ReadByte() / 255f, ReadByte() / 255f, ReadByte() / 255f, ReadByte() / 255f );
+
                 case VectorBinaryFormat.Int16:
-                    return new Color( ReadInt16() / 32768f, ReadInt16() / 32768f, ReadInt16() / 32768f,
-                        ReadInt16() / 32768f );
+                    return new Color( ReadInt16() / 32767f, ReadInt16() / 32767f, ReadInt16() / 32767f, ReadInt16() / 32767f );
 
                 default:
                     throw new ArgumentException( nameof( format ) );
