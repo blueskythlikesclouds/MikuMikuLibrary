@@ -552,7 +552,7 @@ namespace MikuMikuLibrary.IO.Common
         }
 
         public void Write( Half value ) => 
-            base.Write( SwapBytes ? EndiannessHelper.Swap( value.Value ) : value.Value );
+            Write( value.Value );
 
         public void Write( Half[] values )
         {

@@ -18,7 +18,7 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
             {
                 WritePackedValue( writer, ( int ) ( scopeDescriptor.Position - lastScopePosition ) );
                 WritePackedValue( writer, scopeDescriptor.FieldDescriptors.Count );
-                WritePackedValue( writer, 0 ); // ByteSize
+                WritePackedValue( writer, 0 ); // ByteSize (Game does not care if this is zero)
                 WritePackedValue( writer, scopeDescriptor.RepeatCount );
 
                 long lastFieldEndPosition = scopeDescriptor.Position;

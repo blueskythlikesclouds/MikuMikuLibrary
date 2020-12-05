@@ -8,12 +8,38 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
 {
     public class EnrsBinaryWriter : EndianBinaryWriter
     {
-        private readonly Dictionary<long, int> mPositionMap;
+        private readonly long mBeginPosition;
+        private readonly List<byte> mBitArray;
+
+        private void SetBitArrayValue( long offset, byte value )
+        {
+            if ( offset < 0 )
+                return;
+
+            int index = ( int ) ( offset / 4 );
+
+            while ( mBitArray.Count < index + 1 )
+                mBitArray.Add( 0xFF );
+
+            int bitOffset = ( int ) ( ( offset % 4 ) * 2 );
+            mBitArray[ index ] = BitHelper.Pack( mBitArray[ index ], value, bitOffset, bitOffset + 2 );
+        }
+
+        private int GetBitArrayValue( long offset )
+        {
+            int index = ( int ) ( offset / 4 );
+
+            if ( index < 0 || index >= mBitArray.Count )
+                return 3;
+
+            int bitOffset = ( int ) ( ( offset % 4 ) * 2 );
+            return BitHelper.Unpack( mBitArray[ index ], bitOffset, bitOffset + 2 );
+        }
 
         public override void Write( short value )
         {
-            if ( EndiannessHelper.Swap(  value ) != value )
-                mPositionMap[ Position ] = sizeof( short );
+            if ( EndiannessHelper.Swap( value ) != value )
+                SetBitArrayValue( Position - mBeginPosition, ( int ) ValueType.Int16 );
 
             base.Write( value );
         }
@@ -23,8 +49,8 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
 
         public override void Write( int value )
         {
-            if ( EndiannessHelper.Swap(  value ) != value )
-                mPositionMap[ Position ] = sizeof( int );
+            if ( EndiannessHelper.Swap( value ) != value )
+                SetBitArrayValue( Position - mBeginPosition, ( int ) ValueType.Int32 );
 
             base.Write( value );
         }
@@ -34,8 +60,8 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
 
         public override void Write( long value )
         {
-            if ( EndiannessHelper.Swap(  value ) != value )
-                mPositionMap[ Position ] = sizeof( long );
+            if ( EndiannessHelper.Swap( value ) != value )
+                SetBitArrayValue( Position - mBeginPosition, ( int ) ValueType.Int64 );
 
             base.Write( value );
         }
@@ -49,45 +75,41 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
         public override unsafe void Write( double value ) => 
             Write( *( long* ) &value );
 
-        public List<ScopeDescriptor> CreateScopeDescriptors( long minPosition, long maxPosition )
+        public List<ScopeDescriptor> CreateScopeDescriptors( long dataSize )
         {
             var scopeDescriptors = new List<ScopeDescriptor>();
             var fieldDescriptors = new List<FieldDescriptor>();
 
-            FieldDescriptor previousFieldDescriptor = null;
-            long previousPosition = minPosition;
-            int previousByteSize = 0;
-
-            foreach ( var kvp in mPositionMap.OrderBy( x => x.Key ).Where( 
-                x => x.Key >= minPosition && x.Key < maxPosition ) )
+            for ( long offset = 0; offset < dataSize; )
             {
-                long position = kvp.Key;
-                int byteSize = kvp.Value;
+                int type = GetBitArrayValue( offset );
 
-                var valueType =
-                    byteSize == 2 ? ValueType.Int16 :
-                    byteSize == 4 ? ValueType.Int32 :
-                    byteSize == 8 ? ValueType.Int64 :
-                    throw new InvalidDataException( "Expected value of Int16, Int32 or Int64 type." );
-
-                if ( previousFieldDescriptor == null || previousFieldDescriptor.ValueType != valueType ||
-                     previousPosition + previousByteSize != position )
+                if ( type == 3 )
                 {
-                    fieldDescriptors.Add( previousFieldDescriptor = new FieldDescriptor
-                    {
-                        Position = position - minPosition,
-                        RepeatCount = 1,
-                        ValueType = valueType
-                    } );
+                    offset++;
+                    continue;
                 }
 
-                else
+                var fieldDescriptor = new FieldDescriptor
                 {
-                    previousFieldDescriptor.RepeatCount++;
+                    Position = offset,
+                    ValueType = ( ValueType ) type,
+                    RepeatCount = 1
+                };
+
+                int byteSize = 2 << type;
+
+                for ( ; offset < dataSize; )
+                {
+                    offset += byteSize;
+
+                    if ( GetBitArrayValue( offset ) != type )
+                        break;
+
+                    fieldDescriptor.RepeatCount++;
                 }
 
-                previousPosition = position;
-                previousByteSize = byteSize;
+                fieldDescriptors.Add( fieldDescriptor );
             }
 
             // TODO: Optimize
@@ -99,10 +121,11 @@ namespace MikuMikuLibrary.IO.Sections.Enrs
             return scopeDescriptors;
         }
 
-        public EnrsBinaryWriter( Stream input, Encoding encoding, Endianness endianness, bool leaveOpen ) 
+        public EnrsBinaryWriter( Stream input, Encoding encoding, Endianness endianness, bool leaveOpen, long beginPosition ) 
             : base( input, encoding, endianness, leaveOpen )
         {
-            mPositionMap = new Dictionary<long, int>( 1024 * 1024 );
+            mBeginPosition = beginPosition;
+            mBitArray = new List<byte>( 1024 * 1024 );
         }
     }
 }

@@ -93,7 +93,7 @@ namespace MikuMikuLibrary.IO.Common
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public static int QuantizeUnorm( float v, int n )
         {
-            float scale = (1 << n) - 1;
+            int scale = (1 << n) - 1;
 
             v = (v >= 0) ? v : 0;
             v = (v <= 1) ? v : 1;
@@ -104,7 +104,7 @@ namespace MikuMikuLibrary.IO.Common
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public static int QuantizeSnorm( float v, int n )
         {
-            float scale = (1 << (n - 1)) - 1;
+            int scale = (1 << (n - 1)) - 1;
 
             float round = (v >= 0 ? 0.5f : -0.5f);
 
