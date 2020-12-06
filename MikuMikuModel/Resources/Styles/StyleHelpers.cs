@@ -161,5 +161,13 @@ namespace MikuMikuModel.Resources.Styles
                 RestoreDefaultStyle( ( Control ) childControl );
             }
         }
+
+        public static void ApplySystemFont( Control control )
+        {
+            control.Font = SystemFonts.MessageBoxFont;
+
+            foreach ( var childControl in control.Controls.OfType<Control>() )
+                ApplySystemFont( childControl );
+        }
     }
 }

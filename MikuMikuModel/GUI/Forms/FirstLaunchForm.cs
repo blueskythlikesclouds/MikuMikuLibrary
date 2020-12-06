@@ -1,5 +1,6 @@
 ﻿using System.Windows.Forms;
 using MikuMikuModel.Resources;
+using MikuMikuModel.Resources.Styles;
 
 namespace MikuMikuModel.GUI.Forms
 {

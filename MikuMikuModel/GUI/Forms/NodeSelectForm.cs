@@ -88,6 +88,8 @@ namespace MikuMikuModel.GUI.Forms
                 mNodeTreeView.Nodes.Add( new NodeAsTreeNode( new ReferenceNode( node ), true )
                     { HideContextMenuStrip = true } );
             }
+
+            StyleHelpers.ApplySystemFont( this );
         }
     }
 }

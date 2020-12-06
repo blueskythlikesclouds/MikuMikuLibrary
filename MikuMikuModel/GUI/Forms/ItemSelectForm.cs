@@ -73,6 +73,8 @@ namespace MikuMikuModel.GUI.Forms
 
             foreach ( ( T item, string name ) in items )
                 mListView.Items.Add( new ListViewItem { Name = name, Text = name, Tag = item, Checked = true } );
+
+            StyleHelpers.ApplySystemFont( this );
         }
     }
 }

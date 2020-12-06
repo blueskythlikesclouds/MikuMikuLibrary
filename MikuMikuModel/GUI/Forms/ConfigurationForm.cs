@@ -308,6 +308,8 @@ namespace MikuMikuModel.GUI.Forms
             mOriginalMap = new Dictionary<Configuration, Configuration>();
             for ( int i = 0; i < mConfigurationList.Configurations.Count; i++ )
                 mOriginalMap[ mConfigurationList.Configurations[ i ] ] = ConfigurationList.Instance.Configurations[ i ];
+
+            StyleHelpers.ApplySystemFont( this );
         }
     }
 }

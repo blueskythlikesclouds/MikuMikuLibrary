@@ -93,6 +93,8 @@ namespace MikuMikuModel.GUI.Forms
                 mMaterialTextureTypeComboBox.Items.Add( typeName );
 
             mMaterialTextureTypeComboBox.SelectedIndex = ( int ) type;
+
+            StyleHelpers.ApplySystemFont( this );
         }
     }
 }

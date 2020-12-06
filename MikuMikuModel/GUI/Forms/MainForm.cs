@@ -764,6 +764,8 @@ namespace MikuMikuModel.GUI.Forms
 #if DEBUG
             mPropertyGrid.BrowsableAttributes = new AttributeCollection();
 #endif
+
+            StyleHelpers.ApplySystemFont( this );
         }
     }
 }
