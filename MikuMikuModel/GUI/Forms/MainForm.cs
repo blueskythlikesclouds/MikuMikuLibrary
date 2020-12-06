@@ -46,7 +46,7 @@ namespace MikuMikuModel.GUI.Forms
             {
                 mStringBuilder.AppendFormat( " - {0}", Path.GetFileName( mCurrentlyOpenFilePath ) );
 
-                if ( mNodeTreeView.TopDataNode is IDirtyNode dirtyNode && dirtyNode.IsDirty )
+                if ( mNodeTreeView.RootDataNode is IDirtyNode dirtyNode && dirtyNode.IsDirty )
                     mStringBuilder.Append( '*' );
             }
 
@@ -58,6 +58,15 @@ namespace MikuMikuModel.GUI.Forms
 
         private void SetSplitContainerControl( Control control )
         {
+            if ( mMainSplitContainer.Panel1.Controls.Count == 0 && control == null )
+                return;
+
+            if ( mMainSplitContainer.Panel1.Controls.Count == 1 && mMainSplitContainer.Panel1.Controls[ 0 ] == control )
+            {
+                control.Refresh();
+                return;
+            }
+
             mMainSplitContainer.Panel1.Controls.Clear();
 
             if ( control == null )
@@ -124,14 +133,14 @@ namespace MikuMikuModel.GUI.Forms
 
         public void Reset()
         {
-            if ( mNodeTreeView.TopNode != null )
+            if ( mNodeTreeView.RootNode != null )
             {
-                SetSubscription( mNodeTreeView.TopDataNode, true );
+                SetSubscription( mNodeTreeView.RootDataNode, true );
 
-                mNodeTreeView.TopNode.Dispose();
-                mNodeTreeView.TopDataNode.Exported -= OnNodeExported;
-                mNodeTreeView.TopDataNode.DisposeData();
-                mNodeTreeView.TopDataNode.Dispose();
+                mNodeTreeView.RootNode.Dispose();
+                mNodeTreeView.RootDataNode.Exported -= OnNodeExported;
+                mNodeTreeView.RootDataNode.DisposeData();
+                mNodeTreeView.RootDataNode.Dispose();
             }
 
             mNodeTreeView.Nodes.Clear();
@@ -246,7 +255,7 @@ namespace MikuMikuModel.GUI.Forms
 
         private bool SaveFileAs()
         {
-            string path = mNodeTreeView.TopDataNode?.Export();
+            string path = mNodeTreeView.RootDataNode?.Export();
             if ( string.IsNullOrEmpty( path ) )
                 return false;
 
@@ -256,16 +265,16 @@ namespace MikuMikuModel.GUI.Forms
 
         private void SaveFile( string filePath )
         {
-            if ( mNodeTreeView.TopDataNode == null )
+            if ( mNodeTreeView.RootDataNode == null )
                 return;
 
-            mNodeTreeView.TopDataNode.Export( filePath );
+            mNodeTreeView.RootDataNode.Export( filePath );
             mCurrentlyOpenFilePath = filePath;
         }
 
         private bool SaveFile()
         {
-            if ( mNodeTreeView.TopDataNode == null )
+            if ( mNodeTreeView.RootDataNode == null )
                 return false;
 
             if ( string.IsNullOrEmpty( mCurrentlyOpenFilePath ) )
@@ -290,7 +299,7 @@ namespace MikuMikuModel.GUI.Forms
         /// </summary>
         private bool AskForSavingChanges()
         {
-            if ( mNodeTreeView.TopDataNode == null || !( ( IDirtyNode ) mNodeTreeView.TopDataNode ).IsDirty )
+            if ( mNodeTreeView.RootDataNode == null || !( ( IDirtyNode ) mNodeTreeView.RootDataNode ).IsDirty )
                 return false;
 
             var result = MessageBox.Show( "You have unsaved changes. Do you want to save them?", Program.Name, MessageBoxButtons.YesNoCancel,
@@ -654,6 +663,8 @@ namespace MikuMikuModel.GUI.Forms
 
             if ( mAutoCheckUpdatesToolStripMenuItem.Checked )
                 new Thread( () => CheckForUpdates( false ) ).Start();
+
+            SetStyle( ControlStyles.DoubleBuffer, true );
 
             base.OnLoad( eventArgs );
         }
