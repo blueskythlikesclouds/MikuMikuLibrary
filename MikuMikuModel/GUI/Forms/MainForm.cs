@@ -462,6 +462,8 @@ namespace MikuMikuModel.GUI.Forms
 
                     uint hash = MurmurHash.Calculate( inputDialog.Input );
 
+                    Clipboard.SetText( $"{hash}" );
+
                     MessageBox.Show( $"{inputDialog.Input}: 0x{hash:X8} ({hash})", Program.Name,
                         MessageBoxButtons.OK, MessageBoxIcon.None );
                 }
