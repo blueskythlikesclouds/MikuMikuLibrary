@@ -44,28 +44,28 @@ namespace MikuMikuLibrary.Databases
         public string Name { get; set; }
         public string Auth3dName { get; set; }
         public StageObjectInfo[] Objects { get; set; }
-        public int LensFlareScaleX { get; set; }
-        public int LensFlareScaleY { get; set; }
-        public int LensFlareScaleZ { get; set; }
+        public uint LensFlareScaleX { get; set; }
+        public uint LensFlareScaleY { get; set; }
+        public uint LensFlareScaleZ { get; set; }
         public float Field00 { get; set; }
-        public int Field01 { get; set; } // It's always set to 0
+        public uint Field01 { get; set; } // It's always set to 0
         public uint RenderTextureId { get; set; }
         public uint RenderTextureIdFlag { get; set; }
         public uint MovieTextureId { get; set; }
         public uint MovieTextureIdFlag { get; set; }
         public string CollisionFilePath { get; set; } // Unused
-        public int Field04 { get; set; }
+        public uint Field04 { get; set; }
         public uint Field04Flag { get; set; }
-        public int Field05 { get; set; }
+        public uint Field05 { get; set; }
         public uint Field05Flag { get; set; }
-        public int Field06 { get; set; }
+        public uint Field06 { get; set; }
         public uint Field06Flag { get; set; }
-        public int Field07 { get; set; }
+        public uint Field07 { get; set; }
         public uint Field07Flag { get; set; }
-        public int Field08 { get; set; }
+        public uint Field08 { get; set; }
         public uint Field08Flag { get; set; }
-        public int Field09 { get; set; }
-        public int Field10 { get; set; }
+        public uint Field09 { get; set; }
+        public uint Field10 { get; set; }
         public float RingRectangleX { get; set; }
         public float RingRectangleY { get; set; }
         public float RingRectangleWidth { get; set; }
@@ -73,14 +73,14 @@ namespace MikuMikuLibrary.Databases
         public float RingRectangleHeight { get; set; }
         public float RingRingHeight { get; set; }
         public float RingOutHeight { get; set; }
-        public int Field11 { get; set; }
-        public int Field12 { get; set; }
-        public int Field13 { get; set; }
-        public int Field14 { get; set; }
-        public int Field15 { get; set; }
-        public int Field16 { get; set; }
-        public int Field17 { get; set; }
-        public int Field18 { get; set; }
+        public uint Field11 { get; set; }
+        public uint Field12 { get; set; }
+        public uint Field13 { get; set; }
+        public uint Field14 { get; set; }
+        public uint Field15 { get; set; }
+        public uint Field16 { get; set; }
+        public uint Field17 { get; set; }
+        public uint Field18 { get; set; }
         public StageEffect[] StageEffects { get; set; }
         public uint Id { get; set; }
         public uint UnknownId { get; set; }
@@ -91,9 +91,7 @@ namespace MikuMikuLibrary.Databases
         {
             if ( format == BinaryFormat.F2nd || format == BinaryFormat.X )
             {
-                reader.Seek( 4, SeekOrigin.Current );
-
-                Id = reader.ReadUInt32();
+                Id = ( uint ) reader.ReadUInt64();
                 Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
                 Auth3dName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
 
@@ -104,24 +102,24 @@ namespace MikuMikuLibrary.Databases
                 }
 
                 Field00 = reader.ReadSingle();
-                Field01 = reader.ReadInt32();
+                Field01 = reader.ReadUInt32();
                 RenderTextureId = reader.ReadUInt32();
                 RenderTextureIdFlag = reader.ReadUInt32();
                 MovieTextureId = reader.ReadUInt32();
                 MovieTextureIdFlag = reader.ReadUInt32();
-                Field04 = reader.ReadInt32();
+                Field04 = reader.ReadUInt32();
                 Field04Flag = reader.ReadUInt32();
-                Field05 = reader.ReadInt32();
+                Field05 = reader.ReadUInt32();
                 Field05Flag = reader.ReadUInt32();
-                Field06 = reader.ReadInt32();
+                Field06 = reader.ReadUInt32();
                 Field06Flag = reader.ReadUInt32();
-                Field07 = reader.ReadInt32();
+                Field07 = reader.ReadUInt32();
                 Field07Flag = reader.ReadUInt32();
-                Field08 = reader.ReadInt32();
+                Field08 = reader.ReadUInt32();
                 Field08Flag = reader.ReadUInt32();
-                LensFlareScaleX = reader.ReadInt32();
-                LensFlareScaleY = reader.ReadInt32();
-                LensFlareScaleZ = reader.ReadInt32();
+                LensFlareScaleX = reader.ReadUInt32();
+                LensFlareScaleY = reader.ReadUInt32();
+                LensFlareScaleZ = reader.ReadUInt32();
                 RingRectangleX = reader.ReadSingle();
                 RingRectangleY = reader.ReadSingle();
                 RingRectangleWidth = reader.ReadSingle();
@@ -131,7 +129,7 @@ namespace MikuMikuLibrary.Databases
 
                 ReadStageEffects( reader );
 
-                int auth3dIdsCount = reader.ReadInt32();
+                uint auth3dIdsCount = reader.ReadUInt32();
                 long auth3dIdsOffset = reader.ReadOffset();
 
                 reader.ReadAtOffset( auth3dIdsOffset, () =>
@@ -153,31 +151,31 @@ namespace MikuMikuLibrary.Databases
                     Objects[ i ].SetId = reader.ReadUInt16();
                 }
 
-                LensFlareScaleX = reader.ReadInt32();
-                LensFlareScaleY = reader.ReadInt32();
-                LensFlareScaleZ = reader.ReadInt32();
+                LensFlareScaleX = reader.ReadUInt32();
+                LensFlareScaleY = reader.ReadUInt32();
+                LensFlareScaleZ = reader.ReadUInt32();
                 Field00 = reader.ReadSingle();
-                Field01 = reader.ReadInt32();
+                Field01 = reader.ReadUInt32();
                 RenderTextureId = reader.ReadUInt32();
 
                 if ( format > BinaryFormat.DT )
                     MovieTextureId = reader.ReadUInt32();
 
                 CollisionFilePath = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-                Field04 = reader.ReadInt32();
-                Field05 = reader.ReadInt32();
+                Field04 = reader.ReadUInt32();
+                Field05 = reader.ReadUInt32();
 
                 reader.ReadOffset( () =>
                 {
-                   Field06 = reader.ReadInt32();
-                   Field07 = reader.ReadInt32();
-                   Field08 = reader.ReadInt32();
+                   Field06 = reader.ReadUInt32();
+                   Field07 = reader.ReadUInt32();
+                   Field08 = reader.ReadUInt32();
                 } );
 
-                Field09 = reader.ReadInt32();
+                Field09 = reader.ReadUInt32();
 
                 if ( format == BinaryFormat.FT )
-                    Field10 = reader.ReadInt32();
+                    Field10 = reader.ReadUInt32();
 
                 RingRectangleX = reader.ReadSingle();
                 RingRectangleY = reader.ReadSingle();
@@ -192,8 +190,8 @@ namespace MikuMikuLibrary.Databases
         {
             if ( format == BinaryFormat.F2nd || format == BinaryFormat.X )
             {
-                writer.WriteNulls( 4 );
-                writer.Write( Id );
+                writer.Align( 8 );
+                writer.Write( ( ulong ) Id );
                 writer.AddStringToStringTable( Name );
                 writer.AddStringToStringTable( Auth3dName );
 
@@ -289,14 +287,14 @@ namespace MikuMikuLibrary.Databases
 
         internal void ReadStageEffects( EndianBinaryReader reader )
         {
-            Field11 = reader.ReadInt32();
-            Field12 = reader.ReadInt32();
-            Field13 = reader.ReadInt32();
-            Field14 = reader.ReadInt32();
-            Field15 = reader.ReadInt32();
-            Field16 = reader.ReadInt32();
-            Field17 = reader.ReadInt32();
-            Field18 = reader.ReadInt32();
+            Field11 = reader.ReadUInt32();
+            Field12 = reader.ReadUInt32();
+            Field13 = reader.ReadUInt32();
+            Field14 = reader.ReadUInt32();
+            Field15 = reader.ReadUInt32();
+            Field16 = reader.ReadUInt32();
+            Field17 = reader.ReadUInt32();
+            Field18 = reader.ReadUInt32();
 
             for ( int i = 0; i < 16; i++ )
                 StageEffects[ i ] = ( StageEffect ) reader.ReadInt32();
