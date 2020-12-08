@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Numerics;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra
@@ -8,6 +9,7 @@ namespace MikuMikuLibrary.Objects.Extra
     {
         public string Name { get; set; }
         public float Length { get; set; }
+        public Vector3 Rotation { get; set; }
 
         public string SiblingName { get; set; }
         public float SiblingDistance { get; set; }
@@ -30,6 +32,20 @@ namespace MikuMikuLibrary.Objects.Extra
             writer.Write( id );
             writer.Write( Length );
             writer.Write( id & 0x7FFF ); // Unsure if it's always this way
+        }
+
+        internal void ReadOsgBlockInfo( EndianBinaryReader reader, StringSet stringSet )
+        {
+            Name = stringSet.ReadString( reader );
+            Length = reader.ReadSingle();
+            Rotation = reader.ReadVector3();
+        }
+
+        internal void WriteOsgBlockInfo( EndianBinaryWriter writer, StringSet stringSet )
+        {
+            stringSet.WriteString( writer, Name );
+            writer.Write( Length );
+            writer.Write( Rotation );
         }
 
         internal void WriteSiblingInfo( EndianBinaryWriter writer, StringSet stringSet )

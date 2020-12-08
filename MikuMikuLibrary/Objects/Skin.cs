@@ -115,13 +115,6 @@ namespace MikuMikuLibrary.Objects
 
                             var block = blockConstructor();
                             block.Read( reader, stringSet );
-
-                            if ( block is OsageBlock osageNode )
-                            {
-                                for ( int i = 0; i < osageNode.Count; i++ )
-                                    osageNode.Bones.Add( osageBones[ osageNode.StartIndex + i ] );
-                            }
-
                             Blocks.Add( block );
                         } );
                     }
@@ -148,6 +141,20 @@ namespace MikuMikuLibrary.Objects
                         osageBone.SiblingDistance = siblingDistance;
                     }
                 } );
+
+                foreach ( var osageBlock in Blocks.OfType<OsageBlock>() )
+                {
+                    for ( int i = 0; i < osageBlock.Count; i++ )
+                    {
+                        var donorOsageBone = osageBones[ osageBlock.StartIndex + i ];
+                        var osageBone = osageBlock.Bones[ i ];
+
+                        osageBone.Name = donorOsageBone.Name;
+                        osageBone.Length = donorOsageBone.Length;
+                        osageBone.SiblingName = donorOsageBone.SiblingName;
+                        osageBone.SiblingDistance = donorOsageBone.SiblingDistance;
+                    }
+                }
             } );
 
             reader.ReadAtOffset( boneParentIdsOffset, () =>
