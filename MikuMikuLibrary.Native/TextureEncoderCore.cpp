@@ -50,6 +50,77 @@ namespace MikuMikuLibrary::Textures::Processing
         }
     }
 
+    void EncodeYCbCr( const DirectX::Image& image, DirectX::XMFLOAT2* yaBuffer, DirectX::XMFLOAT2* cbcrBuffer )
+    {
+        for ( size_t i = 0; i < image.width; i++ )
+        {
+            for ( size_t j = 0; j < image.height; j++ )
+            {
+                const size_t offset = j * image.width + i;
+
+                const Color8& color = ( ( Color8* ) image.pixels )[ offset ];
+
+                const float r = color.r / 255.0f;
+                const float g = color.g / 255.0f;
+                const float b = color.b / 255.0f;
+                const float a = color.a / 255.0f;
+
+                const float y = r * 0.212593317f + g * 0.715214610f + b * 0.0721921176f;
+
+                const float cb = (r * -0.114568502f + g * -0.385435730f + b * 0.5000042320f + 0.503929f) / 1.003922f;
+                const float cr = (r * 0.500004232f + g * -0.454162151f + b * -0.0458420813f + 0.503929f) / 1.003922f;
+
+                yaBuffer[ offset ].x = y;
+                yaBuffer[ offset ].y = a;
+
+                cbcrBuffer[ offset ].x = cb;
+                cbcrBuffer[ offset ].y = cr;
+            }
+        }
+    }
+
+    Texture^ EncodeYCbCrToTexture( const DirectX::Image& image )
+    {
+        array<SubTexture^, 2>^ subTextures = gcnew array<SubTexture^, 2>( 2, 1 );
+
+        DirectX::ScratchImage luminanceImage;
+        luminanceImage.Initialize2D( DXGI_FORMAT_R32G32_FLOAT, image.width, image.height, 1, 1 );
+
+        DirectX::ScratchImage chromaImage;
+        chromaImage.Initialize2D( DXGI_FORMAT_R32G32_FLOAT, image.width, image.height, 1, 1 );
+
+        EncodeYCbCr( image, ( DirectX::XMFLOAT2* ) luminanceImage.GetPixels(), ( DirectX::XMFLOAT2* ) chromaImage.GetPixels() );
+
+        DirectX::ScratchImage scaledChromaImage;
+
+        if ( FAILED( DirectX::Resize( *chromaImage.GetImage( 0, 0, 0 ), image.width >> 1, image.height >> 1, DirectX::TEX_FILTER_BOX, scaledChromaImage ) ) )
+            throw gcnew Exception( "Failed to resize chroma image" );
+
+        DirectX::ScratchImage compressedLuminanceImage;
+
+        if ( FAILED( DirectX::Compress( *luminanceImage.GetImage( 0, 0, 0 ), DXGI_FORMAT_BC5_UNORM, DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT, compressedLuminanceImage ) ) )
+            throw gcnew Exception( "Failed to compress luminance image" );
+
+        DirectX::ScratchImage compressedChromaImage;
+
+        if ( FAILED( DirectX::Compress( *scaledChromaImage.GetImage( 0, 0, 0 ), DXGI_FORMAT_BC5_UNORM, DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT, compressedChromaImage ) ) )
+            throw gcnew Exception( "Failed to compress chroma image" );
+
+        Texture^ texture = gcnew Texture( ( int ) image.width, ( int ) image.height, TextureFormat::ATI2, 1, 2 );
+
+        {
+            const pin_ptr<byte> dataPtr = &texture[ 0, 0 ]->Data[ 0 ];
+            memcpy( dataPtr, compressedLuminanceImage.GetPixels(), texture[ 0, 0 ]->Data->Length );
+        }
+
+        {
+            const pin_ptr<byte> dataPtr = &texture[ 0, 1 ]->Data[ 0 ];
+            memcpy( dataPtr, compressedChromaImage.GetPixels(), texture[ 0, 1 ]->Data->Length );
+        }
+
+        return texture;
+    }
+
     SubTexture^ EncodeToSubTexture( const DirectX::Image& image, const TextureFormat formatHint )
     {
         if ( !DirectX::IsCompressed( image.format ) )
@@ -150,7 +221,7 @@ namespace MikuMikuLibrary::Textures::Processing
             return hasAlpha ? TextureFormat::DXT5 : TextureFormat::DXT1;
 
         if ( TextureFormatUtilities::IsBlockCompressed( formatHint ) )
-            return hasAlpha && formatHint == TextureFormat::DXT1 ? TextureFormat::DXT5 : formatHint;
+            return hasAlpha && formatHint == TextureFormat::DXT1 ? TextureFormat::DXT5 : !hasAlpha && formatHint == TextureFormat::DXT5 ? TextureFormat::DXT1 : formatHint;
 
         return hasAlpha ? TextureFormat::RGBA8 : TextureFormat::RGB8;
     }
@@ -206,6 +277,20 @@ namespace MikuMikuLibrary::Textures::Processing
         return texture;
     }
 
+    Texture^ TextureEncoderCore::EncodeYCbCrFromBitmap( Bitmap^ bitmap )
+    {
+        BitmapData^ bitmapData = bitmap->LockBits( Drawing::Rectangle( 0, 0, bitmap->Width, bitmap->Height ), ImageLockMode::ReadOnly, PixelFormat::Format32bppArgb );
+
+        DirectX::Image image;
+        MakeImage( image, bitmap->Width, bitmap->Height, UNCOMPRESSED_FORMAT, ( byte* ) bitmapData->Scan0.ToPointer() );
+
+        Texture^ texture = EncodeYCbCrToTexture( image );
+
+        bitmap->UnlockBits( bitmapData );
+
+        return texture;
+    }
+
     SubTexture^ TextureEncoderCore::EncodeFromFile( String^ filePath, TextureFormat formatHint )
     {
         DirectX::ScratchImage scratchImage;
@@ -232,12 +317,38 @@ namespace MikuMikuLibrary::Textures::Processing
         {
             DirectX::ScratchImage mipChain;
 
-            if ( DirectX::GenerateMipMaps( scratchImage.GetImages(), scratchImage.GetImageCount(), scratchImage.GetMetadata(), DirectX::TEX_FILTER_DEFAULT, 0, mipChain ) )
+            if ( FAILED( DirectX::GenerateMipMaps( scratchImage.GetImages(), scratchImage.GetImageCount(), scratchImage.GetMetadata(), DirectX::TEX_FILTER_DEFAULT, 0, mipChain ) ) )
                 throw gcnew Exception( "Failed to generate mip-maps" );
 
             return EncodeToTexture( mipChain, AdjustFormatHint( formatHint, !mipChain.IsAlphaAllOpaque() ) );
         }
 
         return EncodeToTexture( scratchImage, AdjustFormatHint( formatHint, !scratchImage.IsAlphaAllOpaque() ) );
+    }
+
+    Texture^ TextureEncoderCore::EncodeYCbCrFromFile(String^ filePath)
+    {
+        DirectX::ScratchImage scratchImage;
+        LoadImageFile( filePath, scratchImage );
+
+        const DirectX::TexMetadata& metadata = scratchImage.GetMetadata();
+
+        if ( metadata.format == UNCOMPRESSED_FORMAT )
+            return EncodeYCbCrToTexture( *scratchImage.GetImage( 0, 0, 0 ) );
+
+        DirectX::ScratchImage convertedScratchImage;
+
+        if ( DirectX::IsCompressed( metadata.format ) )
+        {
+            if ( FAILED( DirectX::Decompress( *scratchImage.GetImage( 0, 0, 0 ), UNCOMPRESSED_FORMAT, convertedScratchImage ) ) )
+                throw gcnew Exception( "Failed to decompress image" );
+        }
+        else
+        {
+            if ( FAILED( DirectX::Convert( *scratchImage.GetImage( 0, 0, 0 ), UNCOMPRESSED_FORMAT, DirectX::TEX_FILTER_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, convertedScratchImage ) ) )
+                throw gcnew Exception( "Failed to convert image" );
+        }
+
+        return EncodeYCbCrToTexture( *convertedScratchImage.GetImage( 0, 0, 0 ) );
     }
 }

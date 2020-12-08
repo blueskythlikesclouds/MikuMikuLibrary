@@ -12,8 +12,10 @@ namespace MikuMikuLibrary::Textures::Processing
     public:
         virtual SubTexture^ EncodeFromBitmap( Bitmap^ bitmap, TextureFormat formatHint );
         virtual Texture^ EncodeFromBitmap( Bitmap^ bitmap, TextureFormat formatHint, bool mipMapHint );
+        virtual Texture^ EncodeYCbCrFromBitmap( Bitmap^ bitmap );
 
         virtual SubTexture^ EncodeFromFile( String^ filePath, TextureFormat formatHint );
         virtual Texture^ EncodeFromFile( String^ filePath, TextureFormat formatHint, bool mipMapHint );
+        virtual Texture^ EncodeYCbCrFromFile( String^ filePath );
     };
 }

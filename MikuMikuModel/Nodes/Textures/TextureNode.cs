@@ -40,20 +40,6 @@ namespace MikuMikuModel.Nodes.Textures
         [Category( "General" )] public int Height => GetProperty<int>();
         [Category( "General" )] public TextureFormat Format => GetProperty<TextureFormat>();
 
-        private Texture ReplaceBitmap( string filePath, bool flipped = false )
-        {
-            using ( var bitmap = new Bitmap( filePath ) )
-            {
-                if ( flipped )
-                    bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
-
-                if ( Data.IsYCbCr )
-                    return TextureEncoder.EncodeFromBitmap( bitmap, TextureFormat.RGBA8, false );
-
-                return TextureEncoder.EncodeFromBitmap( bitmap, Format, Data.MipMapCount != 0 );
-            }
-        }
-
         private ImageFormat GetImageFormat( string filePath )
         {
             string extension = Path.GetExtension( filePath ).Trim( '.' ).ToLowerInvariant();
@@ -77,12 +63,36 @@ namespace MikuMikuModel.Nodes.Textures
             }
         }
 
+        private void EncodeTexture( TextureFormat format, bool ycbcr, bool flipped )
+        {
+            string filePath = ModuleImportUtilities.SelectModuleImport<Bitmap>();
+
+            if ( string.IsNullOrEmpty( filePath ) )
+                return;
+
+            using ( var bitmap = new Bitmap( filePath ) )
+            {
+                if ( flipped )
+                    bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
+
+                Replace( ycbcr
+                    ? TextureEncoder.EncodeYCbCrFromBitmap( bitmap )
+                    : TextureEncoder.EncodeFromBitmap( bitmap, format != TextureFormat.Unknown ? format : Format, Data.MipMapCount > 1 ) );
+            }
+        }
+
         protected override void Initialize()
         {
             AddExportHandler<Texture>( filePath => TextureDecoder.DecodeToFile( Data, filePath ) );
             AddReplaceHandler<Texture>( filePath =>
-                TextureEncoder.EncodeFromFile( filePath, Data.IsYCbCr ? TextureFormat.RGBA8 : Data.Format, Data.MipMapCount != 1 ) );
+            {
+                if ( Data.IsYCbCr )
+                    return TextureEncoder.EncodeYCbCrFromFile( filePath );
 
+                return TextureEncoder.EncodeFromFile( filePath, Data.Format, Data.MipMapCount > 1 );
+            } );
+
+            AddCustomHandlerSeparator();
             AddCustomHandler( "Export flipped", () =>
             {
                 string filePath = ModuleExportUtilities.SelectModuleExport<Bitmap>( "Select a file to export to.", Name );
@@ -98,13 +108,28 @@ namespace MikuMikuModel.Nodes.Textures
                     bitmap.Save( filePath, imageFormat );
                 }
             } );
-            AddCustomHandler( "Replace flipped", () =>
-            {
-                string filePath = ModuleImportUtilities.SelectModuleImport<Bitmap>();
 
-                if ( !string.IsNullOrEmpty( filePath ) )
-                    Replace( ReplaceBitmap( filePath, true ) );
-            } );
+            AddCustomHandler( "Replace flipped", () => EncodeTexture( TextureFormat.Unknown, Data.IsYCbCr, true ) );
+
+            AddCustomHandlerSeparator();
+
+            AddCustomHandler( "Replace as..." );
+            {
+                AppendCustomHandler( "Uncompressed", () => EncodeTexture( TextureFormat.RGBA8, false, false ) );
+                AppendCustomHandler( "DXT1/DXT5", () => EncodeTexture( TextureFormat.DXT5, false, false ) );
+                AppendCustomHandler( "ATI1", () => EncodeTexture( TextureFormat.ATI1, false, false ) );
+                AppendCustomHandler( "ATI2", () => EncodeTexture( TextureFormat.ATI2, false, false ) );
+                AppendCustomHandler( "YCbCr", () => EncodeTexture( TextureFormat.Unknown, true, false ) );
+            }
+
+            AddCustomHandler( "Replace as... (flipped)" );
+            {
+                AppendCustomHandler( "Uncompressed", () => EncodeTexture( TextureFormat.RGBA8, false, true ) );
+                AppendCustomHandler( "DXT1/DXT5", () => EncodeTexture( TextureFormat.DXT5, false, true ) );
+                AppendCustomHandler( "ATI1", () => EncodeTexture( TextureFormat.ATI1, false, true ) );
+                AppendCustomHandler( "ATI2", () => EncodeTexture( TextureFormat.ATI2, false, true ) );
+                AppendCustomHandler( "YCbCr", () => EncodeTexture( TextureFormat.Unknown, true, true ) );
+            }
         }
 
         protected override void PopulateCore()

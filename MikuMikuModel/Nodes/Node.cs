@@ -556,10 +556,10 @@ namespace MikuMikuModel.Nodes
         protected void AddReplaceHandler<TModule>( NodeReplaceHandler<T> handler ) => 
             mReplaceHandlers[ typeof( TModule ) ] = handler;
 
-        protected void AddCustomHandler( string name, Action action, 
+        protected ToolStripMenuItem CreateCustomHandler( string name, Action action, 
             Keys shortcutKeys = Keys.None, CustomHandlerFlags flags = CustomHandlerFlags.None )
         {
-            mCustomHandlers.Add( new ToolStripMenuItem( name, null, ( s, e ) =>
+            return new ToolStripMenuItem( name, null, ( s, e ) =>
             {
                 if ( flags.HasFlag( CustomHandlerFlags.ClearMementos ) )
                 {
@@ -579,7 +579,25 @@ namespace MikuMikuModel.Nodes
                     IsPopulated = false;
                     Populate();
                 }
-            }, shortcutKeys ) );
+            }, shortcutKeys );
+        }
+
+        protected void AddCustomHandler( string name )
+        {
+            mCustomHandlers.Add( new ToolStripMenuItem( name, null ) );
+        }
+
+        protected void AddCustomHandler( string name, Action action,
+            Keys shortcutKeys = Keys.None, CustomHandlerFlags flags = CustomHandlerFlags.None )
+        {
+            mCustomHandlers.Add( CreateCustomHandler( name, action, shortcutKeys, flags ) );
+        }
+
+        protected void AppendCustomHandler( string name, Action action,
+            Keys shortcutKeys = Keys.None, CustomHandlerFlags flags = CustomHandlerFlags.None )
+        {
+            ( ( ToolStripMenuItem ) mCustomHandlers[ mCustomHandlers.Count - 1 ] ).DropDownItems.Add(
+                CreateCustomHandler( name, action, shortcutKeys, flags ) );
         }
 
         protected void AddCustomHandlerSeparator() => 
