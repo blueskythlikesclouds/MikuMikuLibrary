@@ -23,6 +23,7 @@
             this.mMenuStrip = new System.Windows.Forms.MenuStrip();
             this.mFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mOpenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mOpenRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mSaveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mCloseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +52,11 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
-            this.mOpenRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertOsageSkinParametersToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.mConvertOspToClassicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertOspToF2ndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertOspToXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
             this.mMainSplitContainer.Panel2.SuspendLayout();
             this.mMainSplitContainer.SuspendLayout();
@@ -160,6 +165,12 @@
             this.mOpenToolStripMenuItem.Text = "Open";
             this.mOpenToolStripMenuItem.Click += new System.EventHandler(this.OnOpen);
             // 
+            // mOpenRecentToolStripMenuItem
+            // 
+            this.mOpenRecentToolStripMenuItem.Name = "mOpenRecentToolStripMenuItem";
+            this.mOpenRecentToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.mOpenRecentToolStripMenuItem.Text = "Open Recent";
+            // 
             // mSaveToolStripMenuItem
             // 
             this.mSaveToolStripMenuItem.Enabled = false;
@@ -215,7 +226,7 @@
             // 
             this.mUndoToolStripMenuItem.Name = "mUndoToolStripMenuItem";
             this.mUndoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.mUndoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mUndoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.mUndoToolStripMenuItem.Text = "Undo";
             this.mUndoToolStripMenuItem.Click += new System.EventHandler(this.OnUndo);
             // 
@@ -223,7 +234,7 @@
             // 
             this.mRedoToolStripMenuItem.Name = "mRedoToolStripMenuItem";
             this.mRedoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.mRedoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mRedoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.mRedoToolStripMenuItem.Text = "Redo";
             this.mRedoToolStripMenuItem.Click += new System.EventHandler(this.OnRedo);
             // 
@@ -239,7 +250,9 @@
             this.mToolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mCombineMotsFileToolStripMenuItem,
             this.toolStripSeparator1,
-            this.mGenerateMurmurHashesToolStripMenuItem});
+            this.mGenerateMurmurHashesToolStripMenuItem,
+            this.toolStripSeparator6,
+            this.mConvertOsageSkinParametersToToolStripMenuItem});
             this.mToolsToolStripMenuItem.Name = "mToolsToolStripMenuItem";
             this.mToolsToolStripMenuItem.Size = new System.Drawing.Size(46, 21);
             this.mToolsToolStripMenuItem.Text = "Tools";
@@ -378,11 +391,41 @@
             this.mPanel.Size = new System.Drawing.Size(736, 25);
             this.mPanel.TabIndex = 1;
             // 
-            // mOpenRecentToolStripMenuItem
+            // mConvertOsageSkinParametersToToolStripMenuItem
             // 
-            this.mOpenRecentToolStripMenuItem.Name = "mOpenRecentToolStripMenuItem";
-            this.mOpenRecentToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.mOpenRecentToolStripMenuItem.Text = "Open Recent";
+            this.mConvertOsageSkinParametersToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mConvertOspToClassicToolStripMenuItem,
+            this.mConvertOspToF2ndToolStripMenuItem,
+            this.mConvertOspToXToolStripMenuItem});
+            this.mConvertOsageSkinParametersToToolStripMenuItem.Name = "mConvertOsageSkinParametersToToolStripMenuItem";
+            this.mConvertOsageSkinParametersToToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
+            this.mConvertOsageSkinParametersToToolStripMenuItem.Text = "Convert osage skin parameters to...";
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(261, 6);
+            // 
+            // mConvertOspToClassicToolStripMenuItem
+            // 
+            this.mConvertOspToClassicToolStripMenuItem.Name = "mConvertOspToClassicToolStripMenuItem";
+            this.mConvertOspToClassicToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mConvertOspToClassicToolStripMenuItem.Text = "DT/F/FT";
+            this.mConvertOspToClassicToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToClassic);
+            // 
+            // mConvertOspToF2ndToolStripMenuItem
+            // 
+            this.mConvertOspToF2ndToolStripMenuItem.Name = "mConvertOspToF2ndToolStripMenuItem";
+            this.mConvertOspToF2ndToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mConvertOspToF2ndToolStripMenuItem.Text = "F 2nd";
+            this.mConvertOspToF2ndToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToF2nd);
+            // 
+            // mConvertOspToXToolStripMenuItem
+            // 
+            this.mConvertOspToXToolStripMenuItem.Name = "mConvertOspToXToolStripMenuItem";
+            this.mConvertOspToXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mConvertOspToXToolStripMenuItem.Text = "X";
+            this.mConvertOspToXToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToX);
             // 
             // MainForm
             // 
@@ -450,5 +493,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem mAutoCheckUpdatesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mOpenRecentToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem mConvertOsageSkinParametersToToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mConvertOspToClassicToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mConvertOspToF2ndToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mConvertOspToXToolStripMenuItem;
     }
 }

@@ -40,6 +40,7 @@ A program that allows you to unpack or repack .farc files.
 # Special thanks
 * [Brolijah](https://github.com/Brolijah)
 * [chrrox](https://www.deviantart.com/chrrox)
+* [keikei14](https://github.com/keikei14)
 * [korenkonder](https://github.com/korenkonder)
 * [lybxlpsv](https://github.com/lybxlpsv)
 * [minmode](https://www.deviantart.com/minmode)

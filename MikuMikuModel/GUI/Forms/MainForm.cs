@@ -6,14 +6,17 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Motions;
+using MikuMikuLibrary.Objects.Extra;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Mementos;
 using MikuMikuModel.Modules;
+using MikuMikuModel.Modules.Objects.Extra;
 using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.Collections;
@@ -468,6 +471,61 @@ namespace MikuMikuModel.GUI.Forms
                         MessageBoxButtons.OK, MessageBoxIcon.None );
                 }
             }
+        }
+
+        private void ConvertOsageSkinParameters( BinaryFormat format )
+        {
+            var filePaths =
+                ModuleImportUtilities.SelectModuleImportMultiselect<OsageSkinParameterSet>(
+                    "Select file(s) to convert." );
+
+            if ( filePaths == null )
+                return;
+
+            using ( var folderBrowserDialog = new VistaFolderBrowserDialog
+                { Description = "Select a folder to save file(s) to.", UseDescriptionForTitle = true } )
+            {
+                if ( folderBrowserDialog.ShowDialog( this ) != DialogResult.OK )
+                    return;
+
+                new Thread( () =>
+                {
+                    try
+                    {
+                        Invoke( new Action( () => Enabled = false ) );
+
+                        string extension = format.IsModern() ? ".osp" : ".txt";
+
+                        foreach ( string filePath in filePaths )
+                        {
+                            var ospSet = BinaryFile.Load<OsageSkinParameterSet>( filePath );
+
+                            ospSet.Format = format;
+                            ospSet.Save( Path.Combine( folderBrowserDialog.SelectedPath,
+                                Path.GetFileNameWithoutExtension( filePath ) + extension ) );
+                        }
+                    }
+                    finally
+                    {
+                        Invoke( new Action( () => Enabled = true ) );
+                    }
+                } ).Start();
+            }
+        }
+
+        private void OnConvertOspToClassic( object sender, EventArgs e )
+        {
+            ConvertOsageSkinParameters( BinaryFormat.DT );
+        }
+
+        private void OnConvertOspToF2nd( object sender, EventArgs e )
+        {
+            ConvertOsageSkinParameters( BinaryFormat.F2nd );
+        }
+
+        private void OnConvertOspToX( object sender, EventArgs e )
+        {
+            ConvertOsageSkinParameters( BinaryFormat.X );
         }
 
         private void OnUserGuide( object sender, EventArgs e )

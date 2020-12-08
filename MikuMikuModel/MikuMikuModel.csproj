@@ -118,10 +118,16 @@
     <Compile Include="Mementos\IMemento.cs" />
     <Compile Include="Mementos\ValueMemento.cs" />
     <Compile Include="Modules\Imaging\BitmapModule.cs" />
+    <Compile Include="Modules\Objects\Extra\OsageSkinParameterSetModule.cs" />
     <Compile Include="Nodes\Databases\ObjectDatabaseNode.cs" />
     <Compile Include="Nodes\IO\StreamNode.cs" />
     <Compile Include="Nodes\NodeList.cs" />
     <Compile Include="Nodes\NodeMementos.cs" />
+    <Compile Include="Nodes\Objects\Extra\OsageCollisionBoneParameterNode.cs" />
+    <Compile Include="Nodes\Objects\Extra\OsageCollisionParameterNode.cs" />
+    <Compile Include="Nodes\Objects\Extra\OsageNodeParameterNode.cs" />
+    <Compile Include="Nodes\Objects\Extra\OsageSkinParameterNode.cs" />
+    <Compile Include="Nodes\Objects\Extra\OsageSkinParameterSetNode.cs" />
     <Compile Include="Nodes\TypeConverters\IdTypeConverter.cs" />
     <Compile Include="Resources\Styles\Style.cs" />
     <Compile Include="Resources\Styles\StyleColorTable.cs" />

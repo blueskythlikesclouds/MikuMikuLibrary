@@ -57,6 +57,7 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
+        public Encoding Encoding => mEncoding;
         public void Seek( long offset, SeekOrigin origin ) => 
             BaseStream.Seek( offset, origin );
 

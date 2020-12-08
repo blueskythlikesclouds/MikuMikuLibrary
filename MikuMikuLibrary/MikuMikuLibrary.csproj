@@ -67,6 +67,7 @@
     <Compile Include="Databases\SpriteDatabase.cs" />
     <Compile Include="Databases\StageDatabase.cs" />
     <Compile Include="Databases\StringArray.cs" />
+    <Compile Include="Extensions\BinaryEx.cs" />
     <Compile Include="Extensions\BitmapEx.cs" />
     <Compile Include="Extensions\BlockEx.cs" />
     <Compile Include="Extensions\QuaternionEx.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="IO\Common\BitHelper.cs" />
     <Compile Include="IO\Common\VectorBinaryFormat.cs" />
     <Compile Include="IO\IBinaryFile.cs" />
+    <Compile Include="Parameters\ParameterTree.cs" />
     <Compile Include="IO\Sections\Databases\AetDatabaseSection.cs" />
     <Compile Include="IO\Sections\Databases\BoneDatabaseSection.cs" />
     <Compile Include="IO\Sections\Databases\ObjectDatabaseSection.cs" />
@@ -92,6 +94,7 @@
     <Compile Include="IO\Sections\IO\BinaryFileSection.cs" />
     <Compile Include="IO\Sections\ISection.cs" />
     <Compile Include="IO\Sections\Motions\MotionSection.cs" />
+    <Compile Include="IO\Sections\Objects\Extra\OsageSkinParameterSetSection.cs" />
     <Compile Include="IO\Sections\Objects\IndexDataSection.cs" />
     <Compile Include="IO\Sections\Objects\ObjectSection.cs" />
     <Compile Include="IO\Sections\Objects\ObjectSetSection.cs" />
@@ -119,6 +122,7 @@
     <Compile Include="Objects\Extra\IBlock.cs" />
     <Compile Include="Objects\Extra\MotionBone.cs" />
     <Compile Include="Objects\Extra\OsageBone.cs" />
+    <Compile Include="Objects\Extra\OsageSkinParameterSet.cs" />
     <Compile Include="Objects\Extra\StringSet.cs" />
     <Compile Include="Objects\Processing\Assimp\AssimpExtensions.cs" />
     <Compile Include="Objects\Processing\Assimp\AssimpExporter.cs" />
@@ -137,6 +141,7 @@
     <Compile Include="Motions\MotionSet.cs" />
     <Compile Include="Motions\KeySetType.cs" />
     <Compile Include="Objects\Skin.cs" />
+    <Compile Include="Parameters\ParameterTreeWriter.cs" />
     <Compile Include="Skeletons\Bone.cs" />
     <Compile Include="Skeletons\Skeleton.cs" />
     <Compile Include="Sprites\SpriteCropper.cs" />
