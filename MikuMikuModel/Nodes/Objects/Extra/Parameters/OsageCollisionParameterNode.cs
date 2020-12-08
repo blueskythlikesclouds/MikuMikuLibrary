@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
-using MikuMikuLibrary.Objects.Extra;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 
-namespace MikuMikuModel.Nodes.Objects.Extra
+namespace MikuMikuModel.Nodes.Objects.Extra.Parameters
 {
     public class OsageCollisionParameterNode : Node<OsageCollisionParameter>
     {

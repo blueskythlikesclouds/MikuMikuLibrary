@@ -78,6 +78,11 @@
     <Compile Include="IO\Common\BitHelper.cs" />
     <Compile Include="IO\Common\VectorBinaryFormat.cs" />
     <Compile Include="IO\IBinaryFile.cs" />
+    <Compile Include="Objects\Extra\Parameters\OsageBocParameter.cs" />
+    <Compile Include="Objects\Extra\Parameters\OsageCollisionBoneParameter.cs" />
+    <Compile Include="Objects\Extra\Parameters\OsageCollisionParameter.cs" />
+    <Compile Include="Objects\Extra\Parameters\OsageNodeParameter.cs" />
+    <Compile Include="Objects\Extra\Parameters\OsageSkinParameter.cs" />
     <Compile Include="Parameters\ParameterTree.cs" />
     <Compile Include="IO\Sections\Databases\AetDatabaseSection.cs" />
     <Compile Include="IO\Sections\Databases\BoneDatabaseSection.cs" />
@@ -94,7 +99,7 @@
     <Compile Include="IO\Sections\IO\BinaryFileSection.cs" />
     <Compile Include="IO\Sections\ISection.cs" />
     <Compile Include="IO\Sections\Motions\MotionSection.cs" />
-    <Compile Include="IO\Sections\Objects\Extra\OsageSkinParameterSetSection.cs" />
+    <Compile Include="IO\Sections\Objects\Extra\Parameters\OsageSkinParameterSetSection.cs" />
     <Compile Include="IO\Sections\Objects\IndexDataSection.cs" />
     <Compile Include="IO\Sections\Objects\ObjectSection.cs" />
     <Compile Include="IO\Sections\Objects\ObjectSetSection.cs" />
@@ -122,7 +127,7 @@
     <Compile Include="Objects\Extra\IBlock.cs" />
     <Compile Include="Objects\Extra\MotionBone.cs" />
     <Compile Include="Objects\Extra\OsageBone.cs" />
-    <Compile Include="Objects\Extra\OsageSkinParameterSet.cs" />
+    <Compile Include="Objects\Extra\Parameters\OsageSkinParameterSet.cs" />
     <Compile Include="Objects\Extra\StringSet.cs" />
     <Compile Include="Objects\Processing\Assimp\AssimpExtensions.cs" />
     <Compile Include="Objects\Processing\Assimp\AssimpExporter.cs" />

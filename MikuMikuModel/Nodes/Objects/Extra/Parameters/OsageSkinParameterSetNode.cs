@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using MikuMikuLibrary.IO;
-using MikuMikuLibrary.Objects.Extra;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
 
-namespace MikuMikuModel.Nodes.Objects.Extra
+namespace MikuMikuModel.Nodes.Objects.Extra.Parameters
 {
     public class OsageSkinParameterSetNode : BinaryFileNode<OsageSkinParameterSet>
     {

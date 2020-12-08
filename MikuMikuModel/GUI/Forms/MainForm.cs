@@ -12,6 +12,7 @@ using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Motions;
 using MikuMikuLibrary.Objects.Extra;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Mementos;

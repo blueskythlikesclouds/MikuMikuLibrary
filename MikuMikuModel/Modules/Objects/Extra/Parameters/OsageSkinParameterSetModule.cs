@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.IO;
-using MikuMikuLibrary.Objects.Extra;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 
-namespace MikuMikuModel.Modules.Objects.Extra
+namespace MikuMikuModel.Modules.Objects.Extra.Parameters
 {
     public class OsageSkinParameterSetModule : FormatModule<OsageSkinParameterSet>
     {

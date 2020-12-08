@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Numerics;
-using MikuMikuLibrary.Objects.Extra;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 using MikuMikuModel.Nodes.TypeConverters;
 
-namespace MikuMikuModel.Nodes.Objects.Extra
+namespace MikuMikuModel.Nodes.Objects.Extra.Parameters
 {
     public class OsageCollisionBoneParameterNode : Node<OsageCollisionBoneParameter>
     {

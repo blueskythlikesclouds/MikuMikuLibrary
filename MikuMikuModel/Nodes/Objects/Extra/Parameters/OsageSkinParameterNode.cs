@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
-using MikuMikuLibrary.Objects.Extra;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 using MikuMikuModel.Nodes.Collections;
 
-namespace MikuMikuModel.Nodes.Objects.Extra
+namespace MikuMikuModel.Nodes.Objects.Extra.Parameters
 {
     public class OsageSkinParameterNode : Node<OsageSkinParameter>
     {
@@ -136,7 +136,7 @@ namespace MikuMikuModel.Nodes.Objects.Extra
                     x => $"{x.Bone0.Name}/{x.Bone1.Name}" ) );
 
             if ( Data.Bocs.Count > 0 )
-                Nodes.Add( new ListNode<OsageBocParameter>( "BOCs", Data.Bocs, x => x.EdRootName ) );
+                Nodes.Add( new ListNode<OsageBocParameter>( "BOCs", Data.Bocs, x => x.EdRoot ) );
 
             if ( Data.Nodes.Count > 0 )
                 Nodes.Add( new ListNode<OsageNodeParameter>( "Nodes", Data.Nodes ) );
