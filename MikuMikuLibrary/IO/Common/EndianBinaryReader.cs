@@ -55,6 +55,12 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
+        public long Offset
+        {
+            get => Position - BaseOffset;
+            set => Position = BaseOffset + value;
+        }
+
         public void Seek( long offset, SeekOrigin origin ) => 
             BaseStream.Seek( offset, origin );
 

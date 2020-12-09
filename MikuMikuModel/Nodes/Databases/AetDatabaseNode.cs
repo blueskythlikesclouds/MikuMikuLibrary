@@ -9,38 +9,38 @@ using MikuMikuModel.Nodes.TypeConverters;
 
 namespace MikuMikuModel.Nodes.Databases
 {
-    public class SpriteDatabaseNode : BinaryFileNode<SpriteDatabase>
+    public class AetDatabaseNode : BinaryFileNode<AetDatabase>
     {
         public override NodeFlags Flags =>
             NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
 
         protected override void Initialize()
         {
-            AddExportHandler<SpriteDatabase>( filePath => Data.Save( filePath ) );
-            AddReplaceHandler<SpriteDatabase>( BinaryFile.Load<SpriteDatabase> );
+            AddExportHandler<AetDatabase>( filePath => Data.Save( filePath ) );
+            AddReplaceHandler<AetDatabase>( BinaryFile.Load<AetDatabase> );
 
             base.Initialize();
         }
 
         protected override void PopulateCore()
         {
-            Nodes.Add( new ListNode<SpriteSetInfo>( "Sprite sets", Data.SpriteSets, x => x.Name ) );
+            Nodes.Add( new ListNode<AetSetInfo>( "Aet sets", Data.AetSets, x => x.Name ) );
         }
 
         protected override void SynchronizeCore()
         {
         }
 
-        public SpriteDatabaseNode( string name, SpriteDatabase data ) : base( name, data )
+        public AetDatabaseNode( string name, AetDatabase data ) : base( name, data )
         {
         }
 
-        public SpriteDatabaseNode( string name, Func<Stream> streamGetter ) : base( name, streamGetter )
+        public AetDatabaseNode( string name, Func<Stream> streamGetter ) : base( name, streamGetter )
         {
         }
     }
 
-    public class SpriteSetInfoNode : Node<SpriteSetInfo>
+    public class AetSetInfoNode : Node<AetSetInfo>
     {
         public override NodeFlags Flags => NodeFlags.Add | NodeFlags.Rename;
 
@@ -60,26 +60,33 @@ namespace MikuMikuModel.Nodes.Databases
             set => SetProperty( value );
         }
 
+        [Category( "General" )]
+        [DisplayName( "Sprite set id" )]
+        public uint SpriteSetId
+        {
+            get => GetProperty<uint>();
+            set => SetProperty( value );
+        }
+
         protected override void Initialize()
         {
         }
 
         protected override void PopulateCore()
         {
-            Nodes.Add( new ListNode<SpriteInfo>( "Sprites", Data.Sprites, x => x.Name ) );
-            Nodes.Add( new ListNode<SpriteTextureInfo>( "Textures", Data.Textures, x => x.Name ) );
+            Nodes.Add( new ListNode<AetInfo>( "Aet scenes", Data.Aets, x => x.Name ) );
         }
 
         protected override void SynchronizeCore()
         {
         }
 
-        public SpriteSetInfoNode( string name, SpriteSetInfo data ) : base( name, data )
+        public AetSetInfoNode( string name, AetSetInfo data ) : base( name, data )
         {
         }
     }
 
-    public class SpriteInfoNode : Node<SpriteInfo>
+    public class AetInfoNode : Node<AetInfo>
     {
         public override NodeFlags Flags => NodeFlags.Rename;
 
@@ -110,43 +117,7 @@ namespace MikuMikuModel.Nodes.Databases
         {
         }
 
-        public SpriteInfoNode( string name, SpriteInfo data ) : base( name, data )
-        {
-        }
-    }
-    
-    public class SpriteTextureInfoNode : Node<SpriteTextureInfo>
-    {
-        public override NodeFlags Flags => NodeFlags.Rename;
-
-        [Category( "General" )]
-        [TypeConverter( typeof( IdTypeConverter ) )]
-        public uint Id
-        {
-            get => GetProperty<uint>();
-            set => SetProperty( value );
-        }
-
-        [Category( "General" )]
-        public ushort Index
-        {
-            get => GetProperty<ushort>();
-            set => SetProperty( value );
-        }
-
-        protected override void Initialize()
-        {
-        }
-
-        protected override void PopulateCore()
-        {
-        }
-
-        protected override void SynchronizeCore()
-        {
-        }
-
-        public SpriteTextureInfoNode( string name, SpriteTextureInfo data ) : base( name, data )
+        public AetInfoNode( string name, AetInfo data ) : base( name, data )
         {
         }
     }

@@ -129,11 +129,28 @@ namespace MikuMikuModel.Nodes.Sprites
                 {
                     var spriteSetInfo = spriteDatabaseNode.Data.SpriteSets[ 0 ];
 
+                    string suffix = spriteSetInfo.Name.ToUpperInvariant() + "_";
+                    string suffixTex = suffix.Replace( "SPR_", "SPRTEX_" );
+
                     foreach ( var spriteInfo in spriteSetInfo.Sprites )
-                        Data.Sprites[ spriteInfo.Index ].Name = spriteInfo.Name;
+                    {
+                        string name = spriteInfo.Name;
+
+                        if ( name.StartsWith( suffix, StringComparison.OrdinalIgnoreCase ) )
+                            name = name.Substring( suffix.Length );
+
+                        Data.Sprites[ spriteInfo.Index ].Name = name;
+                    }
 
                     foreach ( var textureInfo in spriteSetInfo.Textures )
-                        Data.TextureSet.Textures[ textureInfo.Index ].Name = textureInfo.Name;
+                    {
+                        string name = textureInfo.Name;
+
+                        if ( name.StartsWith( suffixTex, StringComparison.OrdinalIgnoreCase ) )
+                            name = name.Substring( suffixTex.Length );
+                            
+                        Data.TextureSet.Textures[ textureInfo.Index ].Name = name;
+                    }
                 }
             }
 

@@ -20,6 +20,7 @@ namespace MikuMikuLibrary.IO.Common
         private Stack<long> mOffsets;
         private Stack<long> mBaseOffsets;
         private List<ScheduledWrite> mScheduledWrites;
+        private List<DelayedWrite> mDelayedWrites;
         private Stack<StringTable> mStringTables;
         private List<long> mOffsetPositions;
 
@@ -57,7 +58,14 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
+        public long Offset
+        {
+            get => Position - BaseOffset;
+            set => Position = BaseOffset + value;
+        }
+
         public Encoding Encoding => mEncoding;
+
         public void Seek( long offset, SeekOrigin origin ) => 
             BaseStream.Seek( offset, origin );
 
@@ -477,6 +485,49 @@ namespace MikuMikuLibrary.IO.Common
             }
         }
 
+        public void DelayWrite( int byteSize, Action action )
+        {
+            long position = Position;
+            WriteNulls( byteSize );
+
+            mDelayedWrites.Add( new DelayedWrite { Position = position, Action = action } );
+        }
+
+        public void DelayWriteOffset( Func<long> offsetGetter )
+        {
+            int byteSize = AddressSpace.GetByteSize();
+
+            if ( AddressSpace == AddressSpace.Int64 )
+                Align( byteSize );
+
+            mOffsetPositions.Add( Position );
+
+            DelayWrite( byteSize, () => { WriteOffset( offsetGetter() ); } );
+        }
+
+        public void DelayWriteOffsetIf( bool condition, Func<long> offsetGetter )
+        {
+            if ( condition )
+                DelayWriteOffset( offsetGetter );
+            else
+                WriteOffset( 0 );
+        }
+
+        public void PerformDelayedWrites()
+        {
+            long current = Position;
+
+            foreach ( var delayedWrite in mDelayedWrites )
+            {
+                SeekBegin( delayedWrite.Position );
+                delayedWrite.Action();
+            }
+
+            SeekBegin( current );
+
+            mDelayedWrites.Clear();
+        }
+
         public void Write( sbyte[] values )
         {
             for ( int i = 0; i < values.Length; i++ )
@@ -848,6 +899,7 @@ namespace MikuMikuLibrary.IO.Common
             if ( disposing )
             {
                 PerformScheduledWrites();
+                PerformDelayedWrites();
                 PopStringTablesReversed();
             }
 
@@ -862,6 +914,7 @@ namespace MikuMikuLibrary.IO.Common
             mOffsets = new Stack<long>();
             mBaseOffsets = new Stack<long>();
             mScheduledWrites = new List<ScheduledWrite>();
+            mDelayedWrites = new List<DelayedWrite>();
             mStringTables = new Stack<StringTable>();
             mOffsetPositions = new List<long>();
         }
@@ -924,6 +977,12 @@ namespace MikuMikuLibrary.IO.Common
 
             public StringTable() => 
                 Strings = new Dictionary<string, List<long>>();
+        }
+
+        private class DelayedWrite
+        {
+            public long Position;
+            public Action Action;
         }
     }
 

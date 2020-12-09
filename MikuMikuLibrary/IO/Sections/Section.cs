@@ -54,6 +54,8 @@ namespace MikuMikuLibrary.IO.Sections
 
         public BinaryFormat Format => AddressSpace.GetCorrespondingModernFormat();
 
+        public virtual Encoding Encoding => Encoding.UTF8;
+
         public EndianBinaryReader Reader { get; private set; }
 
         public EndianBinaryWriter Writer { get; private set; }
@@ -167,7 +169,7 @@ namespace MikuMikuLibrary.IO.Sections
                 throw new InvalidOperationException( "Section has already been read before" );
 
             BaseStream = source;
-            Reader = new EndianBinaryReader( BaseStream, Encoding.UTF8, Endianness.Little, true );
+            Reader = new EndianBinaryReader( BaseStream, Encoding, Endianness.Little, true );
 
             if ( skipSignature )
             {
@@ -239,8 +241,8 @@ namespace MikuMikuLibrary.IO.Sections
             const int headerSize = 8 * sizeof( uint );
 
             Writer = IsEnrsWorthWriting()
-                ? new EnrsBinaryWriter( BaseStream, Encoding.UTF8, Endianness.Little, true, headerOffset + headerSize )
-                : new EndianBinaryWriter( BaseStream, Encoding.UTF8, Endianness.Little, true );
+                ? new EnrsBinaryWriter( BaseStream, Encoding, Endianness.Little, true, headerOffset + headerSize )
+                : new EndianBinaryWriter( BaseStream, Encoding, Endianness.Little, true );
 
             Writer.WriteNulls( headerSize );
 
@@ -256,6 +258,7 @@ namespace MikuMikuLibrary.IO.Sections
                         Write( mData, Writer );
                     }
                     Writer.PerformScheduledWrites();
+                    Writer.PerformDelayedWrites();
                     Writer.PopStringTablesReversed();
                 }
                 Writer.Endianness = Endianness.Little;

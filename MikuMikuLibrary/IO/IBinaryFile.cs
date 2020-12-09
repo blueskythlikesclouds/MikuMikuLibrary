@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 
@@ -10,6 +11,7 @@ namespace MikuMikuLibrary.IO
         BinaryFileFlags Flags { get; }
         BinaryFormat Format { get; set; }
         Endianness Endianness { get; set; }
+        Encoding Encoding { get; }
 
         void Read( EndianBinaryReader reader, ISection section = null );
         void Write( EndianBinaryWriter writer, ISection section = null );

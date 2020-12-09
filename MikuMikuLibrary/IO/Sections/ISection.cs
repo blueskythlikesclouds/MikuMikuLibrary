@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.IO.Sections
@@ -18,6 +19,7 @@ namespace MikuMikuLibrary.IO.Sections
         Endianness Endianness { get; set; }
         SectionFlags Flags { get; }
         BinaryFormat Format { get; }
+        Encoding Encoding { get; }
         SectionMode Mode { get; }
         SectionInfo SectionInfo { get; }
         IEnumerable<ISection> Sections { get; }

@@ -16,6 +16,7 @@ namespace MikuMikuLibrary.IO
         public abstract BinaryFileFlags Flags { get; }
         public virtual BinaryFormat Format { get; set; }
         public virtual Endianness Endianness { get; set; }
+        public virtual Encoding Encoding => Encoding.UTF8;
 
         public void Load( Stream source, bool leaveOpen = false )
         {
@@ -101,7 +102,7 @@ namespace MikuMikuLibrary.IO
 
             void ReadClassic()
             {
-                using ( var reader = new EndianBinaryReader( source, Encoding.UTF8, Endianness, true ) )
+                using ( var reader = new EndianBinaryReader( source, Encoding, Endianness, true ) )
                 {
                     reader.PushBaseOffset();
                     {
@@ -163,7 +164,7 @@ namespace MikuMikuLibrary.IO
 
             void WriteClassic()
             {
-                using ( var writer = new EndianBinaryWriter( destination, Encoding.UTF8, Endianness, true ) )
+                using ( var writer = new EndianBinaryWriter( destination, Encoding, Endianness, true ) )
                 {
                     writer.PushBaseOffset();
                     {
