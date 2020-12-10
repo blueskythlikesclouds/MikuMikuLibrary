@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarcPack", "CliTools\FarcPa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MikuMikuLibrary.Native", "MikuMikuLibrary.Native\MikuMikuLibrary.Native.vcxproj", "{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikuMikuLibrary.Rendering", "MikuMikuLibrary.Rendering\MikuMikuLibrary.Rendering.csproj", "{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.Debug|Any CPU.Build.0 = Debug|x64
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.Release|Any CPU.ActiveCfg = Release|x64
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.Release|Any CPU.Build.0 = Release|x64
+		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

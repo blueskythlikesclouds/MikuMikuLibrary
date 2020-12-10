@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MikuMikuLibrary.Rendering</RootNamespace>
+    <AssemblyName>MikuMikuLibrary.Rendering</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OpenTK, Version=3.2.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.2\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Buffers\ArrayBuffer.cs" />
+    <Compile Include="Cameras\Camera.cs" />
+    <Compile Include="Cameras\Frustum.cs" />
+    <Compile Include="Cameras\PerspectiveFreeCamera.cs" />
+    <Compile Include="Cameras\ShadowMapCamera.cs" />
+    <Compile Include="Extensions\MMLEx.cs" />
+    <Compile Include="Extensions\NumericsEx.cs" />
+    <Compile Include="Arrays\ElementArray.cs" />
+    <Compile Include="Passes\SSSPass.cs" />
+    <Compile Include="RenderCommand.cs" />
+    <Compile Include="Renderer.cs" />
+    <Compile Include="Cameras\PerspectiveOrbitCamera.cs" />
+    <Compile Include="Materials\Material.cs" />
+    <Compile Include="Primitives\Quad.cs" />
+    <Compile Include="Buffers\UniformBuffer.cs" />
+    <Compile Include="Buffers\VertexBuffer.cs" />
+    <Compile Include="Arrays\VertexArray.cs" />
+    <Compile Include="Passes\BackgroundPass.cs" />
+    <Compile Include="Passes\EndPass.cs" />
+    <Compile Include="Passes\GridPass.cs" />
+    <Compile Include="Passes\Pass.cs" />
+    <Compile Include="Passes\ScenePass.cs" />
+    <Compile Include="Passes\ShadowMapPass.cs" />
+    <Compile Include="Passes\ToneMapPass.cs" />
+    <Compile Include="Sampler.cs" />
+    <Compile Include="IBLs\IBL.cs" />
+    <Compile Include="IBLs\LightMap.cs" />
+    <Compile Include="Scenes\Node.cs" />
+    <Compile Include="Scenes\Objects\MeshNode.cs" />
+    <Compile Include="Scenes\Objects\ObjectNode.cs" />
+    <Compile Include="Scenes\Objects\ObjectSetNode.cs" />
+    <Compile Include="Scenes\Objects\SubMeshNode.cs" />
+    <Compile Include="Scenes\Scene.cs" />
+    <Compile Include="Effect.cs" />
+    <Compile Include="TextureDictionary.cs" />
+    <Compile Include="Scheduler.cs" />
+    <Compile Include="Shaders\Shader.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shaders\ShaderLibrary.cs" />
+    <Compile Include="State.cs" />
+    <Compile Include="Textures\Framebuffer.cs" />
+    <Compile Include="Textures\Texture.cs" />
+    <Compile Include="Uniforms.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MikuMikuLibrary\MikuMikuLibrary.csproj">
+      <Project>{9c7171ca-7379-458f-a9ca-293bbf2c74dc}</Project>
+      <Name>MikuMikuLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
+    <None Include="Resources\Shaders\Filter\SSS\SSSFilterGauss2D.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\SSS\SSSFilterGauss2D.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\SSS\SSSFilterMin.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\SSS\SSSFilterMin.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ToneMapDefinitions.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\ArbCommon.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneCommon.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneAttributes.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\Material\SKIN.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\Material\ITEM.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\Material\CLOTH.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\Material\CHARA.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\Material\HAIR.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneDefinitions.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\CopyTexture.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\CopyColor.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\CopyTexture.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\CopyColor.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\ESM\EsmGauss.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Filter\ESM\EsmGauss.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ReduceTex\ReduceTexComposite.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ReduceTex\ReduceTexComposite.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ToneMap.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Exposure\ExposureAverage.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ToneMap.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Exposure\ExposureMeasure.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Exposure\ExposureAverage.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Exposure\ExposureMinify.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Exposure\ExposureMeasure.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Gauss\GaussCone.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Exposure\ExposureMinify.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Gauss\GaussUsual.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Gauss\GaussCone.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ReduceTex\ReduceTex.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ReduceTex\ReduceTexExtract.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\Gauss\GaussUsual.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ReduceTex\ReduceTexExtract.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\PostProcess\ReduceTex\ReduceTex.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneGrid.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneGrid.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneSSS.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneSSS.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneShadowMap.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\SceneShadowMap.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\Scene.frag.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Shaders\Scene\Scene.vert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

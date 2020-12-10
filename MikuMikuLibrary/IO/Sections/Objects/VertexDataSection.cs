@@ -20,6 +20,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
             {
                 mMeshes.Add( mesh );
                 mCurrentOffset += mesh.Positions.Length * stride;
+                mCurrentOffset = AlignmentHelper.Align( mCurrentOffset, 4 );
             }
 
             return current;

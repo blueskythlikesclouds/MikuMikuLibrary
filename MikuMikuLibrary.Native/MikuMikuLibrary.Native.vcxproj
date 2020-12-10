@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LightMapImporterCore.h" />
     <ClInclude Include="NativeContext.h" />
     <ClInclude Include="FbxExporterCore.h" />
     <ClInclude Include="Pch.h" />
@@ -31,6 +32,7 @@
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Dependencies\meshoptimizer\stripifier.cpp" />
+    <ClCompile Include="LightMapImporterCore.cpp" />
     <ClCompile Include="NativeContext.cpp" />
     <ClCompile Include="FbxExporterCore.cpp" />
     <ClCompile Include="Pch.cpp">

@@ -84,7 +84,6 @@ namespace MikuMikuLibrary.Materials
         public static readonly IReadOnlyList<string> ShaderNames = new[]
         {
             "BLINN",
-            "CHARA",
             "CLOTH",
             "EYEBALL",
             "FLOOR",
@@ -95,7 +94,8 @@ namespace MikuMikuLibrary.Materials
             "SKY",
             "STAGE",
             "TIGHTS",
-            "WATER01"
+            "WATER01",
+            "CHARA" // Not actually in the game.
         };
 
         public MaterialFlags Flags { get; set; }

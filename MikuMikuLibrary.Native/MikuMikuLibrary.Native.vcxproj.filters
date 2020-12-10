@@ -16,6 +16,9 @@
       <Filter>Textures\Processing</Filter>
     </ClInclude>
     <ClInclude Include="NativeContext.h" />
+    <ClInclude Include="LightMapImporterCore.h">
+      <Filter>IBLs\Processing</Filter>
+    </ClInclude>
     <ClInclude Include="StripifierCore.h">
       <Filter>Objects</Filter>
     </ClInclude>
@@ -37,6 +40,9 @@
     <ClCompile Include="NativeContext.cpp" />
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Properties</Filter>
+    </ClCompile>
+    <ClCompile Include="LightMapImporterCore.cpp">
+      <Filter>IBLs\Processing</Filter>
     </ClCompile>
     <ClCompile Include="Dependencies\meshoptimizer\stripifier.cpp">
       <Filter>Dependencies\meshoptimizer</Filter>
@@ -63,6 +69,12 @@
     </Filter>
     <Filter Include="Properties">
       <UniqueIdentifier>{b7562b38-9400-413c-b5d8-0b477b9986b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IBLs">
+      <UniqueIdentifier>{10ceb2a0-c4a3-4e72-8edf-ebdac5b62895}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IBLs\Processing">
+      <UniqueIdentifier>{65c4ad29-5ec0-4cc4-b52f-62241c54a8be}</UniqueIdentifier>
     </Filter>
     <Filter Include="Dependencies">
       <UniqueIdentifier>{f1cc9f53-b35b-4d3e-9011-900b87f51701}</UniqueIdentifier>
