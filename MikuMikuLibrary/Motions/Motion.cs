@@ -31,10 +31,7 @@ namespace MikuMikuLibrary.Motions
         {
             if ( section != null )
             {
-                if ( section.Format == BinaryFormat.F2nd )
-                    reader.SeekCurrent( 4 );
-
-                Id = reader.ReadUInt32();
+                Id = ( uint ) reader.ReadUInt64();
                 Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             }
 
@@ -107,10 +104,7 @@ namespace MikuMikuLibrary.Motions
         {
             if ( section != null )
             {
-                if ( section.Format == BinaryFormat.F2nd )
-                    writer.Write( 0 );
-
-                writer.Write( Id );
+                writer.Write( ( ulong ) Id );
                 writer.AddStringToStringTable( Name );
             }
 
