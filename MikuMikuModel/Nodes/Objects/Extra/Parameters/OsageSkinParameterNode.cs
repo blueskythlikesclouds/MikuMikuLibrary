@@ -123,6 +123,14 @@ namespace MikuMikuModel.Nodes.Objects.Extra.Parameters
         {
             get => GetProperty<float>();
             set => SetProperty( value );
+        }       
+        
+        [Category( "General" )]
+        [DisplayName( "Collision target osage" )]
+        public string CollisionTargetOsage
+        {
+            get => GetProperty<string>();
+            set => SetProperty( value );
         }
 
         protected override void Initialize()

@@ -26,6 +26,7 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
         public float CollisionRadius { get; set; }
         public float Stiffness { get; set; }
         public float MoveCancel { get; set; }
+        public string CollisionTargetOsage { get; set; }
         public List<OsageCollisionParameter> Collisions { get; }
         public List<OsageBocParameter> Bocs { get; }
         public List<OsageNodeParameter> Nodes { get; }
@@ -202,6 +203,7 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
                 RotationZ = tree.Get<float>( "rot_z" );
                 Friction = tree.Get<float>( "friction" );
                 WindAffection = tree.Get<float>( "wind_afc" );
+                CollisionType = tree.Get<uint>( "coli_type" );
                 InitRotationY = tree.Get<float>( "init_rot_y" );
                 InitRotationZ = tree.Get<float>( "init_rot_z" );             
                 HingeY = tree.Get<float>( "hinge_y", 90 );
@@ -209,6 +211,7 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
                 CollisionRadius = tree.Get<float>( "coli_r" );
                 Stiffness = tree.Get<float>( "stiffness" );
                 MoveCancel = tree.Get<float>( "move_cancel" );
+                CollisionTargetOsage = tree.Get<string>( "colli_tgt_osg" );
 
                 tree.Enumerate( "coli", i =>
                 {
@@ -256,6 +259,9 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
                     writer.Write( "coli_r", CollisionRadius );
                     writer.Write( "stiffness", Stiffness );
                     writer.Write( "move_cancel", MoveCancel );
+
+                    if ( !string.IsNullOrEmpty( CollisionTargetOsage ) )
+                        writer.Write( "colli_tgt_osg", CollisionTargetOsage );
 
                     writer.Write( "coli", Collisions, x => x.Write( writer ) );
                     writer.Write( "boc", Bocs, x => x.Write( writer ) );
