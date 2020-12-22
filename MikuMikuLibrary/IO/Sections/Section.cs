@@ -220,7 +220,7 @@ namespace MikuMikuLibrary.IO.Sections
                 Reader.SeekBegin( DataOffset + SectionSize );
             }
 
-            if ( AddressSpace == AddressSpace.Int64 )
+            if ( AddressSpace == AddressSpace.Int64 || !mSections.Any( x => x is RelocationTableSectionInt32 ) )
                 Reader.BaseOffset = DataOffset;
 
             Reader.Endianness = Endianness;

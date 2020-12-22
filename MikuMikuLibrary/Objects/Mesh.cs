@@ -5,6 +5,7 @@ using Assimp.Configs;
 using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.IO.Sections;
 using MikuMikuLibrary.IO.Sections.Objects;
 using MikuMikuLibrary.Misc;
 
@@ -224,20 +225,20 @@ namespace MikuMikuLibrary.Objects
 
             Name = reader.ReadString( StringBinaryFormat.FixedLength, 64 );
 
-            SubMeshes.Capacity = subMeshCount;
-
-            for ( int i = 0; i < subMeshCount; i++ )
+            reader.ReadAtOffset( subMeshesOffset, () =>
             {
-                reader.ReadAtOffset( subMeshesOffset + i * SubMesh.GetByteSize( section?.Format ?? BinaryFormat.DT ), () =>
+                SubMeshes.Capacity = subMeshCount;
+
+                for ( int i = 0; i < subMeshCount; i++ )
                 {
                     var subMesh = new SubMesh();
                     subMesh.Read( reader, section );
                     SubMeshes.Add( subMesh );
-                } );
-            }
+                }
+            } );
 
             // Modern Format
-            if ( section != null )
+            if ( ( vertexFormat & VertexFormatAttributes.UsesModernStorage ) != 0 )
                 ReadVertexAttributesModern();
 
             else
@@ -353,11 +354,23 @@ namespace MikuMikuLibrary.Objects
                     bool hasTexCoord1 = false;
                     bool hasColors = false;
 
-                    var vertexReader = section.VertexData.Reader;
+                    EndianBinaryReader vertexReader;
+                    long baseOffset;
+
+                    if ( section != null )
+                    {
+                        vertexReader = section.VertexData.Reader;
+                        baseOffset = section.VertexData.DataOffset;
+                    }
+                    else
+                    {
+                        vertexReader = reader;
+                        baseOffset = reader.BaseOffset;
+                    }
 
                     for ( int i = 0; i < vertexCount; i++ )
                     {
-                        vertexReader.SeekBegin( section.VertexData.DataOffset + attributeOffsets[ 13 ] + vertexSize * i );
+                        vertexReader.SeekBegin( baseOffset + attributeOffsets[ 13 ] + vertexSize * i );
 
                         Positions[ i ] = vertexReader.ReadVector3();
                         Normals[ i ] = vertexReader.ReadVector3( VectorBinaryFormat.Int16 );

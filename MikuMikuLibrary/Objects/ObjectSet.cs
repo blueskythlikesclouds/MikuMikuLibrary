@@ -41,7 +41,7 @@ namespace MikuMikuLibrary.Objects
             long textureIdsOffset = reader.ReadOffset();
             int textureIdCount = reader.ReadInt32();
 
-            reader.ReadAtOffsetIf( section == null, objectsOffset, () =>
+            reader.ReadAtOffset( objectsOffset, () =>
             {
                 Objects.Capacity = objectCount;
 
@@ -60,7 +60,7 @@ namespace MikuMikuLibrary.Objects
                 }
             } );
 
-            reader.ReadAtOffsetIf( section == null, objectSkinsOffset, () =>
+            reader.ReadAtOffset( objectSkinsOffset, () =>
             {
                 foreach ( var obj in Objects )
                 {
