@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
@@ -93,13 +94,17 @@ namespace MikuMikuLibrary.Databases
 
                 foreach ( var stringEntry in Strings.OrderBy( x => x.Id ) )
                 {
-                    for ( int i = 0; i < stringEntry.Id - previousId - 1; i++ )
+                    uint count = ( uint ) Math.Max( 0, ( long ) stringEntry.Id - previousId - 1 );
+
+                    for ( int i = 0; i < count; i++ )
                         writer.AddStringToStringTable( string.Empty );
 
                     previousId = stringEntry.Id;
 
                     writer.AddStringToStringTable( stringEntry.Value );
                 }
+
+                writer.WriteOffset( 0 );
             }
 
             void WriteModern()
