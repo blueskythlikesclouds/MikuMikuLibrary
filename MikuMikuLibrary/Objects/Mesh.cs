@@ -368,6 +368,8 @@ namespace MikuMikuLibrary.Objects
                         baseOffset = reader.BaseOffset;
                     }
 
+                    long current = reader.Position;
+
                     for ( int i = 0; i < vertexCount; i++ )
                     {
                         vertexReader.SeekBegin( baseOffset + attributeOffsets[ 13 ] + vertexSize * i );
@@ -411,6 +413,8 @@ namespace MikuMikuLibrary.Objects
                     if ( !hasTangents ) Tangents = null;
                     if ( !hasTexCoord1 ) TexCoords1 = null;
                     if ( !hasColors ) Colors0 = null;
+
+                    reader.SeekBegin( current );
                 }
 
                 if ( Tangents == null ) 

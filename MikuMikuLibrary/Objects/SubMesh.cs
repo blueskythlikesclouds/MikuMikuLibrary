@@ -116,6 +116,9 @@ namespace MikuMikuLibrary.Objects
 
             IndexOffset = reader.ReadUInt32();
 
+            if ( section?.Format == BinaryFormat.X )
+                reader.SeekCurrent( 4 );
+
             reader.ReadAtOffsetIf( BonesPerVertex == 4, boneIndicesOffset, 
                 () => { BoneIndices = reader.ReadUInt16s( boneIndexCount ); } );
 
@@ -126,10 +129,15 @@ namespace MikuMikuLibrary.Objects
 
             else
             {
-                var indexReader = section.IndexData.Reader;
+                long current = reader.Position;
+                {
+                    var indexReader = section.IndexData.Reader;
 
-                indexReader.SeekBegin( section.IndexData.DataOffset + indicesOffset );
-                ReadIndices( indexReader );
+                    indexReader.SeekBegin( section.IndexData.DataOffset + indicesOffset );
+                    ReadIndices( indexReader );
+                }
+
+                reader.SeekBegin( current );
             }
 
             void ReadIndices( EndianBinaryReader r )
