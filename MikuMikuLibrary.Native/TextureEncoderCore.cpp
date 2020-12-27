@@ -253,7 +253,7 @@ namespace MikuMikuLibrary::Textures::Processing
 
         Texture^ texture;
 
-        if ( generateMipMaps )
+        if ( generateMipMaps && (bitmap->Width & (bitmap->Width - 1)) == 0 && (bitmap->Height & (bitmap->Height - 1)) == 0)
         {
             DirectX::ScratchImage mipChain;
 
@@ -313,7 +313,8 @@ namespace MikuMikuLibrary::Textures::Processing
             generateMipMaps = false;
         }
 
-        if ( !DirectX::IsCompressed( metadata.format ) && generateMipMaps && metadata.mipLevels == 1 )
+        if ( !DirectX::IsCompressed( metadata.format ) && generateMipMaps && metadata.mipLevels == 1 &&
+            (metadata.width & (metadata.width - 1)) == 0 && (metadata.height & (metadata.height - 1)) == 0)
         {
             DirectX::ScratchImage mipChain;
 
