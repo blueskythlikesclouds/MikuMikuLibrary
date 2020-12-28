@@ -194,6 +194,8 @@
             // 
             this.mCloseToolStripMenuItem.Enabled = false;
             this.mCloseToolStripMenuItem.Name = "mCloseToolStripMenuItem";
+            this.mCloseToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.C)));
             this.mCloseToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
             this.mCloseToolStripMenuItem.Text = "Close";
             this.mCloseToolStripMenuItem.Click += new System.EventHandler(this.OnNodeClose);
