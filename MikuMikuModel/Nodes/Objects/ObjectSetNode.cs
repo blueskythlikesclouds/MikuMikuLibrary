@@ -474,6 +474,30 @@ namespace MikuMikuModel.Nodes.Objects
                 }
 
                 return true;
+            } );           
+            
+            AddDirtyCustomHandler( "Convert triangle strips to triangles", () =>
+            {
+                foreach ( var subMesh in Data.Objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
+                {
+                    if ( subMesh.PrimitiveType != PrimitiveType.TriangleStrip )
+                        continue;
+
+                    var triangles = subMesh.GetTriangles();
+                    var indices = new uint[ triangles.Count * 3 ];
+
+                    for ( int i = 0; i < triangles.Count; i++ )
+                    {
+                        indices[ i * 3 + 0 ] = triangles[ i ].A;
+                        indices[ i * 3 + 1 ] = triangles[ i ].B;
+                        indices[ i * 3 + 2 ] = triangles[ i ].C;
+                    }
+
+                    subMesh.PrimitiveType = PrimitiveType.Triangles;
+                    subMesh.Indices = indices;
+                }
+
+                return true;
             } );
 
             AddCustomHandlerSeparator();
