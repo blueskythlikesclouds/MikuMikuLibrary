@@ -69,8 +69,11 @@ namespace MikuMikuLibrary.Databases
                 {
                     uint id = reader.ReadUInt32();
                     string name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-
                     int info = reader.ReadInt32();
+
+                    if ( section?.Format == BinaryFormat.X )
+                        reader.SkipNulls( sizeof( uint ) );
+
                     ushort index = ( ushort ) ( info & 0xFFFF );
                     ushort setIndex = ( ushort ) ( ( info >> 16 ) & 0xFFFF );
 
@@ -113,6 +116,9 @@ namespace MikuMikuLibrary.Databases
                         writer.Write( aetInfo.Id );
                         writer.AddStringToStringTable( aetInfo.Name );
                         writer.Write( ( i << 16 ) | aetInfo.Index );
+
+                        if ( section?.Format == BinaryFormat.X )
+                            writer.WriteNulls( sizeof( uint ) );
                     }
                 }
             } );
