@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Style>
+  <Name>Pink</Name>
+  <Text R="0" G="0" B="0" A="255" />
+  <SelectedText R="255" G="255" B="255" A="255" />
+  <Foreground R="0" G="0" B="0" A="255" />
+  <Background R="255" G="209" B="220" A="255" />
+  <Border R="248" G="179" B="198" A="255" />
+  <ToolStripDropDownBackground R="248" G="179" B="198" A="255" />
+  <MenuItemSelected R="81" G="119" B="178" A="255" />
+  <MenuBorder R="0" G="0" B="0" A="0" />
+  <MenuItemBorder R="0" G="0" B="0" A="0" />
+  <MenuStripGradientBegin R="248" G="179" B="198" A="255" />
+  <MenuStripGradientEnd R="248" G="179" B="198" A="255" />
+  <MenuItemSelectedGradientBegin R="81" G="119" B="178" A="255" />
+  <MenuItemSelectedGradientEnd R="81" G="119" B="178" A="255" />
+  <MenuItemPressedGradientBegin R="81" G="119" B="178" A="255" />
+  <MenuItemPressedGradientEnd R="81" G="119" B="178" A="255" />
+  <ImageMarginGradientBegin R="248" G="179" B="198" A="255" />
+  <ImageMarginGradientMiddle R="248" G="179" B="198" A="255" />
+  <ImageMarginGradientEnd R="248" G="179" B="198" A="255" />
+  <SeparatorDark R="255" G="209" B="220" A="255" />
+  <SeparatorLight R="214" G="241" B="241" A="255" />
+  <ButtonColor R="49" G="49" B="49" A="255" />
+  <ButtonMouseOverColor R="81" G="119" B="178" A="255" />
+  <ButtonMouseDownColor R="81" G="119" B="178" A="255" />
+  <ButtonBorderColor R="51" G="51" B="55" A="255" />
+  <ViewportBackground R="248" G="179" B="198" A="255" />
+  <GridInnerColor R="255" G="209" B="220" A="255" />
+  <GridOuterColor R="255" G="209" B="220" A="255" />
+  <GridXColor R="142" G="66" B="76" A="255" />
+  <GridZColor R="97" G="129" B="51" A="255" />
+  <MenuStripForeground R="0" G="0" B="0" A="255" />
+  <MenuStripBackground R="248" G="179" B="198" A="255" />
+</Style>
