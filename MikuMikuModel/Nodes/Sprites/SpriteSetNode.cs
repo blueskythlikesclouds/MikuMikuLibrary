@@ -139,7 +139,8 @@ namespace MikuMikuModel.Nodes.Sprites
                         if ( name.StartsWith( suffix, StringComparison.OrdinalIgnoreCase ) )
                             name = name.Substring( suffix.Length );
 
-                        Data.Sprites[ spriteInfo.Index ].Name = name;
+                        if ( spriteInfo.Index < Data.Sprites.Count )
+                            Data.Sprites[ spriteInfo.Index ].Name = name;
                     }
 
                     foreach ( var textureInfo in spriteSetInfo.Textures )
@@ -148,8 +149,9 @@ namespace MikuMikuModel.Nodes.Sprites
 
                         if ( name.StartsWith( suffixTex, StringComparison.OrdinalIgnoreCase ) )
                             name = name.Substring( suffixTex.Length );
-                            
-                        Data.TextureSet.Textures[ textureInfo.Index ].Name = name;
+
+                        if ( textureInfo.Index < Data.TextureSet.Textures.Count )
+                            Data.TextureSet.Textures[ textureInfo.Index ].Name = name;
                     }
                 }
             }
@@ -160,7 +162,7 @@ namespace MikuMikuModel.Nodes.Sprites
 
         protected override void SynchronizeCore()
         {
-            if ( mTextureSetNode == null || Data.TextureSet == mTextureSetNode.Data )
+            if ( !IsPopulated || mTextureSetNode == null || Data.TextureSet == mTextureSetNode.Data )
                 return;
 
             Data.TextureSet.Textures.Clear();
