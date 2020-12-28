@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.IO.Sections
@@ -18,11 +19,9 @@ namespace MikuMikuLibrary.IO.Sections
         {
             var bytes = new List<byte>();
 
-            data.Sort();
-
             long currentOffset = 0;
 
-            foreach ( long offset in data )
+            foreach ( long offset in data.Distinct().OrderBy( x => x ) )
             {
                 long distance = ( offset - currentOffset ) >> 2;
 
@@ -38,7 +37,7 @@ namespace MikuMikuLibrary.IO.Sections
                     bytes.Add( ( byte ) ( 0x80 | ( distance >> 8 ) ) );
                     bytes.Add( ( byte ) distance );
                 }
-                else if ( distance > 0 )
+                else
                 {
                     bytes.Add( ( byte ) ( 0x40 | distance ) );
                 }
@@ -74,11 +73,9 @@ namespace MikuMikuLibrary.IO.Sections
         {
             var bytes = new List<byte>();
 
-            data.Sort();
-
             long currentOffset = 0;
 
-            foreach ( long offset in data )
+            foreach ( long offset in data.Distinct().OrderBy( x => x ) )
             {
                 long distance = ( offset - currentOffset ) >> 3;
 
@@ -94,7 +91,7 @@ namespace MikuMikuLibrary.IO.Sections
                     bytes.Add( ( byte ) ( 0x80 | ( distance >> 8 ) ) );
                     bytes.Add( ( byte ) distance );
                 }
-                else if ( distance > 0 )
+                else
                 {
                     bytes.Add( ( byte ) ( 0x40 | distance ) );
                 }
