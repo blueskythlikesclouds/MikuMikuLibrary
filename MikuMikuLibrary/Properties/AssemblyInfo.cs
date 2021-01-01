@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
 [assembly: AssemblyProduct( "Miku Miku Library" )]
-[assembly: AssemblyCopyright( "Copyright © 2020 Skyth (MIT License)" )]
+[assembly: AssemblyCopyright( "Copyright © 2021 Skyth (MIT License)" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 

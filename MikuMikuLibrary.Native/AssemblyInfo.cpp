@@ -9,7 +9,7 @@ using namespace Runtime::InteropServices;
 [assembly:AssemblyConfigurationAttribute( "" )];
 [assembly:AssemblyCompanyAttribute( "" )];
 [assembly:AssemblyProductAttribute( "Miku Miku Library (Native)" )];
-[assembly:AssemblyCopyrightAttribute( "Copyright © 2020 Skyth (MIT License)" )];
+[assembly:AssemblyCopyrightAttribute( "Copyright © 2021 Skyth (MIT License)" )];
 [assembly:AssemblyTrademarkAttribute( "" )];
 [assembly:AssemblyCultureAttribute( "" )];
 
