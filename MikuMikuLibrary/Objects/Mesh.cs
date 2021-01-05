@@ -338,95 +338,106 @@ namespace MikuMikuLibrary.Objects
 
             void ReadVertexAttributesModern()
             {
-                if ( attributeFlags == 2 || attributeFlags == 4 )
+                Positions = new Vector3[ vertexCount ];
+                Normals = new Vector3[ vertexCount ];
+                Tangents = new Vector4[ vertexCount ];
+                TexCoords0 = new Vector2[ vertexCount ];
+                TexCoords1 = new Vector2[ vertexCount ];
+
+                if ( attributeFlags == 10 )
                 {
-                    Positions = new Vector3[ vertexCount ];
-                    Normals = new Vector3[ vertexCount ];
-                    Tangents = new Vector4[ vertexCount ];
-                    TexCoords0 = new Vector2[ vertexCount ];
-                    TexCoords1 = new Vector2[ vertexCount ];
-                    Colors0 = new Color[ vertexCount ];
+                    TexCoords2 = new Vector2[ vertexCount ];
+                    TexCoords3 = new Vector2[ vertexCount ];
+                }
+
+                Colors0 = new Color[ vertexCount ];
+
+                if ( attributeFlags == 4 )
+                    BoneWeights = new BoneWeight[ vertexCount ];
+
+                bool hasTangents = false;
+                bool hasTexCoord1 = false;
+                bool hasColors = false;
+
+                EndianBinaryReader vertexReader;
+                long baseOffset;
+
+                if ( section != null )
+                {
+                    vertexReader = section.VertexData.Reader;
+                    baseOffset = section.VertexData.DataOffset;
+                }
+                else
+                {
+                    vertexReader = reader;
+                    baseOffset = reader.BaseOffset;
+                }
+
+                long current = reader.Position;
+
+                for ( int i = 0; i < vertexCount; i++ )
+                {
+                    vertexReader.SeekBegin( baseOffset + attributeOffsets[ 13 ] + vertexSize * i );
+
+                    Positions[ i ] = vertexReader.ReadVector3();
+                    Normals[ i ] = vertexReader.ReadVector3( VectorBinaryFormat.Int16 );
+                    vertexReader.SeekCurrent( 2 );
+                    Tangents[ i ] = vertexReader.ReadVector4( VectorBinaryFormat.Int16 );
+                    TexCoords0[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+                    TexCoords1[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+
+                    if ( attributeFlags == 10 )
+                    {
+                        TexCoords2[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+                        TexCoords3[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
+                    }
+
+                    Colors0[ i ] = vertexReader.ReadColor( VectorBinaryFormat.Half );
 
                     if ( attributeFlags == 4 )
-                        BoneWeights = new BoneWeight[ vertexCount ];
-
-                    bool hasTangents = false;
-                    bool hasTexCoord1 = false;
-                    bool hasColors = false;
-
-                    EndianBinaryReader vertexReader;
-                    long baseOffset;
-
-                    if ( section != null )
                     {
-                        vertexReader = section.VertexData.Reader;
-                        baseOffset = section.VertexData.DataOffset;
-                    }
-                    else
-                    {
-                        vertexReader = reader;
-                        baseOffset = reader.BaseOffset;
-                    }
-
-                    long current = reader.Position;
-
-                    for ( int i = 0; i < vertexCount; i++ )
-                    {
-                        vertexReader.SeekBegin( baseOffset + attributeOffsets[ 13 ] + vertexSize * i );
-
-                        Positions[ i ] = vertexReader.ReadVector3();
-                        Normals[ i ] = vertexReader.ReadVector3( VectorBinaryFormat.Int16 );
-                        vertexReader.SeekCurrent( 2 );
-                        Tangents[ i ] = vertexReader.ReadVector4( VectorBinaryFormat.Int16 );
-                        TexCoords0[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
-                        TexCoords1[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
-                        Colors0[ i ] = vertexReader.ReadColor( VectorBinaryFormat.Half );
-
-                        if ( attributeFlags == 4 )
+                        var boneWeight = new BoneWeight
                         {
-                            var boneWeight = new BoneWeight
-                            {
-                                Weight1 = vertexReader.ReadUInt16() / 32767f,
-                                Weight2 = vertexReader.ReadUInt16() / 32767f,
-                                Weight3 = vertexReader.ReadUInt16() / 32767f,
-                                Weight4 = vertexReader.ReadUInt16() / 32767f,
-                                Index1 = vertexReader.ReadByte() / 3,
-                                Index2 = vertexReader.ReadByte() / 3,
-                                Index3 = vertexReader.ReadByte() / 3,
-                                Index4 = vertexReader.ReadByte() / 3
-                            };
+                            Weight1 = vertexReader.ReadUInt16() / 32767f,
+                            Weight2 = vertexReader.ReadUInt16() / 32767f,
+                            Weight3 = vertexReader.ReadUInt16() / 32767f,
+                            Weight4 = vertexReader.ReadUInt16() / 32767f,
+                            Index1 = vertexReader.ReadByte() / 3,
+                            Index2 = vertexReader.ReadByte() / 3,
+                            Index3 = vertexReader.ReadByte() / 3,
+                            Index4 = vertexReader.ReadByte() / 3
+                        };
 
-                            boneWeight.Validate();
+                        boneWeight.Validate();
 
-                            BoneWeights[ i ] = boneWeight;
-                        }
-
-                        // Normalize normal because precision
-                        Normals[ i ] = Vector3.Normalize( Normals[ i ] );
-
-                        // Checks to get rid of useless data after reading
-                        if ( Tangents[ i ] != Vector4.Zero ) hasTangents = true;
-                        if ( TexCoords0[ i ] != TexCoords1[ i ] ) hasTexCoord1 = true;
-                        if ( !Colors0[ i ].Equals( Color.White ) ) hasColors = true;
+                        BoneWeights[ i ] = boneWeight;
                     }
 
-                    if ( !hasTangents ) Tangents = null;
-                    if ( !hasTexCoord1 ) TexCoords1 = null;
-                    if ( !hasColors ) Colors0 = null;
+                    // Normalize normal because precision
+                    Normals[ i ] = Vector3.Normalize( Normals[ i ] );
 
-                    reader.SeekBegin( current );
+                    // Checks to get rid of useless data after reading
+                    if ( Tangents[ i ] != Vector4.Zero ) hasTangents = true;
+                    if ( TexCoords0[ i ] != TexCoords1[ i ] ) hasTexCoord1 = true;
+                    if ( !Colors0[ i ].Equals( Color.White ) ) hasColors = true;
                 }
 
-                if ( Tangents == null ) 
-                    return;
+                if ( !hasTangents ) Tangents = null;
+                if ( !hasTexCoord1 ) TexCoords1 = null;
+                if ( !hasColors ) Colors0 = null;
 
-                for ( int i = 0; i < Tangents.Length; i++ )
-                {
-                    int direction = Math.Sign( Tangents[ i ].W );
-                    var tangent = Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
+                reader.SeekBegin( current );
+            }
 
-                    Tangents[ i ] = new Vector4( tangent, direction );
-                }
+            if ( Tangents == null )
+                return;
+
+            for ( int i = 0; i < Tangents.Length; i++ )
+            {
+                int direction = Math.Sign( Tangents[ i ].W );
+                var tangent = Vector3.Normalize( new Vector3( Tangents[ i ].X, Tangents[ i ].Y, Tangents[ i ].Z ) );
+
+                Tangents[ i ] = new Vector4( tangent, direction );
             }
         }
 
