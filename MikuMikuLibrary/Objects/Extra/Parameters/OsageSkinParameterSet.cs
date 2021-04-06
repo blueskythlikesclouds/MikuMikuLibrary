@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MikuMikuLibrary.Extensions;
+using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
@@ -119,7 +121,7 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
 
             void WriteParameters()
             {
-                foreach ( var parameter in Parameters )
+                foreach ( var parameter in Parameters.OrderBy( x => MurmurHash.Calculate( x.Name ) ) )
                     parameter.Write( writer );
             }
         }
