@@ -15,7 +15,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         internal int StartIndex { get; set; }
         internal int Count { get; set; }
 
-        public List<OsageBone> Bones { get; }
+        public List<OsageNode> Nodes { get; }
         public string ExternalName { get; set; }
 
         internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
@@ -25,10 +25,10 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             ExternalName = stringSet.ReadString( reader );
             Name = stringSet.ReadString( reader );
 
-            Bones.Capacity = Count;
+            Nodes.Capacity = Count;
 
             for ( int i = 0; i < Count; i++ )
-                Bones.Add( new OsageBone() );
+                Nodes.Add( new OsageNode() );
 
             // Either means rotation info on FT, or integrated SKP on old DT/AC
             reader.ReadOffset( () =>
@@ -41,7 +41,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
                 reader.SeekBegin( current );
 
-                foreach ( var bone in Bones )
+                foreach ( var bone in Nodes )
                     bone.ReadOsgBlockInfo( reader, stringSet );
             } );
 
@@ -54,18 +54,18 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
         {
             writer.Write( StartIndex );
-            writer.Write( Bones.Count );
+            writer.Write( Nodes.Count );
             stringSet.WriteString( writer, ExternalName );
             stringSet.WriteString( writer, Name );
 
-            bool hasAnyRotation = Bones.Any( x =>
+            bool hasAnyRotation = Nodes.Any( x =>
                 Math.Abs( x.Rotation.X ) > 0 ||
                 Math.Abs( x.Rotation.Y ) > 0 ||
                 Math.Abs( x.Rotation.Z ) > 0 );
 
             writer.ScheduleWriteOffsetIf( hasAnyRotation, 4, AlignmentMode.Left, () =>
             {
-                foreach ( var bone in Bones )
+                foreach ( var bone in Nodes )
                     bone.WriteOsgBlockInfo( writer, stringSet );
             } );
 
@@ -77,16 +77,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
         public OsageBlock()
         {
-            Bones = new List<OsageBone>();
-        }
-
-        // Obsolete properties
-        
-        [Obsolete( "This property has been renamed. Please use Name instead." ), Browsable( false )]
-        public string InternalName
-        {
-            get => Name;
-            set => Name = value;
+            Nodes = new List<OsageNode>();
         }
     }
 }

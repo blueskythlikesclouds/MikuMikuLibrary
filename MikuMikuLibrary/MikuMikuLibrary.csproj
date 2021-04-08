@@ -153,8 +153,8 @@
     <Compile Include="Objects\Extra\Blocks\MotionBlock.cs" />
     <Compile Include="Objects\Extra\Blocks\OsageBlock.cs" />
     <Compile Include="Objects\Extra\IBlock.cs" />
-    <Compile Include="Objects\Extra\MotionBone.cs" />
-    <Compile Include="Objects\Extra\OsageBone.cs" />
+    <Compile Include="Objects\Extra\MotionNode.cs" />
+    <Compile Include="Objects\Extra\OsageNode.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageSkinParameterSet.cs" />
     <Compile Include="Objects\Extra\StringSet.cs" />
     <Compile Include="Objects\Processing\Assimp\AssimpExtensions.cs" />

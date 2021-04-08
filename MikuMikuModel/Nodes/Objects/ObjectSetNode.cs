@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 using Assimp;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.Extensions;
+using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Materials;
@@ -288,9 +289,9 @@ namespace MikuMikuModel.Nodes.Objects
                             switch ( x )
                             {
                                 case OsageBlock osgBlock:
-                                    return osgBlock.Bones.Any( y => y.Name == bone.Name );
+                                    return osgBlock.Nodes.Any( y => y.Name == bone.Name );
                                 case ExpressionBlock expBlock:
-                                    return expBlock.BoneName == bone.Name;
+                                    return expBlock.Name == bone.Name;
                                 default:
                                     return false;
                             }
@@ -323,14 +324,14 @@ namespace MikuMikuModel.Nodes.Objects
                         var osageBlock = new OsageBlock
                         {
                             ExternalName = $"c_{baseName}_osg",
-                            InternalName = $"e_{baseName}",
+                            Name = $"e_{baseName}",
                             ParentName = bone.Parent.Name,
                             Position = translation,
                             Rotation = rotation.ToEulerAngles(),
                             Scale = scale
                         };
 
-                        osageBlock.Bones.Add( new OsageBone { Name = bone.Name, Stiffness = 0.08f } );
+                        osageBlock.Nodes.Add( new OsageNode { Name = bone.Name, Length = 0.08f } );
                         obj.Skin.Blocks.Add( osageBlock );
 
                         stringBuilder.AppendFormat(
@@ -394,57 +395,99 @@ namespace MikuMikuModel.Nodes.Objects
                         if ( !( block is MotionBlock motionBlock ) )
                             continue;
 
-                        foreach ( var motionBone in motionBlock.Bones )
-                        {
-                            var bone = obj.Skin.Bones.First( x => x.Name.Equals( motionBone.Name ) );
+                        var parentBoneInfo = obj.Skin.Bones.FirstOrDefault( x => x.Name == motionBlock.ParentName );
 
-                            if ( bone?.Parent == null )
+                        if ( parentBoneInfo == null )
+                            continue;
+
+                        foreach ( var motionBone in motionBlock.Nodes )
+                        {
+                            if ( !motionBone.Name.EndsWith( "_000_wj" ) ) 
                                 continue;
 
-                            var matrix = Matrix4x4.Multiply( motionBone.Transformation,
-                                bone.Parent.InverseBindPoseMatrix );
+                            string nameNoSuffix = motionBone.Name.Substring( 0, motionBone.Name.Length - 7 );
+                            string nameNoPrefix = nameNoSuffix.Substring( 2 );
+
+                            var matrix = motionBone.Transformation * parentBoneInfo.InverseBindPoseMatrix;
 
                             Matrix4x4.Decompose( matrix, out var scale, out var rotation, out var translation );
 
                             rotation = Quaternion.Normalize( rotation );
 
-                            string baseName = bone.Name;
+                            var osageBlock = new OsageBlock
+                            {
+                                ParentName = motionBlock.ParentName,
+                                ExternalName = "c_" + nameNoPrefix + "_osg",
+                                Name = "e_" + nameNoPrefix,
+                                Position = matrix.Translation,
+                                Rotation = rotation.ToEulerAngles(),
+                                Scale = scale
+                            };
 
-                            if ( baseName.StartsWith( "j_", StringComparison.OrdinalIgnoreCase ) )
-                                baseName = baseName.Remove( 0, 2 );
+                            MotionNode previousMotionNode = null;
+                            OsageNode previousOsageNode = null;
 
-                            if ( baseName.EndsWith( "_wj", StringComparison.OrdinalIgnoreCase ) )
-                                baseName = baseName.Remove( baseName.Length - 3 );
+                            foreach ( var alsoMotionBone in motionBlock.Nodes )
+                            {
+                                if ( !alsoMotionBone.Name.StartsWith( nameNoSuffix ) )
+                                    continue;
 
-                            var osageBlock = new OsageBlock();
-                            osageBlock.ParentName = bone.Parent.Name;
-                            osageBlock.ExternalName = "c_" + baseName + "_osg";
-                            osageBlock.InternalName = "e_" + baseName;
-                            osageBlock.Position = matrix.Translation;
-                            osageBlock.Rotation = rotation.ToEulerAngles();
-                            osageBlock.Scale = scale;
-                            osageBlock.Bones.Add( new OsageBone { Name = bone.Name, Stiffness = 0.17f } );
+                                if ( previousOsageNode != null )
+                                    previousOsageNode.Length = Vector3.Distance( previousMotionNode.Transformation.Translation,
+                                        alsoMotionBone.Transformation.Translation );
+
+                                previousMotionNode = alsoMotionBone;
+
+                                osageBlock.Nodes.Add( previousOsageNode = new OsageNode { Name = alsoMotionBone.Name, Length = 0.1f } );
+                            }
+
+                            if ( osageBlock.Nodes.Count == 0 ) 
+                                continue;
+
+                            var endMotionBone = osageBlock.Nodes[ osageBlock.Nodes.Count - 1 ];
+                            var endBoneInfoIndex = obj.Skin.Bones.FindIndex( x => x.Name == endMotionBone.Name );
+
+                            if ( endBoneInfoIndex != -1 )
+                            {
+                                var aabb = new AxisAlignedBoundingBox();
+
+                                foreach ( var mesh in obj.Meshes )
+                                {
+                                    if ( mesh.BoneWeights == null )
+                                        continue;
+
+                                    foreach ( var subMesh in mesh.SubMeshes )
+                                    {
+                                        if ( subMesh.BoneIndices == null )
+                                            continue;
+
+                                        for ( int i = 0; i < subMesh.BoneIndices.Length; i++ )
+                                        {
+                                            if ( subMesh.BoneIndices[ i ] != endBoneInfoIndex )
+                                                continue;
+
+                                            for ( int j = 0; j < mesh.BoneWeights.Length; j++ )
+                                            {
+                                                var boneWeight = mesh.BoneWeights[ j ];
+
+                                                if ( boneWeight.Index1 == i ||
+                                                     boneWeight.Index2 == i ||
+                                                     boneWeight.Index3 == i ||
+                                                     boneWeight.Index4 == i )
+                                                {
+                                                    aabb.AddPoint( mesh.Positions[ j ] );
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                float distance = aabb.SizeMax;
+                                if ( !float.IsInfinity( distance ) )
+                                    endMotionBone.Length = distance;
+                            }
+
                             obj.Skin.Blocks.Add( osageBlock );
-
-                            stringBuilder.AppendFormat(
-                                "{0}.node.0.coli_r=0.030000\r\n" +
-                                "{0}.node.0.hinge_ymax=179.000000\r\n" +
-                                "{0}.node.0.hinge_ymin=-179.000000\r\n" +
-                                "{0}.node.0.hinge_zmax=179.000000\r\n" +
-                                "{0}.node.0.hinge_zmin=-179.000000\r\n" +
-                                "{0}.node.0.inertial_cancel=1.000000\r\n" +
-                                "{0}.node.0.weight=3.000000\r\n" +
-                                "{0}.node.length=1\r\n" +
-                                "{0}.root.force=0.010000\r\n" +
-                                "{0}.root.force_gain=0.300000\r\n" +
-                                "{0}.root.friction=1.000000\r\n" +
-                                "{0}.root.init_rot_y=0.000000\r\n" +
-                                "{0}.root.init_rot_z=0.000000\r\n" +
-                                "{0}.root.rot_y=0.000000\r\n" +
-                                "{0}.root.rot_z=0.000000\r\n" +
-                                "{0}.root.stiffness=0.100000\r\n" +
-                                "{0}.root.wind_afc=0.500000\r\n",
-                                osageBlock.ExternalName );
                         }
 
                         obj.Skin.Blocks.Remove( block );

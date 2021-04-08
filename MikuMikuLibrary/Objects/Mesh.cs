@@ -549,7 +549,7 @@ namespace MikuMikuLibrary.Objects
                 {
                     var attribute = ( VertexFormatAttributes ) ( 1 << i );
 
-                    writer.ScheduleWriteOffsetIf( ( vertexFormat & attribute ) != 0, 4, AlignmentMode.Left, () =>
+                    writer.ScheduleWriteOffsetIf( ( vertexFormat & attribute ) != 0, ( int ) attribute + 1, 4, AlignmentMode.Left, () =>
                     {
                         switch ( attribute )
                         {

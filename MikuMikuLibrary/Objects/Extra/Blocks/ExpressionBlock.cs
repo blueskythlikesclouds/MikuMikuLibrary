@@ -39,14 +39,5 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         {
             Expressions = new List<string>();
         }
-
-        // Obsolete properties
-
-        [Obsolete( "This property has been renamed. Please use Name instead." ), Browsable( false )]
-        public string BoneName
-        {
-            get => Name;
-            set => Name = value;
-        }
     }
 }

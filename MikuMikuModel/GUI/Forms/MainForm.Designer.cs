@@ -37,6 +37,11 @@
             this.mCombineMotsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.mGenerateMurmurHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.mConvertOsageSkinParametersToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertOspToClassicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertOspToF2ndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertOspToXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mAutoCheckUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
@@ -52,11 +57,6 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
-            this.mConvertOsageSkinParametersToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-            this.mConvertOspToClassicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mConvertOspToF2ndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mConvertOspToXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
             this.mMainSplitContainer.Panel2.SuspendLayout();
             this.mMainSplitContainer.SuspendLayout();
@@ -278,6 +278,42 @@
             this.mGenerateMurmurHashesToolStripMenuItem.Text = "Generate murmur hashes";
             this.mGenerateMurmurHashesToolStripMenuItem.Click += new System.EventHandler(this.OnGenerateMurmurHashes);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(261, 6);
+            // 
+            // mConvertOsageSkinParametersToToolStripMenuItem
+            // 
+            this.mConvertOsageSkinParametersToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mConvertOspToClassicToolStripMenuItem,
+            this.mConvertOspToF2ndToolStripMenuItem,
+            this.mConvertOspToXToolStripMenuItem});
+            this.mConvertOsageSkinParametersToToolStripMenuItem.Name = "mConvertOsageSkinParametersToToolStripMenuItem";
+            this.mConvertOsageSkinParametersToToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
+            this.mConvertOsageSkinParametersToToolStripMenuItem.Text = "Convert osage skin parameters to...";
+            // 
+            // mConvertOspToClassicToolStripMenuItem
+            // 
+            this.mConvertOspToClassicToolStripMenuItem.Name = "mConvertOspToClassicToolStripMenuItem";
+            this.mConvertOspToClassicToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.mConvertOspToClassicToolStripMenuItem.Text = "DT/F/FT";
+            this.mConvertOspToClassicToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToClassic);
+            // 
+            // mConvertOspToF2ndToolStripMenuItem
+            // 
+            this.mConvertOspToF2ndToolStripMenuItem.Name = "mConvertOspToF2ndToolStripMenuItem";
+            this.mConvertOspToF2ndToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.mConvertOspToF2ndToolStripMenuItem.Text = "F 2nd";
+            this.mConvertOspToF2ndToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToF2nd);
+            // 
+            // mConvertOspToXToolStripMenuItem
+            // 
+            this.mConvertOspToXToolStripMenuItem.Name = "mConvertOspToXToolStripMenuItem";
+            this.mConvertOspToXToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.mConvertOspToXToolStripMenuItem.Text = "X";
+            this.mConvertOspToXToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToX);
+            // 
             // mOptionsToolStripMenuItem
             // 
             this.mOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -392,42 +428,6 @@
             this.mPanel.Name = "mPanel";
             this.mPanel.Size = new System.Drawing.Size(736, 25);
             this.mPanel.TabIndex = 1;
-            // 
-            // mConvertOsageSkinParametersToToolStripMenuItem
-            // 
-            this.mConvertOsageSkinParametersToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mConvertOspToClassicToolStripMenuItem,
-            this.mConvertOspToF2ndToolStripMenuItem,
-            this.mConvertOspToXToolStripMenuItem});
-            this.mConvertOsageSkinParametersToToolStripMenuItem.Name = "mConvertOsageSkinParametersToToolStripMenuItem";
-            this.mConvertOsageSkinParametersToToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
-            this.mConvertOsageSkinParametersToToolStripMenuItem.Text = "Convert osage skin parameters to...";
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(261, 6);
-            // 
-            // mConvertOspToClassicToolStripMenuItem
-            // 
-            this.mConvertOspToClassicToolStripMenuItem.Name = "mConvertOspToClassicToolStripMenuItem";
-            this.mConvertOspToClassicToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.mConvertOspToClassicToolStripMenuItem.Text = "DT/F/FT";
-            this.mConvertOspToClassicToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToClassic);
-            // 
-            // mConvertOspToF2ndToolStripMenuItem
-            // 
-            this.mConvertOspToF2ndToolStripMenuItem.Name = "mConvertOspToF2ndToolStripMenuItem";
-            this.mConvertOspToF2ndToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.mConvertOspToF2ndToolStripMenuItem.Text = "F 2nd";
-            this.mConvertOspToF2ndToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToF2nd);
-            // 
-            // mConvertOspToXToolStripMenuItem
-            // 
-            this.mConvertOspToXToolStripMenuItem.Name = "mConvertOspToXToolStripMenuItem";
-            this.mConvertOspToXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.mConvertOspToXToolStripMenuItem.Text = "X";
-            this.mConvertOspToXToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToX);
             // 
             // MainForm
             // 

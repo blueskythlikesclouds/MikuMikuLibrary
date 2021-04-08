@@ -5,14 +5,14 @@ using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra
 {
-    public class OsageBone
+    public class OsageNode
     {
         public string Name { get; set; }
         public float Length { get; set; }
         public Vector3 Rotation { get; set; }
 
         public string SiblingName { get; set; }
-        public float SiblingDistance { get; set; }
+        public float SiblingMaxDistance { get; set; }
 
         public override string ToString()
         {
@@ -52,14 +52,7 @@ namespace MikuMikuLibrary.Objects.Extra
         {
             stringSet.WriteString( writer, Name );
             stringSet.WriteString( writer, SiblingName );
-            writer.Write( SiblingDistance );
-        }
-
-        [Obsolete( "The real purpose of this property has been figured. Please use Length instead." ), Browsable( false )]
-        public float Stiffness
-        {
-            get => Length;
-            set => Length = value;
+            writer.Write( SiblingMaxDistance );
         }
     }
 }

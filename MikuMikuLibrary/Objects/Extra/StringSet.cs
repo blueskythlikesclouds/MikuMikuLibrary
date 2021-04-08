@@ -47,17 +47,21 @@ namespace MikuMikuLibrary.Objects.Extra
                 {
                     case ConstraintBlock constraintBlock:
                     {
-                        AddString( constraintBlock.BoneName );
-                        AddString( constraintBlock.SourceBoneName );
+                        AddString( constraintBlock.Name );
+                        AddString( constraintBlock.SourceNodeName );
 
                         switch ( constraintBlock.Data )
                         {
                             case DirectionConstraintData directionData:
-                                AddString( directionData.Field20 );
+                                AddString( directionData.UpVector.Name );
                                 break;            
                             
                             case PositionConstraintData positionData:
-                                AddString( positionData.Field20 );
+                                AddString( positionData.UpVector.Name );
+                                break;                     
+                            
+                            case DistanceConstraintData distanceData:
+                                AddString( distanceData.UpVector.Name );
                                 break;
                         }
 
@@ -65,12 +69,12 @@ namespace MikuMikuLibrary.Objects.Extra
                     }
 
                     case ExpressionBlock expressionBlock:
-                        AddString( expressionBlock.BoneName );
+                        AddString( expressionBlock.Name );
                         break;
 
                     case MotionBlock motionBlock:
                     {
-                        foreach ( var bone in motionBlock.Bones )
+                        foreach ( var bone in motionBlock.Nodes )
                             AddString( bone.Name );
 
                         break;
@@ -80,13 +84,13 @@ namespace MikuMikuLibrary.Objects.Extra
                     {
                         AddString( osageBlock.ExternalName );
 
-                        foreach ( var osageBone in osageBlock.Bones )
+                        foreach ( var osageNode in osageBlock.Nodes )
                         {
-                            AddString( osageBone.Name );
-                            AddString( osageBone.SiblingName );
+                            AddString( osageNode.Name );
+                            AddString( osageNode.SiblingName );
                         }
 
-                        AddString( osageBlock.InternalName );
+                        AddString( osageBlock.Name );
                         break;
                     }
                 }

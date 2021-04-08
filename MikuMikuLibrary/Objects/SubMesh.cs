@@ -230,7 +230,7 @@ namespace MikuMikuLibrary.Objects
 
             else
             {
-                writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
+                writer.ScheduleWriteOffset( 1, 8, AlignmentMode.Left, () =>
                 {
                     switch ( IndexFormat )
                     {

@@ -7,7 +7,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
     {
         public override string Signature => "MOT";
 
-        public List<MotionBone> Bones { get; }
+        public List<MotionNode> Nodes { get; }
 
         internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
         {
@@ -16,42 +16,42 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             long boneNamesOffset = reader.ReadOffset();
             long boneMatricesOffset = reader.ReadOffset();
 
-            Bones.Capacity = count;
+            Nodes.Capacity = count;
 
             Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
 
             reader.ReadAtOffset( boneNamesOffset, () =>
             {
                 for ( int i = 0; i < count; i++ )
-                    Bones.Add( new MotionBone { Name = stringSet.ReadString( reader ) } );
+                    Nodes.Add( new MotionNode { Name = stringSet.ReadString( reader ) } );
             } );
 
             reader.ReadAtOffset( boneMatricesOffset, () =>
             {
                 for ( int i = 0; i < count; i++ )
-                    Bones[ i ].Transformation = reader.ReadMatrix4x4();
+                    Nodes[ i ].Transformation = reader.ReadMatrix4x4();
             } );
         }
 
         internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
         {
             writer.AddStringToStringTable( Name );
-            writer.Write( Bones.Count );
+            writer.Write( Nodes.Count );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var bone in Bones )
+                foreach ( var bone in Nodes )
                     stringSet.WriteString( writer, bone.Name );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var bone in Bones )
+                foreach ( var bone in Nodes )
                     writer.Write( bone.Transformation );
             } );
         }
 
         public MotionBlock()
         {
-            Bones = new List<MotionBone>();
+            Nodes = new List<MotionNode>();
         }
     }
 }
