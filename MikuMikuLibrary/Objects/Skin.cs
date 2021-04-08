@@ -169,7 +169,7 @@ namespace MikuMikuLibrary.Objects
             } );
         }
 
-        internal void Write( EndianBinaryWriter writer )
+        internal void Write( EndianBinaryWriter writer, BinaryFormat format )
         {
             var stringSet = new StringSet( this );
 
@@ -234,7 +234,7 @@ namespace MikuMikuLibrary.Objects
                     foreach ( var block in Blocks )
                     {
                         writer.AddStringToStringTable( block.Signature );
-                        writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () => block.Write( writer, stringSet ) );
+                        writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () => block.Write( writer, stringSet, format ) );
                     }
 
                     writer.WriteNulls( writer.AddressSpace.GetByteSize() * 2 );

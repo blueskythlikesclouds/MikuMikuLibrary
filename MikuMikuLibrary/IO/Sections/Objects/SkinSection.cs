@@ -12,7 +12,7 @@ namespace MikuMikuLibrary.IO.Sections.Objects
             data.Read( reader );
 
         protected override void Write( Skin data, EndianBinaryWriter writer ) => 
-            data.Write( writer );
+            data.Write( writer, Format );
 
         public SkinSection( SectionMode mode, Skin data = null ) : base( mode, data )
         {

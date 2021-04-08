@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Numerics;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
@@ -62,7 +63,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             Data.Read( reader );
         }
 
-        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
+        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format  )
         {
             writer.AddStringToStringTable( Enum.GetName( typeof( ConstraintType ), Data.Type ) );
             writer.AddStringToStringTable( Name );

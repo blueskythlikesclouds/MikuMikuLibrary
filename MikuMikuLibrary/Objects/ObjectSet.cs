@@ -7,6 +7,7 @@ using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
+using MikuMikuLibrary.Objects.Extra.Blocks;
 using MikuMikuLibrary.Textures;
 
 namespace MikuMikuLibrary.Objects
@@ -68,6 +69,23 @@ namespace MikuMikuLibrary.Objects
                     {
                         obj.Skin = new Skin();
                         obj.Skin.Read( reader );
+
+                        foreach ( var block in obj.Skin.Blocks )
+                        {
+                            if ( !( block is OsageBlock osageBlock ) )
+                                continue;
+
+                            foreach ( var osageNode in osageBlock.Nodes )
+                            {
+                                if ( Math.Abs( osageNode.Rotation.X ) > 0 ||
+                                     Math.Abs( osageNode.Rotation.Y ) > 0 ||
+                                     Math.Abs( osageNode.Rotation.Z ) > 0 )
+                                {
+                                    Format = BinaryFormat.FT;
+                                    return;
+                                }
+                            }
+                        }
                     } );
                 }
             } );
@@ -114,7 +132,7 @@ namespace MikuMikuLibrary.Objects
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {
                 foreach ( var obj in Objects )
-                    writer.ScheduleWriteOffsetIf( obj.Skin != null && section == null, 16, AlignmentMode.Left, () => { obj.Skin.Write( writer ); } );
+                    writer.ScheduleWriteOffsetIf( obj.Skin != null && section == null, 16, AlignmentMode.Left, () => { obj.Skin.Write( writer, Format ); } );
             } );
             writer.ScheduleWriteOffset( 16, AlignmentMode.Center, () =>
             {

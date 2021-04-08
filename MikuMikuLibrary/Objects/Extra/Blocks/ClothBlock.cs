@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
@@ -76,7 +77,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             Field30 = reader.ReadUInt32();
         }
 
-        public void Write( EndianBinaryWriter writer, StringSet stringSet )
+        public void Write( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format  )
         {
             writer.AddStringToStringTable( Field00 );
             writer.AddStringToStringTable( Field04 );

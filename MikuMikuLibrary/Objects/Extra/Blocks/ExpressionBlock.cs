@@ -24,7 +24,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
                 Expressions.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
         }
 
-        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
+        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format )
         {
             writer.AddStringToStringTable( Name );
             writer.Write( Expressions.Count );

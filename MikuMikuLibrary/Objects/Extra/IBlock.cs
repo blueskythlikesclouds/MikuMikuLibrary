@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra
 {
@@ -7,6 +8,6 @@ namespace MikuMikuLibrary.Objects.Extra
         string Signature { get; }
 
         void Read( EndianBinaryReader reader, StringSet stringSet );
-        void Write( EndianBinaryWriter writer, StringSet stringSet );
+        void Write( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format );
     }
 }

@@ -51,19 +51,19 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
                 reader.SkipNulls( 5 * sizeof( uint ) );
         }
 
-        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
+        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format )
         {
             writer.Write( StartIndex );
             writer.Write( Nodes.Count );
             stringSet.WriteString( writer, ExternalName );
             stringSet.WriteString( writer, Name );
 
-            bool hasAnyRotation = Nodes.Any( x =>
+            bool shouldWriteRotation = format == BinaryFormat.FT && Nodes.Any( x =>
                 Math.Abs( x.Rotation.X ) > 0 ||
                 Math.Abs( x.Rotation.Y ) > 0 ||
                 Math.Abs( x.Rotation.Z ) > 0 );
 
-            writer.ScheduleWriteOffsetIf( hasAnyRotation, 4, AlignmentMode.Left, () =>
+            writer.ScheduleWriteOffsetIf( shouldWriteRotation, 4, AlignmentMode.Left, () =>
             {
                 foreach ( var bone in Nodes )
                     bone.WriteOsgBlockInfo( writer, stringSet );

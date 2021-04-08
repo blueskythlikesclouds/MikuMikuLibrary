@@ -27,7 +27,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             ReadBody( reader, stringSet );
         }
 
-        public virtual void Write( EndianBinaryWriter writer, StringSet stringSet )
+        public virtual void Write( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format )
         {
             writer.AddStringToStringTable( ParentName );
             writer.Write( Position );
@@ -37,10 +37,10 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             if ( writer.AddressSpace == AddressSpace.Int64 )
                 writer.WriteNulls( sizeof( uint ) );
 
-            WriteBody( writer, stringSet );
+            WriteBody( writer, stringSet, format );
         }
 
         internal abstract void ReadBody( EndianBinaryReader reader, StringSet stringSet );
-        internal abstract void WriteBody( EndianBinaryWriter writer, StringSet stringSet );
+        internal abstract void WriteBody( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format );
     }
 }

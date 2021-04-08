@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
@@ -33,7 +34,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
             } );
         }
 
-        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet )
+        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format  )
         {
             writer.AddStringToStringTable( Name );
             writer.Write( Nodes.Count );
