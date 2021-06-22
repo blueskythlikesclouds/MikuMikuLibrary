@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
 using MikuMikuLibrary.Geometry;
@@ -6,6 +7,7 @@ using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Objects;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Collections;
+using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.Nodes.Objects
 {
@@ -123,6 +125,42 @@ namespace MikuMikuModel.Nodes.Objects
 
         protected override void Initialize()
         {
+            AddCustomHandler( "Create color data", () =>
+            {
+                while ( true )
+                {
+                    using ( var inputDialog = new InputDialog
+                        { WindowTitle = "Please enter color values. (R, G, B, A)", Input = "1, 1, 1, 1" } )
+                    {
+                        if ( inputDialog.ShowDialog() != DialogResult.OK )
+                            break;
+
+                        bool success = true;
+
+                        var split = inputDialog.Input.Split( ',' ).Select( x =>
+                        {
+                            success &= float.TryParse( x, out float value );
+                            return value;
+                        } ).ToArray();
+
+                        if ( split.Length != 4 || !success )
+                        {
+                            MessageBox.Show( "Please enter valid color values.", Program.Name, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error );
+
+                            continue;
+                        }
+
+                        var color = new Color( split[ 0 ], split[ 1 ], split[ 2 ], split[ 3 ] );
+                        var colors = new Color[ Data.Positions.Length ];
+                        for ( int i = 0; i < colors.Length; i++ )
+                            colors[ i ] = color;
+
+                        Colors0 = colors;
+                        break;
+                    }
+                }
+            } );
         }
 
         protected override void PopulateCore()
