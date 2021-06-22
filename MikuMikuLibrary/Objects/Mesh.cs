@@ -419,12 +419,10 @@ namespace MikuMikuLibrary.Objects
                     // Checks to get rid of useless data after reading
                     if ( Tangents[ i ] != Vector4.Zero ) hasTangents = true;
                     if ( TexCoords0[ i ] != TexCoords1[ i ] ) hasTexCoord1 = true;
-                    if ( !Colors0[ i ].Equals( Color.White ) ) hasColors = true;
                 }
 
                 if ( !hasTangents ) Tangents = null;
                 if ( !hasTexCoord1 ) TexCoords1 = null;
-                if ( !hasColors ) Colors0 = null;
 
                 reader.SeekBegin( current );
             }
