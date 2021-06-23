@@ -50,11 +50,11 @@ namespace MikuMikuLibrary::Textures::Processing
         const ushort value = *( ushort* ) pixel;
 
         byte r = value & 0x1F;
-        byte g = ( value >> 5 ) & 0x1F;
-        byte b = ( value >> 10 ) & 0x1F;
+        byte g = ( value >> 5 ) & 0x3F;
+        byte b = ( value >> 11 ) & 0x1F;
 
         r = ( r << 3 ) | ( r >> 2 );
-        g = ( g << 3 ) | ( g >> 2 );
+        g = ( g << 2 ) | ( g >> 4 );
         b = ( b << 3 ) | ( b >> 2 );
 
         return Color8( r, g, b, 0xFF );
