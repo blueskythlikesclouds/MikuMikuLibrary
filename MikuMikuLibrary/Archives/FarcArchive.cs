@@ -119,7 +119,7 @@ namespace MikuMikuLibrary.Archives
         {
             string signature = reader.ReadString( StringBinaryFormat.FixedLength, 4 );
             if ( signature != "FARC" && signature != "FArC" && signature != "FArc" )
-                throw new InvalidDataException( "Invalid signature (excepted FARC/FArC/FArc)" );
+                throw new InvalidDataException( "Invalid signature (expected FARC/FArC/FArc)" );
 
             uint headerSize = reader.ReadUInt32() + 0x08;
             var originalStream = reader.BaseStream;
