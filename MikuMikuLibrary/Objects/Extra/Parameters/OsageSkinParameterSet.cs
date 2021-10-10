@@ -129,7 +129,7 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
         public override void Save( string filePath )
         {
             // Assume it's being exported for F 2nd PS3
-            if ( Format.IsClassic() && filePath.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
+            if ( Format.IsClassic() && filePath.EndsWith( ".osp", StringComparison.OrdinalIgnoreCase ) )
                 Format = BinaryFormat.F2nd;
 
             // And vice versa
