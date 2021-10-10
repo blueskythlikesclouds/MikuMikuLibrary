@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Numerics;
 using System.Windows.Forms;
 using MikuMikuLibrary.Sprites;
 using MikuMikuModel.GUI.Controls;
@@ -31,30 +32,16 @@ namespace MikuMikuModel.Nodes.Sprites
         }
 
         [Browsable( false )]
-        public float NormalizedX
+        public Vector2 RectangleBegin
         {
-            get => GetProperty<float>();
+            get => GetProperty<Vector2>();
             set => SetProperty( value );
         }
 
         [Browsable( false )]
-        public float NormalizedY
+        public Vector2 RectangleEnd
         {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }        
-        
-        [Browsable( false )]
-        public float NormalizedWidth
-        {
-            get => GetProperty<float>();
-            set => SetProperty( value );
-        }
-
-        [Browsable( false )]
-        public float NormalizedHeight
-        {
-            get => GetProperty<float>();
+            get => GetProperty<Vector2>();
             set => SetProperty( value );
         }
 
@@ -67,7 +54,7 @@ namespace MikuMikuModel.Nodes.Sprites
                 MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
-                CalculateNormalizedValues();
+                CalculateRectangleValues();
 
                 MementoStack.EndCompoundMemento();
             }
@@ -82,7 +69,7 @@ namespace MikuMikuModel.Nodes.Sprites
                 MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
-                CalculateNormalizedValues();
+                CalculateRectangleValues();
 
                 MementoStack.EndCompoundMemento();
             }
@@ -97,7 +84,7 @@ namespace MikuMikuModel.Nodes.Sprites
                 MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
-                CalculateNormalizedValues();
+                CalculateRectangleValues();
 
                 MementoStack.EndCompoundMemento();
             }
@@ -112,13 +99,13 @@ namespace MikuMikuModel.Nodes.Sprites
                 MementoStack.BeginCompoundMemento();
 
                 SetProperty( value );
-                CalculateNormalizedValues();
+                CalculateRectangleValues();
 
                 MementoStack.EndCompoundMemento();
             }
         }
 
-        private void CalculateNormalizedValues()
+        private void CalculateRectangleValues()
         {
             var spriteSetNode = FindParent<SpriteSetNode>();
             var spriteSet = spriteSetNode.Data;
@@ -128,10 +115,13 @@ namespace MikuMikuModel.Nodes.Sprites
 
             var texture = spriteSet.TextureSet.Textures[ ( int ) Data.TextureIndex ];
 
-            NormalizedX = Data.X / texture.Width;
-            NormalizedY = Data.Y / texture.Height;
-            NormalizedWidth = Data.Width / texture.Width;
-            NormalizedHeight = Data.Height / texture.Height;
+            RectangleBegin = new Vector2( 
+                Data.X / texture.Width, 
+                Data.Y / texture.Height );
+
+            RectangleEnd = new Vector2(
+                ( Data.X + Data.Width ) / texture.Width,
+                ( Data.Y + Data.Height ) / texture.Height );
         }
 
         protected override void Initialize()

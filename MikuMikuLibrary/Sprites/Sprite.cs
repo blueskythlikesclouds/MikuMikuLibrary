@@ -1,4 +1,5 @@
-﻿using MikuMikuLibrary.IO.Common;
+﻿using System.Numerics;
+using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Sprites
 {
@@ -30,10 +31,8 @@ namespace MikuMikuLibrary.Sprites
         public string Name { get; set; }
         public ResolutionMode ResolutionMode { get; set; }
         public uint TextureIndex { get; set; }
-        public float NormalizedX { get; set; }
-        public float NormalizedY { get; set; }
-        public float NormalizedWidth { get; set; }
-        public float NormalizedHeight { get; set; }
+        public Vector2 RectangleBegin { get; set; }
+        public Vector2 RectangleEnd { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Width { get; set; }
@@ -43,10 +42,8 @@ namespace MikuMikuLibrary.Sprites
         {
             TextureIndex = reader.ReadUInt32();
             reader.SeekCurrent( 4 );
-            NormalizedX = reader.ReadSingle();
-            NormalizedY = reader.ReadSingle();
-            NormalizedWidth = reader.ReadSingle();
-            NormalizedHeight = reader.ReadSingle();
+            RectangleBegin = reader.ReadVector2();
+            RectangleEnd = reader.ReadVector2();
             X = reader.ReadSingle();
             Y = reader.ReadSingle();
             Width = reader.ReadSingle();
@@ -57,10 +54,8 @@ namespace MikuMikuLibrary.Sprites
         {
             writer.Write( TextureIndex );
             writer.Write( 0 );
-            writer.Write( NormalizedX );
-            writer.Write( NormalizedY );
-            writer.Write( NormalizedWidth );
-            writer.Write( NormalizedHeight );
+            writer.Write( RectangleBegin );
+            writer.Write( RectangleEnd );
             writer.Write( X );
             writer.Write( Y );
             writer.Write( Width );
