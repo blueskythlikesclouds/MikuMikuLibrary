@@ -66,7 +66,7 @@ namespace MikuMikuLibrary.Objects
 
             reader.ReadAtOffset( exDataOffset, () =>
             {
-                int osageNameCount = reader.ReadInt32();
+                int osageCount = reader.ReadInt32();
                 int osageNodeCount = reader.ReadInt32();
                 reader.SkipNulls( sizeof( uint ) );
                 long osageNodesOffset = reader.ReadOffset();
@@ -199,15 +199,22 @@ namespace MikuMikuLibrary.Objects
             {
                 var osageNames = new List<string>( Blocks.Count / 2 );
                 var osageNodes = new List<OsageNode>( Blocks.Count / 2 );
+                var clothNames = new List<string>( Blocks.Count / 8 );
 
                 foreach ( var block in Blocks )
                 {
-                    if ( !( block is OsageBlock osageBlock ) )
-                        continue;
+                    switch ( block )
+                    {
+                        case OsageBlock osageBlock:
+                            osageBlock.StartIndex = osageNodes.Count;
+                            osageNodes.AddRange( osageBlock.Nodes );
+                            osageNames.Add( osageBlock.ExternalName );
+                            break;
 
-                    osageBlock.StartIndex = osageNodes.Count;
-                    osageNodes.AddRange( osageBlock.Nodes );
-                    osageNames.Add( osageBlock.ExternalName );
+                        case ClothBlock clothBlock:
+                            clothNames.Add( clothBlock.Name );
+                            break;
+                    }
                 }
 
                 writer.Write( osageNames.Count );
@@ -225,6 +232,9 @@ namespace MikuMikuLibrary.Objects
                 writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
                 {
                     foreach ( string value in osageNames )
+                        writer.AddStringToStringTable( value );
+
+                    foreach ( string value in clothNames )
                         writer.AddStringToStringTable( value );
 
                     writer.WriteNulls( writer.AddressSpace.GetByteSize() );
@@ -261,7 +271,7 @@ namespace MikuMikuLibrary.Objects
 
                     writer.WriteNulls( 3 * sizeof( uint ) );
                 } );
-                writer.Write( Blocks.OfType<ClothBlock>().Count() );
+                writer.Write( clothNames.Count );
 
                 if ( writer.AddressSpace == AddressSpace.Int64 )
                     writer.WriteNulls( 4 );

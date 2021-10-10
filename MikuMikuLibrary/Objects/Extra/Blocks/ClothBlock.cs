@@ -9,12 +9,12 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
     {
         public string Signature => "CLS";
 
-        public string Field00 { get; set; }
-        public string Field04 { get; set; }
+        public string Name { get; set; }
+        public string BackFaceName { get; set; }
         public uint Field08 { get; set; }
         public uint Field10 { get; set; }
         public uint Field14 { get; set; }
-        public List<Vector3> Field18 { get; set; }
+        public Matrix4x4[] Field18 { get; set; }
         public List<Field1CData> Field1C { get; set; }
         public List<Field20Data> Field20 { get; set; }
         public ushort[] Field24 { get; set; }
@@ -24,8 +24,8 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
         public void Read( EndianBinaryReader reader, StringSet stringSet )
         {
-            Field00 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            Field04 = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+            BackFaceName = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
             Field08 = reader.ReadUInt32();
             int count = reader.ReadInt32();
             Field10 = reader.ReadUInt32();
@@ -33,10 +33,11 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
             reader.ReadOffset( () =>
             {
-                Field18.Capacity = count;
-
-                for ( int i = 0; i < count; i++ )
-                    Field18.Add( reader.ReadVector3() );
+                for ( int i = 0; i < Field18.Length; i++ )
+                {
+                    if ( ( Field10 & ( 1 << i ) ) != 0 )
+                        Field18[ i ] = reader.ReadMatrix4x4();
+                }
             } );
 
             reader.ReadOffset( () =>
@@ -79,17 +80,20 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
         public void Write( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format  )
         {
-            writer.AddStringToStringTable( Field00 );
-            writer.AddStringToStringTable( Field04 );
+            writer.AddStringToStringTable( Name );
+            writer.AddStringToStringTable( BackFaceName );
             writer.Write( Field08 );
-            writer.Write( Field18.Count );
+            writer.Write( Field1C.Count );
             writer.Write( Field10 );
             writer.Write( Field14 );
             
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
             {
-                foreach ( var value in Field18 )
-                    writer.Write( value );
+                for ( int i = 0; i < Field18.Length; i++ )
+                {
+                    if ( ( Field10 & ( 1 << i ) ) != 0 )
+                        writer.Write( Field18[ i ] );
+                }
             } );            
             
             writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
@@ -122,7 +126,7 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
 
         public ClothBlock()
         {
-            Field18 = new List<Vector3>();
+            Field18 = new Matrix4x4[ 32 ];
             Field1C = new List<Field1CData>();
             Field20 = new List<Field20Data>();
         }
