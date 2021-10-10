@@ -9,6 +9,7 @@ using MikuMikuModel.Nodes.IO;
 using MikuMikuModel.Nodes.Textures;
 using Ookii.Dialogs.WinForms;
 using System.Globalization;
+using System.Numerics;
 using MikuMikuModel.Mementos;
 
 namespace MikuMikuModel.Nodes.Sprites
@@ -113,6 +114,26 @@ namespace MikuMikuModel.Nodes.Sprites
                 }
 
                 return false;
+            } );
+
+            AddCustomHandlerSeparator();
+
+            AddDirtyCustomHandler( "Compute sprite rectangles", () =>
+            {
+                foreach ( var sprite in Data.Sprites )
+                {
+                    var texture = Data.TextureSet.Textures[ ( int ) sprite.TextureIndex ];
+
+                    sprite.RectangleBegin = new Vector2( 
+                        sprite.X / texture.Width, 
+                        sprite.Y / texture.Height );
+
+                    sprite.RectangleEnd = new Vector2(
+                        ( sprite.X + sprite.Width ) / texture.Width,
+                        ( sprite.Y + sprite.Height ) / texture.Height );
+                }
+
+                return true;
             } );
 
             base.Initialize();
