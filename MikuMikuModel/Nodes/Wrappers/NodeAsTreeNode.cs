@@ -59,9 +59,12 @@ namespace MikuMikuModel.Nodes.Wrappers
             treeView?.BeginUpdate();
 
             var movedNode = Nodes[ args.PreviousIndex ];
+            bool updateView = TreeView.SelectedNode == movedNode;
             Nodes.RemoveAt( args.PreviousIndex );
             Nodes.Insert( args.NewIndex, movedNode );
-            TreeView.SelectedNode = movedNode;
+
+            if ( updateView )
+                TreeView.SelectedNode = movedNode;
 
             treeView?.EndUpdate();
         }
