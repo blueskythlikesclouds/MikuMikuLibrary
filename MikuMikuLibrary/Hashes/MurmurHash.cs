@@ -52,7 +52,7 @@ namespace MikuMikuLibrary.Hashes
             // TODO: Allocations for each iteration is unnecessary. Find a convenient solution.
             // ArrayPool would be useful but we're not on .NET Core yet.
 
-            var buffer = encoding.GetBytes( value.ToUpperInvariant() );
+            var buffer = encoding.GetBytes( value?.ToUpperInvariant() ?? string.Empty );
             fixed ( byte* bufferPtr = buffer )
                 return Calculate( bufferPtr, buffer.Length );
         }
