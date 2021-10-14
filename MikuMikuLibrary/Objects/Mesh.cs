@@ -349,6 +349,8 @@ namespace MikuMikuLibrary.Objects
                     TexCoords2 = new Vector2[ vertexCount ];
                     TexCoords3 = new Vector2[ vertexCount ];
                 }
+                else if ( attributeFlags == 6 )
+                    TexCoords2 = new Vector2[ vertexCount ];
 
                 Colors0 = new Color[ vertexCount ];
 
@@ -356,8 +358,6 @@ namespace MikuMikuLibrary.Objects
                     BoneWeights = new BoneWeight[ vertexCount ];
 
                 bool hasTangents = false;
-                bool hasTexCoord1 = false;
-                bool hasColors = false;
 
                 EndianBinaryReader vertexReader;
                 long baseOffset;
@@ -391,6 +391,8 @@ namespace MikuMikuLibrary.Objects
                         TexCoords2[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
                         TexCoords3[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
                     }
+                    else if ( attributeFlags == 6 )
+                        TexCoords2[ i ] = vertexReader.ReadVector2( VectorBinaryFormat.Half );
 
                     Colors0[ i ] = vertexReader.ReadColor( VectorBinaryFormat.Half );
 
@@ -418,11 +420,9 @@ namespace MikuMikuLibrary.Objects
 
                     // Checks to get rid of useless data after reading
                     if ( Tangents[ i ] != Vector4.Zero ) hasTangents = true;
-                    if ( TexCoords0[ i ] != TexCoords1[ i ] ) hasTexCoord1 = true;
                 }
 
                 if ( !hasTangents ) Tangents = null;
-                if ( !hasTexCoord1 ) TexCoords1 = null;
 
                 reader.SeekBegin( current );
             }
