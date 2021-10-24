@@ -34,13 +34,10 @@ namespace MikuMikuLibrary.Databases
     public class StageReflect
     {
         public StageReflectRefractResolution ResolutionMode { get; set; }
-        public int ResolutionModeFlag { get; set; }
         public int BlurNum { get; set; }
-        public int BlurNumFlag { get; set; }
         public StageReflectBlurFilter BlurFilter { get; set; }
-        public int BlurFilterFlag { get; set; }
 
-        internal static StageReflect ReadClassic( EndianBinaryReader reader )
+        internal static StageReflect Read( EndianBinaryReader reader )
         {
             StageReflect reflect = new StageReflect();
             reflect.ResolutionMode = ( StageReflectRefractResolution ) reader.ReadInt32();
@@ -49,33 +46,11 @@ namespace MikuMikuLibrary.Databases
             return reflect;
         }
 
-        internal void WriteClassic( EndianBinaryWriter writer )
+        internal void Write( EndianBinaryWriter writer )
         {
             writer.Write( ( int ) ResolutionMode );
             writer.Write( BlurNum );
             writer.Write( ( int ) BlurFilter );
-        }
-
-        internal static StageReflect ReadModern( EndianBinaryReader reader )
-        {
-            StageReflect reflect = new StageReflect();
-            reflect.ResolutionMode = ( StageReflectRefractResolution ) reader.ReadInt32();
-            reflect.ResolutionModeFlag = reader.ReadInt32();
-            reflect.BlurNum = reader.ReadInt32();
-            reflect.BlurNumFlag = reader.ReadInt32();
-            reflect.BlurFilter = ( StageReflectBlurFilter ) reader.ReadInt32();
-            reflect.BlurFilterFlag = reader.ReadInt32();
-            return reflect;
-        }
-
-        internal void WriteModern( EndianBinaryWriter writer )
-        {
-            writer.Write( ( int ) ResolutionMode );
-            writer.Write( ResolutionModeFlag );
-            writer.Write( BlurNum );
-            writer.Write( BlurNumFlag );
-            writer.Write( ( int ) BlurFilter );
-            writer.Write( BlurFilterFlag );
         }
     }
     
@@ -118,15 +93,15 @@ namespace MikuMikuLibrary.Databases
         internal static StageObjectInfo ReadModern( EndianBinaryReader reader )
         {
             StageObjectInfo objectInfo = default;
-            objectInfo.Id = reader.ReadUInt32();
             objectInfo.SetId = reader.ReadUInt32();
+            objectInfo.Id = reader.ReadUInt32();
             return objectInfo;
         }
 
         internal void WriteModern( EndianBinaryWriter writer )
         {
-            writer.Write( Id );
             writer.Write( SetId );
+            writer.Write( Id );
         }
     }
 
@@ -227,14 +202,28 @@ namespace MikuMikuLibrary.Databases
         public float RingRectangleHeight { get; set; }
         public float RingRingHeight { get; set; }
         public float RingOutHeight { get; set; }
-        public uint Field11 { get; set; }
-        public uint Field12 { get; set; }
+        public uint Field04 { get; set; }
+        public uint Field04Flag { get; set; }
+        public uint Field05 { get; set; }
+        public uint Field05Flag { get; set; }
+        public uint Field06 { get; set; }
+        public uint Field06Flag { get; set; }
+        public uint Field07 { get; set; }
+        public uint Field07Flag { get; set; }
+        public uint Field08 { get; set; }
+        public uint Field09 { get; set; }
+        public uint Field10 { get; set; }
+        public long Field11 { get; set; }
+        public long Field12 { get; set; }
         public uint Field13 { get; set; }
-        public uint Field14 { get; set; }
-        public uint Field15 { get; set; }
-        public uint Field16 { get; set; }
-        public uint Field17 { get; set; }
-        public uint Field18 { get; set; }
+        public uint StageEffectField01 { get; set; }
+        public uint StageEffectField02 { get; set; }
+        public uint StageEffectField03 { get; set; }
+        public uint StageEffectField04 { get; set; }
+        public uint StageEffectField05 { get; set; }
+        public uint StageEffectField06 { get; set; }
+        public uint StageEffectField07 { get; set; }
+        public uint StageEffectField08 { get; set; }
         public StageEffect[] StageEffects { get; set; }
         public uint Id { get; set; }
         public uint UnknownId { get; set; }
@@ -254,22 +243,37 @@ namespace MikuMikuLibrary.Databases
                 RenderTextureIdFlag = reader.ReadUInt32();
                 MovieTextureId = reader.ReadUInt32();
                 MovieTextureIdFlag = reader.ReadUInt32();
-                ReflectType = reader.ReadUInt32();
-                ReflectTypeFlag = reader.ReadUInt32();
-                RefractEnable = reader.ReadUInt32() != 0;
-                RefractEnableFlag = reader.ReadUInt32();
-                Reflect = StageReflect.ReadModern( reader );
-                LensFlareTexture = reader.ReadUInt32();
-                LensShaftTexture = reader.ReadUInt32();
-                LensGhostTexture = reader.ReadUInt32();
+                Field04 = reader.ReadUInt32();
+                Field04Flag = reader.ReadUInt32();
+                Field05 = reader.ReadUInt32();
+                Field05Flag = reader.ReadUInt32();
+                Field06 = reader.ReadUInt32();
+                Field06Flag = reader.ReadUInt32();
+                Field07 = reader.ReadUInt32();
+                Field07Flag = reader.ReadUInt32();
+                Field08 = reader.ReadUInt32();
+                Field09 = reader.ReadUInt32();
+                Field10 = reader.ReadUInt32();
+
+                if ( format == BinaryFormat.X )
+                    reader.Seek( 4, SeekOrigin.Current );
+
+                Field11 = reader.ReadOffset();
+                Field12 = reader.ReadOffset();
                 RingRectangleX = reader.ReadSingle();
                 RingRectangleY = reader.ReadSingle();
                 RingRectangleWidth = reader.ReadSingle();
-                RingRectangleLength = reader.ReadSingle();
                 RingRectangleHeight = reader.ReadSingle();
-                UnknownId = reader.ReadUInt32();
+                RingRingHeight = reader.ReadSingle();
+                RingOutHeight = reader.ReadSingle();
+
+                if ( format == BinaryFormat.X )
+                    Field13 = reader.ReadUInt32();
 
                 ReadStageEffects( reader );
+                
+                if ( format == BinaryFormat.X )
+                    reader.Seek( 4, SeekOrigin.Current );
 
                 uint auth3dIdsCount = reader.ReadUInt32();
                 long auth3dIdsOffset = reader.ReadOffset();
@@ -280,7 +284,8 @@ namespace MikuMikuLibrary.Databases
                         Auth3dIds.Add( reader.ReadUInt32() );
                 });
 
-                reader.Seek( 4, SeekOrigin.Current );
+                if ( format != BinaryFormat.X )
+                    reader.Seek( 4, SeekOrigin.Current );
             }
             else
             {
@@ -303,7 +308,7 @@ namespace MikuMikuLibrary.Databases
                 RefractEnable = reader.ReadUInt32() != 0;
 
                 reader.ReadAtOffset( reader.ReadInt32(),
-                    () => Reflect = StageReflect.ReadClassic( reader ) );
+                    () => Reflect = StageReflect.Read( reader ) );
                 
                 reader.ReadAtOffset( reader.ReadInt32(),
                     () => Refract = StageRefract.Read( reader ) );
@@ -335,22 +340,37 @@ namespace MikuMikuLibrary.Databases
                 writer.Write( RenderTextureIdFlag );
                 writer.Write( MovieTextureId );
                 writer.Write( MovieTextureIdFlag );
-                writer.Write( ReflectType );
-                writer.Write( ReflectTypeFlag );
-                writer.Write( RefractEnable ? 1u : 0u );
-                writer.Write( RefractEnableFlag );
-                Reflect.WriteModern( writer );
-                writer.Write( LensFlareTexture );
-                writer.Write( LensShaftTexture );
-                writer.Write( LensGhostTexture );
+                writer.Write( Field04 );
+                writer.Write( Field04Flag );
+                writer.Write( Field05 );
+                writer.Write( Field05Flag );
+                writer.Write( Field06 );
+                writer.Write( Field06Flag );
+                writer.Write( Field07 );
+                writer.Write( Field07Flag );
+                writer.Write( Field08 );
+                writer.Write( Field09 );
+                writer.Write( Field10 );
+
+                if ( format == BinaryFormat.X )
+                    writer.WriteNulls( 4 );
+
+                writer.WriteOffset( Field11 );
+                writer.WriteOffset( Field12 );
                 writer.Write( RingRectangleX );
                 writer.Write( RingRectangleY );
                 writer.Write( RingRectangleWidth );
-                writer.Write( RingRectangleLength );
                 writer.Write( RingRectangleHeight );
-                writer.Write( UnknownId );
+                writer.Write( RingRingHeight );
+                writer.Write( RingOutHeight );
+
+                if ( format == BinaryFormat.X )
+                    writer.Write( Field13 );
 
                 WriteStageEffects( writer );
+                
+                if ( format == BinaryFormat.X )
+                    writer.WriteNulls( 4 );
 
                 writer.Write( Auth3dIds.Count );
 
@@ -358,9 +378,11 @@ namespace MikuMikuLibrary.Databases
                 {
                     foreach ( uint id in Auth3dIds )
                         writer.Write( id );
+                    writer.Align( 16 );
                 } );
-
-                writer.WriteNulls( 4 );
+                
+                if ( format != BinaryFormat.X )
+                    writer.WriteNulls( 4 );
             }
             else
             {
@@ -383,7 +405,7 @@ namespace MikuMikuLibrary.Databases
                 writer.Write( RefractEnable ? 1u : 0u );
                 
                 writer.ScheduleWriteOffsetIf( Reflect != null && Reflect.BlurNum != 0 , 4, AlignmentMode.Left,
-                    () => Reflect.WriteClassic( writer ) );
+                    () => Reflect.Write( writer ) );
                 
                 writer.ScheduleWriteOffsetIf( Refract != null , 4, AlignmentMode.Left,
                     () => Refract.Write( writer ) );
@@ -402,14 +424,14 @@ namespace MikuMikuLibrary.Databases
 
         internal void ReadStageEffects( EndianBinaryReader reader )
         {
-            Field11 = reader.ReadUInt32();
-            Field12 = reader.ReadUInt32();
-            Field13 = reader.ReadUInt32();
-            Field14 = reader.ReadUInt32();
-            Field15 = reader.ReadUInt32();
-            Field16 = reader.ReadUInt32();
-            Field17 = reader.ReadUInt32();
-            Field18 = reader.ReadUInt32();
+            StageEffectField01 = reader.ReadUInt32();
+            StageEffectField02 = reader.ReadUInt32();
+            StageEffectField03 = reader.ReadUInt32();
+            StageEffectField04 = reader.ReadUInt32();
+            StageEffectField05 = reader.ReadUInt32();
+            StageEffectField06 = reader.ReadUInt32();
+            StageEffectField07 = reader.ReadUInt32();
+            StageEffectField08 = reader.ReadUInt32();
 
             for ( int i = 0; i < 16; i++ )
                 StageEffects[ i ] = ( StageEffect ) reader.ReadInt32();
@@ -417,14 +439,14 @@ namespace MikuMikuLibrary.Databases
 
         internal void WriteStageEffects( EndianBinaryWriter writer )
         {
-            writer.Write( Field11 );
-            writer.Write( Field12 );
-            writer.Write( Field13 );
-            writer.Write( Field14 );
-            writer.Write( Field15 );
-            writer.Write( Field16 );
-            writer.Write( Field17 );
-            writer.Write( Field18 );
+            writer.Write( StageEffectField01 );
+            writer.Write( StageEffectField02 );
+            writer.Write( StageEffectField03 );
+            writer.Write( StageEffectField04 );
+            writer.Write( StageEffectField05 );
+            writer.Write( StageEffectField06 );
+            writer.Write( StageEffectField07 );
+            writer.Write( StageEffectField08 );
 
             foreach ( var stageEffect in StageEffects )
                 writer.Write( ( int ) stageEffect );
