@@ -75,7 +75,7 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
 
                 nodeCount = reader.ReadInt32();
 
-                reader.SkipNulls( 8 );
+                reader.SkipNulls( 12 );
 
                 // Murmur hash of name
                 reader.SeekCurrent( sizeof( ulong ) );
@@ -162,7 +162,7 @@ namespace MikuMikuLibrary.Objects.Extra.Parameters
                 writer.Write( CollisionType );
                 writer.ScheduleWriteOffsetIf( Bocs.Count > 0, 16, AlignmentMode.Left, WriteBocs );
                 writer.Write( Nodes.Count );
-                writer.WriteNulls( 8 );
+                writer.WriteNulls( 12 );
                 writer.Write( ( ulong ) MurmurHash.Calculate( Name ) );
                 writer.ScheduleWriteOffsetIf( Nodes.Count > 0, 16, AlignmentMode.Left, WriteNodes );
             }
