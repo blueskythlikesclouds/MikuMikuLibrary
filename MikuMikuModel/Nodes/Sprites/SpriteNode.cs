@@ -168,12 +168,7 @@ namespace MikuMikuModel.Nodes.Sprites
             {
                 var texture = FindParent<SpriteSetNode>().Data.TextureSet.Textures[ ( int ) Data.TextureIndex ];
                 var bitmap = TextureDecoder.DecodeToBitmap( texture );
-                Bitmap newBitmap;
-                if ( texture.IsYCbCr )
-                    newBitmap = TextureDecoder.DecodeToBitmap( TextureEncoder.EncodeYCbCrFromFile( filepath ) );
-                else
-                    newBitmap = TextureDecoder.DecodeToBitmap( TextureEncoder.EncodeFromFile( filepath, texture.Format, texture.UsesMipMaps ) );
-                
+                Bitmap newBitmap = new Bitmap( filepath );
                 bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
                 var graphic = Graphics.FromImage( bitmap );
                 graphic.SetClip( new RectangleF( Data.X, Data.Y, newBitmap.Width, newBitmap.Height ), CombineMode.Replace );
@@ -185,6 +180,8 @@ namespace MikuMikuModel.Nodes.Sprites
                     FindParent<SpriteSetNode>().Data.TextureSet.Textures[ ( int ) Data.TextureIndex ] = TextureEncoder.EncodeYCbCrFromBitmap( bitmap );
                 else
                     FindParent<SpriteSetNode>().Data.TextureSet.Textures[ ( int ) Data.TextureIndex ] = TextureEncoder.EncodeFromBitmap( bitmap, texture.Format, texture.UsesMipMaps );
+
+                SpriteViewControl.Instance.SetBitmap( newBitmap );
 
                 Data.Width = newBitmap.Width;
                 Data.Height = newBitmap.Height;
