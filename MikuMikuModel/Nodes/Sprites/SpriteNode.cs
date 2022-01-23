@@ -2,10 +2,12 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Numerics;
 using System.Windows.Forms;
 using MikuMikuLibrary.Sprites;
+using MikuMikuLibrary.Textures.Processing;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Mementos;
 
@@ -13,7 +15,7 @@ namespace MikuMikuModel.Nodes.Sprites
 {
     public class SpriteNode : Node<Sprite>
     {
-        public override NodeFlags Flags => NodeFlags.Rename | NodeFlags.Export;
+        public override NodeFlags Flags => NodeFlags.Rename | NodeFlags.Export | NodeFlags.Replace;
 
         [Category( "General" )]
         [DisplayName( "Texture index" )]
@@ -160,6 +162,30 @@ namespace MikuMikuModel.Nodes.Sprites
 
                 using ( var bitmap = SpriteCropper.Crop( Data, FindParent<SpriteSetNode>().Data ) )
                     bitmap.Save( filePath, imageFormat );
+            } );
+
+            AddReplaceHandler<Bitmap>( filepath =>
+            {
+                var texture = FindParent<SpriteSetNode>().Data.TextureSet.Textures[ ( int ) Data.TextureIndex ];
+                var bitmap = TextureDecoder.DecodeToBitmap( texture );
+                Bitmap newBitmap = new Bitmap( filepath );
+                bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
+                var graphic = Graphics.FromImage( bitmap );
+                graphic.SetClip( new RectangleF( Data.X, Data.Y, newBitmap.Width, newBitmap.Height ), CombineMode.Replace );
+                graphic.Clear( Color.Transparent );
+                graphic.DrawImage( newBitmap, new PointF( Data.X, Data.Y ) );
+                bitmap.RotateFlip( RotateFlipType.Rotate180FlipX );
+
+                if ( texture.IsYCbCr )
+                    FindParent<SpriteSetNode>().Data.TextureSet.Textures[ ( int ) Data.TextureIndex ] = TextureEncoder.EncodeYCbCrFromBitmap( bitmap );
+                else
+                    FindParent<SpriteSetNode>().Data.TextureSet.Textures[ ( int ) Data.TextureIndex ] = TextureEncoder.EncodeFromBitmap( bitmap, texture.Format, texture.UsesMipMaps );
+
+                SpriteViewControl.Instance.SetBitmap( newBitmap );
+
+                Data.Width = newBitmap.Width;
+                Data.Height = newBitmap.Height;
+                return Data;
             } );
         }
 
