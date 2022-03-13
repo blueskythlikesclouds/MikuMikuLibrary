@@ -26,6 +26,19 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         return lMatrix;
     }
 
+    FbxLayer* GetFbxLayer( FbxMesh* lMesh, int pIndex )
+    {
+        FbxLayer* lLayer = lMesh->GetLayer( pIndex );
+
+        if ( !lLayer )
+        {
+            while ( lMesh->CreateLayer() != pIndex );
+            lLayer = lMesh->GetLayer( pIndex );
+        }
+
+        return lLayer;
+    }
+
     FbxNode* CreateFbxNodeFromMesh( Mesh^ mesh, Object^ object, FbxScene* lScene, List<IntPtr>^ materials, Dictionary<String^, IntPtr>^ convertedBones )
     {
         FbxNode* lNode = FbxNode::Create( lScene, Utf8String( mesh->Name ).ToCStr() );
@@ -39,14 +52,35 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
             lMesh->SetControlPointAt( FbxVector4( position.X, position.Y, position.Z ), i );
         }
 
+        // Elements need to be created in this exact order for 3DS Max to read it properly.
+
         if ( mesh->Normals != nullptr )
         {
-            FbxGeometryElementNormal* lElementNormal = lMesh->CreateElementNormal();
+            FbxGeometryElementNormal* lElementNormal = ( FbxGeometryElementNormal* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eNormal );
             lElementNormal->SetMappingMode( FbxLayerElement::eByControlPoint );
             lElementNormal->SetReferenceMode( FbxLayerElement::eDirect );
 
             for each ( Vector3 normal in mesh->Normals )
                 lElementNormal->GetDirectArray().Add( FbxVector4( normal.X, normal.Y, normal.Z ) );
+        }
+
+        FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
+
+        for ( int i = 0; i < 1; i++ )
+        {
+            array<Color>^ colors = mesh->GetColorsChannel( i );
+
+            if ( colors == nullptr )
+                continue;
+
+            lElementVertexColor = ( FbxGeometryElementVertexColor* ) GetFbxLayer( lMesh, i )->CreateLayerElementOfType( FbxLayerElement::eVertexColor );
+
+            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
+            lElementVertexColor->SetMappingMode( FbxLayerElement::eByPolygonVertex );
+            lElementVertexColor->SetReferenceMode( FbxLayerElement::eIndexToDirect );
+
+            for each ( Color color in colors )
+                lElementVertexColor->GetDirectArray().Add( FbxColor( color.R, color.G, color.B, color.A ) );
         }
 
         for ( int i = 0; i < 4; i++ )
@@ -56,7 +90,8 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
             if ( texCoords == nullptr )
                 continue;
 
-            FbxGeometryElementUV* lElementUV = lMesh->CreateElementUV( Utf8String( String::Format( "UVChannel_{0}", i ) ).ToCStr() );
+            FbxGeometryElementUV* lElementUV = ( FbxGeometryElementUV* ) GetFbxLayer( lMesh, i )->CreateLayerElementOfType( FbxLayerElement::eUV );
+            lElementUV->SetName( Utf8String( String::Format( "UVChannel_{0}", i + 1 ) ).ToCStr() );
             lElementUV->SetMappingMode( FbxLayerElement::eByControlPoint );
             lElementUV->SetReferenceMode( FbxLayerElement::eDirect );
 
@@ -64,22 +99,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
                 lElementUV->GetDirectArray().Add( FbxVector2( texCoord.X, 1 - texCoord.Y ) );
         }
 
-        for ( int i = 0; i < 2; i++ )
-        {
-            array<Color>^ colors = mesh->GetColorsChannel( i );
-
-            if ( colors == nullptr )
-                continue;
-
-            FbxGeometryElementVertexColor* lElementVertexColor = lMesh->CreateElementVertexColor();
-            lElementVertexColor->SetMappingMode( FbxLayerElement::eByControlPoint );
-            lElementVertexColor->SetReferenceMode( FbxLayerElement::eDirect );
-
-            for each ( Color color in colors )
-                lElementVertexColor->GetDirectArray().Add( FbxColor( color.R, color.G, color.B, color.A ) );
-        }
-
-        FbxGeometryElementMaterial* lElementMaterial = lMesh->CreateElementMaterial();
+        FbxGeometryElementMaterial* lElementMaterial = ( FbxGeometryElementMaterial* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eMaterial );
         lElementMaterial->SetMappingMode( FbxLayerElement::eByPolygon );
         lElementMaterial->SetReferenceMode( FbxLayerElement::eIndexToDirect );
 
@@ -119,6 +139,13 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
                 lMesh->AddPolygon( triangle.B );
                 lMesh->AddPolygon( triangle.C );
                 lMesh->EndPolygon();
+
+                if ( lElementVertexColor )
+                {
+                    lElementVertexColor->GetIndexArray().Add( triangle.A ); 
+                    lElementVertexColor->GetIndexArray().Add( triangle.B ); 
+                    lElementVertexColor->GetIndexArray().Add( triangle.C ); 
+                }
             }
 
             if ( lSkin != nullptr && subMesh->BoneIndices != nullptr )
@@ -238,7 +265,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
 
             lFileTexture->SetFileName( Utf8String( Path::Combine( texturesDirectoryPath, texture->Name + extension ) ).ToCStr() );
 
-            lFileTexture->UVSet.Set( "UVChannel_0" );
+            lFileTexture->UVSet.Set( "UVChannel_1" );
 
             if ( materialTexture->TextureCoordinateTranslationType == MaterialTextureCoordinateTranslationType::Sphere )
                 lFileTexture->SetMappingType( FbxTexture::eSpherical );

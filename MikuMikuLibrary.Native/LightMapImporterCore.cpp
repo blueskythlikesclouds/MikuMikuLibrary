@@ -15,12 +15,12 @@ namespace MikuMikuLibrary::IBLs::Processing
 
         LightMap^ lightMap = gcnew LightMap();
 
-        lightMap->Width = metadata.width;
-        lightMap->Height = metadata.height;
+        lightMap->Width = ( int ) metadata.width;
+        lightMap->Height = ( int ) metadata.height;
 
         for ( size_t i = 0; i < metadata.arraySize; i++ )
         {
-            array<Half>^ data = gcnew array<Half>( metadata.width * metadata.height * 4 );
+            array<Half>^ data = gcnew array<Half>( ( int ) ( metadata.width * metadata.height * 4 ) );
             const pin_ptr<Half> dataPtr = &data[ 0 ];
 
             const DirectX::Image* image = convertedScratchImage.GetImage( 0, i, 0 );
