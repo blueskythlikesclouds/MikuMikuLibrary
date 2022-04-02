@@ -90,28 +90,28 @@ namespace MikuMikuModel.Nodes.PostProcessTables.Fog
             set => SetProperty( value );
         }
 
-        [Category("Unknowns")]
+        [Category( "Unknowns" )]
         public float Unk2
         {
             get => GetProperty<float>();
             set => SetProperty( value );
         }
 
-        [Category("Unknowns")]
+        [Category( "Unknowns" )]
         public float Unk3
         {
             get => GetProperty<float>();
             set => SetProperty( value );
         }
 
-        [Category("Unknowns")]
+        [Category( "Unknowns" )]
         public float Unk4
         {
             get => GetProperty<float>();
             set => SetProperty( value );
         }
 
-        [Category("Unknowns")]
+        [Category( "Unknowns" )]
         public float Unk5
         {
             get => GetProperty<float>();
