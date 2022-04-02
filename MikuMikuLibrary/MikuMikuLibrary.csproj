@@ -99,6 +99,12 @@
     <Compile Include="IO\Common\BitHelper.cs" />
     <Compile Include="IO\Common\VectorBinaryFormat.cs" />
     <Compile Include="IO\IBinaryFile.cs" />
+    <Compile Include="IO\Sections\PostProcessTables\BloomTableSection.cs" />
+    <Compile Include="IO\Sections\PostProcessTables\ColorCorrectTableSection.cs" />
+    <Compile Include="IO\Sections\PostProcessTables\DepthOfFieldTableSection.cs" />
+    <Compile Include="IO\Sections\PostProcessTables\FogTableSection.cs" />
+    <Compile Include="IO\Sections\PostProcessTables\LightTableSection.cs" />
+    <Compile Include="IO\Sections\PostProcessTables\ToonEdgeTableSection.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageBocParameter.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageCollisionBoneParameter.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageCollisionParameter.cs" />
@@ -175,6 +181,12 @@
     <Compile Include="Motions\KeySetType.cs" />
     <Compile Include="Objects\Skin.cs" />
     <Compile Include="Parameters\ParameterTreeWriter.cs" />
+    <Compile Include="PostProcessTables\BloomTable.cs" />
+    <Compile Include="PostProcessTables\ColorCorrectTable.cs" />
+    <Compile Include="PostProcessTables\DepthOfFieldTable.cs" />
+    <Compile Include="PostProcessTables\FogTable.cs" />
+    <Compile Include="PostProcessTables\LightTable.cs" />
+    <Compile Include="PostProcessTables\ToonEdgeTable.cs" />
     <Compile Include="Skeletons\Bone.cs" />
     <Compile Include="Skeletons\Skeleton.cs" />
     <Compile Include="Sprites\SpriteCropper.cs" />
