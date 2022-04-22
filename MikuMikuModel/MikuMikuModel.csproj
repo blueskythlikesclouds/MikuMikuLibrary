@@ -118,7 +118,7 @@
     <Compile Include="Mementos\IMemento.cs" />
     <Compile Include="Mementos\ValueMemento.cs" />
     <Compile Include="Modules\Aets\AetSetModule.cs" />
-    <Compile Include="Modules\Chritm\ChritmModule.cs" />
+    <Compile Include="Modules\Chritm\CharacterItemTableModule.cs" />
     <Compile Include="Modules\Databases\AetDatabaseModule.cs" />
     <Compile Include="Modules\IBLs\IBLModule.cs" />
     <Compile Include="Modules\Imaging\BitmapModule.cs" />
@@ -143,10 +143,10 @@
     <Compile Include="Nodes\Aets\TransferModeNode.cs" />
     <Compile Include="Nodes\Aets\VideoNode.cs" />
     <Compile Include="Nodes\Aets\VideoSourceNode.cs" />
-    <Compile Include="Nodes\Chritm\ChritmNode.cs" />
-    <Compile Include="Nodes\Chritm\CosNode.cs" />
-    <Compile Include="Nodes\Chritm\DbgNode.cs" />
-    <Compile Include="Nodes\Chritm\ItemNode.cs" />
+    <Compile Include="Nodes\Chritm\CharacterItemTableNode.cs" />
+    <Compile Include="Nodes\Chritm\CostumeNode.cs" />
+    <Compile Include="Nodes\Chritm\DebugSetNode.cs" />
+    <Compile Include="Nodes\Chritm\CostumeItemNode.cs" />
     <Compile Include="Nodes\Databases\ObjectDatabaseNode.cs" />
     <Compile Include="Nodes\Databases\AetDatabaseNode.cs" />
     <Compile Include="Nodes\IBLs\IBLNode.cs" />

@@ -73,10 +73,10 @@
     <Compile Include="Archives\FarcArchive.cs" />
     <Compile Include="Archives\IArchive.cs" />
     <Compile Include="Archives\EntryStream.cs" />
-    <Compile Include="Chritm\ChritmSet.cs" />
-    <Compile Include="Chritm\Cos.cs" />
-    <Compile Include="Chritm\Dbg.cs" />
-    <Compile Include="Chritm\Item.cs" />
+    <Compile Include="Chritm\CharacterItemTable.cs" />
+    <Compile Include="Chritm\Costume.cs" />
+    <Compile Include="Chritm\DebugSet.cs" />
+    <Compile Include="Chritm\CostumeItem.cs" />
     <Compile Include="Cryptography\DivafileDecryptor.cs" />
     <Compile Include="Databases\AetDatabase.cs" />
     <Compile Include="Databases\MotionDatabase.cs" />
