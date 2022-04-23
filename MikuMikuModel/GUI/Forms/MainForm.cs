@@ -22,6 +22,7 @@ using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
+using MikuMikuModel.Nodes.TypeConverters;
 using MikuMikuModel.Nodes.Wrappers;
 using MikuMikuModel.Resources;
 using MikuMikuModel.Resources.Styles;
@@ -697,6 +698,8 @@ namespace MikuMikuModel.GUI.Forms
 
         protected override void OnLoad( EventArgs eventArgs )
         {
+            TypeConverterUtilities.RegisterTypeConverters();
+
             if ( Type.GetType( "Mono.Runtime" ) == null )
             {
                 StyleHelpers.StoreDefaultStyle( this );

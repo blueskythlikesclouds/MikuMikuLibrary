@@ -168,6 +168,7 @@
     <Compile Include="Nodes\PostProcessTables\ToonEdge\ToonEdgeNode.cs" />
     <Compile Include="Nodes\PostProcessTables\ToonEdge\ToonSettingNode.cs" />
     <Compile Include="Nodes\TypeConverters\IdTypeConverter.cs" />
+    <Compile Include="Nodes\TypeConverters\TypeConverterUtilities.cs" />
     <Compile Include="Resources\Styles\Style.cs" />
     <Compile Include="Resources\Styles\StyleColorTable.cs" />
     <Compile Include="Resources\Styles\StyleHelpers.cs" />
