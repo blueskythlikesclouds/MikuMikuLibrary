@@ -112,6 +112,11 @@ namespace MikuMikuModel.Nodes
             remove => Node.Moved -= value;
         }
 
+        public void NotifyModified( NodeModifyFlags modifyFlags )
+        {
+            Node.NotifyModified( modifyFlags );
+        }
+
         public void Populate()
         {
             Node.Populate();
