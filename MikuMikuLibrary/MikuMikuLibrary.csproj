@@ -73,10 +73,10 @@
     <Compile Include="Archives\FarcArchive.cs" />
     <Compile Include="Archives\IArchive.cs" />
     <Compile Include="Archives\EntryStream.cs" />
-    <Compile Include="Chritm\CharacterItemTable.cs" />
-    <Compile Include="Chritm\Costume.cs" />
-    <Compile Include="Chritm\DebugSet.cs" />
-    <Compile Include="Chritm\CostumeItem.cs" />
+    <Compile Include="CharacterItem\CharacterItemTable.cs" />
+    <Compile Include="CharacterItem\Costume.cs" />
+    <Compile Include="CharacterItem\DebugSet.cs" />
+    <Compile Include="CharacterItem\CostumeItem.cs" />
     <Compile Include="Cryptography\DivafileDecryptor.cs" />
     <Compile Include="Databases\AetDatabase.cs" />
     <Compile Include="Databases\MotionDatabase.cs" />
@@ -103,7 +103,7 @@
     <Compile Include="IO\Common\BitHelper.cs" />
     <Compile Include="IO\Common\VectorBinaryFormat.cs" />
     <Compile Include="IO\IBinaryFile.cs" />
-    <Compile Include="IO\Sections\Chritm\ChritmSetSection.cs" />
+    <Compile Include="IO\Sections\CharacterItem\ChritmSetSection.cs" />
     <Compile Include="IO\Sections\PostProcessTables\BloomTableSection.cs" />
     <Compile Include="IO\Sections\PostProcessTables\ColorCorrectTableSection.cs" />
     <Compile Include="IO\Sections\PostProcessTables\DepthOfFieldTableSection.cs" />

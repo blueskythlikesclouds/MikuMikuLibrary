@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Windows.Forms;
-using MikuMikuLibrary.Chritm;
+using MikuMikuLibrary.CharacterItem;
 using MikuMikuLibrary.IO;
 using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
 
-namespace MikuMikuModel.Nodes.Chritm
+namespace MikuMikuModel.Nodes.CharacterItem
 {
     class CharacterItemTableNode : BinaryFileNode<CharacterItemTable>
     {

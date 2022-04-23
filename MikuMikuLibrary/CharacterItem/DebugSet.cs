@@ -7,16 +7,18 @@ using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.Misc;
 
-namespace MikuMikuLibrary.Chritm
+namespace MikuMikuLibrary.CharacterItem
 {
-    public class Costume
+    public class DebugSet
     {
-        public int CostumeID { get; set; }
+        public ulong ID { get; set; }
+        public string Name { get; set; }
         public List<int> Parts { get; }
 
         internal void Read(EndianBinaryReader reader)
         {
-            CostumeID = reader.ReadInt32();
+            ID = reader.ReadUInt64();
+            Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
             for (int i = 0; i < 25; i++)
             {
                 Parts.Add(reader.ReadInt32());
@@ -25,14 +27,15 @@ namespace MikuMikuLibrary.Chritm
 
         internal void Write(EndianBinaryWriter writer)
         {
-            writer.Write(CostumeID);
+            writer.Write(ID);
+            writer.AddStringToStringTable(Name);
             for (int i = 0; i < 25; i++)
             {
                 writer.Write(Parts[i]);
             }
         }
 
-        public Costume()
+        public DebugSet()
         {
             Parts = new List<int>();
         }

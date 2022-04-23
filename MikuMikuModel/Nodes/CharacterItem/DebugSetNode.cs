@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
-using MikuMikuLibrary.Chritm;
+using MikuMikuLibrary.CharacterItem;
 
-namespace MikuMikuModel.Nodes.Chritm
+namespace MikuMikuModel.Nodes.CharacterItem
 {
     class DebugSetNode : Node<DebugSet>
     {

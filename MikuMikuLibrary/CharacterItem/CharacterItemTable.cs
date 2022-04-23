@@ -7,7 +7,7 @@ using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 
-namespace MikuMikuLibrary.Chritm
+namespace MikuMikuLibrary.CharacterItem
 {
     public class CharacterItemTable : BinaryFile
     {

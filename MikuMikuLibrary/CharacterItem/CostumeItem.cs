@@ -7,7 +7,7 @@ using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.Misc;
 
-namespace MikuMikuLibrary.Chritm
+namespace MikuMikuLibrary.CharacterItem
 {
     public class CostumeItemObject
     {

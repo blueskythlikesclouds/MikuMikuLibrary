@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using MikuMikuLibrary.IO;
-using MikuMikuLibrary.Chritm;
+using MikuMikuLibrary.CharacterItem;
 
-namespace MikuMikuModel.Modules.Chritm
+namespace MikuMikuModel.Modules.CharacterItem
 {
     public class CharacterItemTableModule : FormatModule<CharacterItemTable>
     {
