@@ -30,7 +30,7 @@ Supported files:
 * mot_db.bin
 * obj_db.bin/.osi
 * spr_db.bin/.spi
-* stage_data.bin
+* stage_data.bin/.stg
 * str_array.bin/string_array.bin/.str
 * tex_db.bin/.txi
 
