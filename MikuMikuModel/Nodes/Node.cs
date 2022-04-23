@@ -166,6 +166,20 @@ namespace MikuMikuModel.Nodes
         public event EventHandler<NodeMoveEventArgs> Moved;
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public void NotifyModified( NodeModifyFlags modifyFlags )
+        {
+            if ( modifyFlags.HasFlag( NodeModifyFlags.Property ) )
+                OnPropertyChanged( $"{nameof( NodeModifyFlags )}.{nameof( NodeModifyFlags.Property )}" );
+
+            if ( modifyFlags.HasFlag( NodeModifyFlags.Collection ) )
+            {
+                OnPropertyChanged( $"{nameof( NodeModifyFlags )}.{nameof( NodeModifyFlags.Collection )}" );
+
+                IsPopulated = false;
+                Populate();
+            }
+        }
+
         public void Populate()
         {
             if ( IsPopulated && !Flags.HasFlag( NodeFlags.Add ) )

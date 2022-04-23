@@ -72,6 +72,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -167,6 +168,7 @@
     <Compile Include="Nodes\PostProcessTables\Light\LightSettingNode.cs" />
     <Compile Include="Nodes\PostProcessTables\ToonEdge\ToonEdgeNode.cs" />
     <Compile Include="Nodes\PostProcessTables\ToonEdge\ToonSettingNode.cs" />
+    <Compile Include="Nodes\TypeConverters\DirtyCollectionEditor.cs" />
     <Compile Include="Nodes\TypeConverters\IdTypeConverter.cs" />
     <Compile Include="Nodes\TypeConverters\TypeConverterUtilities.cs" />
     <Compile Include="Resources\Styles\Style.cs" />

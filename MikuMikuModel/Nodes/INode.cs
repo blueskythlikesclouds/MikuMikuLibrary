@@ -36,6 +36,8 @@ namespace MikuMikuModel.Nodes
         event EventHandler<NodeReplaceEventArgs> Replaced;
         event EventHandler<NodeMoveEventArgs> Moved;
 
+        void NotifyModified(NodeModifyFlags modifyFlags);
+
         void Populate();
         void Synchronize();
 
@@ -75,5 +77,12 @@ namespace MikuMikuModel.Nodes
         Export = 1 << 4,
         Replace = 1 << 5,
         Move = 1 << 6
+    }
+
+    [Flags]
+    public enum NodeModifyFlags
+    {
+        Property = 1 << 0,
+        Collection = 1 << 1
     }
 }
