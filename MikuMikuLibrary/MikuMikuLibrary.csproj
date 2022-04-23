@@ -110,6 +110,8 @@
     <Compile Include="Objects\Extra\Parameters\OsageCollisionParameter.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageNodeParameter.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageSkinParameter.cs" />
+    <Compile Include="Parameters\Extensions\ParameterTreeEx.cs" />
+    <Compile Include="Parameters\Extensions\ParameterTreeWriterEx.cs" />
     <Compile Include="Parameters\ParameterTree.cs" />
     <Compile Include="IO\Sections\Aets\AetSetSection.cs" />
     <Compile Include="IO\Sections\Databases\AetDatabaseSection.cs" />

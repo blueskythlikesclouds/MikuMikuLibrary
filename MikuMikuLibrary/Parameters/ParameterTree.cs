@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Text;
 using MikuMikuLibrary.Extensions;
+using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
 namespace MikuMikuLibrary.Parameters
@@ -11,13 +14,19 @@ namespace MikuMikuLibrary.Parameters
         private readonly Dictionary<string, object> mValues;
         private readonly Stack<ParameterTree> mScopeStack;
 
-        public IEnumerable<string> Keys => mValues.Keys;
+        public ParameterTree Current => mScopeStack.Count > 0 ? mScopeStack.Peek() : this;
+        public IEnumerable<string> Keys => Current.mValues.Keys;
+
+        // Read operations
+
+        public bool Contains( string key )
+        {
+            return Current.mValues.ContainsKey( key );
+        }
 
         public bool OpenScope<T>( T key )
         {
-            var paramTree = mScopeStack.Count > 0 ? mScopeStack.Peek() : this;
-
-            if ( !paramTree.mValues.TryGetValue( $"{key}", out var value ) || !( value is ParameterTree subParamTree ) )
+            if ( !Current.mValues.TryGetValue( $"{key}", out var value ) || !( value is ParameterTree subParamTree ) )
                 return false;
 
             mScopeStack.Push( subParamTree );
@@ -31,9 +40,7 @@ namespace MikuMikuLibrary.Parameters
 
         public T Get<T>( string key, T fallback = default )
         {
-            var paramTree = mScopeStack.Count > 0 ? mScopeStack.Peek() : this;
-
-            if ( paramTree.mValues.TryGetValue( key, out var value ) )
+            if ( Current.mValues.TryGetValue( key, out var value ) )
                 return ( T ) Convert.ChangeType( value, typeof( T ), CultureInfo.InvariantCulture );
 
             return fallback;
@@ -56,6 +63,52 @@ namespace MikuMikuLibrary.Parameters
             }
 
             CloseScope();
+        }
+
+        // Write operations
+
+        public void CreateScope<T>( T key )
+        {
+            var current = Current;
+            string keyStr = $"{key}";
+            
+            if ( !current.mValues.TryGetValue( keyStr, out var value ) || !( value is ParameterTree subParamTree ) )
+                current.mValues[ keyStr ] = ( subParamTree = new ParameterTree() );
+
+            mScopeStack.Push( subParamTree );
+        }
+
+        public void Set<T>( string key, T value )
+        {
+            Current.mValues[ key ] = value;
+        }
+
+        public void Write( ParameterTreeWriter writer )
+        {
+            foreach ( var pair in mValues )
+            {
+                if ( pair.Value is ParameterTree parameterTree )
+                {
+                    writer.PushScope( pair.Key );
+                    parameterTree.Write( writer );
+                    writer.PopScope();
+                }
+
+                else
+                    writer.Write( pair.Key, pair.Value );
+            }
+        }
+
+        public static ParameterTree Load( Stream stream, bool leaveOpen = false )
+        {
+            using ( var reader = new EndianBinaryReader( stream, Encoding.UTF8, Endianness.Little, leaveOpen ) )
+                return new ParameterTree( reader );
+        }
+
+        public static ParameterTree Load( string filePath )
+        {
+            using ( var stream = File.OpenRead( filePath ) )
+                return Load( stream );
         }
 
         public ParameterTree()

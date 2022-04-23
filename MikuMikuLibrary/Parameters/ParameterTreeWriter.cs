@@ -61,6 +61,24 @@ namespace MikuMikuLibrary.Parameters
             PopScope();
         }
 
+        public void Write( string key, int count, Action<int> writer )
+        {
+            PushScope( key );
+            {
+                for ( int i = 0; i < count; i++ )
+                {
+                    PushScope( i );
+                    {
+                        writer( i );
+                    }
+                    PopScope();
+                }
+
+                Write( "length", count );
+            }
+            PopScope();
+        }
+
         public void PushScope<T>( T scope )
         {
             mScopes.Add( scope );
