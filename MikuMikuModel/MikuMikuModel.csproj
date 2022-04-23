@@ -119,6 +119,7 @@
     <Compile Include="Mementos\IMemento.cs" />
     <Compile Include="Mementos\ValueMemento.cs" />
     <Compile Include="Modules\Aets\AetSetModule.cs" />
+    <Compile Include="Modules\CharacterItem\CharacterItemTableModule.cs" />
     <Compile Include="Modules\Databases\AetDatabaseModule.cs" />
     <Compile Include="Modules\IBLs\IBLModule.cs" />
     <Compile Include="Modules\Imaging\BitmapModule.cs" />
@@ -143,6 +144,10 @@
     <Compile Include="Nodes\Aets\TransferModeNode.cs" />
     <Compile Include="Nodes\Aets\VideoNode.cs" />
     <Compile Include="Nodes\Aets\VideoSourceNode.cs" />
+    <Compile Include="Nodes\CharacterItem\CharacterItemTableNode.cs" />
+    <Compile Include="Nodes\CharacterItem\CostumeNode.cs" />
+    <Compile Include="Nodes\CharacterItem\DebugSetNode.cs" />
+    <Compile Include="Nodes\CharacterItem\CostumeItemNode.cs" />
     <Compile Include="Nodes\Databases\ObjectDatabaseNode.cs" />
     <Compile Include="Nodes\Databases\AetDatabaseNode.cs" />
     <Compile Include="Nodes\IBLs\IBLNode.cs" />
