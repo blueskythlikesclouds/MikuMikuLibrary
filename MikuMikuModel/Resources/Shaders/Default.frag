@@ -112,9 +112,15 @@ void standard()
     {
         if ( uHasTangent && uHasNormalTexture && uHasTexCoord0 )
         {
-            normal = texture( uNormalTexture, fTexCoord0 ).xyz * 2 - 1;
-            normal.z = sqrt( 1 - normal.x * normal.x - normal.y * normal.y );
-            normal = normalize( fTangent * normal.x + fBitangent * normal.y + fNormal * normal.z );
+            vec4 tmp = texture( uNormalTexture, fTexCoord0 );
+            tmp.xy = tmp.xy * 2.0 - 1.0;
+            tmp.zw = tmp.xy * tmp.xy * tmp.xy;
+            tmp *= vec4(1.5, 1.5, 2.0, 2.0);
+            tmp.xy += tmp.zw;
+
+            normal += fTangent * tmp.x;
+            normal += fBitangent * tmp.y;
+            normal = normalize(normal);
         }
 
         fresnel = pow( 1 - clamp( dot( normal, viewDirection ), 0, 1 ), 5 );
