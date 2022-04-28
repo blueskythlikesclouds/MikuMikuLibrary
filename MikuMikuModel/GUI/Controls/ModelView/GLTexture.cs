@@ -26,7 +26,33 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 { TextureFormat.ATI1, InternalFormat.CompressedRedRgtc1 },
                 { TextureFormat.ATI2, InternalFormat.CompressedRgRgtc2 },
                 { TextureFormat.L8, InternalFormat.Luminance8 },
-                { TextureFormat.L8A8, InternalFormat.Luminance8Alpha8 }
+                { TextureFormat.L8A8, InternalFormat.Luminance8Alpha8 },
+            };
+
+        private static readonly IReadOnlyDictionary<TextureFormat, PixelFormat> sPixelFormatMap =
+            new Dictionary<TextureFormat, PixelFormat>
+            {
+                { TextureFormat.A8, PixelFormat.Alpha },
+                { TextureFormat.RGB8 , PixelFormat.Rgb },
+                { TextureFormat.RGBA8 , PixelFormat.Rgba },
+                { TextureFormat.RGB5, PixelFormat.Rgb },
+                { TextureFormat.RGB5A1, PixelFormat.Rgba },
+                { TextureFormat.RGBA4, PixelFormat.Rgba },
+                { TextureFormat.L8, PixelFormat.Luminance },
+                { TextureFormat.L8A8, PixelFormat.LuminanceAlpha }
+            };
+
+        private static readonly IReadOnlyDictionary<TextureFormat, PixelType> sPixelTypeMap =
+            new Dictionary<TextureFormat, PixelType>
+            {
+                { TextureFormat.A8, PixelType.UnsignedByte },
+                { TextureFormat.RGB8 , PixelType.UnsignedByte },
+                { TextureFormat.RGBA8 , PixelType.UnsignedByte },
+                { TextureFormat.RGB5, PixelType.UnsignedShort5551 },
+                { TextureFormat.RGB5A1, PixelType.UnsignedShort5551 },
+                { TextureFormat.RGBA4, PixelType.UnsignedShort4444 },
+                { TextureFormat.L8, PixelType.UnsignedByte },
+                { TextureFormat.L8A8, PixelType.UnsignedByte }
             };
 
         private readonly long mLength;
@@ -64,6 +90,43 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Dispose( false );
         }
 
+        private void SetImage( SubTexture subTexture, int levelIndex, int mipMapIndex )
+        {
+            if ( levelIndex > 0 )
+                levelIndex = sCubeMapIndices[ levelIndex ];
+
+            var target = Target == TextureTarget.TextureCubeMap
+                ? TextureTarget.TextureCubeMapPositiveX + levelIndex
+                : TextureTarget.Texture2D;
+
+            if ( TextureFormatUtilities.IsBlockCompressed( subTexture.Format ) )
+            {
+                GL.CompressedTexImage2D(
+                    target,
+                    mipMapIndex,
+                    sInternalFormatMap[ subTexture.Format ],
+                    subTexture.Width,
+                    subTexture.Height,
+                    0,
+                    subTexture.Data.Length,
+                    subTexture.Data );
+            }
+
+            else
+            {
+                GL.TexImage2D(
+                    target,
+                    mipMapIndex,
+                    ( PixelInternalFormat ) sInternalFormatMap[ subTexture.Format ],
+                    subTexture.Width,
+                    subTexture.Height,
+                    0,
+                    sPixelFormatMap[ subTexture.Format ],
+                    sPixelTypeMap[ subTexture.Format ],
+                    subTexture.Data );
+            }
+        }
+
         public GLTexture( Texture texture )
         {
             Id = GL.GenTexture();
@@ -79,14 +142,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.LinearMipmapNearest );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
-                var format = sInternalFormatMap[ texture.Format ];
-
-                for ( int i = 0; i < sCubeMapIndices.Length; i++ )
+                for ( int i = 0; i < texture.ArraySize; i++ )
                 for ( int j = 0; j < texture.MipMapCount; j++ )
-                {
-                    GL.CompressedTexImage2D( TextureTarget.TextureCubeMapPositiveX + sCubeMapIndices[ i ], j, format, texture[ i, j ].Width,
-                        texture[ i, j ].Height, 0, texture[ i, j ].Data.Length, texture[ i, j ].Data );
-                }
+                    SetImage( texture[ i, j ], i, j );
             }
 
             else
@@ -94,19 +152,20 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 Target = TextureTarget.Texture2D;
                 GL.BindTexture( TextureTarget.Texture2D, Id );
 
-                GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int ) TextureWrapMode.Repeat );
-                GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int ) TextureWrapMode.Repeat );
+                var wrapMode = TextureWrapMode.Repeat;
+
+                if ( texture.Width == 256 && texture.Height == 8 && !TextureFormatUtilities.IsBlockCompressed( texture.Format ) )
+                    wrapMode = TextureWrapMode.ClampToEdge; // Toon curve needs clamp wrap mode
+
+                GL.TexParameter( Target, TextureParameterName.TextureWrapS, ( int ) wrapMode );
+                GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int ) wrapMode );
                 GL.TexParameter( Target, TextureParameterName.TextureMagFilter, ( int ) TextureMagFilter.Linear );
                 GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.LinearMipmapLinear );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
-                var format = sInternalFormatMap[ texture.Format ];
-
-                for ( int i = 0; i < texture.MipMapCount; i++ )
-                {
-                    GL.CompressedTexImage2D( TextureTarget.Texture2D, i, format, texture[ i ].Width, texture[ i ].Height, 0, texture[ i ].Data.Length,
-                        texture[ i ].Data );
-                }
+                for ( int i = 0; i < texture.ArraySize; i++ )
+                for ( int j = 0; j < texture.MipMapCount; j++ )
+                    SetImage( texture[ i, j ], i, j );
             }
 
             mLength = texture.EnumerateLevels()

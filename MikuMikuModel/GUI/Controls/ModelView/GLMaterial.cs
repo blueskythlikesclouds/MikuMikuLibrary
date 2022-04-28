@@ -18,6 +18,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
         public GLTexture Normal { get; }
         public GLTexture Specular { get; }
         public GLTexture Reflection { get; }
+        public GLTexture ToonCurve { get; }
         public Color4 DiffuseColor { get; }
         public Color4 AmbientColor { get; }
         public Color4 SpecularColor { get; }
@@ -38,6 +39,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Normal?.Dispose();
             Specular?.Dispose();
             Reflection?.Dispose();
+            ToonCurve?.Dispose();
         }
 
         public void Bind( GLShaderProgram shaderProgram )
@@ -74,6 +76,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             ActivateTexture( Normal, "NormalTexture" );
             ActivateTexture( Specular, "SpecularTexture" );
             ActivateTexture( Reflection, "ReflectionTexture", TextureTarget.TextureCubeMap );
+            ActivateTexture( ToonCurve, "ToonCurveTexture" );
         }
 
         public GLMaterial( Material material, Dictionary<uint, GLTexture> textures, TextureSet textureSet )
@@ -93,12 +96,16 @@ namespace MikuMikuModel.GUI.Controls.ModelView
             Normal = GetTexture( MaterialTextureType.Normal, 0 );
             Specular = GetTexture( MaterialTextureType.Specular, 0 );
             Reflection = GetTexture( MaterialTextureType.EnvironmentCube, 0 );
+            ToonCurve = GetTexture( MaterialTextureType.Color, 2 );
 
             DiffuseColor = material.Diffuse.ToGL();
             SpecularColor = material.Specular.ToGL();
             AmbientColor = new Color4( 0.25f, 0.25f, 0.25f, 1.0f );
             Shininess = material.Shininess;
             AnisoDirection = material.AnisoDirection;
+
+            if ( material.ShaderName == "HAIR" && ToonCurve != null )
+                AnisoDirection = AnisoDirection.V;
 
             CullFace = !material.DoubleSided;
             PunchThrough = material.PunchThrough;
