@@ -482,6 +482,9 @@ namespace MikuMikuModel.GUI.Controls
                 GL.DepthMask( false );
                 Draw( mTransparentDrawCommands );
             }
+
+            GL.Disable( EnableCap.Blend );
+            GL.DepthMask( true );
         }
 
         private void DrawGrid( ref Matrix4 view, ref Matrix4 projection )
@@ -524,8 +527,8 @@ namespace MikuMikuModel.GUI.Controls
 
             GetViewMatrix( out mViewMatrix );
 
-            DrawModel( ref mViewMatrix, ref mProjectionMatrix );
             DrawGrid( ref mViewMatrix, ref mProjectionMatrix );
+            DrawModel( ref mViewMatrix, ref mProjectionMatrix );
 
             SwapBuffers();
         }
