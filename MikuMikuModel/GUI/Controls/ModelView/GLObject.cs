@@ -19,9 +19,9 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 material.Dispose();
         }
 
-        public void Draw( GLShaderProgram shaderProgram )
+        public void Submit(List<DrawCommand> opaqueCommands, List<DrawCommand> transparentCommands)
         {
-            foreach ( var mesh in Meshes ) mesh.Draw( shaderProgram );
+            foreach ( var mesh in Meshes ) mesh.Submit( opaqueCommands, transparentCommands );
         }
 
         public GLObject( Object obj, Dictionary<uint, GLTexture> textures, TextureSet textureSet )

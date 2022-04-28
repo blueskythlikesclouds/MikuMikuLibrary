@@ -9,5 +9,5 @@ uniform vec4 uBackColor;
 
 void main()
 {
-    oColor = vec4( mix( uBackColor.rgb, fColor, clamp( ( 45.0 + fPosition.z ) / 45.0, 0.0, 1.0 ) ), 1.0 );
+    oColor = vec4( fColor, clamp( ( 45.0 + fPosition.z ) / 45.0, 0.0, 1.0 ) );
 }

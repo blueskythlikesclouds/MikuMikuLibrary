@@ -1,9 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using MikuMikuLibrary.Geometry;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
-    internal interface IDrawable : IDisposable
+    public struct DrawCommand
     {
-        void Draw( GLShaderProgram shaderProgram );
+        public GLMesh Mesh;
+        public GLSubMesh SubMesh;
+    }
+
+    public interface IDrawable : IDisposable
+    {
+        void Submit( List<DrawCommand> opaqueCommands, List<DrawCommand> transparentCommands );
     }
 }

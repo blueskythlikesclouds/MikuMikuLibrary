@@ -17,5 +17,8 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public static Color4 ToGL( this Color value ) => 
             *( Color4* ) &value;
+
+        public static Matrix4 ToGL( this System.Numerics.Matrix4x4 value ) =>
+            *( Matrix4* ) &value;
     }
 }

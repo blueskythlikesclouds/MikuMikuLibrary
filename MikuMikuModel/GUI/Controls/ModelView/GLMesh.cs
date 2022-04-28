@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MikuMikuLibrary.Misc;
 using MikuMikuLibrary.Objects;
 using OpenTK.Graphics.OpenGL;
@@ -22,18 +23,17 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public List<GLSubMesh> SubMeshes { get; }
 
-        public void Draw( GLShaderProgram shaderProgram )
+        public void Submit( List<DrawCommand> opaqueCommands, List<DrawCommand> transparentCommands )
         {
-            shaderProgram.SetUniform( "uHasNormal", NormalBuffer != null );
-            shaderProgram.SetUniform( "uHasTexCoord0", TexCoord0Buffer != null );
-            shaderProgram.SetUniform( "uHasTexCoord1", TexCoord1Buffer != null );
-            shaderProgram.SetUniform( "uHasColor0", Color0Buffer != null );
-            shaderProgram.SetUniform( "uHasTangent", TangentBuffer != null );
-
-            GL.BindVertexArray( VertexArrayId );
-
             foreach ( var subMesh in SubMeshes )
-                subMesh.Draw( shaderProgram );
+            {
+                var drawCommand = new DrawCommand { Mesh = this, SubMesh = subMesh };
+
+                if ( subMesh.Material.IsTransparent )
+                    transparentCommands.Add( drawCommand );
+                else
+                    opaqueCommands.Add( drawCommand );
+            }
         }
 
         public void Dispose()

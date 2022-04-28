@@ -33,6 +33,7 @@ uniform vec4 uAmbientColor;
 uniform vec4 uSpecularColor;
 uniform float uShininess;
 uniform int uAnisoDirection;
+uniform bool uPunchThrough;
 
 uniform vec3 uViewPosition;
 uniform vec3 uLightPosition;
@@ -56,15 +57,15 @@ void main()
 
     if ( uHasColor0 )
         diffuseColor *= fColor0;
-
-    if ( diffuseColor.a < ALPHA_THRESHOLD )
+        
+    if ( uPunchThrough && diffuseColor.a < ALPHA_THRESHOLD )
         discard;
 
     if ( uHasSpecularTexture && uHasTexCoord0 )
-        specularColor *= texture( uSpecularTexture, fTexCoord0 );
+        specularColor *= pow( texture( uSpecularTexture, fTexCoord0 ), GAMMA );
 
     if ( uHasAmbientTexture && uHasTexCoord1 )
-        ambientColor *= texture( uAmbientTexture, fTexCoord1 ).rgb;
+        diffuseColor.rgb *= pow( texture( uAmbientTexture, fTexCoord1 ), GAMMA ).rgb;
 
     vec3 directLighting = vec3( 0 );
 
@@ -100,7 +101,7 @@ void main()
     vec3 indirectLighting = ambientColor * diffuseColor.rgb;
 
     if ( uHasNormal && uHasReflectionTexture )
-        indirectLighting += texture( uReflectionTexture, reflect( -viewDirection, normal ) ).rgb * specularColor.rgb * specularColor.w;
+        indirectLighting += pow( texture( uReflectionTexture, reflect( -viewDirection, normal ) ), GAMMA ).rgb * specularColor.w * ( dot( normal, lightDirection ) * 0.5 + 0.5 );
 
     oColor = pow( vec4( directLighting + indirectLighting, diffuseColor.a ), INVERSE_GAMMA );
 }

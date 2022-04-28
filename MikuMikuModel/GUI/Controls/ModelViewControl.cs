@@ -80,6 +80,9 @@ namespace MikuMikuModel.GUI.Controls
 
         private Matrix4 mViewMatrix;
 
+        private readonly List<DrawCommand> mOpaqueDrawCommands;
+        private readonly List<DrawCommand> mTransparentDrawCommands;
+
         public static ModelViewControl Instance => sInstance ?? ( sInstance = new ModelViewControl() );
 
         private bool CanRender => mDefaultShader != null && mGridShader != null;
@@ -329,7 +332,7 @@ namespace MikuMikuModel.GUI.Controls
 
         private void GetProjectionMatrix( out Matrix4 projection )
         {
-            projection = Matrix4.CreatePerspectiveFieldOfView( sFieldOfView, ( float ) Width / Height, 0.1f, 100000f );
+            projection = Matrix4.CreatePerspectiveFieldOfView( sFieldOfView, ( float ) Width / Height, 0.1f, 1000f );
         }
 
         private void OnStyleChanged( object sender, StyleChangedEventArgs eventArgs )
@@ -405,6 +408,39 @@ namespace MikuMikuModel.GUI.Controls
             GL.EnableVertexAttribArray( 0 );
         }
 
+        private void Draw( List<DrawCommand> drawCommands )
+        {
+            GLMesh prevMesh = null;
+            GLSubMesh prevSubMesh = null;
+            GLMaterial prevMaterial = null;
+
+            foreach ( var drawCommand in drawCommands )
+            {
+                if ( prevMesh != drawCommand.Mesh )
+                {
+                    mDefaultShader.SetUniform( "uHasNormal", drawCommand.Mesh.NormalBuffer != null );
+                    mDefaultShader.SetUniform( "uHasTexCoord0", drawCommand.Mesh.TexCoord0Buffer != null );
+                    mDefaultShader.SetUniform( "uHasTexCoord1", drawCommand.Mesh.TexCoord1Buffer != null );
+                    mDefaultShader.SetUniform( "uHasColor0", drawCommand.Mesh.Color0Buffer != null );
+                    mDefaultShader.SetUniform( "uHasTangent", drawCommand.Mesh.TangentBuffer != null );
+
+                    GL.BindVertexArray( drawCommand.Mesh.VertexArrayId );
+                }
+
+                if ( prevMaterial != drawCommand.SubMesh.Material )
+                    drawCommand.SubMesh.Material.Bind( mDefaultShader );
+
+                if (prevSubMesh != drawCommand.SubMesh )
+                    drawCommand.SubMesh.ElementBuffer.Bind();
+
+                GL.DrawElements( drawCommand.SubMesh.PrimitiveType, drawCommand.SubMesh.ElementBuffer.Length, DrawElementsType.UnsignedInt, 0 );
+
+                prevMesh = drawCommand.Mesh;
+                prevMaterial = drawCommand.SubMesh.Material;
+                prevSubMesh = drawCommand.SubMesh;
+            }
+        }
+
         private void DrawModel( ref Matrix4 view, ref Matrix4 projection )
         {
             mDefaultShader.Use();
@@ -423,7 +459,29 @@ namespace MikuMikuModel.GUI.Controls
                 mDefaultShader.SetUniform( "uLightPosition", mCamPosition );
             }
 
-            mModel.Draw( mDefaultShader );
+            mOpaqueDrawCommands.Clear();
+            mTransparentDrawCommands.Clear();
+
+            mModel.Submit( mOpaqueDrawCommands, mTransparentDrawCommands );
+
+            if ( mOpaqueDrawCommands.Count > 0 )
+            {
+                GL.Disable( EnableCap.Blend );
+                GL.DepthMask( true );
+                Draw( mOpaqueDrawCommands );
+            }
+
+            if ( mTransparentDrawCommands.Count > 0 )
+            {
+                mTransparentDrawCommands.Sort( ( x, y ) =>
+                    Vector3.DistanceSquared( y.SubMesh.Center, mCamPosition )
+                        .CompareTo( Vector3.DistanceSquared( x.SubMesh.Center, mCamPosition ) ) );
+
+                // Transparent
+                GL.Enable( EnableCap.Blend );
+                GL.DepthMask( false );
+                Draw( mTransparentDrawCommands );
+            }
         }
 
         private void DrawGrid( ref Matrix4 view, ref Matrix4 projection )
@@ -431,14 +489,18 @@ namespace MikuMikuModel.GUI.Controls
             mGridShader.Use();
             mGridShader.SetUniform( "uView", view );
             mGridShader.SetUniform( "uProjection", projection );
-            mGridShader.SetUniform( "uBackColor", mBackgroundColor );
             mGridShader.SetUniform( "uInnerColor", mGridInnerColor );
             mGridShader.SetUniform( "uOuterColor", mGridOuterColor );
             mGridShader.SetUniform( "uXColor", mGridXColor );
             mGridShader.SetUniform( "uZColor", mGridZColor );
 
+            GL.Enable( EnableCap.Blend );
+            GL.DepthMask( false );
+            GL.BlendFunc( BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha );
             GL.BindVertexArray( mGridVertexArrayId );
             GL.DrawArrays( PrimitiveType.Lines, 0, mGridVertexBuffer.Length );
+            GL.Disable( EnableCap.Blend );
+            GL.DepthMask( true );
         }
 
         protected override void OnPaint( PaintEventArgs pe )
@@ -696,6 +758,9 @@ namespace MikuMikuModel.GUI.Controls
                 Visible = false;
                 return;
             }
+
+            mOpaqueDrawCommands = new List<DrawCommand>( 32 );
+            mTransparentDrawCommands = new List<DrawCommand>( 32 );
 
             GL.FrontFace( FrontFaceDirection.Ccw );
             GL.CullFace( CullFaceMode.Back );

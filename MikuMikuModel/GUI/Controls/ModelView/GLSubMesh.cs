@@ -1,23 +1,18 @@
 ﻿using System.Collections.Generic;
+using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Objects;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
 
 namespace MikuMikuModel.GUI.Controls.ModelView
 {
-    public class GLSubMesh : IDrawable
+    public class GLSubMesh
     {
+        public Vector3 Center { get; }
         public GLBuffer<uint> ElementBuffer { get; }
         public PrimitiveType PrimitiveType { get; }
         public GLMaterial Material { get; }
-
-        public void Draw( GLShaderProgram shaderProgram )
-        {
-            Material.Bind( shaderProgram );
-            ElementBuffer.Bind();
-
-            GL.DrawElements( PrimitiveType, ElementBuffer.Length, DrawElementsType.UnsignedInt, 0 );
-        }
 
         public void Dispose()
         {
@@ -27,6 +22,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
 
         public GLSubMesh( SubMesh subMesh, List<GLMaterial> materials )
         {
+            Center = subMesh.BoundingSphere.Center.ToGL();
             ElementBuffer = new GLBuffer<uint>( BufferTarget.ElementArrayBuffer, subMesh.Indices,
                 BufferUsageHint.StaticDraw );
 

@@ -76,7 +76,7 @@ namespace MikuMikuModel.GUI.Controls.ModelView
                 GL.TexParameter( Target, TextureParameterName.TextureWrapT, ( int ) TextureWrapMode.ClampToEdge );
                 GL.TexParameter( Target, TextureParameterName.TextureWrapR, ( int ) TextureWrapMode.ClampToEdge );
                 GL.TexParameter( Target, TextureParameterName.TextureMagFilter, ( int ) TextureMagFilter.Linear );
-                GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.Linear );
+                GL.TexParameter( Target, TextureParameterName.TextureMinFilter, ( int ) TextureMinFilter.LinearMipmapNearest );
                 GL.TexParameter( Target, TextureParameterName.TextureMaxLevel, texture.MipMapCount - 1 );
 
                 var format = sInternalFormatMap[ texture.Format ];

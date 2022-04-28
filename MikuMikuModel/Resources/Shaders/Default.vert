@@ -9,6 +9,8 @@ layout ( location = 5 ) in vec4 aColor0;
 
 uniform mat4 uView;
 uniform mat4 uProjection;
+uniform mat4 uDiffuseTransformation;
+uniform mat4 uAmbientTransformation;
 
 out vec3 fPosition;
 out vec3 fNormal;
@@ -24,8 +26,8 @@ void main()
     fNormal = aNormal;
     fTangent = normalize( aTangent.xyz - dot( aTangent.xyz, aNormal ) * aNormal );
     fBitangent = cross( fNormal, fTangent ) * aTangent.w;
-    fTexCoord0 = aTexCoord0;
-    fTexCoord1 = aTexCoord1;
+    fTexCoord0 = ( uDiffuseTransformation * vec4( aTexCoord0, 0, 0 ) ).xy;
+    fTexCoord1 = ( uAmbientTransformation * vec4( aTexCoord1, 0, 0 ) ).xy;
     fColor0 = aColor0;
 
     gl_Position = uProjection * uView * vec4( aPosition, 1.0 );
