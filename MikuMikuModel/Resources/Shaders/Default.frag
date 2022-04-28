@@ -40,9 +40,42 @@ uniform bool uPunchThrough;
 uniform vec3 uViewPosition;
 uniform vec3 uLightPosition;
 
-const vec4 GAMMA = vec4( vec3( 2.2 ), 1 );
-const vec4 INVERSE_GAMMA = 1.0 / GAMMA;
 const float ALPHA_THRESHOLD = 0.5;
+
+vec2 yccLookup(float x)
+{
+    float v9 = 1.5;
+    float samples = 32;
+    float scale = 1.0 / samples;
+    float i = x * 16 * samples;
+    float v11 = exp( -i * scale );
+    float v10 = pow( 1.0 - v11, v9 );
+    v11 = v10 * 2.0 - 1.0;
+    v11 *= v11;
+    v11 *= v11;
+    v11 *= v11;
+    v11 *= v11;
+
+    return vec2( v10, v10 * ( samples / i ) * ( 1.0 - v11 ) );
+}
+
+vec3 yccToneMap( vec3 c )
+{
+    float exposure = 2.0;
+
+    vec4 color;
+    color.rgb = c;
+
+    color.y = dot( color.rgb, vec3( 0.30, 0.59, 0.11 ) );
+    color.rb -= color.y;
+    color.yw = yccLookup( color.y * exposure * 0.0625 );
+    color.rb *= exposure * color.w;
+    color.w = dot( color.rgb, vec3( -0.508475, 1.0, -0.186441 ) );
+    color.rb += color.y;
+    color.g = color.w;
+
+    return color.rgb;
+}
 
 void standard()
 {
@@ -54,8 +87,10 @@ void standard()
     vec4 specularColor = uSpecularColor;
     vec3 ambientColor = uAmbientColor.rgb;
 
+    specularColor.rgb *= 2.0;
+
     if ( uHasDiffuseTexture && uHasTexCoord0 )
-        diffuseColor *= pow( texture( uDiffuseTexture, fTexCoord0 ), GAMMA );
+        diffuseColor *= texture( uDiffuseTexture, fTexCoord0 );
 
     if ( uHasColor0 )
         diffuseColor *= fColor0;
@@ -64,11 +99,12 @@ void standard()
         discard;
 
     if ( uHasSpecularTexture && uHasTexCoord0 )
-        specularColor *= pow( texture( uSpecularTexture, fTexCoord0 ), GAMMA );
+        specularColor *= texture( uSpecularTexture, fTexCoord0 );
 
     if ( uHasAmbientTexture && uHasTexCoord1 )
-        diffuseColor.rgb *= pow( texture( uAmbientTexture, fTexCoord1 ), GAMMA ).rgb;
+        diffuseColor.rgb *= texture( uAmbientTexture, fTexCoord1 ).rgb;
 
+    float fresnel = 0;
     vec3 directLighting = vec3( 0 );
 
     vec3 normal = normalize( fNormal );
@@ -76,12 +112,12 @@ void standard()
     {
         if ( uHasTangent && uHasNormalTexture && uHasTexCoord0 )
         {
-            mat3 tangentToWorldMatrix = mat3( fTangent, fBitangent, fNormal );
-            
             normal = texture( uNormalTexture, fTexCoord0 ).xyz * 2 - 1;
             normal.z = sqrt( 1 - normal.x * normal.x - normal.y * normal.y );
-            normal = normalize( tangentToWorldMatrix * normal );
+            normal = normalize( fTangent * normal.x + fBitangent * normal.y + fNormal * normal.z );
         }
+
+        fresnel = pow( 1 - clamp( dot( normal, viewDirection ), 0, 1 ), 5 );
 
         directLighting += diffuseColor.rgb;
         
@@ -94,18 +130,18 @@ void standard()
         }
         else
         {
-            directLighting += pow( max( 0, dot( normal, halfwayDirection ) ), uShininess ) * specularColor.rgb;
+            directLighting += pow( clamp( dot( normal, halfwayDirection ), 0, 1 ), uShininess ) * specularColor.rgb;
         }
     }
 
-    directLighting *= max( 0, dot( normal, lightDirection ) );
+    directLighting *= clamp( dot( normal, lightDirection ), 0, 1 );
 
-    vec3 indirectLighting = ambientColor * diffuseColor.rgb;
+    vec3 indirectLighting = mix( ambientColor, vec3( 1 ), fresnel ) * diffuseColor.rgb;
 
     if ( uHasNormal && uHasReflectionTexture )
-        indirectLighting += pow( texture( uReflectionTexture, reflect( -viewDirection, normal ) ), GAMMA ).rgb * specularColor.w * ( dot( normal, lightDirection ) * 0.5 + 0.5 );
+        indirectLighting += texture( uReflectionTexture, reflect( -viewDirection, normal ) ).rgb * mix( specularColor.w * ( dot( normal, lightDirection ) * 0.5 + 0.5 ), 1, fresnel );
 
-    oColor = pow( vec4( directLighting + indirectLighting, diffuseColor.a ), INVERSE_GAMMA );
+    oColor = vec4( yccToneMap( directLighting + indirectLighting ), diffuseColor.a );
 }
 
 void chara()

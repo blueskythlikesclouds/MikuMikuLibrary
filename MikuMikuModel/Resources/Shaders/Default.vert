@@ -24,7 +24,7 @@ void main()
 {
     fPosition = aPosition;
     fNormal = aNormal;
-    fTangent = normalize( aTangent.xyz - dot( aTangent.xyz, aNormal ) * aNormal );
+    fTangent = aTangent.xyz;
     fBitangent = cross( fNormal, fTangent ) * aTangent.w;
     fTexCoord0 = ( uDiffuseTransformation * vec4( aTexCoord0, 0, 0 ) ).xy;
     fTexCoord1 = ( uAmbientTransformation * vec4( aTexCoord1, 0, 0 ) ).xy;
