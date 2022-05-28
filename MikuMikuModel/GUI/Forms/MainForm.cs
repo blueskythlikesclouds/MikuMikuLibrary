@@ -218,8 +218,8 @@ namespace MikuMikuModel.GUI.Forms
                     mNodeTreeView.SelectedNode = treeNode.Nodes[ 0 ] as NodeAsTreeNode;
 
                 mCurrentlyOpenFilePath = filePath;
-                mSaveToolStripMenuItem.Enabled = true;
-                mSaveAsToolStripMenuItem.Enabled = true;
+                mSaveToolStripMenuItem.Enabled = node.Flags.HasFlag( NodeFlags.Export );
+                mSaveAsToolStripMenuItem.Enabled = node.Flags.HasFlag( NodeFlags.Export );
                 mCloseToolStripMenuItem.Enabled = true;
 
                 FileHistory.Add( filePath );
