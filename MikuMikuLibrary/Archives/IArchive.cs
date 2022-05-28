@@ -4,19 +4,19 @@ using MikuMikuLibrary.IO;
 
 namespace MikuMikuLibrary.Archives
 {
-    public interface IArchive<THandle> : IEnumerable<THandle>, IBinaryFile
+    public interface IArchive : IEnumerable<string>, IBinaryFile
     {
         bool CanAdd { get; }
         bool CanRemove { get; }
 
-        IEnumerable<THandle> Entries { get; }
+        IEnumerable<string> FileNames { get; }
 
-        bool Contains( THandle handle );
-        void Add( THandle handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy );
-        void Add( THandle handle, string fileName, ConflictPolicy conflictPolicy );
-        void Remove( THandle handle );
+        bool Contains( string fileName );
+        void Add( string fileName, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy );
+        void Add( string fileName, string sourceFilePath, ConflictPolicy conflictPolicy );
+        void Remove( string fileName );
         void Clear();
 
-        EntryStream<THandle> Open( THandle handle, EntryStreamMode mode );
+        EntryStream Open( string fileName, EntryStreamMode mode );
     }
 }

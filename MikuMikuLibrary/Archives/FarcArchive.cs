@@ -12,7 +12,7 @@ using MikuMikuLibrary.IO.Sections;
 
 namespace MikuMikuLibrary.Archives
 {
-    public class FarcArchive : BinaryFile, IArchive<string>
+    public class FarcArchive : BinaryFile, IArchive
     {
         private readonly Dictionary<string, Entry> mEntries;
         private int mAlignment;
@@ -33,19 +33,19 @@ namespace MikuMikuLibrary.Archives
         public bool CanAdd => true;
         public bool CanRemove => true;
 
-        public IEnumerable<string> Entries => mEntries.Keys;
+        public IEnumerable<string> FileNames => mEntries.Keys;
 
-        public void Add( string handle, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
+        public void Add( string fileName, Stream source, bool leaveOpen, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError )
         {
-            if ( mEntries.TryGetValue( handle, out var entry ) )
+            if ( mEntries.TryGetValue( fileName, out var entry ) )
             {
                 switch ( conflictPolicy )
                 {
                     case ConflictPolicy.RaiseError:
-                        throw new InvalidOperationException( $"Entry already exists ({handle})" );
+                        throw new InvalidOperationException( $"Entry already exists ({fileName})" );
 
                     case ConflictPolicy.Replace:
-                        if ( source is EntryStream<string> entryStream && entryStream.Source == source )
+                        if ( source is EntryStream entryStream && entryStream.Source == source )
                             break;
 
                         entry.Dispose();
@@ -60,34 +60,34 @@ namespace MikuMikuLibrary.Archives
 
             else
             {
-                mEntries.Add( handle, new Entry
+                mEntries.Add( fileName, new Entry
                 {
-                    Handle = handle,
+                    Name = fileName,
                     Stream = source,
                     OwnsStream = !leaveOpen
                 } );
             }
         }
 
-        public void Add( string handle, string fileName, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError ) => 
-            Add( handle, File.OpenRead( fileName ), false, conflictPolicy );
+        public void Add( string fileName, string sourceFilePath, ConflictPolicy conflictPolicy = ConflictPolicy.RaiseError ) => 
+            Add( fileName, File.OpenRead( sourceFilePath ), false, conflictPolicy );
 
-        public void Remove( string handle )
+        public void Remove( string fileName )
         {
-            if ( !mEntries.TryGetValue( handle, out var entry ) )
+            if ( !mEntries.TryGetValue( fileName, out var entry ) )
                 return;
 
             entry.Dispose();
-            mEntries.Remove( handle );
+            mEntries.Remove( fileName );
         }
 
-        public EntryStream<string> Open( string handle, EntryStreamMode mode )
+        public EntryStream Open( string fileName, EntryStreamMode mode )
         {
-            var entry = mEntries[ handle ];
+            var entry = mEntries[ fileName ];
             var entryStream = entry.Open( mStream );
 
             if ( mode != EntryStreamMode.MemoryStream )
-                return new EntryStream<string>( entry.Handle, entryStream );
+                return new EntryStream( entry.Name, entryStream );
 
             var temp = entryStream;
             entryStream = new MemoryStream();
@@ -95,7 +95,7 @@ namespace MikuMikuLibrary.Archives
             entryStream.Position = 0;
             temp.Close();
 
-            return new EntryStream<string>( entry.Handle, entryStream );
+            return new EntryStream( entry.Name, entryStream );
         }
 
         public void Clear()
@@ -106,8 +106,8 @@ namespace MikuMikuLibrary.Archives
             mEntries.Clear();
         }
 
-        public bool Contains( string handle ) => 
-            mEntries.ContainsKey( handle );
+        public bool Contains( string fileName ) => 
+            mEntries.ContainsKey( fileName );
 
         public IEnumerator<string> GetEnumerator() => 
             mEntries.Keys.GetEnumerator();
@@ -184,7 +184,7 @@ namespace MikuMikuLibrary.Archives
 
                     mEntries.Add( name, new Entry
                     {
-                        Handle = name,
+                        Name = name,
                         Position = offset,
                         UnpackedLength = uncompressedSize,
                         CompressedLength = Math.Min( compressedSize, originalStream.Length - offset ),
@@ -216,7 +216,7 @@ namespace MikuMikuLibrary.Archives
 
                     mEntries.Add( name, new Entry
                     {
-                        Handle = name,
+                        Name = name,
                         Position = offset,
                         UnpackedLength = uncompressedSize,
                         CompressedLength = fixedSize,
@@ -242,7 +242,7 @@ namespace MikuMikuLibrary.Archives
 
                     mEntries.Add( name, new Entry
                     {
-                        Handle = name,
+                        Name = name,
                         Position = offset,
                         UnpackedLength = fixedSize,
                         Length = fixedSize
@@ -260,9 +260,9 @@ namespace MikuMikuLibrary.Archives
             {
                 writer.Write( mAlignment );
 
-                foreach ( var entry in mEntries.Values.OrderBy( x => x.Handle ) )
+                foreach ( var entry in mEntries.Values.OrderBy( x => x.Name ) )
                 {
-                    writer.Write( entry.Handle, StringBinaryFormat.NullTerminated );
+                    writer.Write( entry.Name, StringBinaryFormat.NullTerminated );
                     writer.ScheduleWriteOffset( OffsetMode.OffsetAndSize, () =>
                     {
                         writer.Align( mAlignment, 0x78 );
@@ -361,7 +361,7 @@ namespace MikuMikuLibrary.Archives
 
         internal class Entry : IDisposable
         {
-            public string Handle;
+            public string Name;
             public long Position;
             public long Length;
             public long CompressedLength;

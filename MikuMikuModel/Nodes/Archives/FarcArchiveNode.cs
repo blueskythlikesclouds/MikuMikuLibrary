@@ -50,29 +50,29 @@ namespace MikuMikuModel.Nodes.Archives
                     if ( folderBrowseDialog.ShowDialog() != DialogResult.OK )
                         return;
 
-                    foreach ( string handle in Data.Entries )
+                    foreach ( string fileName in Data.FileNames )
                     {
-                        using ( var source = Data.Open( handle, EntryStreamMode.OriginalStream ) )
-                        using ( var destination = File.Create( Path.Combine( folderBrowseDialog.SelectedPath, handle ) ) )
+                        using ( var source = Data.Open( fileName, EntryStreamMode.OriginalStream ) )
+                        using ( var destination = File.Create( Path.Combine( folderBrowseDialog.SelectedPath, fileName ) ) )
                             source.CopyTo( destination );
                     }
                 }
             }, Keys.Control | Keys.Shift | Keys.E );
         }
-
+        
         protected override void PopulateCore()
         {
-            foreach ( string handle in Data )
+            foreach ( string fileName in Data )
             {
-                var module = ModuleImportUtilities.GetModule( handle, () => Data.Open( handle, EntryStreamMode.OriginalStream ) );
+                var module = ModuleImportUtilities.GetModule( fileName, () => Data.Open( fileName, EntryStreamMode.OriginalStream ) );
 
                 INode node;
                 
                 if ( module != null && typeof( IBinaryFile ).IsAssignableFrom( module.ModelType ) && NodeFactory.NodeTypes.ContainsKey( module.ModelType ) )
-                    node = NodeFactory.Create( module.ModelType, handle, new Func<Stream>( () => Data.Open( handle, EntryStreamMode.MemoryStream ) ) );
+                    node = NodeFactory.Create( module.ModelType, fileName, new Func<Stream>( () => Data.Open( fileName, EntryStreamMode.MemoryStream ) ) );
 
                 else
-                    node = new StreamNode( handle, Data.Open( handle, EntryStreamMode.OriginalStream ) );
+                    node = new StreamNode( fileName, Data.Open( fileName, EntryStreamMode.OriginalStream ) );
 
                 Nodes.Add( node );
             }
@@ -93,7 +93,7 @@ namespace MikuMikuModel.Nodes.Archives
                 }
             }
 
-            foreach ( string entryName in Data.Entries.Except( Nodes.Select( x => x.Name ), StringComparer.InvariantCultureIgnoreCase ).ToList() )
+            foreach ( string entryName in Data.FileNames.Except( Nodes.Select( x => x.Name ), StringComparer.InvariantCultureIgnoreCase ).ToList() )
                 Data.Remove( entryName );
         }
 

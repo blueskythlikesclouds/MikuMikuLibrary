@@ -2,10 +2,10 @@
 
 namespace MikuMikuLibrary.Archives
 {
-    public sealed class EntryStream<THandle> : Stream
+    public sealed class EntryStream : Stream
     {
         public Stream Source { get; }
-        public THandle Handle { get; }
+        public string Name { get; }
 
         public override bool CanRead => Source.CanRead;
         public override bool CanWrite => Source.CanWrite;
@@ -33,9 +33,9 @@ namespace MikuMikuLibrary.Archives
         public override void Write( byte[] buffer, int offset, int count ) => 
             Source.Write( buffer, 0, count );
 
-        public EntryStream( THandle entry, Stream source )
+        public EntryStream( string name, Stream source )
         {
-            Handle = entry;
+            Name = name;
             Source = source;
         }
     }
