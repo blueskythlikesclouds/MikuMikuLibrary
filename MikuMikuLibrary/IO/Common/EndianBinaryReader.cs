@@ -35,6 +35,12 @@ namespace MikuMikuLibrary.IO.Common
 
         public bool SwapBytes { get; private set; }
 
+        public Encoding Encoding
+        {
+            get => mEncoding;
+            set => mEncoding = value;
+        }
+
         public AddressSpace AddressSpace { get; set; }
 
         public long Position

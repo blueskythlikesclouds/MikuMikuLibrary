@@ -70,6 +70,8 @@
     <Compile Include="Aets\AetSet.cs" />
     <Compile Include="Aets\Video.cs" />
     <Compile Include="Archives\ConflictPolicy.cs" />
+    <Compile Include="Archives\CriMw\CpkArchive.cs" />
+    <Compile Include="Archives\CriMw\UtfTable.cs" />
     <Compile Include="Archives\FarcArchive.cs" />
     <Compile Include="Archives\IArchive.cs" />
     <Compile Include="Archives\EntryStream.cs" />

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using FarcPack.Properties;
 using MikuMikuLibrary.Archives;
+using MikuMikuLibrary.Archives.CriMw;
 using MikuMikuLibrary.IO;
 
 namespace FarcPack
@@ -67,6 +68,15 @@ namespace FarcPack
                     }
                 }
             }
+
+            else if ( sourceFileName.EndsWith( ".cpk", StringComparison.OrdinalIgnoreCase ) )
+            {
+                destinationFileName = Path.ChangeExtension( destinationFileName, null );
+
+                using ( var cpkArchive = BinaryFile.Load<CpkArchive>( sourceFileName ) )
+                    cpkArchive.Extract( destinationFileName );
+            }
+
             else
             {
                 destinationFileName = Path.ChangeExtension( destinationFileName, "farc" );
