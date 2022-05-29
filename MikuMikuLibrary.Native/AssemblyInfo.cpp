@@ -18,9 +18,9 @@ using namespace Runtime::InteropServices;
 [assembly:CLSCompliantAttribute( true )];
 
 #ifdef _DEBUG
-[assembly:AssemblyVersionAttribute( "1.1.*" )];
+[assembly:AssemblyVersionAttribute( "1.2.*" )];
 #else
-[assembly:AssemblyVersionAttribute( "1.1.0" )];
+[assembly:AssemblyVersionAttribute( "1.2.0" )];
 #endif
 
 [assembly:AssemblyKeyFileAttribute( "..\\MikuMikuLibrary.snk" )];
