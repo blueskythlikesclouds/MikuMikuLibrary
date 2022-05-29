@@ -43,6 +43,8 @@ namespace MikuMikuModel.GUI
             
             foreach ( string filePath in split )
                 sFiles.Add( Path.GetFullPath( filePath ) );
+
+            sFiles.RemoveAll( x => !File.Exists( x ) );
         }
     }
 }
