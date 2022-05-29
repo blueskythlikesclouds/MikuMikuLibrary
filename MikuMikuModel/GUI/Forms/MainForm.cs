@@ -640,6 +640,8 @@ namespace MikuMikuModel.GUI.Forms
 
         private void OnPropertyValueChanged( object s, PropertyValueChangedEventArgs e )
         {
+            mNodeTreeView.SelectedDataNode?.NotifyModified( NodeModifyFlags.Property );
+
             MementoStack.EndCompoundMemento();
             MementoStack.BeginCompoundMemento();
         }
