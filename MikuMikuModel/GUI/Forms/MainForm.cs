@@ -51,7 +51,8 @@ namespace MikuMikuModel.GUI.Forms
             {
                 mStringBuilder.AppendFormat( " - {0}", Path.GetFileName( mCurrentlyOpenFilePath ) );
 
-                if ( mNodeTreeView.RootDataNode is IDirtyNode dirtyNode && dirtyNode.IsDirty )
+                if ( mNodeTreeView.RootDataNode.Flags.HasFlag( NodeFlags.Export ) &&
+                     mNodeTreeView.RootDataNode is IDirtyNode dirtyNode && dirtyNode.IsDirty )
                     mStringBuilder.Append( '*' );
             }
 
@@ -304,7 +305,8 @@ namespace MikuMikuModel.GUI.Forms
         /// </summary>
         private bool AskForSavingChanges()
         {
-            if ( mNodeTreeView.RootDataNode == null || !( ( IDirtyNode ) mNodeTreeView.RootDataNode ).IsDirty )
+            if ( mNodeTreeView.RootDataNode == null || 
+                 !mNodeTreeView.RootDataNode.Flags.HasFlag( NodeFlags.Export ) || !( ( IDirtyNode ) mNodeTreeView.RootDataNode ).IsDirty )
                 return false;
 
             var result = MessageBox.Show( "You have unsaved changes. Do you want to save them?", Program.Name, MessageBoxButtons.YesNoCancel,
