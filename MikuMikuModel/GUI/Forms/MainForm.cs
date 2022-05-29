@@ -392,11 +392,13 @@ namespace MikuMikuModel.GUI.Forms
         private void OnUndo( object sender, EventArgs e )
         {
             MementoStack.Undo();
+            mPropertyGrid.Refresh();
         }
 
         private void OnRedo( object sender, EventArgs e )
         {
             MementoStack.Redo();
+            mPropertyGrid.Refresh();
         }
 
         private void OnConfigurations( object sender, EventArgs e )
