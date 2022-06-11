@@ -9,6 +9,6 @@ namespace MikuMikuLibrary::IBLs::Processing
     public ref class LightMapImporterCore : public ILightMapImporter
     {
     public:
-        virtual LightMap^ ImportFromFile( String^ filePath, int width, int height );
+        virtual LightMap^ ImportFromFile(String^ filePath, int width, int height);
     };
 }

@@ -1,80 +1,77 @@
-﻿using System.Collections.Generic;
-using MikuMikuLibrary.IO.Common;
-using MikuMikuLibrary.Misc;
+﻿using MikuMikuLibrary.IO.Common;
 
-namespace MikuMikuLibrary.Aets
+namespace MikuMikuLibrary.Aets;
+
+public class VideoSource
 {
-    public class VideoSource
+    public string Name { get; set; }
+    public uint Id { get; set; }
+
+    internal void Read(EndianBinaryReader reader)
     {
-        public string Name { get; set; }
-        public uint Id { get; set; }
-
-        internal void Read( EndianBinaryReader reader )
-        {
-            Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-            Id = reader.ReadUInt32();
-        }
-
-        internal void Write( EndianBinaryWriter writer )
-        {
-            writer.AddStringToStringTable( Name );
-            writer.Write( Id );
-        }
+        Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
+        Id = reader.ReadUInt32();
     }
 
-    public class Video
+    internal void Write(EndianBinaryWriter writer)
     {
-        internal long ReferenceOffset { get; private set; }
+        writer.WriteStringOffset(Name);
+        writer.Write(Id);
+    }
+}
 
-        public Color Color { get; set; }
-        public ushort Width { get; set; }
-        public ushort Height { get; set; }
-        public float Frames { get; set; }
-        
-        public List<VideoSource> Sources { get; }
+public class Video
+{
+    internal long ReferenceOffset { get; private set; }
 
-        internal void Read( EndianBinaryReader reader )
+    public Vector4 Color { get; set; }
+    public ushort Width { get; set; }
+    public ushort Height { get; set; }
+    public float Frames { get; set; }
+
+    public List<VideoSource> Sources { get; }
+
+    internal void Read(EndianBinaryReader reader)
+    {
+        ReferenceOffset = reader.Offset;
+
+        Color = reader.ReadVector4(VectorBinaryFormat.UInt8);
+        Width = reader.ReadUInt16();
+        Height = reader.ReadUInt16();
+        Frames = reader.ReadSingle();
+
+        int sourceCount = reader.ReadInt32();
+        reader.ReadOffset(() =>
         {
-            ReferenceOffset = reader.Offset;
+            Sources.Capacity = sourceCount;
 
-            Color = reader.ReadColor( VectorBinaryFormat.UInt8 );
-            Width = reader.ReadUInt16();
-            Height = reader.ReadUInt16();
-            Frames = reader.ReadSingle();
-
-            int sourceCount = reader.ReadInt32();
-            reader.ReadOffset( () =>
+            for (int i = 0; i < sourceCount; i++)
             {
-                Sources.Capacity = sourceCount;
+                var source = new VideoSource();
+                source.Read(reader);
+                Sources.Add(source);
+            }
+        });
+    }
 
-                for ( int i = 0; i < sourceCount; i++ )
-                {
-                    var source = new VideoSource();
-                    source.Read( reader );
-                    Sources.Add( source );
-                }
-            } );
-        }
+    internal void Write(EndianBinaryWriter writer)
+    {
+        ReferenceOffset = writer.Offset;
 
-        internal void Write( EndianBinaryWriter writer )
+        writer.Write(Color, VectorBinaryFormat.UInt8);
+        writer.Write(Width);
+        writer.Write(Height);
+        writer.Write(Frames);
+        writer.Write(Sources.Count);
+        writer.WriteOffset(8, AlignmentMode.Left, () =>
         {
-            ReferenceOffset = writer.Offset;
+            foreach (var source in Sources)
+                source.Write(writer);
+        });
+    }
 
-            writer.Write( Color, VectorBinaryFormat.UInt8 );
-            writer.Write( Width );
-            writer.Write( Height );
-            writer.Write( Frames );
-            writer.Write( Sources.Count );
-            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
-            {
-                foreach ( var source in Sources )
-                    source.Write( writer );
-            } );
-        }
-
-        public Video()
-        {
-            Sources = new List<VideoSource>();
-        }
+    public Video()
+    {
+        Sources = new List<VideoSource>();
     }
 }

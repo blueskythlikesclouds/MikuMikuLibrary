@@ -1,43 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
-namespace MikuMikuLibrary.Objects.Extra.Blocks
+namespace MikuMikuLibrary.Objects.Extra.Blocks;
+
+public class ExpressionBlock : NodeBlock
 {
-    public class ExpressionBlock : NodeBlock
+    public override string Signature => "EXP";
+
+    public List<string> Expressions { get; }
+
+    internal override void ReadBody(EndianBinaryReader reader, StringSet stringSet)
     {
-        public override string Signature => "EXP";
+        Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
 
-        public List<string> Expressions { get; }
+        int expressionCount = reader.ReadInt32();
 
-        internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
-        {
-            Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
+        Expressions.Capacity = expressionCount;
 
-            int expressionCount = reader.ReadInt32();
+        for (int i = 0; i < expressionCount; i++)
+            Expressions.Add(reader.ReadStringOffset(StringBinaryFormat.NullTerminated));
+    }
 
-            Expressions.Capacity = expressionCount;
+    internal override void WriteBody(EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format)
+    {
+        writer.WriteStringOffset(Name);
+        writer.Write(Expressions.Count);
 
-            for ( int i = 0; i < expressionCount; i++ )
-                Expressions.Add( reader.ReadStringOffset( StringBinaryFormat.NullTerminated ) );
-        }
+        foreach (string expression in Expressions)
+            writer.WriteStringOffset(expression);
 
-        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format )
-        {
-            writer.AddStringToStringTable( Name );
-            writer.Write( Expressions.Count );
+        writer.WriteNulls((9 - Expressions.Count) * writer.AddressSpace.GetByteSize());
+    }
 
-            foreach ( string expression in Expressions )
-                writer.AddStringToStringTable( expression );
-
-            writer.WriteNulls( ( 9 - Expressions.Count ) * writer.AddressSpace.GetByteSize() );
-        }
-
-        public ExpressionBlock()
-        {
-            Expressions = new List<string>();
-        }
+    public ExpressionBlock()
+    {
+        Expressions = new List<string>();
     }
 }

@@ -4,23 +4,23 @@ using namespace System;
 using namespace Reflection;
 using namespace Runtime::InteropServices;
 
-[assembly:AssemblyTitleAttribute( "Miku Miku Library (Native)" )];
-[assembly:AssemblyDescriptionAttribute( "A library that provides the native back-end to Miku Miku Library. This library is loaded automatically." )];
-[assembly:AssemblyConfigurationAttribute( "" )];
-[assembly:AssemblyCompanyAttribute( "" )];
-[assembly:AssemblyProductAttribute( "Miku Miku Library (Native)" )];
-[assembly:AssemblyCopyrightAttribute( "Copyright © 2022 Skyth (MIT License)" )];
-[assembly:AssemblyTrademarkAttribute( "" )];
-[assembly:AssemblyCultureAttribute( "" )];
+[assembly:AssemblyTitleAttribute("Miku Miku Library (Native)")];
+[assembly:AssemblyDescriptionAttribute("A library that provides the native back-end to Miku Miku Library. This library is loaded automatically.")];
+[assembly:AssemblyConfigurationAttribute("")];
+[assembly:AssemblyCompanyAttribute("")];
+[assembly:AssemblyProductAttribute("Miku Miku Library (Native)")];
+[assembly:AssemblyCopyrightAttribute("Copyright © 2022 Skyth (MIT License)")];
+[assembly:AssemblyTrademarkAttribute("")];
+[assembly:AssemblyCultureAttribute("")];
 
-[assembly:ComVisible( false )];
+[assembly:ComVisible(false)];
 
-[assembly:CLSCompliantAttribute( true )];
+[assembly:CLSCompliantAttribute(true)];
 
 #ifdef _DEBUG
-[assembly:AssemblyVersionAttribute( "1.2.*" )];
+[assembly:AssemblyVersionAttribute("1.2.*")];
 #else
-[assembly:AssemblyVersionAttribute( "1.2.0" )];
+[assembly:AssemblyVersionAttribute("1.2.0")];
 #endif
 
-[assembly:AssemblyKeyFileAttribute( "..\\MikuMikuLibrary.snk" )];
+[assembly:AssemblyKeyFileAttribute("..\\MikuMikuLibrary.snk")];

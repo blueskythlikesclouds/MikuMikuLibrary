@@ -4,6 +4,6 @@ namespace MikuMikuLibrary
 {
     void NativeContext::Initialize()
     {
-        CoInitializeEx( nullptr, COINIT_MULTITHREADED );
+        CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     }
 }

@@ -1,41 +1,39 @@
 ﻿// Code by Thatrandomlurker
-using MikuMikuModel.Nodes.Collections;
-using System;
-using System.IO;
-using MikuMikuLibrary.PostProcessTables.FogTable;
+
 using MikuMikuLibrary.IO;
+using MikuMikuLibrary.PostProcessTables;
+using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
 
-namespace MikuMikuModel.Nodes.PostProcessTables.Fog
+namespace MikuMikuModel.Nodes.PostProcessTables.Fog;
+
+class FogTableNode : BinaryFileNode<FogTable>
 {
-    class FogTableNode : BinaryFileNode<FogTable>
+    public override NodeFlags Flags =>
+        NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
+
+    protected override void Initialize()
     {
-        public override NodeFlags Flags =>
-            NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
+        AddReplaceHandler<FogTable>(BinaryFile.Load<FogTable>);
+        AddExportHandler<FogTable>(filePath => Data.Save(filePath));
 
-        protected override void Initialize()
-        {
-            AddReplaceHandler<FogTable>(BinaryFile.Load<FogTable>);
-            AddExportHandler<FogTable>( filePath => Data.Save( filePath ) );
+        base.Initialize();
+    }
 
-            base.Initialize();
-        }
+    protected override void PopulateCore()
+    {
+        Nodes.Add(new ListNode<FogSetting>("Entries", Data.FogEntries, x => x.Name));
+    }
 
-        protected override void PopulateCore()
-        {
-            Nodes.Add( new ListNode<FogSetting>( "Entries", Data.FogEntries, x => x.Name ) );
-        }
+    protected override void SynchronizeCore()
+    {
+    }
 
-        protected override void SynchronizeCore()
-        {
-        }
+    public FogTableNode(string name, FogTable data) : base(name, data)
+    {
+    }
 
-        public FogTableNode( string name, FogTable data ) : base( name, data )
-        {
-        }
-
-        public FogTableNode( string name, Func<Stream> streamGetter ) : base( name, streamGetter )
-        {
-        }
+    public FogTableNode(string name, Func<Stream> streamGetter) : base(name, streamGetter)
+    {
     }
 }

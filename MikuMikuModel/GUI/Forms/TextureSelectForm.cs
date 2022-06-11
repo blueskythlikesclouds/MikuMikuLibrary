@@ -1,100 +1,96 @@
-﻿using System;
-using System.ComponentModel;
-using System.Windows.Forms;
-using MikuMikuLibrary.Materials;
+﻿using MikuMikuLibrary.Materials;
 using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Textures;
 using MikuMikuModel.Nodes.Wrappers;
 using MikuMikuModel.Resources;
 using MikuMikuModel.Resources.Styles;
 
-namespace MikuMikuModel.GUI.Forms
+namespace MikuMikuModel.GUI.Forms;
+
+public partial class TextureSelectForm : Form
 {
-    public partial class TextureSelectForm : Form
+    public TextureNode SelectedTextureNode =>
+        mNodeTreeView.SelectedDataNode as TextureNode;
+
+    public MaterialTextureType MaterialTextureType =>
+        (MaterialTextureType)mMaterialTextureTypeComboBox.SelectedIndex;
+
+    private void OnNodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
     {
-        public TextureNode SelectedTextureNode =>
-            mNodeTreeView.SelectedDataNode as TextureNode;
+        DialogResult = DialogResult.OK;
+        Close();
+    }
 
-        public MaterialTextureType MaterialTextureType =>
-            ( MaterialTextureType ) mMaterialTextureTypeComboBox.SelectedIndex;
+    private void OnAfterSelect(object sender, TreeViewEventArgs e)
+    {
+        mMainSplitContainer.Panel1.Controls.Clear();
 
-        private void OnNodeMouseDoubleClick( object sender, TreeNodeMouseClickEventArgs e )
+        var control = mNodeTreeView.ControlOfSelectedDataNode;
+        if (control == null)
+            return;
+
+        control.Dock = DockStyle.Fill;
+        mMainSplitContainer.Panel1.Controls.Add(control);
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (DialogResult == DialogResult.OK && !(mNodeTreeView.SelectedNode?.Node is TextureNode))
         {
-            DialogResult = DialogResult.OK;
-            Close();
+            MessageBox.Show("Please select a texture.", Program.Name, MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            e.Cancel = true;
         }
 
-        private void OnAfterSelect( object sender, TreeViewEventArgs e )
+        base.OnClosing(e);
+    }
+
+    /// <summary>
+    /// Clean up any resources being used.
+    /// </summary>
+    /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
         {
-            mMainSplitContainer.Panel1.Controls.Clear();
-
-            var control = mNodeTreeView.ControlOfSelectedDataNode;
-            if ( control == null )
-                return;
-
-            control.Dock = DockStyle.Fill;
-            mMainSplitContainer.Panel1.Controls.Add( control );
+            mMainSplitContainer.Panel1.Controls.Clear(); // why tf you disposing texture view control bruh
+            mNodeTreeView.RootNode?.Dispose();
+            mNodeTreeView.RootDataNode?.Dispose();
+            components?.Dispose();
         }
 
-        protected override void OnClosing( CancelEventArgs e )
-        {
-            if ( DialogResult == DialogResult.OK && !( mNodeTreeView.SelectedNode?.Node is TextureNode ) )
-            {
-                MessageBox.Show( "Please select a texture.", Program.Name, MessageBoxButtons.OK,
-                    MessageBoxIcon.Error );
+        base.Dispose(disposing);
+    }
 
-                e.Cancel = true;
-            }
+    public TextureSelectForm(INode textureSetNode)
+    {
+        InitializeComponent();
 
-            base.OnClosing( e );
-        }
+        if (StyleSet.CurrentStyle != null)
+            StyleHelpers.ApplyStyle(this, StyleSet.CurrentStyle);
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose( bool disposing )
-        {
-            if ( disposing )
-            {
-                mMainSplitContainer.Panel1.Controls.Clear(); // why tf you disposing texture view control bruh
-                mNodeTreeView.RootNode?.Dispose();
-                mNodeTreeView.RootDataNode?.Dispose();
-                components?.Dispose();
-            }
+        Icon = ResourceStore.LoadIcon("Icons/Application.ico");
 
-            base.Dispose( disposing );
-        }
+        var rootNode = new ReferenceNode(textureSetNode);
 
-        public TextureSelectForm( INode textureSetNode )
-        {
-            InitializeComponent();
+        var nodeAsTreeNode = new NodeAsTreeNode(rootNode);
+        mNodeTreeView.Nodes.Add(nodeAsTreeNode);
 
-            if ( StyleSet.CurrentStyle != null )
-                StyleHelpers.ApplyStyle( this, StyleSet.CurrentStyle );
+        nodeAsTreeNode.Expand();
+        nodeAsTreeNode.Nodes[0].Expand();
+    }
 
-            Icon = ResourceStore.LoadIcon( "Icons/Application.ico" );
+    public TextureSelectForm(INode textureSetNode, MaterialTextureType type) : this(textureSetNode)
+    {
+        mMaterialTextureTypeLabel.Visible = true;
+        mMaterialTextureTypeComboBox.Visible = true;
 
-            var rootNode = new ReferenceNode( textureSetNode );
+        foreach (string typeName in Enum.GetNames(typeof(MaterialTextureType)))
+            mMaterialTextureTypeComboBox.Items.Add(typeName);
 
-            var nodeAsTreeNode = new NodeAsTreeNode( rootNode );
-            mNodeTreeView.Nodes.Add( nodeAsTreeNode );
+        mMaterialTextureTypeComboBox.SelectedIndex = (int)type;
 
-            nodeAsTreeNode.Expand();
-            nodeAsTreeNode.Nodes[ 0 ].Expand();
-        }
-
-        public TextureSelectForm( INode textureSetNode, MaterialTextureType type ) : this( textureSetNode )
-        {
-            mMaterialTextureTypeLabel.Visible = true;
-            mMaterialTextureTypeComboBox.Visible = true;
-
-            foreach ( string typeName in Enum.GetNames( typeof( MaterialTextureType ) ) )
-                mMaterialTextureTypeComboBox.Items.Add( typeName );
-
-            mMaterialTextureTypeComboBox.SelectedIndex = ( int ) type;
-
-            StyleHelpers.ApplySystemFont( this );
-        }
+        StyleHelpers.ApplySystemFont(this);
     }
 }

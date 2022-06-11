@@ -9,6 +9,6 @@ namespace MikuMikuLibrary::Objects::Processing
     public ref class StripifierCore sealed : public IStripifier
     {
     public:
-        virtual array<uint>^ Stripify( array<uint>^ indices );
+        virtual array<uint>^ Stripify(array<uint>^ indices);
     };
 }

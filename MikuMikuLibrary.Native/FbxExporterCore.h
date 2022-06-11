@@ -14,6 +14,6 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         FbxExporterCore();
         ~FbxExporterCore();
 
-        virtual void ExportToFile( ObjectSet^ objectSet, String^ destinationFilePath );
+        virtual void ExportToFile(ObjectSet^ objectSet, String^ destinationFilePath);
     };
 }

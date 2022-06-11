@@ -1,7 +1,6 @@
-﻿namespace MikuMikuLibrary.Objects.Processing.Fbx.Interfaces
+﻿namespace MikuMikuLibrary.Objects.Processing.Fbx.Interfaces;
+
+public interface IFbxExporter
 {
-    public interface IFbxExporter
-    {
-        void ExportToFile( ObjectSet objectSet, string destinationFilePath );
-    }
+    void ExportToFile(ObjectSet objectSet, string destinationFilePath);
 }

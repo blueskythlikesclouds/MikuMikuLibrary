@@ -1,8 +1,7 @@
-﻿namespace MikuMikuLibrary.Objects.Processing.Fbx
+﻿namespace MikuMikuLibrary.Objects.Processing.Fbx;
+
+public static class FbxExporter
 {
-    public static class FbxExporter
-    {
-        public static void ExportToFile( ObjectSet objectSet, string destinationFilePath ) =>
-            Native.FbxExporter.ExportToFile( objectSet, destinationFilePath );
-    }
+    public static void ExportToFile(ObjectSet objectSet, string destinationFilePath) =>
+        Native.FbxExporter.ExportToFile(objectSet, destinationFilePath);
 }

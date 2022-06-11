@@ -1,58 +1,56 @@
-﻿using System.Collections.Generic;
-using MikuMikuLibrary.IO;
+﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
-namespace MikuMikuLibrary.Objects.Extra.Blocks
+namespace MikuMikuLibrary.Objects.Extra.Blocks;
+
+public class MotionBlock : NodeBlock
 {
-    public class MotionBlock : NodeBlock
+    public override string Signature => "MOT";
+
+    public List<MotionNode> Nodes { get; }
+
+    internal override void ReadBody(EndianBinaryReader reader, StringSet stringSet)
     {
-        public override string Signature => "MOT";
+        long nameOffset = reader.ReadOffset();
+        int count = reader.ReadInt32();
+        long boneNamesOffset = reader.ReadOffset();
+        long boneMatricesOffset = reader.ReadOffset();
 
-        public List<MotionNode> Nodes { get; }
+        Nodes.Capacity = count;
 
-        internal override void ReadBody( EndianBinaryReader reader, StringSet stringSet )
+        Name = reader.ReadStringAtOffset(nameOffset, StringBinaryFormat.NullTerminated);
+
+        reader.ReadAtOffset(boneNamesOffset, () =>
         {
-            long nameOffset = reader.ReadOffset();
-            int count = reader.ReadInt32();
-            long boneNamesOffset = reader.ReadOffset();
-            long boneMatricesOffset = reader.ReadOffset();
+            for (int i = 0; i < count; i++)
+                Nodes.Add(new MotionNode { Name = stringSet.ReadString(reader) });
+        });
 
-            Nodes.Capacity = count;
-
-            Name = reader.ReadStringAtOffset( nameOffset, StringBinaryFormat.NullTerminated );
-
-            reader.ReadAtOffset( boneNamesOffset, () =>
-            {
-                for ( int i = 0; i < count; i++ )
-                    Nodes.Add( new MotionNode { Name = stringSet.ReadString( reader ) } );
-            } );
-
-            reader.ReadAtOffset( boneMatricesOffset, () =>
-            {
-                for ( int i = 0; i < count; i++ )
-                    Nodes[ i ].Transformation = reader.ReadMatrix4x4();
-            } );
-        }
-
-        internal override void WriteBody( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format  )
+        reader.ReadAtOffset(boneMatricesOffset, () =>
         {
-            writer.AddStringToStringTable( Name );
-            writer.Write( Nodes.Count );
-            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
-            {
-                foreach ( var bone in Nodes )
-                    stringSet.WriteString( writer, bone.Name );
-            } );
-            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
-            {
-                foreach ( var bone in Nodes )
-                    writer.Write( bone.Transformation );
-            } );
-        }
+            for (int i = 0; i < count; i++)
+                Nodes[i].Transformation = reader.ReadMatrix4x4();
+        });
+    }
 
-        public MotionBlock()
+    internal override void WriteBody(EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format)
+    {
+        writer.WriteStringOffset(Name);
+        writer.Write(Nodes.Count);
+        writer.WriteOffset(16, AlignmentMode.Left, () =>
         {
-            Nodes = new List<MotionNode>();
-        }
+            foreach (var bone in Nodes)
+                stringSet.WriteString(writer, bone.Name);
+        });
+        writer.WriteOffset(16, AlignmentMode.Left, () =>
+        {
+            foreach (var bone in Nodes)
+                writer.Write(bone.Transformation);
+        });
+    }
+
+    public MotionBlock()
+    {
+        Nodes = new List<MotionNode>();
     }
 }

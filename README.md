@@ -6,7 +6,7 @@ Format library and file editor for Hatsune Miku: Project DIVA games.
 * [Unstable (development) builds](https://ci.appveyor.com/project/blueskythlikesclouds/mikumikulibrary/build/artifacts)
 
 ## Manually building
-1. Open the solution in Visual Studio 2019 (or later).
+1. Open the solution in Visual Studio 2022.
 2. Restore missing NuGet packages.
 3. Install FBX SDK. (See instructions [here.](https://github.com/blueskythlikesclouds/MikuMikuLibrary/tree/master/MikuMikuLibrary.Native/Dependencies/FBX))
 4. Build the solution.

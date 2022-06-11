@@ -1,6 +1,6 @@
 #version 330
 
-layout ( location = 0 ) in vec4 aPosition;
+layout (location = 0) in vec4 aPosition;
 
 out vec3 fPosition;
 out vec3 fColor;
@@ -15,9 +15,9 @@ uniform vec4 uZColor;
 
 void main()
 {
-    fPosition = ( uView * vec4( aPosition.xyz, 1.0 ) ).xyz;
+    fPosition = (uView * vec4(aPosition.xyz, 1.0)).xyz;
 
-    switch ( int( aPosition.w ) )
+    switch (int(aPosition.w))
     {
         case 0:
             fColor = uZColor.rgb;
@@ -36,5 +36,5 @@ void main()
             break;
     }
 
-    gl_Position = uProjection * vec4( fPosition, 1.0 );
+    gl_Position = uProjection * vec4(fPosition, 1.0);
 }

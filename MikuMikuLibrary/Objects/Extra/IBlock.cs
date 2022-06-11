@@ -1,13 +1,12 @@
 ﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 
-namespace MikuMikuLibrary.Objects.Extra
-{
-    public interface IBlock
-    {
-        string Signature { get; }
+namespace MikuMikuLibrary.Objects.Extra;
 
-        void Read( EndianBinaryReader reader, StringSet stringSet );
-        void Write( EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format );
-    }
+public interface IBlock
+{
+    string Signature { get; }
+
+    void Read(EndianBinaryReader reader, StringSet stringSet);
+    void Write(EndianBinaryWriter writer, StringSet stringSet, BinaryFormat format);
 }

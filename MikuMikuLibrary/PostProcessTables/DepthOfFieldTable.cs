@@ -1,94 +1,91 @@
 // Code by Thatrandomlurker
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 
-namespace MikuMikuLibrary.PostProcessTables.DepthOfFieldTable
+namespace MikuMikuLibrary.PostProcessTables;
+
+public class DOFSetting
 {
-    public class DOFSetting
+    public string Name { get; set; }
+    public uint SettingFlags { get; set; }
+    public float Focus { get; set; }
+    public float FocusRange { get; set; }
+    public float FuzzingRange { get; set; }
+    public float Ratio { get; set; }
+    public float Quality { get; set; }
+
+    internal void Read(EndianBinaryReader reader)
     {
-        public string Name { get; set; }
-        public uint SettingFlags { get; set; }
-        public float Focus { get; set; }
-        public float FocusRange { get; set; }
-        public float FuzzingRange { get; set; }
-        public float Ratio { get; set; }
-        public float Quality { get; set; }
+        SettingFlags = reader.ReadUInt32();
+        Focus = reader.ReadSingle();
+        FocusRange = reader.ReadSingle();
+        FuzzingRange = reader.ReadSingle();
+        Ratio = reader.ReadSingle();
+        Quality = reader.ReadSingle();
+        Name = "";
+    }
 
-        internal void Read( EndianBinaryReader reader )
-        {
-            SettingFlags = reader.ReadUInt32();
-            Focus = reader.ReadSingle();
-            FocusRange = reader.ReadSingle();
-            FuzzingRange = reader.ReadSingle();
-            Ratio = reader.ReadSingle();
-            Quality = reader.ReadSingle();
-            Name = "";
-        }
+    internal void Write(EndianBinaryWriter writer)
+    {
+        writer.Write(SettingFlags);
+        writer.Write(Focus);
+        writer.Write(FocusRange);
+        writer.Write(FuzzingRange);
+        writer.Write(Ratio);
+        writer.Write(Quality);
+    }
 
-        internal void Write( EndianBinaryWriter writer )
+}
+
+public class DOFTable : BinaryFile
+{
+    public override BinaryFileFlags Flags =>
+        BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
+
+    public List<DOFSetting> DOFEntries { get; }
+
+    public override void Read(EndianBinaryReader reader, ISection section = null)
+    {
+        uint DOFSettingCount = reader.ReadUInt32();
+        if (Format == BinaryFormat.X)
+            reader.SeekCurrent(4);
+        uint DOFSettingOffset = reader.ReadUInt32();
+        if (Format == BinaryFormat.X)
+            reader.SeekCurrent(4);
+
+        reader.ReadAtOffset(DOFSettingOffset, () =>
         {
-            writer.Write( SettingFlags );
-            writer.Write( Focus );
-            writer.Write( FocusRange );
-            writer.Write( FuzzingRange );
-            writer.Write( Ratio );
-            writer.Write( Quality );
-        }
+            for (int i = 0; i < DOFSettingCount; i++)
+            {
+                DOFSetting DofEntry = new DOFSetting();
+                DofEntry.Read(reader);
+                DofEntry.Name = $"DOF Setting {i}";
+                DOFEntries.Add(DofEntry);
+                if (Format == BinaryFormat.X)
+                {
+                    reader.SeekCurrent(4);
+                }
+            }
+        });
 
     }
 
-    public class DOFTable : BinaryFile
+    public override void Write(EndianBinaryWriter writer, ISection section = null)
     {
-        public override BinaryFileFlags Flags =>
-            BinaryFileFlags.Load | BinaryFileFlags.Save | BinaryFileFlags.HasSectionFormat;
-
-        public List<DOFSetting> DOFEntries { get; }
-
-        public override void Read( EndianBinaryReader reader, ISection section = null )
+        writer.Write(DOFEntries.Count);
+        writer.WriteOffset(16, AlignmentMode.Left, () =>
         {
-            uint DOFSettingCount = reader.ReadUInt32();
-            if ( Format == BinaryFormat.X )
-                reader.SeekCurrent( 4 );
-            uint DOFSettingOffset = reader.ReadUInt32();
-            if ( Format == BinaryFormat.X )
-                reader.SeekCurrent( 4 );
-
-            reader.ReadAtOffset( DOFSettingOffset, () =>
+            foreach (var DOFSetting in DOFEntries)
             {
-                for ( int i = 0; i < DOFSettingCount; i++ )
-                {
-                    DOFSetting DofEntry = new DOFSetting();
-                    DofEntry.Read( reader );
-                    DofEntry.Name = $"DOF Setting { i }";
-                    DOFEntries.Add( DofEntry );
-                    if ( Format == BinaryFormat.X )
-                    {
-                        reader.SeekCurrent( 4 );
-                    }
-                }
-            } );
+                DOFSetting.Write(writer);
+            }
+        });
+    }
 
-        }
-
-        public override void Write( EndianBinaryWriter writer, ISection section = null )
-        {
-            writer.Write( DOFEntries.Count );
-            writer.ScheduleWriteOffset( 16, AlignmentMode.Left, () =>
-            {
-                foreach ( var DOFSetting in DOFEntries )
-                {
-                    DOFSetting.Write( writer );
-                }
-            } );
-        }
-
-        public DOFTable()
-        {
-            DOFEntries = new List<DOFSetting>();
-        }
+    public DOFTable()
+    {
+        DOFEntries = new List<DOFSetting>();
     }
 }

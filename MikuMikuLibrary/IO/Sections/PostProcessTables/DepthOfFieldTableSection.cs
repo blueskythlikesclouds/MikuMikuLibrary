@@ -1,20 +1,19 @@
 // Code by Thatrandomlurker
-using System.Text;
-using MikuMikuLibrary.PostProcessTables.DepthOfFieldTable;
+
 using MikuMikuLibrary.IO.Sections.IO;
+using MikuMikuLibrary.PostProcessTables;
 
-namespace MikuMikuLibrary.IO.Sections.PostProcessTables
+namespace MikuMikuLibrary.IO.Sections.PostProcessTables;
+
+[Section("DOFT")]
+
+class DOFTableSection : BinaryFileSection<DOFTable>
 {
-    [Section("DOFT")]
+    public override SectionFlags Flags => SectionFlags.None;
 
-    class DOFTableSection : BinaryFileSection<DOFTable>
+    public override Encoding Encoding { get; } = Encoding.GetEncoding("utf-8");
+
+    public DOFTableSection(SectionMode mode, DOFTable data = null) : base(mode, data)
     {
-        public override SectionFlags Flags => SectionFlags.None;
-
-        public override Encoding Encoding { get; } = Encoding.GetEncoding( "utf-8" );
-
-        public DOFTableSection( SectionMode mode, DOFTable data = null ) : base( mode, data )
-        {
-        }
     }
 }

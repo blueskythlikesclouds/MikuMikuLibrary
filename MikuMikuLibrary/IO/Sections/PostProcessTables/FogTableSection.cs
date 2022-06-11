@@ -1,20 +1,19 @@
 // Code by Thatrandomlurker
-using System.Text;
-using MikuMikuLibrary.PostProcessTables.FogTable;
+
 using MikuMikuLibrary.IO.Sections.IO;
+using MikuMikuLibrary.PostProcessTables;
 
-namespace MikuMikuLibrary.IO.Sections.PostProcessTables
+namespace MikuMikuLibrary.IO.Sections.PostProcessTables;
+
+[Section("FOGC")]
+
+class FogTableSection : BinaryFileSection<FogTable>
 {
-    [Section("FOGC")]
+    public override SectionFlags Flags => SectionFlags.None;
 
-    class FogTableSection : BinaryFileSection<FogTable>
+    public override Encoding Encoding { get; } = Encoding.GetEncoding("utf-8");
+
+    public FogTableSection(SectionMode mode, FogTable data = null) : base(mode, data)
     {
-        public override SectionFlags Flags => SectionFlags.None;
-
-        public override Encoding Encoding { get; } = Encoding.GetEncoding( "utf-8" );
-
-        public FogTableSection( SectionMode mode, FogTable data = null ) : base( mode, data )
-        {
-        }
     }
 }

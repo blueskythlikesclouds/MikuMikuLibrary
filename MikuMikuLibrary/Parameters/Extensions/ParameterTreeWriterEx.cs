@@ -1,13 +1,10 @@
-﻿using System.IO;
+﻿namespace MikuMikuLibrary.Parameters.Extensions;
 
-namespace MikuMikuLibrary.Parameters.Extensions
+public static class ParameterTreeWriterEx
 {
-    public static class ParameterTreeWriterEx
+    public static void Save(this ParameterTreeWriter paramTreeWriter, string filePath)
     {
-        public static void Save( this ParameterTreeWriter paramTreeWriter, string filePath )
-        {
-            using ( var stream = File.Create( filePath ) )
-                paramTreeWriter.Flush( stream );
-        }
+        using (var stream = File.Create(filePath))
+            paramTreeWriter.Flush(stream);
     }
 }

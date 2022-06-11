@@ -1,62 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
+﻿namespace MikuMikuLibrary.Geometry;
 
-namespace MikuMikuLibrary.Geometry
+public class AxisAlignedBoundingBox
 {
-    public class AxisAlignedBoundingBox
+    public Vector3 Min, Max;
+
+    public Vector3 Center => (Min + Max) / 2.0f;
+    public float SizeX => Max.X - Min.X;
+    public float SizeY => Max.Y - Min.Y;
+    public float SizeZ => Max.Z - Min.Z;
+    public float SizeMax => Math.Max(SizeX, Math.Max(SizeY, SizeZ));
+    public float Area => SizeX * SizeY * SizeZ;
+
+    public void AddPoint(Vector3 point)
     {
-        public Vector3 Min, Max;
+        Min = Vector3.Min(Min, point);
+        Max = Vector3.Max(Max, point);
+    }
 
-        public Vector3 Center => ( Min + Max ) / 2.0f;
-        public float SizeX => Max.X - Min.X;
-        public float SizeY => Max.Y - Min.Y;
-        public float SizeZ => Max.Z - Min.Z;
-        public float SizeMax => Math.Max( SizeX, Math.Max( SizeY, SizeZ ) );
-        public float Area => SizeX * SizeY * SizeZ;
+    public void Merge(AxisAlignedBoundingBox aabb)
+    {
+        Min = Vector3.Min(Min, aabb.Min);
+        Max = Vector3.Max(Max, aabb.Max);
+    }
 
-        public void AddPoint( Vector3 point )
+    public BoundingSphere ToBoundingSphere()
+    {
+        return new BoundingSphere
         {
-            Min = Vector3.Min( Min, point );
-            Max = Vector3.Max( Max, point );
-        }
+            Center = Center,
+            Radius = SizeMax * (float)Math.Sqrt(2.0) / 2.0f
+        };
+    }
 
-        public void Merge( AxisAlignedBoundingBox aabb )
+    public BoundingBox ToBoundingBox()
+    {
+        return new BoundingBox
         {
-            Min = Vector3.Min( Min, aabb.Min );
-            Max = Vector3.Max( Max, aabb.Max );
-        }
+            Center = Center,
+            Width = SizeX,
+            Height = SizeY,
+            Depth = SizeZ
+        };
+    }
 
-        public BoundingSphere ToBoundingSphere()
-        {
-            return new BoundingSphere
-            {
-                Center = Center,
-                Radius = SizeMax * ( float ) Math.Sqrt( 2.0 ) / 2.0f
-            };
-        }
+    public AxisAlignedBoundingBox()
+    {
+        Min = new Vector3(float.PositiveInfinity);
+        Max = new Vector3(float.NegativeInfinity);
+    }
 
-        public BoundingBox ToBoundingBox()
-        {
-            return new BoundingBox
-            {
-                Center = Center,
-                Width = SizeX,
-                Height = SizeY,
-                Depth = SizeZ
-            };
-        }
-
-        public AxisAlignedBoundingBox()
-        {
-            Min = new Vector3( float.PositiveInfinity );
-            Max = new Vector3( float.NegativeInfinity );
-        }
-
-        public AxisAlignedBoundingBox( IEnumerable<Vector3> points ) : this()
-        {
-            foreach ( var point in points )
-                AddPoint( point );
-        }
+    public AxisAlignedBoundingBox(IEnumerable<Vector3> points) : this()
+    {
+        foreach (var point in points)
+            AddPoint(point);
     }
 }

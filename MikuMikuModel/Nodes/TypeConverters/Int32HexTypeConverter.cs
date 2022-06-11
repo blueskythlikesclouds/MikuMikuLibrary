@@ -1,63 +1,58 @@
-﻿using System;
-using System.ComponentModel;
-using System.Globalization;
+﻿namespace MikuMikuModel.Nodes.TypeConverters;
 
-namespace MikuMikuModel.Nodes.TypeConverters
+public class Int32HexTypeConverter : TypeConverter
 {
-    public class Int32HexTypeConverter : TypeConverter
+    public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) => 
+        sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+
+    public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) => 
+        sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+
+    public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        if ( !( value is string input ) ) 
+            return base.ConvertFrom( context, culture, value );
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        if ( input.StartsWith( "0x" ) )
+            input = input.Substring( 2 );
 
-        public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
-        {
-            if ( !( value is string input ) ) 
-                return base.ConvertFrom( context, culture, value );
-
-            if ( input.StartsWith( "0x" ) )
-                input = input.Substring( 2 );
-
-            return int.Parse( input, NumberStyles.HexNumber, culture );
-        }
-
-        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value,
-            Type destinationType )
-        {
-            if ( value is int && destinationType == typeof( string ) )
-                return $"0x{value:X8}";
-
-            return base.ConvertTo( context, culture, value, destinationType );
-        }
+        return int.Parse( input, NumberStyles.HexNumber, culture );
     }
 
-    public class UInt32HexTypeConverter : TypeConverter
+    public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value,
+        Type destinationType )
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        if ( value is int && destinationType == typeof( string ) )
+            return $"0x{value:X8}";
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        return base.ConvertTo( context, culture, value, destinationType );
+    }
+}
 
-        public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
-        {
-            if ( !( value is string input ) ) 
-                return base.ConvertFrom( context, culture, value );
+public class UInt32HexTypeConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
-            if ( input.StartsWith( "0x" ) )
-                input = input.Substring( 2 );
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertTo(context, sourceType);
 
-            return uint.Parse( input, NumberStyles.HexNumber, culture );
-        }
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+    {
+        if (!(value is string input))
+            return base.ConvertFrom(context, culture, value);
 
-        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType )
-        {
-            if ( value is uint && destinationType == typeof( string ) )
-                return $"0x{value:X8}";
+        if (input.StartsWith("0x"))
+            input = input.Substring(2);
 
-            return base.ConvertTo( context, culture, value, destinationType );
-        }
+        return uint.Parse(input, NumberStyles.HexNumber, culture);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+    {
+        if (value is uint && destinationType == typeof(string))
+            return $"0x{value:X8}";
+
+        return base.ConvertTo(context, culture, value, destinationType);
     }
 }

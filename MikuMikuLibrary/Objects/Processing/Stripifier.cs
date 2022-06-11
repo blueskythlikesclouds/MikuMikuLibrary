@@ -1,10 +1,9 @@
-﻿namespace MikuMikuLibrary.Objects.Processing
+﻿namespace MikuMikuLibrary.Objects.Processing;
+
+public static class Stripifier
 {
-    public static class Stripifier
+    public static uint[] Stripify(uint[] indices)
     {
-        public static uint[] Stripify( uint[] indices )
-        {
-            return Native.Stripifier.Stripify( indices );
-        }
+        return Native.Stripifier.Stripify(indices);
     }
 }

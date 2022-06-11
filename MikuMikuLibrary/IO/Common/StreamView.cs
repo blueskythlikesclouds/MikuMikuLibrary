@@ -1,106 +1,102 @@
-﻿using System;
-using System.IO;
+﻿namespace MikuMikuLibrary.IO.Common;
 
-namespace MikuMikuLibrary.IO.Common
+public sealed class StreamView : Stream
 {
-    public sealed class StreamView : Stream
+    private readonly Stream mSourceStream;
+    private readonly Stream mRootStream;
+    private readonly Stream mSeekingStream;
+    private readonly long mPosition;
+
+    private long mSubPosition;
+    private long mSeekingStreamPosition;
+    private long mLength;
+
+    private readonly bool mLeaveOpen;
+
+    public override bool CanRead => mSourceStream.CanRead;
+    public override bool CanSeek => mSourceStream.CanSeek;
+    public override bool CanWrite => false;
+    public override long Length => mLength;
+
+    public override long Position
     {
-        private readonly Stream mSourceStream;
-        private readonly Stream mRootStream;
-        private readonly Stream mSeekingStream;
-        private readonly long mPosition;
+        get => mSubPosition;
+        set => mSubPosition = value;
+    }
 
-        private long mSubPosition;
-        private long mSeekingStreamPosition;
-        private long mLength;
+    public override void Flush() =>
+        mSourceStream.Flush();
 
-        private readonly bool mLeaveOpen;
-
-        public override bool CanRead => mSourceStream.CanRead;
-        public override bool CanSeek => mSourceStream.CanSeek;
-        public override bool CanWrite => false;
-        public override long Length => mLength;
-
-        public override long Position
+    public override long Seek(long offset, SeekOrigin origin)
+    {
+        switch (origin)
         {
-            get => mSubPosition;
-            set => mSubPosition = value;
+            case SeekOrigin.Begin:
+                mSubPosition = offset;
+                break;
+            case SeekOrigin.Current:
+                mSubPosition += offset;
+                break;
+            case SeekOrigin.End:
+                mSubPosition = mPosition + mLength - offset;
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(origin), origin, null);
         }
 
-        public override void Flush() => 
-            mSourceStream.Flush();
+        return mSubPosition;
+    }
 
-        public override long Seek( long offset, SeekOrigin origin )
-        {
-            switch ( origin )
-            {
-                case SeekOrigin.Begin:
-                    mSubPosition = offset;
-                    break;
-                case SeekOrigin.Current:
-                    mSubPosition += offset;
-                    break;
-                case SeekOrigin.End:
-                    mSubPosition = mPosition + mLength - offset;
-                    break;
+    public override void SetLength(long value) =>
+        mLength = value;
 
-                default:
-                    throw new ArgumentOutOfRangeException( nameof( origin ), origin, null );
-            }
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+        if (mSubPosition >= mLength)
+            return 0;
 
-            return mSubPosition;
-        }
+        if (mSubPosition + count > mLength)
+            count = (int)(mLength - mSubPosition);
 
-        public override void SetLength( long value ) => 
-            mLength = value;
+        long previousPosition = mSeekingStream.Position;
+        mSeekingStream.Seek(mSeekingStreamPosition, SeekOrigin.Begin);
 
-        public override int Read( byte[] buffer, int offset, int count )
-        {
-            if ( mSubPosition >= mLength )
-                return 0;
+        int result = mSourceStream.Read(buffer, offset, count);
+        mSubPosition += result;
+        mSeekingStreamPosition = mSeekingStream.Position;
 
-            if ( mSubPosition + count > mLength )
-                count = ( int ) ( mLength - mSubPosition );
+        mSeekingStream.Seek(previousPosition, SeekOrigin.Begin);
 
-            long previousPosition = mSeekingStream.Position;
-            mSeekingStream.Seek( mSeekingStreamPosition, SeekOrigin.Begin );
+        return result;
+    }
 
-            int result = mSourceStream.Read( buffer, offset, count );
-            mSubPosition += count;
-            mSeekingStreamPosition = mSeekingStream.Position;
+    public override void Write(byte[] buffer, int offset, int count) =>
+        throw new NotSupportedException();
 
-            mSeekingStream.Seek( previousPosition, SeekOrigin.Begin );
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && !mLeaveOpen)
+            mSourceStream.Close();
 
-            return result;
-        }
-          
-        public override void Write( byte[] buffer, int offset, int count ) => 
-            throw new NotSupportedException();
+        base.Dispose(disposing);
+    }
 
-        protected override void Dispose( bool disposing )
-        {
-            if ( disposing && !mLeaveOpen )
-                mSourceStream.Close();
+    public StreamView(Stream sourceStream, Stream rootStream, long position, long length, bool leaveOpen = false)
+    {
+        mSourceStream = sourceStream;
+        mRootStream = rootStream;
+        mSeekingStream = rootStream ?? sourceStream;
+        mPosition = position;
+        mSubPosition = 0;
+        mSeekingStreamPosition = position;
+        mLength = length;
+        mLeaveOpen = leaveOpen;
+    }
 
-            base.Dispose( disposing );
-        }
+    public StreamView(Stream sourceStream, long position, long length, bool leaveOpen = false)
+        : this(sourceStream, null, position, length, leaveOpen)
+    {
 
-        public StreamView( Stream sourceStream, Stream rootStream, long position, long length, bool leaveOpen = false )
-        {
-            mSourceStream = sourceStream;
-            mRootStream = rootStream;
-            mSeekingStream = rootStream ?? sourceStream;
-            mPosition = position;
-            mSubPosition = 0;
-            mSeekingStreamPosition = position;
-            mLength = length;
-            mLeaveOpen = leaveOpen;
-        }
-
-        public StreamView( Stream sourceStream, long position, long length, bool leaveOpen = false )
-            : this( sourceStream, null, position, length, leaveOpen )
-        {
-
-        }
     }
 }

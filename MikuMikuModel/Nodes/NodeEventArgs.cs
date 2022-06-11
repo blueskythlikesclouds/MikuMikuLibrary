@@ -1,80 +1,77 @@
-﻿using System;
+﻿namespace MikuMikuModel.Nodes;
 
-namespace MikuMikuModel.Nodes
+public class NodeRenameEventArgs : EventArgs
 {
-    public class NodeRenameEventArgs : EventArgs
-    {
-        public string PreviousName { get; }
+    public string PreviousName { get; }
 
-        public NodeRenameEventArgs( string previousName )
-        {
-            PreviousName = previousName;
-        }
+    public NodeRenameEventArgs(string previousName)
+    {
+        PreviousName = previousName;
     }
+}
 
-    public class NodeAddEventArgs : EventArgs
+public class NodeAddEventArgs : EventArgs
+{
+    public INode AddedNode { get; }
+    public int Index { get; }
+
+    public NodeAddEventArgs(INode addedNode, int index)
     {
-        public INode AddedNode { get; }
-        public int Index { get; }
-
-        public NodeAddEventArgs( INode addedNode, int index )
-        {
-            AddedNode = addedNode;
-            Index = index;
-        }
+        AddedNode = addedNode;
+        Index = index;
     }
+}
 
-    public class NodeRemoveEventArgs : EventArgs
+public class NodeRemoveEventArgs : EventArgs
+{
+    public INode RemovedNode { get; }
+
+    public NodeRemoveEventArgs(INode removedNode)
     {
-        public INode RemovedNode { get; }
-
-        public NodeRemoveEventArgs( INode removedNode )
-        {
-            RemovedNode = removedNode;
-        }
+        RemovedNode = removedNode;
     }
+}
 
-    public class NodeImportEventArgs : EventArgs
+public class NodeImportEventArgs : EventArgs
+{
+    public string FilePath { get; }
+
+    public NodeImportEventArgs(string filePath)
     {
-        public string FilePath { get; }
-
-        public NodeImportEventArgs( string filePath )
-        {
-            FilePath = filePath;
-        }
+        FilePath = filePath;
     }
+}
 
-    public class NodeExportEventArgs : EventArgs
+public class NodeExportEventArgs : EventArgs
+{
+    public string FilePath { get; }
+
+    public NodeExportEventArgs(string filePath)
     {
-        public string FilePath { get; }
-
-        public NodeExportEventArgs( string filePath )
-        {
-            FilePath = filePath;
-        }
+        FilePath = filePath;
     }
+}
 
-    public class NodeReplaceEventArgs : EventArgs
+public class NodeReplaceEventArgs : EventArgs
+{
+    public object PreviousData { get; }
+
+    public NodeReplaceEventArgs(object previousData)
     {
-        public object PreviousData { get; }
-
-        public NodeReplaceEventArgs( object previousData )
-        {
-            PreviousData = previousData;
-        }
+        PreviousData = previousData;
     }
+}
 
-    public class NodeMoveEventArgs : EventArgs
+public class NodeMoveEventArgs : EventArgs
+{
+    public INode MovedNode { get; }
+    public int PreviousIndex { get; }
+    public int NewIndex { get; }
+
+    public NodeMoveEventArgs(INode movedNode, int previousIndex, int newIndex)
     {
-        public INode MovedNode { get; }
-        public int PreviousIndex { get; }
-        public int NewIndex { get; }
-
-        public NodeMoveEventArgs( INode movedNode, int previousIndex, int newIndex )
-        {
-            MovedNode = movedNode;
-            PreviousIndex = previousIndex;
-            NewIndex = newIndex;
-        }
+        MovedNode = movedNode;
+        PreviousIndex = previousIndex;
+        NewIndex = newIndex;
     }
 }

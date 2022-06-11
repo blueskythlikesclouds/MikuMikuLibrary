@@ -2,15 +2,14 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
-namespace MikuMikuLibrary.IO.Common
+namespace MikuMikuLibrary.IO.Common;
+
+public enum StringBinaryFormat
 {
-    public enum StringBinaryFormat
-    {
-        Unknown,
-        NullTerminated,
-        FixedLength,
-        PrefixedLength8,
-        PrefixedLength16,
-        PrefixedLength32
-    }
+    Unknown,
+    NullTerminated,
+    FixedLength,
+    PrefixedLength8,
+    PrefixedLength16,
+    PrefixedLength32
 }

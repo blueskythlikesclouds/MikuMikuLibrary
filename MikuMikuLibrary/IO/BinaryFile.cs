@@ -1,289 +1,284 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using MikuMikuLibrary.Cryptography;
+﻿using MikuMikuLibrary.Cryptography;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections;
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO;
+
+public abstract class BinaryFile : IBinaryFile
 {
-    public abstract class BinaryFile : IBinaryFile
+    protected Stream mStream;
+    protected bool mOwnsStream;
+
+    public abstract BinaryFileFlags Flags { get; }
+    public virtual BinaryFormat Format { get; set; }
+    public virtual Endianness Endianness { get; set; }
+    public virtual Encoding Encoding => Encoding.UTF8;
+
+    public void Load(Stream source, bool leaveOpen = false)
     {
-        protected Stream mStream;
-        protected bool mOwnsStream;
+        if (!Flags.HasFlag(BinaryFileFlags.Load))
+            throw new NotSupportedException("Binary file is not able to load");
 
-        public abstract BinaryFileFlags Flags { get; }
-        public virtual BinaryFormat Format { get; set; }
-        public virtual Endianness Endianness { get; set; }
-        public virtual Encoding Encoding => Encoding.UTF8;
-
-        public void Load( Stream source, bool leaveOpen = false )
+        if (Flags.HasFlag(BinaryFileFlags.UsesSourceStream))
         {
-            if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
-                throw new NotSupportedException( "Binary file is not able to load" );
+            mStream = source;
+            mOwnsStream = !leaveOpen;
+        }
 
-            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
+        if (!(Flags.HasFlag(BinaryFileFlags.HasSectionFormat) && ReadModern()))
+            ReadClassic();
+
+        if (!leaveOpen && !Flags.HasFlag(BinaryFileFlags.UsesSourceStream))
+            source.Dispose();
+
+        bool ReadModern()
+        {
+            var stream = source;
+
+            var bytes = new byte[4];
+
+            string ReadSignature()
             {
-                mStream = source;
-                mOwnsStream = !leaveOpen;
+                stream.Read(bytes, 0, bytes.Length);
+                return Encoding.UTF8.GetString(bytes);
             }
 
-            if ( !( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) && ReadModern() ) )
-                ReadClassic();
-
-            if ( !leaveOpen && !Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
-                source.Dispose();
-
-            bool ReadModern()
+            long current = source.Position;
             {
-                var stream = source;
+                string signature = ReadSignature();
 
-                var bytes = new byte[ 4 ];
-
-                string ReadSignature()
+                if (signature == "DIVA")
                 {
-                    stream.Read( bytes, 0, bytes.Length );
-                    return Encoding.UTF8.GetString( bytes );
+                    string signatureOtherHalf = ReadSignature();
+
+                    if (signatureOtherHalf != "FILE")
+                        throw new InvalidDataException($"Invalid signature (expected DIVAFILE)");
+
+                    stream = DivafileDecryptor.DecryptToMemoryStream(source, true, true);
+                    signature = ReadSignature();
                 }
 
-                long current = source.Position;
+                if (SectionRegistry.SectionInfosBySignature.TryGetValue(signature, out var sectionInfo))
                 {
-                    string signature = ReadSignature();
-
-                    if ( signature == "DIVA" )
+                    using (var section = sectionInfo.Create(SectionMode.Read, this))
                     {
-                        string signatureOtherHalf = ReadSignature();
+                        section.Read(stream, true);
 
-                        if ( signatureOtherHalf != "FILE" )
-                            throw new InvalidDataException( $"Invalid signature (expected DIVAFILE)" );
-
-                        stream = DivafileDecryptor.DecryptToMemoryStream( source, true, true );
-                        signature = ReadSignature();
-                    }
-
-                    if ( SectionRegistry.SectionInfosBySignature.TryGetValue( signature, out var sectionInfo ) )
-                    {
-                        using ( var section = sectionInfo.Create( SectionMode.Read, this ) )
+                        while (source.Position < source.Length)
                         {
-                            section.Read( stream, true );
+                            signature = ReadSignature();
+                            sectionInfo = SectionRegistry.SectionInfosBySignature[signature];
 
-                            while ( source.Position < source.Length )
+                            using (var siblingSection = sectionInfo.Create(SectionMode.Read))
                             {
-                                signature = ReadSignature();
-                                sectionInfo = SectionRegistry.SectionInfosBySignature[ signature ];
+                                siblingSection.Read(stream, true);
 
-                                using ( var siblingSection = sectionInfo.Create( SectionMode.Read ) )
-                                {
-                                    siblingSection.Read( stream, true );
+                                if (siblingSection is EndOfFileSection)
+                                    break;
 
-                                    if ( siblingSection is EndOfFileSection )
-                                        break;
-
-                                    if ( section.SectionInfo.SubSectionInfos.TryGetValue( sectionInfo, out var subSectionInfo ) )
-                                        subSectionInfo.ProcessPropertyForReading( siblingSection, section );
-                                }
+                                if (section.SectionInfo.SubSectionInfos.TryGetValue(sectionInfo, out var subSectionInfo))
+                                    subSectionInfo.ProcessPropertyForReading(siblingSection, section);
                             }
-
-                            section.ProcessData();
                         }
 
-                        return true;
+                        section.ProcessData();
                     }
 
-                    if ( stream != source )
-                        stream.Close();
+                    return true;
                 }
 
-                source.Seek( current, SeekOrigin.Begin );
-
-                return false;
+                if (stream != source)
+                    stream.Close();
             }
 
-            void ReadClassic()
+            source.Seek(current, SeekOrigin.Begin);
+
+            return false;
+        }
+
+        void ReadClassic()
+        {
+            using (var reader = new EndianBinaryReader(source, Encoding, Endianness, true))
             {
-                using ( var reader = new EndianBinaryReader( source, Encoding, Endianness, true ) )
+                reader.PushBaseOffset();
                 {
-                    reader.PushBaseOffset();
+                    Read(reader);
+                }
+            }
+        }
+    }
+
+    public virtual void Load(string filePath)
+    {
+        if (!Flags.HasFlag(BinaryFileFlags.Load))
+            throw new NotSupportedException("Binary file is not able to load");
+
+        Load(File.OpenRead(filePath));
+    }
+
+    public void Save(Stream destination, bool leaveOpen = false)
+    {
+        if (!Flags.HasFlag(BinaryFileFlags.Save))
+            throw new NotSupportedException("Binary file is not able to save");
+
+        if (Flags.HasFlag(BinaryFileFlags.HasSectionFormat) && BinaryFormatUtilities.IsModern(Format))
+            WriteModern();
+
+        else
+            WriteClassic();
+
+        // Adopt this stream
+        if (Flags.HasFlag(BinaryFileFlags.UsesSourceStream))
+        {
+            if (mOwnsStream)
+                mStream.Close();
+
+            mStream = destination;
+            mOwnsStream = !leaveOpen;
+
+            mStream.Flush();
+        }
+
+        else if (!leaveOpen)
+        {
+            destination.Close();
+        }
+
+        void WriteModern()
+        {
+            using (var section = GetSectionInstanceForWriting())
+            {
+                section.Write(destination);
+
+                foreach (var subSection in section.Sections.Where(x => x.SectionInfo.IsBinaryFile))
+                    subSection.Write(destination);
+
+                using (var eofSection = new EndOfFileSection(SectionMode.Write, this))
+                    eofSection.Write(destination);
+            }
+        }
+
+        void WriteClassic()
+        {
+            using (var writer = new EndianBinaryWriter(destination, Encoding, Endianness, true))
+            {
+                writer.PushBaseOffset();
+                {
+                    // Push a string table
+                    writer.PushStringTable(16, AlignmentMode.Center, StringBinaryFormat.NullTerminated);
                     {
-                        Read( reader );
+                        Write(writer);
                     }
+                    writer.PerformScheduledWrites();
+                    writer.PopStringTablesReversed();
                 }
             }
         }
+    }
 
-        public virtual void Load( string filePath )
+    public virtual void Save(string filePath)
+    {
+        if (!Flags.HasFlag(BinaryFileFlags.Save))
+            throw new NotSupportedException("Binary file is not able to save");
+
+        // Prevent any kind of conflict.
+        if (Flags.HasFlag(BinaryFileFlags.UsesSourceStream) && mStream is FileStream fileStream)
         {
-            if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
-                throw new NotSupportedException( "Binary file is not able to load" );
+            filePath = Path.GetFullPath(filePath);
+            string thisFilePath = Path.GetFullPath(fileStream.Name);
 
-            Load( File.OpenRead( filePath ) );
-        }
-
-        public void Save( Stream destination, bool leaveOpen = false )
-        {
-            if ( !Flags.HasFlag( BinaryFileFlags.Save ) )
-                throw new NotSupportedException( "Binary file is not able to save" );
-
-            if ( Flags.HasFlag( BinaryFileFlags.HasSectionFormat ) && BinaryFormatUtilities.IsModern( Format ) )
-                WriteModern();
-
-            else
-                WriteClassic();
-
-            // Adopt this stream
-            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) )
+            if (filePath.Equals(thisFilePath, StringComparison.OrdinalIgnoreCase))
             {
-                if ( mOwnsStream )
-                    mStream.Close();
-
-                mStream = destination;
-                mOwnsStream = !leaveOpen;
-
-                mStream.Flush();
-            }
-
-            else if ( !leaveOpen )
-            {
-                destination.Close();
-            }
-
-            void WriteModern()
-            {
-                using ( var section = GetSectionInstanceForWriting() )
+                do
                 {
-                    section.Write( destination );
+                    thisFilePath += "_";
+                } while (File.Exists(thisFilePath));
 
-                    foreach ( var subSection in section.Sections.Where( x => x.SectionInfo.IsBinaryFile ) )
-                        subSection.Write( destination );
+                using (var destination = File.Create(thisFilePath))
+                    Save(destination);
 
-                    using ( var eofSection = new EndOfFileSection( SectionMode.Write, this ) ) 
-                        eofSection.Write( destination );
-                }
-            }
+                fileStream.Close();
 
-            void WriteClassic()
-            {
-                using ( var writer = new EndianBinaryWriter( destination, Encoding, Endianness, true ) )
-                {
-                    writer.PushBaseOffset();
-                    {
-                        // Push a string table
-                        writer.PushStringTable( 16, AlignmentMode.Center, StringBinaryFormat.NullTerminated );
-                        {
-                            Write( writer );
-                        }
-                        writer.PerformScheduledWrites();
-                        writer.PopStringTablesReversed();
-                    }
-                }
-            }
-        }
+                File.Delete(filePath);
+                File.Move(thisFilePath, filePath);
 
-        public virtual void Save( string filePath )
-        {
-            if ( !Flags.HasFlag( BinaryFileFlags.Save ) )
-                throw new NotSupportedException( "Binary file is not able to save" );
+                mStream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                mOwnsStream = true;
 
-            // Prevent any kind of conflict.
-            if ( Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && mStream is FileStream fileStream )
-            {
-                filePath = Path.GetFullPath( filePath );
-                string thisFilePath = Path.GetFullPath( fileStream.Name );
-
-                if ( filePath.Equals( thisFilePath, StringComparison.OrdinalIgnoreCase ) )
-                {
-                    do
-                    {
-                        thisFilePath += "_";
-                    } while ( File.Exists( thisFilePath ) );
-
-                    using ( var destination = File.Create( thisFilePath ) )
-                        Save( destination );
-
-                    fileStream.Close();
-
-                    File.Delete( filePath );
-                    File.Move( thisFilePath, filePath );
-
-                    mStream = new FileStream( filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite );
-                    mOwnsStream = true;
-
-                    return;
-                }
-            }
-
-            Save( new FileStream( filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite ) );
-        }
-
-        public void Dispose()
-        {
-            Dispose( true );
-            GC.SuppressFinalize( this );
-        }
-
-        public abstract void Read( EndianBinaryReader reader, ISection section = null );
-        public abstract void Write( EndianBinaryWriter writer, ISection section = null );
-
-        public static T Load<T>( Stream source, bool leaveOpen = false ) where T : IBinaryFile, new()
-        {
-            var instance = new T();
-            instance.Load( source, leaveOpen );
-            return instance;
-        }
-
-        public static T Load<T>( string filePath ) where T : IBinaryFile, new()
-        {
-            var instance = new T();
-            instance.Load( filePath );
-            return instance;
-        }
-
-        public static T LoadIfExist<T>( string filePath ) where T : IBinaryFile, new()
-        {
-            var instance = new T();
-
-            if ( string.IsNullOrEmpty( filePath ) || !File.Exists( filePath ) )
-                return instance;
-
-            instance.Load( filePath );
-            return instance;
-        }
-
-        public void LoadIfExist( string filePath )
-        {
-            if ( !Flags.HasFlag( BinaryFileFlags.Load ) )
-                throw new NotSupportedException( "Binary file is not able to load" );
-
-            if ( string.IsNullOrEmpty( filePath ) || !File.Exists( filePath ) )
                 return;
-
-            Load( filePath );
+            }
         }
 
-        protected virtual ISection GetSectionInstanceForWriting()
-        {
-            var type = GetType();
+        Save(new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
+    }
 
-            if ( !SectionRegistry.SingleSectionInfosByDataType.TryGetValue( type, out var sectionInfo ) )
-                throw new NotImplementedException();
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-            return sectionInfo.Create( SectionMode.Write, this );
-        }
+    public abstract void Read(EndianBinaryReader reader, ISection section = null);
+    public abstract void Write(EndianBinaryWriter writer, ISection section = null);
 
-        /// <summary>
-        ///     Cleans up resources used by the object.
-        /// </summary>
-        /// <param name="disposing">Whether the managed objects are going to be disposed.</param>
-        protected virtual void Dispose( bool disposing )
-        {
-            if ( disposing && Flags.HasFlag( BinaryFileFlags.UsesSourceStream ) && mOwnsStream )
-                mStream?.Close();
-        }
+    public static T Load<T>(Stream source, bool leaveOpen = false) where T : IBinaryFile, new()
+    {
+        var instance = new T();
+        instance.Load(source, leaveOpen);
+        return instance;
+    }
 
-        ~BinaryFile()
-        {
-            Dispose( false );
-        }
+    public static T Load<T>(string filePath) where T : IBinaryFile, new()
+    {
+        var instance = new T();
+        instance.Load(filePath);
+        return instance;
+    }
+
+    public static T LoadIfExist<T>(string filePath) where T : IBinaryFile, new()
+    {
+        var instance = new T();
+
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            return instance;
+
+        instance.Load(filePath);
+        return instance;
+    }
+
+    public void LoadIfExist(string filePath)
+    {
+        if (!Flags.HasFlag(BinaryFileFlags.Load))
+            throw new NotSupportedException("Binary file is not able to load");
+
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            return;
+
+        Load(filePath);
+    }
+
+    protected virtual ISection GetSectionInstanceForWriting()
+    {
+        var type = GetType();
+
+        if (!SectionRegistry.SingleSectionInfosByDataType.TryGetValue(type, out var sectionInfo))
+            throw new NotImplementedException();
+
+        return sectionInfo.Create(SectionMode.Write, this);
+    }
+
+    /// <summary>
+    ///     Cleans up resources used by the object.
+    /// </summary>
+    /// <param name="disposing">Whether the managed objects are going to be disposed.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing && Flags.HasFlag(BinaryFileFlags.UsesSourceStream) && mOwnsStream)
+            mStream?.Close();
+    }
+
+    ~BinaryFile()
+    {
+        Dispose(false);
     }
 }

@@ -1,43 +1,40 @@
-﻿using System;
+﻿namespace MikuMikuLibrary.IO;
 
-namespace MikuMikuLibrary.IO
+public enum AddressSpace
 {
-    public enum AddressSpace
+    Int32,
+    Int64
+}
+
+public static class AddressSpaceEx
+{
+    public static int GetByteSize(this AddressSpace addressSpace)
     {
-        Int32,
-        Int64
+        switch (addressSpace)
+        {
+            case AddressSpace.Int32:
+                return 4;
+
+            case AddressSpace.Int64:
+                return 8;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(addressSpace));
+        }
     }
 
-    public static class AddressSpaceEx
+    public static BinaryFormat GetCorrespondingModernFormat(this AddressSpace addressSpace)
     {
-        public static int GetByteSize( this AddressSpace addressSpace )
+        switch (addressSpace)
         {
-            switch ( addressSpace )
-            {
-                case AddressSpace.Int32:
-                    return 4;
+            case AddressSpace.Int32:
+                return BinaryFormat.F2nd;
 
-                case AddressSpace.Int64:
-                    return 8;
+            case AddressSpace.Int64:
+                return BinaryFormat.X;
 
-                default:
-                    throw new ArgumentOutOfRangeException( nameof( addressSpace ) );
-            }
-        }
-
-        public static BinaryFormat GetCorrespondingModernFormat( this AddressSpace addressSpace )
-        {
-            switch ( addressSpace )
-            {
-                case AddressSpace.Int32:
-                    return BinaryFormat.F2nd;
-
-                case AddressSpace.Int64:
-                    return BinaryFormat.X;
-
-                default:
-                    throw new ArgumentOutOfRangeException( nameof( addressSpace ), addressSpace, null );
-            }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(addressSpace), addressSpace, null);
         }
     }
 }

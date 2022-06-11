@@ -1,7 +1,6 @@
-﻿namespace MikuMikuLibrary.IBLs.Processing.Interfaces
+﻿namespace MikuMikuLibrary.IBLs.Processing.Interfaces;
+
+public interface ILightMapImporter
 {
-    public interface ILightMapImporter
-    {
-        LightMap ImportFromFile( string filePath, int width, int height );  
-    }
+    LightMap ImportFromFile(string filePath, int width, int height);
 }

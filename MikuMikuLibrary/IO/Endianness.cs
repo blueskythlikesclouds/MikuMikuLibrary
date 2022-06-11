@@ -2,11 +2,10 @@
 // Taken and modified from: https://github.com/TGEnigma/Amicitia //
 //===============================================================//
 
-namespace MikuMikuLibrary.IO
+namespace MikuMikuLibrary.IO;
+
+public enum Endianness
 {
-    public enum Endianness
-    {
-        Little,
-        Big
-    }
+    Little,
+    Big
 }

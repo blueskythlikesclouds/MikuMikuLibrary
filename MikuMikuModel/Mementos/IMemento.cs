@@ -1,8 +1,7 @@
-﻿namespace MikuMikuModel.Mementos
+﻿namespace MikuMikuModel.Mementos;
+
+public interface IMemento
 {
-    public interface IMemento
-    {
-        void Undo();
-        void Redo();
-    }
+    void Undo();
+    void Redo();
 }

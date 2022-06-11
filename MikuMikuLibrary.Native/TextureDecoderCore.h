@@ -10,11 +10,11 @@ namespace MikuMikuLibrary::Textures::Processing
     public ref class TextureDecoderCore sealed : public ITextureDecoder
     {
     public:
-        virtual Bitmap^ DecodeToBitmap( SubTexture^ subTexture );
-        virtual Bitmap^ DecodeToBitmap( Texture^ texture );
-        virtual array<Bitmap^, 2>^ DecodeToBitmaps( Texture^ texture );
+        virtual Bitmap^ DecodeToBitmap(SubTexture^ subTexture);
+        virtual Bitmap^ DecodeToBitmap(Texture^ texture);
+        virtual array<Bitmap^, 2>^ DecodeToBitmaps(Texture^ texture);
 
-        virtual void DecodeToFile( SubTexture^ subTexture, String^ filePath );
-        virtual void DecodeToFile( Texture^ texture, String^ filePat );
+        virtual void DecodeToFile(SubTexture^ subTexture, String^ filePath);
+        virtual void DecodeToFile(Texture^ texture, String^ filePat);
     };
 }

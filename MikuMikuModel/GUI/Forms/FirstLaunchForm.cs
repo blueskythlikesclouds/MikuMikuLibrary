@@ -1,16 +1,13 @@
-﻿using System.Windows.Forms;
-using MikuMikuModel.Resources;
-using MikuMikuModel.Resources.Styles;
+﻿using MikuMikuModel.Resources;
 
-namespace MikuMikuModel.GUI.Forms
+namespace MikuMikuModel.GUI.Forms;
+
+public partial class FirstLaunchForm : Form
 {
-    public partial class FirstLaunchForm : Form
+    public FirstLaunchForm()
     {
-        public FirstLaunchForm()
-        {
-            InitializeComponent();
+        InitializeComponent();
 
-            Icon = ResourceStore.LoadIcon( "Icons/Application.ico" );
-        }
+        Icon = ResourceStore.LoadIcon("Icons/Application.ico");
     }
 }

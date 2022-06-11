@@ -1,228 +1,221 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
-using MikuMikuModel.Configurations;
+﻿using MikuMikuModel.Configurations;
 
-namespace MikuMikuModel.Nodes
+namespace MikuMikuModel.Nodes;
+
+public class ReferenceNode : INode
 {
-    public class ReferenceNode : INode
+    private readonly string mName;
+    private readonly bool mUsesCustomName;
+
+    public INode Node { get; }
+
+    public IEnumerator<INode> GetEnumerator()
     {
-        private readonly string mName;
-        private readonly bool mUsesCustomName;
+        return Node.GetEnumerator();
+    }
 
-        public INode Node { get; }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return ((IEnumerable)Node).GetEnumerator();
+    }
 
-        public IEnumerator<INode> GetEnumerator()
-        {
-            return Node.GetEnumerator();
-        }
+    public event PropertyChangedEventHandler PropertyChanged
+    {
+        add => Node.PropertyChanged += value;
+        remove => Node.PropertyChanged -= value;
+    }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ( ( IEnumerable ) Node ).GetEnumerator();
-        }
+    public NodeFlags Flags =>
+        Node.Flags & ~(mUsesCustomName ? NodeFlags.Rename : NodeFlags.None);
 
-        public event PropertyChangedEventHandler PropertyChanged
-        {
-            add => Node.PropertyChanged += value;
-            remove => Node.PropertyChanged -= value;
-        }
+    public object Data => Node.Data;
 
-        public NodeFlags Flags =>
-            Node.Flags & ~( mUsesCustomName ? NodeFlags.Rename : NodeFlags.None );
+    public Type DataType => Node.DataType;
 
-        public object Data => Node.Data;
+    public INode Parent { get; set; }
 
-        public Type DataType => Node.DataType;
+    public IList<INode> Nodes => Node.Nodes;
 
-        public INode Parent { get; set; }
+    public string Name
+    {
+        get => mUsesCustomName ? mName : Node.Name;
+        set => Node.Name = value;
+    }
 
-        public IList<INode> Nodes => Node.Nodes;
+    public ContextMenuStrip ContextMenuStrip => Node.ContextMenuStrip;
 
-        public string Name
-        {
-            get => mUsesCustomName ? mName : Node.Name;
-            set => Node.Name = value;
-        }
+    public Control Control => Node.Control;
 
-        public ContextMenuStrip ContextMenuStrip => Node.ContextMenuStrip;
+    public Bitmap Image => Node.Image;
 
-        public Control Control => Node.Control;
+    public object Tag
+    {
+        get => Node.Tag;
+        set => Node.Tag = value;
+    }
 
-        public Bitmap Image => Node.Image;
+    public Configuration SourceConfiguration
+    {
+        get => Node.SourceConfiguration;
+        set => Node.SourceConfiguration = value;
+    }
 
-        public object Tag
-        {
-            get => Node.Tag;
-            set => Node.Tag = value;
-        }
+    public bool IsPopulated => Node.IsPopulated;
 
-        public Configuration SourceConfiguration
-        {
-            get => Node.SourceConfiguration;
-            set => Node.SourceConfiguration = value;
-        }
+    public bool IsPendingSynchronization => Node.IsPendingSynchronization;
 
-        public bool IsPopulated => Node.IsPopulated;
+    public event EventHandler<NodeRenameEventArgs> Renamed
+    {
+        add => Node.Renamed += value;
+        remove => Node.Renamed -= value;
+    }
 
-        public bool IsPendingSynchronization => Node.IsPendingSynchronization;
+    public event EventHandler<NodeAddEventArgs> Added
+    {
+        add => Node.Added += value;
+        remove => Node.Added -= value;
+    }
 
-        public event EventHandler<NodeRenameEventArgs> Renamed
-        {
-            add => Node.Renamed += value;
-            remove => Node.Renamed -= value;
-        }
+    public event EventHandler<NodeRemoveEventArgs> Removed
+    {
+        add => Node.Removed += value;
+        remove => Node.Removed -= value;
+    }
 
-        public event EventHandler<NodeAddEventArgs> Added
-        {
-            add => Node.Added += value;
-            remove => Node.Added -= value;
-        }
+    public event EventHandler<NodeImportEventArgs> Imported
+    {
+        add => Node.Imported += value;
+        remove => Node.Imported -= value;
+    }
 
-        public event EventHandler<NodeRemoveEventArgs> Removed
-        {
-            add => Node.Removed += value;
-            remove => Node.Removed -= value;
-        }
+    public event EventHandler<NodeExportEventArgs> Exported
+    {
+        add => Node.Exported += value;
+        remove => Node.Exported -= value;
+    }
 
-        public event EventHandler<NodeImportEventArgs> Imported
-        {
-            add => Node.Imported += value;
-            remove => Node.Imported -= value;
-        }
+    public event EventHandler<NodeReplaceEventArgs> Replaced
+    {
+        add => Node.Replaced += value;
+        remove => Node.Replaced -= value;
+    }
 
-        public event EventHandler<NodeExportEventArgs> Exported
-        {
-            add => Node.Exported += value;
-            remove => Node.Exported -= value;
-        }
+    public event EventHandler<NodeMoveEventArgs> Moved
+    {
+        add => Node.Moved += value;
+        remove => Node.Moved -= value;
+    }
 
-        public event EventHandler<NodeReplaceEventArgs> Replaced
-        {
-            add => Node.Replaced += value;
-            remove => Node.Replaced -= value;
-        }
+    public void NotifyModified(NodeModifyFlags modifyFlags)
+    {
+        Node.NotifyModified(modifyFlags);
+    }
 
-        public event EventHandler<NodeMoveEventArgs> Moved
-        {
-            add => Node.Moved += value;
-            remove => Node.Moved -= value;
-        }
+    public void Populate()
+    {
+        Node.Populate();
+    }
 
-        public void NotifyModified( NodeModifyFlags modifyFlags )
-        {
-            Node.NotifyModified( modifyFlags );
-        }
+    public void Synchronize()
+    {
+        Node.Synchronize();
+    }
 
-        public void Populate()
-        {
-            Node.Populate();
-        }
+    public T FindParent<T>() where T : INode
+    {
+        for (var parent = Parent; parent != null; parent = parent.Parent)
+            if (parent is T node)
+                return node;
 
-        public void Synchronize()
-        {
-            Node.Synchronize();
-        }
+        return default;
+    }
 
-        public T FindParent<T>() where T : INode
-        {
-            for ( var parent = Parent; parent != null; parent = parent.Parent )
-                if ( parent is T node )
-                    return node;
+    public T FindNode<T>(string nodeName, bool searchChildren) where T : INode
+    {
+        return Node.FindNode<T>(nodeName, searchChildren);
+    }
 
-            return default;
-        }
+    public void Rename(string name)
+    {
+        Node.Rename(name);
+    }
 
-        public T FindNode<T>( string nodeName, bool searchChildren ) where T : INode
-        {
-            return Node.FindNode<T>( nodeName, searchChildren );
-        }
+    public void Rename()
+    {
+        Node.Rename();
+    }
 
-        public void Rename( string name )
-        {
-            Node.Rename( name );
-        }
+    public void Remove()
+    {
+        Node.Remove();
+    }
 
-        public void Rename()
-        {
-            Node.Rename();
-        }
+    public void Import(string filePath)
+    {
+        Node.Import(filePath);
+    }
 
-        public void Remove()
-        {
-            Node.Remove();
-        }
+    public string[] Import()
+    {
+        return Node.Import();
+    }
 
-        public void Import( string filePath )
-        {
-            Node.Import( filePath );
-        }
+    public void Export(string filePath)
+    {
+        Node.Export(filePath);
+    }
 
-        public string[] Import()
-        {
-            return Node.Import();
-        }
+    public string Export()
+    {
+        return Node.Export();
+    }
 
-        public void Export( string filePath )
-        {
-            Node.Export( filePath );
-        }
+    public void Replace(object data)
+    {
+        Node.Replace(data);
+    }
 
-        public string Export()
-        {
-            return Node.Export();
-        }
+    public void Replace(string filePath)
+    {
+        Node.Replace(filePath);
+    }
 
-        public void Replace( object data )
-        {
-            Node.Replace( data );
-        }
+    public string Replace()
+    {
+        return Node.Replace();
+    }
 
-        public void Replace( string filePath )
-        {
-            Node.Replace( filePath );
-        }
+    public void Move(int index, int targetIndex)
+    {
+        Node.Move(index, targetIndex);
+    }
 
-        public string Replace()
-        {
-            return Node.Replace();
-        }
+    public void MoveUp()
+    {
+        Node.MoveUp();
+    }
 
-        public void Move( int index, int targetIndex )
-        {
-            Node.Move( index, targetIndex );
-        }
+    public void MoveDown()
+    {
+        Node.MoveDown();
+    }
 
-        public void MoveUp()
-        {
-            Node.MoveUp();
-        }
+    public void Dispose()
+    {
+    }
 
-        public void MoveDown()
-        {
-            Node.MoveDown();
-        }
+    public void DisposeData()
+    {
+    }
 
-        public void Dispose()
-        {
-        }
+    public ReferenceNode(INode node)
+    {
+        Node = node;
+    }
 
-        public void DisposeData()
-        {
-        }
-
-        public ReferenceNode( INode node )
-        {
-            Node = node;
-        }
-
-        public ReferenceNode( string name, INode node ) : this( node )
-        {
-            mName = name;
-            mUsesCustomName = true;
-        }
+    public ReferenceNode(string name, INode node) : this(node)
+    {
+        mName = name;
+        mUsesCustomName = true;
     }
 }

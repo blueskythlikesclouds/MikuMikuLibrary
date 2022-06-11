@@ -1,12 +1,8 @@
-﻿using System;
-using System.IO;
+﻿namespace MikuMikuModel.Nodes.IO;
 
-namespace MikuMikuModel.Nodes.IO
+public interface IDirtyNode : INode
 {
-    public interface IDirtyNode : INode
-    {
-        bool IsDirty { get; }
-        event EventHandler DirtyStateChanged;
-        Stream GetStream();
-    }
+    bool IsDirty { get; }
+    event EventHandler DirtyStateChanged;
+    Stream GetStream();
 }

@@ -1,22 +1,21 @@
 ﻿using MikuMikuLibrary.IO.Common;
 
-namespace MikuMikuLibrary.Aets
+namespace MikuMikuLibrary.Aets;
+
+public class Marker
 {
-    public class Marker
+    public float Frame { get; set; }
+    public string Name { get; set; }
+
+    internal void Read(EndianBinaryReader reader)
     {
-        public float Frame { get; set; }
-        public string Name { get; set; }
+        Frame = reader.ReadSingle();
+        Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
+    }
 
-        internal void Read( EndianBinaryReader reader )
-        {
-            Frame = reader.ReadSingle();
-            Name = reader.ReadStringOffset( StringBinaryFormat.NullTerminated );
-        }
-
-        internal void Write( EndianBinaryWriter writer )
-        {
-            writer.Write( Frame );
-            writer.AddStringToStringTable( Name );
-        }
+    internal void Write(EndianBinaryWriter writer)
+    {
+        writer.Write(Frame);
+        writer.WriteStringOffset(Name);
     }
 }

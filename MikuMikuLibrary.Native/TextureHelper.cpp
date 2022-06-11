@@ -4,9 +4,9 @@ using namespace System;
 
 namespace MikuMikuLibrary::Textures::Processing
 {
-    DXGI_FORMAT GetDXGIFormat( const TextureFormat format )
+    DXGI_FORMAT GetDXGIFormat(const TextureFormat format)
     {
-        switch ( format )
+        switch (format)
         {
         case TextureFormat::DXT1a:
         case TextureFormat::DXT1:
@@ -28,9 +28,9 @@ namespace MikuMikuLibrary::Textures::Processing
         return DXGI_FORMAT_UNKNOWN;
     }
 
-    TextureFormat GetTextureFormat( const DXGI_FORMAT format )
+    TextureFormat GetTextureFormat(const DXGI_FORMAT format)
     {
-        switch ( format )
+        switch (format)
         {
         case DXGI_FORMAT_BC1_TYPELESS:
         case DXGI_FORMAT_BC1_UNORM:
@@ -59,14 +59,14 @@ namespace MikuMikuLibrary::Textures::Processing
         return TextureFormat::Unknown;
     }
 
-    void MakeImage( DirectX::Image& image, const uint width, const uint height, const DXGI_FORMAT format, byte* pixels )
+    void MakeImage(DirectX::Image& image, const uint width, const uint height, const DXGI_FORMAT format, byte* pixels)
     {
         image.width = width;
         image.height = height;
         image.format = format;
         image.pixels = pixels;
 
-        if ( FAILED( DirectX::ComputePitch( image.format, image.width, image.height, image.rowPitch, image.slicePitch ) ) )
-            throw gcnew Exception( "Failed to compute pitch for image" );
+        if (FAILED(DirectX::ComputePitch(image.format, image.width, image.height, image.rowPitch, image.slicePitch)))
+            throw gcnew Exception("Failed to compute pitch for image");
     }
 }

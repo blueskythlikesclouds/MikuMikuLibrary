@@ -2,22 +2,21 @@
 using MikuMikuLibrary.Sprites;
 using MikuMikuLibrary.Textures;
 
-namespace MikuMikuLibrary.IO.Sections.Sprites
+namespace MikuMikuLibrary.IO.Sections.Sprites;
+
+[Section("SPRC")]
+public class SpriteSetSection : BinaryFileSection<SpriteSet>
 {
-    [Section( "SPRC" )]
-    public class SpriteSetSection : BinaryFileSection<SpriteSet>
+    public override SectionFlags Flags => SectionFlags.None;
+
+    [SubSection(typeof(SpriteTextureSetSection))]
+    public TextureSet TextureSet
     {
-        public override SectionFlags Flags => SectionFlags.None;
+        get => Data.TextureSet;
+        set => Data.TextureSet = value;
+    }
 
-        [SubSection( typeof( SpriteTextureSetSection ) )]
-        public TextureSet TextureSet
-        {
-            get => Data.TextureSet;
-            set => Data.TextureSet = value;
-        }
-
-        public SpriteSetSection( SectionMode mode, SpriteSet data = null ) : base( mode, data )
-        {
-        }
+    public SpriteSetSection(SectionMode mode, SpriteSet data = null) : base(mode, data)
+    {
     }
 }

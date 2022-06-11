@@ -1,10 +1,9 @@
-﻿namespace MikuMikuLibrary.Motions
+﻿namespace MikuMikuLibrary.Motions;
+
+internal enum KeySetType
 {
-    internal enum KeySetType
-    {
-        None,
-        Static,
-        Linear,
-        Tangent
-    }
+    None,
+    Static,
+    Linear,
+    Tangent
 }

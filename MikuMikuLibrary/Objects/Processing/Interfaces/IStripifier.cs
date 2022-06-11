@@ -1,7 +1,6 @@
-﻿namespace MikuMikuLibrary.Objects.Processing.Interfaces
+﻿namespace MikuMikuLibrary.Objects.Processing.Interfaces;
+
+public interface IStripifier
 {
-    public interface IStripifier
-    {
-        uint[] Stripify( uint[] indices );
-    }
+    uint[] Stripify(uint[] indices);
 }

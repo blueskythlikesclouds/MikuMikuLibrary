@@ -1,43 +1,39 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
+﻿namespace MikuMikuModel.GUI.Controls;
 
-namespace MikuMikuModel.GUI.Controls
+public partial class SpriteViewControl : UserControl
 {
-    public partial class SpriteViewControl : UserControl
+    private static SpriteViewControl sInstance;
+
+    private Bitmap mBitmap;
+
+    public static SpriteViewControl Instance => sInstance ??= new SpriteViewControl();
+
+    private void InitializeComponent()
     {
-        private static SpriteViewControl sInstance;
+        this.SuspendLayout();
+        // 
+        // SpriteViewControl
+        // 
+        this.DoubleBuffered = true;
+        this.Name = "SpriteViewControl";
+        this.ResumeLayout(false);
 
-        private Bitmap mBitmap;
+    }
 
-        public static SpriteViewControl Instance => sInstance ?? (sInstance = new SpriteViewControl());
+    public void SetBitmap(Bitmap bitmap)
+    {
+        if (mBitmap != null) mBitmap.Dispose();
+        mBitmap = bitmap;
+        BackgroundImage = mBitmap;
 
-        private void InitializeComponent()
+        if (mBitmap != null)
         {
-            this.SuspendLayout();
-            // 
-            // SpriteViewControl
-            // 
-            this.DoubleBuffered = true;
-            this.Name = "SpriteViewControl";
-            this.ResumeLayout(false);
-
-        }
-
-        public void SetBitmap(Bitmap bitmap)
-        {
-            if (mBitmap != null) mBitmap.Dispose();
-            mBitmap = bitmap;
-            BackgroundImage = mBitmap;
-
-            if (mBitmap != null)
-            {
-                BackgroundImageLayout =
+            BackgroundImageLayout =
                 ClientSize.Width < BackgroundImage.Width || ClientSize.Height < BackgroundImage.Height
                     ? ImageLayout.Zoom
                     : ImageLayout.Center;
-            }
-
-            Refresh();
         }
+
+        Refresh();
     }
 }

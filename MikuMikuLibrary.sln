@@ -1,26 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29102.190
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikuMikuLibrary", "MikuMikuLibrary\MikuMikuLibrary.csproj", "{9C7171CA-7379-458F-A9CA-293BBF2C74DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MikuMikuLibrary", "MikuMikuLibrary\MikuMikuLibrary.csproj", "{9C7171CA-7379-458F-A9CA-293BBF2C74DC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CliTools", "CliTools", "{A8B4CE90-CD9B-4AFE-AE12-B53838BB02F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikuMikuModel", "MikuMikuModel\MikuMikuModel.csproj", "{C79FAC4B-D1DD-4F2D-BC92-A72C00E07931}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MikuMikuModel", "MikuMikuModel\MikuMikuModel.csproj", "{C79FAC4B-D1DD-4F2D-BC92-A72C00E07931}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7} = {2C3B66BB-F1A9-4513-AB63-570D7687C6A7}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseConverter", "CliTools\DatabaseConverter\DatabaseConverter.csproj", "{AED51515-37B5-4549-AB70-2A624083E86B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseConverter", "CliTools\DatabaseConverter\DatabaseConverter.csproj", "{AED51515-37B5-4549-AB70-2A624083E86B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarcPack", "CliTools\FarcPack\FarcPack.csproj", "{D27E2934-CDF4-4735-B92E-02705DCB1310}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FarcPack", "CliTools\FarcPack\FarcPack.csproj", "{D27E2934-CDF4-4735-B92E-02705DCB1310}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MikuMikuLibrary.Native", "MikuMikuLibrary.Native\MikuMikuLibrary.Native.vcxproj", "{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikuMikuLibrary.Rendering", "MikuMikuLibrary.Rendering\MikuMikuLibrary.Rendering.csproj", "{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MikuMikuLibrary.Shared", "MikuMikuLibrary.Shared\MikuMikuLibrary.Shared.shproj", "{9F3B6FB1-AE97-472A-BB04-BA0A13B042E8}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		MikuMikuLibrary.Shared\MikuMikuLibrary.Shared.projitems*{9c7171ca-7379-458f-a9ca-293bbf2c74dc}*SharedItemsImports = 5
+		MikuMikuLibrary.Shared\MikuMikuLibrary.Shared.projitems*{9f3b6fb1-ae97-472a-bb04-ba0a13b042e8}*SharedItemsImports = 13
+		MikuMikuLibrary.Shared\MikuMikuLibrary.Shared.projitems*{aed51515-37b5-4549-ab70-2a624083e86b}*SharedItemsImports = 5
+		MikuMikuLibrary.Shared\MikuMikuLibrary.Shared.projitems*{c79fac4b-d1dd-4f2d-bc92-a72c00e07931}*SharedItemsImports = 5
+		MikuMikuLibrary.Shared\MikuMikuLibrary.Shared.projitems*{d27e2934-cdf4-4735-b92e-02705dcb1310}*SharedItemsImports = 5
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -46,10 +53,6 @@ Global
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.Debug|Any CPU.Build.0 = Debug|x64
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.Release|Any CPU.ActiveCfg = Release|x64
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.Release|Any CPU.Build.0 = Release|x64
-		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B23DC37B-D6AD-43A8-A2A2-40F5FD747BAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

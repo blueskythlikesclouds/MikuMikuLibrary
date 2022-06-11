@@ -1,110 +1,101 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿namespace MikuMikuLibrary.Parameters;
 
-namespace MikuMikuLibrary.Parameters
+public class ParameterTreeWriter
 {
-    public class ParameterTreeWriter
+    private readonly StringBuilder mStringBuilder;
+    private readonly List<string> mLines;
+    private readonly List<object> mScopes;
+
+    private void BeginWrite(string key)
     {
-        private readonly StringBuilder mStringBuilder;
-        private readonly List<string> mLines;
-        private readonly List<object> mScopes;
+        mStringBuilder.Clear();
 
-        private void BeginWrite( string key )
+        foreach (var scope in mScopes)
         {
-            mStringBuilder.Clear();
-
-            foreach ( var scope in mScopes )
-            {
-                mStringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0}", scope );
-                mStringBuilder.Append( '.' );
-            }
-
-            mStringBuilder.Append( key );
-            mStringBuilder.Append( '=' );
+            mStringBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}", scope);
+            mStringBuilder.Append('.');
         }
 
-        private void EndWrite()
-        {
-            mStringBuilder.Append( '\n' );
-            mLines.Add( mStringBuilder.ToString() );
-        }
+        mStringBuilder.Append(key);
+        mStringBuilder.Append('=');
+    }
 
-        public void Write<T>( string key, T value )
-        {
-            BeginWrite( key );
-            {
-                mStringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0}", value );
-            }
-            EndWrite();
-        }
+    private void EndWrite()
+    {
+        mStringBuilder.Append('\n');
+        mLines.Add(mStringBuilder.ToString());
+    }
 
-        public void Write<T>( string key, IReadOnlyList<T> list, Action<T> writer )
+    public void Write<T>(string key, T value)
+    {
+        BeginWrite(key);
         {
-            PushScope( key );
+            mStringBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}", value);
+        }
+        EndWrite();
+    }
+
+    public void Write<T>(string key, IReadOnlyList<T> list, Action<T> writer)
+    {
+        PushScope(key);
+        {
+            for (int i = 0; i < list.Count; i++)
             {
-                for ( int i = 0; i < list.Count; i++ )
+                PushScope(i);
                 {
-                    PushScope( i );
-                    {
-                        writer( list[ i ] );
-                    }
-                    PopScope();
+                    writer(list[i]);
                 }
-
-                Write( "length", list.Count );
+                PopScope();
             }
-            PopScope();
-        }
 
-        public void Write( string key, int count, Action<int> writer )
+            Write("length", list.Count);
+        }
+        PopScope();
+    }
+
+    public void Write(string key, int count, Action<int> writer)
+    {
+        PushScope(key);
         {
-            PushScope( key );
+            for (int i = 0; i < count; i++)
             {
-                for ( int i = 0; i < count; i++ )
+                PushScope(i);
                 {
-                    PushScope( i );
-                    {
-                        writer( i );
-                    }
-                    PopScope();
+                    writer(i);
                 }
-
-                Write( "length", count );
+                PopScope();
             }
-            PopScope();
-        }
 
-        public void PushScope<T>( T scope )
+            Write("length", count);
+        }
+        PopScope();
+    }
+
+    public void PushScope<T>(T scope)
+    {
+        mScopes.Add(scope);
+    }
+
+    public void PopScope()
+    {
+        mScopes.RemoveAt(mScopes.Count - 1);
+    }
+
+    public void Flush(Stream stream)
+    {
+        var buffer = new byte[4096];
+
+        foreach (string line in mLines.OrderBy(x => x, StringComparer.Ordinal))
         {
-            mScopes.Add( scope );
+            int count = Encoding.UTF8.GetBytes(line, 0, line.Length, buffer, 0);
+            stream.Write(buffer, 0, count);
         }
+    }
 
-        public void PopScope()
-        {
-            mScopes.RemoveAt( mScopes.Count - 1 );
-        }
-
-        public void Flush( Stream stream )
-        {
-            var buffer = new byte[ 4096 ];
-
-            foreach ( string line in mLines.OrderBy( x => x, StringComparer.Ordinal ) )
-            {
-                int count = Encoding.UTF8.GetBytes( line, 0, line.Length, buffer, 0 );
-                stream.Write( buffer, 0, count );
-            }
-        }
-
-        public ParameterTreeWriter()
-        {
-            mStringBuilder = new StringBuilder();
-            mLines = new List<string>();
-            mScopes = new List<object>();
-        }
+    public ParameterTreeWriter()
+    {
+        mStringBuilder = new StringBuilder();
+        mLines = new List<string>();
+        mScopes = new List<object>();
     }
 }

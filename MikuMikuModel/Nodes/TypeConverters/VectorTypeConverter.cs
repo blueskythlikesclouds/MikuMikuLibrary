@@ -1,113 +1,107 @@
-﻿using System;
-using System.ComponentModel;
-using System.Globalization;
-using System.Numerics;
+﻿namespace MikuMikuModel.Nodes.TypeConverters;
 
-namespace MikuMikuModel.Nodes.TypeConverters
+public class Vector2TypeConverter : TypeConverter
 {
-    public class Vector2TypeConverter : TypeConverter
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertTo(context, sourceType);
+
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        if (!(value is string input))
+            return base.ConvertFrom(context, culture, value);
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        var floatValues = input.Trim('<', '>').Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-        public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
-        {
-            if ( !( value is string input ) )
-                return base.ConvertFrom( context, culture, value );
+        float x = float.Parse(floatValues[0], CultureInfo.InvariantCulture);
+        float y = float.Parse(floatValues[1], CultureInfo.InvariantCulture);
 
-            var floatValues = input.Trim( '<', '>' ).Split( new[] { "," }, StringSplitOptions.RemoveEmptyEntries );
-
-            float x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
-            float y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
-
-            return new Vector2( x, y );
-        }
-
-        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType )
-        {
-            if ( !( value is Vector2 input ) || destinationType != typeof( string ) ) 
-                return base.ConvertTo( context, culture, value, destinationType );
-
-            string x = input.X.ToString( CultureInfo.InvariantCulture );
-            string y = input.Y.ToString( CultureInfo.InvariantCulture );
-
-            return $"<{x}, {y}>";
-        }
+        return new Vector2(x, y);
     }
 
-    public class Vector3TypeConverter : TypeConverter
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        if (!(value is Vector2 input) || destinationType != typeof(string))
+            return base.ConvertTo(context, culture, value, destinationType);
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        string x = input.X.ToString(CultureInfo.InvariantCulture);
+        string y = input.Y.ToString(CultureInfo.InvariantCulture);
 
-        public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
-        {
-            if ( !( value is string input ) ) 
-                return base.ConvertFrom( context, culture, value );
+        return $"<{x}, {y}>";
+    }
+}
 
-            var floatValues = input.Trim( '<', '>' ).Split( new[] { "," }, StringSplitOptions.RemoveEmptyEntries );
+public class Vector3TypeConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
-            float x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
-            float y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
-            float z = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertTo(context, sourceType);
 
-            return new Vector3( x, y, z );
-        }
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+    {
+        if (!(value is string input))
+            return base.ConvertFrom(context, culture, value);
 
-        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType )
-        {
-            if ( !( value is Vector3 input ) || destinationType != typeof( string ) )
-                return base.ConvertTo( context, culture, value, destinationType );
+        var floatValues = input.Trim('<', '>').Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-            string x = input.X.ToString( CultureInfo.InvariantCulture );
-            string y = input.Y.ToString( CultureInfo.InvariantCulture );
-            string z = input.Z.ToString( CultureInfo.InvariantCulture );
+        float x = float.Parse(floatValues[0], CultureInfo.InvariantCulture);
+        float y = float.Parse(floatValues[1], CultureInfo.InvariantCulture);
+        float z = float.Parse(floatValues[2], CultureInfo.InvariantCulture);
 
-            return $"<{x}, {y}, {z}>";
-        }
+        return new Vector3(x, y, z);
     }
 
-    public class Vector4TypeConverter : TypeConverter
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
     {
-        public override bool CanConvertFrom( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertFrom( context, sourceType );
+        if (!(value is Vector3 input) || destinationType != typeof(string))
+            return base.ConvertTo(context, culture, value, destinationType);
 
-        public override bool CanConvertTo( ITypeDescriptorContext context, Type sourceType ) => 
-            sourceType == typeof( string ) || base.CanConvertTo( context, sourceType );
+        string x = input.X.ToString(CultureInfo.InvariantCulture);
+        string y = input.Y.ToString(CultureInfo.InvariantCulture);
+        string z = input.Z.ToString(CultureInfo.InvariantCulture);
 
-        public override object ConvertFrom( ITypeDescriptorContext context, CultureInfo culture, object value )
-        {
-            if ( !( value is string input ) )
-                return base.ConvertFrom( context, culture, value );
+        return $"<{x}, {y}, {z}>";
+    }
+}
 
-            var floatValues = input.Trim( '<', '>' )
-                .Split( new[] { "," }, StringSplitOptions.RemoveEmptyEntries );
+public class Vector4TypeConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
-            float x = float.Parse( floatValues[ 0 ], CultureInfo.InvariantCulture );
-            float y = float.Parse( floatValues[ 1 ], CultureInfo.InvariantCulture );
-            float z = float.Parse( floatValues[ 2 ], CultureInfo.InvariantCulture );
-            float w = float.Parse( floatValues[ 3 ], CultureInfo.InvariantCulture );
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertTo(context, sourceType);
 
-            return new Vector4( x, y, z, w );
-        }
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+    {
+        if (!(value is string input))
+            return base.ConvertFrom(context, culture, value);
 
-        public override object ConvertTo( ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType )
-        {
-            if ( !( value is Vector4 input ) || destinationType != typeof( string ) ) 
-                return base.ConvertTo( context, culture, value, destinationType );
+        var floatValues = input.Trim('<', '>')
+            .Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-            string x = input.X.ToString( CultureInfo.InvariantCulture );
-            string y = input.Y.ToString( CultureInfo.InvariantCulture );
-            string z = input.Z.ToString( CultureInfo.InvariantCulture );
-            string w = input.W.ToString( CultureInfo.InvariantCulture );
+        float x = float.Parse(floatValues[0], CultureInfo.InvariantCulture);
+        float y = float.Parse(floatValues[1], CultureInfo.InvariantCulture);
+        float z = float.Parse(floatValues[2], CultureInfo.InvariantCulture);
+        float w = float.Parse(floatValues[3], CultureInfo.InvariantCulture);
 
-            return $"<{x}, {y}, {z}, {w}>";
-        }
+        return new Vector4(x, y, z, w);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+    {
+        if (!(value is Vector4 input) || destinationType != typeof(string))
+            return base.ConvertTo(context, culture, value, destinationType);
+
+        string x = input.X.ToString(CultureInfo.InvariantCulture);
+        string y = input.Y.ToString(CultureInfo.InvariantCulture);
+        string z = input.Z.ToString(CultureInfo.InvariantCulture);
+        string w = input.W.ToString(CultureInfo.InvariantCulture);
+
+        return $"<{x}, {y}, {z}, {w}>";
     }
 }

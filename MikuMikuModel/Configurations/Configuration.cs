@@ -1,202 +1,197 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Xml.Serialization;
-using MikuMikuLibrary.Archives;
+﻿using MikuMikuLibrary.Archives;
+using MikuMikuLibrary.Bones;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.IO;
 using MikuMikuModel.Resources;
 
-namespace MikuMikuModel.Configurations
+namespace MikuMikuModel.Configurations;
+
+public class Configuration : ICloneable, IEquatable<Configuration>
 {
-    public class Configuration : ICloneable, IEquatable<Configuration>
+    private static readonly Dictionary<Type, XmlSerializer> sSerializers;
+
+    private ObjectDatabase mObjectDatabase;
+    private TextureDatabase mTextureDatabase;
+    private BoneData mBoneData;
+    private MotionDatabase mMotionDatabase;
+
+    public string Name { get; set; }
+    public string ObjectDatabaseFilePath { get; set; }
+    public string TextureDatabaseFilePath { get; set; }
+    public string BoneDataFilePath { get; set; }
+    public string MotionDatabaseFilePath { get; set; }
+
+    public DirectoryInfo BaseDirectory => new(ResourceStore.GetPath(Path.Combine("Configurations", Name)));
+
+    [XmlIgnore]
+    public ObjectDatabase ObjectDatabase
     {
-        private static readonly Dictionary<Type, XmlSerializer> sSerializers;
+        get => mObjectDatabase ??= Load(ObjectDatabaseFilePath, BinaryFile.Load<ObjectDatabase>);
+        set => mObjectDatabase = value;
+    }
 
-        private ObjectDatabase mObjectDatabase;
-        private TextureDatabase mTextureDatabase;
-        private BoneDatabase mBoneDatabase;
-        private MotionDatabase mMotionDatabase;
+    [XmlIgnore]
+    public TextureDatabase TextureDatabase
+    {
+        get => mTextureDatabase ??= Load(TextureDatabaseFilePath, BinaryFile.Load<TextureDatabase>);
+        set => mTextureDatabase = value;
+    }
 
-        public string Name { get; set; }
-        public string ObjectDatabaseFilePath { get; set; }
-        public string TextureDatabaseFilePath { get; set; }
-        public string BoneDatabaseFilePath { get; set; }
-        public string MotionDatabaseFilePath { get; set; }
+    [XmlIgnore]
+    public BoneData BoneData
+    {
+        get => mBoneData ??= Load(BoneDataFilePath, BinaryFile.Load<BoneData>);
+        set => mBoneData = value;
+    }
 
-        public DirectoryInfo BaseDirectory => new DirectoryInfo( ResourceStore.GetPath( Path.Combine( "Configurations", Name ) ) );
-
-        [XmlIgnore]
-        public ObjectDatabase ObjectDatabase
+    [XmlIgnore]
+    public MotionDatabase MotionDatabase
+    {
+        get => mMotionDatabase ??= Load(MotionDatabaseFilePath, filePath =>
         {
-            get => mObjectDatabase ?? ( mObjectDatabase = Load( ObjectDatabaseFilePath, BinaryFile.Load<ObjectDatabase> ) );
-            set => mObjectDatabase = value;
-        }
+            if (!filePath.EndsWith(".farc", StringComparison.OrdinalIgnoreCase))
+                return BinaryFile.Load<MotionDatabase>(filePath);
 
-        [XmlIgnore]
-        public TextureDatabase TextureDatabase
-        {
-            get => mTextureDatabase ?? ( mTextureDatabase = Load( TextureDatabaseFilePath, BinaryFile.Load<TextureDatabase> ) );
-            set => mTextureDatabase = value;
-        }
-
-        [XmlIgnore]
-        public BoneDatabase BoneDatabase
-        {
-            get => mBoneDatabase ?? ( mBoneDatabase = Load( BoneDatabaseFilePath, BinaryFile.Load<BoneDatabase> ) );
-            set => mBoneDatabase = value;
-        }
-
-        [XmlIgnore]
-        public MotionDatabase MotionDatabase
-        {
-            get => mMotionDatabase ?? ( mMotionDatabase = Load( MotionDatabaseFilePath, filePath =>
+            using (var farcArchive = BinaryFile.Load<FarcArchive>(filePath))
+            using (var entryStream = farcArchive.Open("mot_db.bin", EntryStreamMode.MemoryStream))
             {
-                if ( !filePath.EndsWith( ".farc", StringComparison.OrdinalIgnoreCase ) )
-                    return BinaryFile.Load<MotionDatabase>( filePath );
-
-                using ( var farcArchive = BinaryFile.Load<FarcArchive>( filePath ) )
-                using ( var entryStream = farcArchive.Open( "mot_db.bin", EntryStreamMode.MemoryStream ) )
-                {
-                    return BinaryFile.Load<MotionDatabase>( entryStream );
-                }
-            } ) );
-            set => mMotionDatabase = value;
-        }
-
-        public object Clone()
-        {
-            return new Configuration
-            {
-                Name = Name,
-                ObjectDatabaseFilePath = ObjectDatabaseFilePath,
-                TextureDatabaseFilePath = TextureDatabaseFilePath,
-                BoneDatabaseFilePath = BoneDatabaseFilePath,
-                MotionDatabaseFilePath = MotionDatabaseFilePath
-            };
-        }
-
-        public bool Equals( Configuration other )
-        {
-            return StringEquals( other.Name, Name ) &&
-                   StringEquals( other.ObjectDatabaseFilePath, ObjectDatabaseFilePath ) &&
-                   StringEquals( other.TextureDatabaseFilePath, TextureDatabaseFilePath ) &&
-                   StringEquals( other.BoneDatabaseFilePath, BoneDatabaseFilePath ) &&
-                   StringEquals( other.MotionDatabaseFilePath, MotionDatabaseFilePath );
-
-            bool StringEquals( string left, string right ) => 
-                ( string.IsNullOrEmpty( left ) && string.IsNullOrEmpty( right ) ) || left == right;
-        }
-
-        public void Save()
-        {
-            Save( ObjectDatabase );
-            Save( TextureDatabase );
-            Save( BoneDatabase );
-            Save( MotionDatabase );
-        }
-
-        public void Clean()
-        {
-            Delete<ObjectDatabase>();
-            Delete<TextureDatabase>();
-            Delete<BoneDatabase>();
-            Delete<MotionDatabase>();
-
-            mObjectDatabase = null;
-            mTextureDatabase = null;
-            mBoneDatabase = null;
-            mMotionDatabase = null;
-        }
-
-        public void SaveTextureDatabase()
-        {
-            if ( mTextureDatabase == null || string.IsNullOrEmpty( TextureDatabaseFilePath ) )
-                return;
-
-            mTextureDatabase.Save( TextureDatabaseFilePath );
-            Save( TextureDatabase );
-        }
-
-        private static XmlSerializer GetSerializer<T>()
-        {
-            if ( !sSerializers.TryGetValue( typeof( T ), out var serializer ) )
-                sSerializers[ typeof( T ) ] = serializer = new XmlSerializer( typeof( T ) );
-
-            return serializer;
-        }
-
-        private T Load<T>( string filePath, Func<string, T> loader ) where T : class
-        {
-            if ( !File.Exists( filePath ) )
-                return null;
-
-            string xmlFilePath = GetPath( $"{typeof( T ).Name}.xml" );
-
-            if ( File.Exists( xmlFilePath ) )
-            {
-                try
-                {
-                    var serializer = GetSerializer<T>();
-
-                    using ( var reader = new StreamReader( xmlFilePath, Encoding.UTF8 ) )
-                        return ( T ) serializer.Deserialize( reader );
-                }
-                catch
-                {
-                    // ignored
-                }
+                return BinaryFile.Load<MotionDatabase>(entryStream);
             }
+        });
+        set => mMotionDatabase = value;
+    }
 
-            BackupFile( filePath );
+    public object Clone()
+    {
+        return new Configuration
+        {
+            Name = Name,
+            ObjectDatabaseFilePath = ObjectDatabaseFilePath,
+            TextureDatabaseFilePath = TextureDatabaseFilePath,
+            BoneDataFilePath = BoneDataFilePath,
+            MotionDatabaseFilePath = MotionDatabaseFilePath
+        };
+    }
 
-            var obj = loader( filePath );
+    public bool Equals(Configuration other)
+    {
+        return StringEquals(other.Name, Name) &&
+               StringEquals(other.ObjectDatabaseFilePath, ObjectDatabaseFilePath) &&
+               StringEquals(other.TextureDatabaseFilePath, TextureDatabaseFilePath) &&
+               StringEquals(other.BoneDataFilePath, BoneDataFilePath) &&
+               StringEquals(other.MotionDatabaseFilePath, MotionDatabaseFilePath);
+
+        bool StringEquals(string left, string right) =>
+            (string.IsNullOrEmpty(left) && string.IsNullOrEmpty(right)) || left == right;
+    }
+
+    public void Save()
+    {
+        Save(ObjectDatabase);
+        Save(TextureDatabase);
+        Save(BoneData);
+        Save(MotionDatabase);
+    }
+
+    public void Clean()
+    {
+        Delete<ObjectDatabase>();
+        Delete<TextureDatabase>();
+        Delete<BoneData>();
+        Delete<MotionDatabase>();
+
+        mObjectDatabase = null;
+        mTextureDatabase = null;
+        mBoneData = null;
+        mMotionDatabase = null;
+    }
+
+    public void SaveTextureDatabase()
+    {
+        if (mTextureDatabase == null || string.IsNullOrEmpty(TextureDatabaseFilePath))
+            return;
+
+        mTextureDatabase.Save(TextureDatabaseFilePath);
+        Save(TextureDatabase);
+    }
+
+    private static XmlSerializer GetSerializer<T>()
+    {
+        if (!sSerializers.TryGetValue(typeof(T), out var serializer))
+            sSerializers[typeof(T)] = serializer = new XmlSerializer(typeof(T));
+
+        return serializer;
+    }
+
+    private T Load<T>(string filePath, Func<string, T> loader) where T : class
+    {
+        if (!File.Exists(filePath))
+            return null;
+
+        string xmlFilePath = GetPath($"{typeof(T).Name}.xml");
+
+        if (File.Exists(xmlFilePath))
+        {
+            try
             {
-                Save( obj );
+                var serializer = GetSerializer<T>();
+
+                using (var reader = new StreamReader(xmlFilePath, Encoding.UTF8))
+                    return (T)serializer.Deserialize(reader);
             }
-
-            return obj;
+            catch
+            {
+                // ignored
+            }
         }
 
-        private void Save<T>( T obj ) where T : class
+        BackupFile(filePath);
+
+        var obj = loader(filePath);
         {
-            if ( obj == null )
-                return;
-
-            var serializer = GetSerializer<T>();
-
-            using ( var writer = new StreamWriter( GetPath( $"{typeof( T ).Name}.xml" ), false, Encoding.UTF8 ) ) 
-                serializer.Serialize( writer, obj );
+            Save(obj);
         }
 
-        private void Delete<T>()
-        {
-            string filePath = Path.Combine( BaseDirectory.FullName, $"{typeof( T ).Name}.xml" );
+        return obj;
+    }
 
-            if ( File.Exists( filePath ) )
-                File.Delete( filePath );
-        }
+    private void Save<T>(T obj) where T : class
+    {
+        if (obj == null)
+            return;
 
-        private void BackupFile( string filePath ) => 
-            File.Copy( filePath, GetPath( Path.Combine( "Sources", Path.GetFileName( filePath ) ) ), true );
+        var serializer = GetSerializer<T>();
 
-        private string GetPath( string relativePath )
-        {
-            var fileInfo = new FileInfo( Path.Combine( BaseDirectory.FullName, relativePath ) );
+        using (var writer = new StreamWriter(GetPath($"{typeof(T).Name}.xml"), false, Encoding.UTF8))
+            serializer.Serialize(writer, obj);
+    }
 
-            fileInfo.Directory?.Create();
-            return fileInfo.FullName;
-        }
+    private void Delete<T>()
+    {
+        string filePath = Path.Combine(BaseDirectory.FullName, $"{typeof(T).Name}.xml");
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+    }
 
-        static Configuration()
-        {
-            sSerializers = new Dictionary<Type, XmlSerializer>();
-        }
+    private void BackupFile(string filePath) =>
+        File.Copy(filePath, GetPath(Path.Combine("Sources", Path.GetFileName(filePath))), true);
+
+    private string GetPath(string relativePath)
+    {
+        var fileInfo = new FileInfo(Path.Combine(BaseDirectory.FullName, relativePath));
+
+        fileInfo.Directory?.Create();
+        return fileInfo.FullName;
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    static Configuration()
+    {
+        sSerializers = new Dictionary<Type, XmlSerializer>();
     }
 }

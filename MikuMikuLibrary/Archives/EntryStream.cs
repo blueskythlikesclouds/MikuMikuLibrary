@@ -1,48 +1,45 @@
-﻿using System.IO;
+﻿namespace MikuMikuLibrary.Archives;
 
-namespace MikuMikuLibrary.Archives
+public sealed class EntryStream : Stream
 {
-    public sealed class EntryStream : Stream
+    public Stream Source { get; }
+    public string Name { get; }
+
+    public override bool CanRead => Source.CanRead;
+    public override bool CanWrite => Source.CanWrite;
+    public override bool CanSeek => Source.CanSeek;
+
+    public override long Position
     {
-        public Stream Source { get; }
-        public string Name { get; }
-
-        public override bool CanRead => Source.CanRead;
-        public override bool CanWrite => Source.CanWrite;
-        public override bool CanSeek => Source.CanSeek;
-
-        public override long Position
-        {
-            get => Source.Position;
-            set => Source.Position = value;
-        }
-
-        public override long Length => Source.Length;
-
-        public override void Flush() => Source.Flush();
-
-        public override int Read( byte[] buffer, int offset, int count ) => 
-            Source.Read( buffer, 0, count );
-
-        public override long Seek( long offset, SeekOrigin origin ) => 
-            Source.Seek( offset, origin );
-
-        public override void SetLength( long value ) => 
-            Source.SetLength( value );
-
-        public override void Write( byte[] buffer, int offset, int count ) => 
-            Source.Write( buffer, 0, count );
-
-        public EntryStream( string name, Stream source )
-        {
-            Name = name;
-            Source = source;
-        }
+        get => Source.Position;
+        set => Source.Position = value;
     }
 
-    public enum EntryStreamMode
+    public override long Length => Source.Length;
+
+    public override void Flush() => Source.Flush();
+
+    public override int Read(byte[] buffer, int offset, int count) =>
+        Source.Read(buffer, 0, count);
+
+    public override long Seek(long offset, SeekOrigin origin) =>
+        Source.Seek(offset, origin);
+
+    public override void SetLength(long value) =>
+        Source.SetLength(value);
+
+    public override void Write(byte[] buffer, int offset, int count) =>
+        Source.Write(buffer, 0, count);
+
+    public EntryStream(string name, Stream source)
     {
-        MemoryStream,
-        OriginalStream
+        Name = name;
+        Source = source;
     }
+}
+
+public enum EntryStreamMode
+{
+    MemoryStream,
+    OriginalStream
 }

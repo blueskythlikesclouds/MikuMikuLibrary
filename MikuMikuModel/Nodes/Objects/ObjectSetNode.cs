@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Serialization;
-using Assimp;
+﻿using Assimp;
 using MikuMikuLibrary.Databases;
 using MikuMikuLibrary.Extensions;
 using MikuMikuLibrary.Geometry;
@@ -26,7 +15,6 @@ using MikuMikuLibrary.Textures;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.GUI.Forms;
-using MikuMikuModel.Mementos;
 using MikuMikuModel.Nodes.Archives;
 using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.Databases;
@@ -35,890 +23,888 @@ using MikuMikuModel.Nodes.Textures;
 using MikuMikuModel.Resources;
 using Ookii.Dialogs.WinForms;
 using Matrix4x4 = System.Numerics.Matrix4x4;
-using Object = MikuMikuLibrary.Objects.Object;
 using Quaternion = System.Numerics.Quaternion;
 using Material = MikuMikuLibrary.Materials.Material;
 using PrimitiveType = MikuMikuLibrary.Objects.PrimitiveType;
 
-namespace MikuMikuModel.Nodes.Objects
+namespace MikuMikuModel.Nodes.Objects;
+
+public class ObjectSetNode : BinaryFileNode<ObjectSet>
 {
-    public class ObjectSetNode : BinaryFileNode<ObjectSet>
+    private static readonly XmlSerializer sObjectSetInfoSerializer = new(typeof(ObjectSetInfo));
+
+    private ObjectDatabaseNode mObjDatabaseNode;
+    private INode mTextureSetNode;
+
+    public override NodeFlags Flags =>
+        NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
+
+    public override Bitmap Image =>
+        ResourceStore.LoadBitmap("Icons/ObjectSet.png");
+
+    public override Control Control
     {
-        private static readonly XmlSerializer sObjectSetInfoSerializer = new XmlSerializer( typeof( ObjectSetInfo ) );
-
-        private ObjectDatabaseNode mObjDatabaseNode;
-        private INode mTextureSetNode;
-
-        public override NodeFlags Flags =>
-            NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
-
-        public override Bitmap Image =>
-            ResourceStore.LoadBitmap( "Icons/ObjectSet.png" );
-
-        public override Control Control
+        get
         {
-            get
-            {
-                ModelViewControl.Instance.SetModel( Data, Data.TextureSet );
-                return ModelViewControl.Instance;
-            }
+            ModelViewControl.Instance.SetModel(Data, Data.TextureSet);
+            return ModelViewControl.Instance;
         }
+    }
 
-        [Category( "General" )]
-        [DisplayName( "Texture ids" )] 
-        public List<uint> TextureIds => GetProperty<List<uint>>();
+    [Category("General")]
+    [DisplayName("Texture ids")]
+    public List<uint> TextureIds => GetProperty<List<uint>>();
 
-        protected override void Initialize()
+    protected override void Initialize()
+    {
+        AddExportHandler<ObjectSet>(filePath =>
         {
-            AddExportHandler<ObjectSet>( filePath =>
+            if (filePath.EndsWith(".fbx", StringComparison.OrdinalIgnoreCase))
             {
-                if ( filePath.EndsWith( ".fbx", StringComparison.OrdinalIgnoreCase ) )
-                {
-                    Data.TryFixParentBoneInfos( SourceConfiguration?.BoneDatabase );
-                    FbxExporter.ExportToFile( Data, filePath );
-                }
+                Data.TryFixParentBoneInfos(SourceConfiguration?.BoneData);
+                FbxExporter.ExportToFile(Data, filePath);
+            }
 
-                else
-                {
-                    var configuration = ConfigurationList.Instance.CurrentConfiguration;
-
-                    var objectDatabase = configuration?.ObjectDatabase;
-                    var textureDatabase = configuration?.TextureDatabase;
-                    var boneDatabase = configuration?.BoneDatabase;
-
-                    Data.Save( filePath, objectDatabase, textureDatabase, boneDatabase );
-                }
-            } );
-            AddExportHandler<Scene>( filePath =>
-            {
-                Data.TryFixParentBoneInfos( SourceConfiguration?.BoneDatabase );
-                AssimpExporter.ExportToFile( Data, filePath );
-            } );
-            AddReplaceHandler<ObjectSet>( filePath =>
+            else
             {
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
 
                 var objectDatabase = configuration?.ObjectDatabase;
                 var textureDatabase = configuration?.TextureDatabase;
+                var boneDatabase = configuration?.BoneData;
 
-                var objectSet = new ObjectSet();
-                objectSet.Load( filePath, objectDatabase, textureDatabase );
-                return objectSet;
-            } );
-            AddReplaceHandler<Scene>( filePath =>
+                Data.Save(filePath, objectDatabase, textureDatabase, boneDatabase);
+            }
+        });
+        AddExportHandler<Scene>(filePath =>
+        {
+            Data.TryFixParentBoneInfos(SourceConfiguration?.BoneData);
+            AssimpExporter.ExportToFile(Data, filePath);
+        });
+        AddReplaceHandler<ObjectSet>(filePath =>
+        {
+            var configuration = ConfigurationList.Instance.CurrentConfiguration;
+
+            var objectDatabase = configuration?.ObjectDatabase;
+            var textureDatabase = configuration?.TextureDatabase;
+
+            var objectSet = new ObjectSet();
+            objectSet.Load(filePath, objectDatabase, textureDatabase);
+            return objectSet;
+        });
+        AddReplaceHandler<Scene>(filePath =>
+        {
+            if (Data.Objects.Count > 1)
+                return AssimpImporter.ImportFromFile(filePath);
+
+            return AssimpImporter.ImportFromFileWithSingleObject(filePath);
+        });
+
+        AddCustomHandler("Copy object set info to clipboard", () =>
+        {
+            uint objectSetId = 39;
+            uint objectId = 0xFFFFFFFF;
+
+            var objectDatabase = ConfigurationList.Instance.CurrentConfiguration?.ObjectDatabase;
+
+            if (objectDatabase != null && objectDatabase.ObjectSets.Count > 0)
             {
-                if ( Data.Objects.Count > 1 )
-                    return AssimpImporter.ImportFromFile( filePath );
+                objectSetId = objectDatabase.ObjectSets.Max(x => x.Id) + 1;
+                objectId = objectDatabase.ObjectSets.SelectMany(x => x.Objects).Max(x => x.Id) + 1;
+            }
 
-                return AssimpImporter.ImportFromFileWithSingleObject( filePath );
-            } );
-
-            AddCustomHandler( "Copy object set info to clipboard", () =>
+            else
             {
-                uint objectSetId = 39;
-                uint objectId = 0xFFFFFFFF;
-
-                var objectDatabase = ConfigurationList.Instance.CurrentConfiguration?.ObjectDatabase;
-
-                if ( objectDatabase != null && objectDatabase.ObjectSets.Count > 0 )
+                using (var inputDialog = new InputDialog
+                       {
+                           WindowTitle = "Enter base id for objects",
+                           Input = Math.Max(0, Data.Objects.Max(x => x.Id) + 1).ToString()
+                       })
                 {
-                    objectSetId = objectDatabase.ObjectSets.Max( x => x.Id ) + 1;
-                    objectId = objectDatabase.ObjectSets.SelectMany( x => x.Objects ).Max( x => x.Id ) + 1;
-                }
-
-                else
-                {
-                    using ( var inputDialog = new InputDialog
+                    while (inputDialog.ShowDialog() == DialogResult.OK)
                     {
-                        WindowTitle = "Enter base id for objects",
-                        Input = Math.Max( 0, Data.Objects.Max( x => x.Id ) + 1 ).ToString()
-                    } )
-                    {
-                        while ( inputDialog.ShowDialog() == DialogResult.OK )
-                        {
-                            bool result = uint.TryParse( inputDialog.Input, out objectId );
+                        bool result = uint.TryParse(inputDialog.Input, out objectId);
 
-                            if ( !result || objectId == 0xFFFFFFFF )
-                                MessageBox.Show( "Please enter a correct id number.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
-
-                            else
-                                break;
-                        }
-                    }
-                }
-
-                if ( objectId == 0xFFFFFFFF )
-                    return;
-
-                string baseName = Path.ChangeExtension( Name, null );
-                if ( Data.Format.IsClassic() && baseName.EndsWith( "_obj", StringComparison.OrdinalIgnoreCase ) )
-                    baseName = baseName.Substring( 0, baseName.Length - 4 );
-
-                var objectSetInfo = new ObjectSetInfo
-                {
-                    Name = baseName.ToUpperInvariant(),
-                    Id = objectSetId,
-                    FileName = Name,
-                    TextureFileName = baseName + ( Data.Format.IsClassic() ? "_tex.bin" : ".txd" ),
-                    ArchiveFileName = Parent is FarcArchiveNode ? Parent.Name : baseName + ".farc"
-                };
-
-                foreach ( var obj in Data.Objects )
-                {
-                    objectSetInfo.Objects.Add( new ObjectInfo
-                    {
-                        Id = objectId++,
-                        Name = obj.Name.ToUpperInvariant()
-                    } );
-                }
-
-                using ( var stringWriter = new StringWriter() )
-                using ( var xmlWriter = XmlWriter.Create( stringWriter,
-                    new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true } ) )
-                {
-                    sObjectSetInfoSerializer.Serialize( xmlWriter, objectSetInfo,
-                        new XmlSerializerNamespaces( new[] { XmlQualifiedName.Empty } ) );
-
-                    Clipboard.SetText( stringWriter.ToString() );
-                }
-            } );
-
-            AddCustomHandlerSeparator();
-
-            AddDirtyCustomHandler( "Combine all objects into one", () =>
-            {
-                if ( Data.Objects.Count <= 1 )
-                    return false;
-
-                var combinedObject = new Object { Name = "Combined object" };
-                var indexMap = new Dictionary<int, int>();
-
-                foreach ( var obj in Data.Objects )
-                {
-                    if ( obj.Skin != null )
-                    {
-                        if ( combinedObject.Skin == null )
-                        {
-                            combinedObject.Skin = new Skin();
-                            combinedObject.Skin.Bones.AddRange( obj.Skin.Bones );
-                        }
+                        if (!result || objectId == 0xFFFFFFFF)
+                            MessageBox.Show("Please enter a correct id number.", Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                         else
+                            break;
+                    }
+                }
+            }
+
+            if (objectId == 0xFFFFFFFF)
+                return;
+
+            string baseName = Path.ChangeExtension(Name, null);
+            if (Data.Format.IsClassic() && baseName.EndsWith("_obj", StringComparison.OrdinalIgnoreCase))
+                baseName = baseName.Substring(0, baseName.Length - 4);
+
+            var objectSetInfo = new ObjectSetInfo
+            {
+                Name = baseName.ToUpperInvariant(),
+                Id = objectSetId,
+                FileName = Name,
+                TextureFileName = baseName + (Data.Format.IsClassic() ? "_tex.bin" : ".txd"),
+                ArchiveFileName = Parent is FarcArchiveNode ? Parent.Name : baseName + ".farc"
+            };
+
+            foreach (var obj in Data.Objects)
+            {
+                objectSetInfo.Objects.Add(new ObjectInfo
+                {
+                    Id = objectId++,
+                    Name = obj.Name.ToUpperInvariant()
+                });
+            }
+
+            using (var stringWriter = new StringWriter())
+            using (var xmlWriter = XmlWriter.Create(stringWriter,
+                       new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true }))
+            {
+                sObjectSetInfoSerializer.Serialize(xmlWriter, objectSetInfo,
+                    new XmlSerializerNamespaces(new[] { XmlQualifiedName.Empty }));
+
+                Clipboard.SetText(stringWriter.ToString());
+            }
+        });
+
+        AddCustomHandlerSeparator();
+
+        AddDirtyCustomHandler("Combine all objects into one", () =>
+        {
+            if (Data.Objects.Count <= 1)
+                return false;
+
+            var combinedObject = new Object { Name = "Combined object" };
+            var indexMap = new Dictionary<int, int>();
+
+            foreach (var obj in Data.Objects)
+            {
+                if (obj.Skin != null)
+                {
+                    if (combinedObject.Skin == null)
+                    {
+                        combinedObject.Skin = new Skin();
+                        combinedObject.Skin.Bones.AddRange(obj.Skin.Bones);
+                    }
+
+                    else
+                    {
+                        for (int i = 0; i < obj.Skin.Bones.Count; i++)
                         {
-                            for ( int i = 0; i < obj.Skin.Bones.Count; i++ )
+                            var bone = obj.Skin.Bones[i];
+                            int boneIndex = combinedObject.Skin.Bones.FindIndex(
+                                x => x.Name.Equals(bone.Name, StringComparison.OrdinalIgnoreCase));
+
+                            if (boneIndex == -1)
                             {
-                                var bone = obj.Skin.Bones[ i ];
-                                int boneIndex = combinedObject.Skin.Bones.FindIndex(
-                                    x => x.Name.Equals( bone.Name, StringComparison.OrdinalIgnoreCase ) );
-
-                                if ( boneIndex == -1 )
-                                {
-                                    indexMap[ i ] = combinedObject.Skin.Bones.Count;
-                                    combinedObject.Skin.Bones.Add( bone );
-                                }
-
-                                else
-                                {
-                                    indexMap[ i ] = boneIndex;
-                                }
+                                indexMap[i] = combinedObject.Skin.Bones.Count;
+                                combinedObject.Skin.Bones.Add(bone);
                             }
 
-                            foreach ( var subMesh in obj.Meshes.SelectMany( x => x.SubMeshes ) )
+                            else
                             {
-                                if ( subMesh.BoneIndices?.Length >= 1 )
-                                {
-                                    for ( int i = 0; i < subMesh.BoneIndices.Length; i++ )
-                                        subMesh.BoneIndices[ i ] = ( ushort ) indexMap[ subMesh.BoneIndices[ i ] ];
-                                }
+                                indexMap[i] = boneIndex;
                             }
                         }
 
-                        combinedObject.Skin.Blocks.AddRange( obj.Skin.Blocks );
+                        foreach (var subMesh in obj.Meshes.SelectMany(x => x.SubMeshes))
+                        {
+                            if (subMesh.BoneIndices?.Length >= 1)
+                            {
+                                for (int i = 0; i < subMesh.BoneIndices.Length; i++)
+                                    subMesh.BoneIndices[i] = (ushort)indexMap[subMesh.BoneIndices[i]];
+                            }
+                        }
                     }
 
-                    foreach ( var subMesh in obj.Meshes.SelectMany( x => x.SubMeshes ) )
-                        subMesh.MaterialIndex += ( uint ) combinedObject.Materials.Count;
-
-                    combinedObject.Meshes.AddRange( obj.Meshes );
-                    combinedObject.Materials.AddRange( obj.Materials );
+                    combinedObject.Skin.Blocks.AddRange(obj.Skin.Blocks);
                 }
 
-                Data.Objects.Clear();
-                Data.Objects.Add( combinedObject );
+                foreach (var subMesh in obj.Meshes.SelectMany(x => x.SubMeshes))
+                    subMesh.MaterialIndex += (uint)combinedObject.Materials.Count;
 
-                return true;
-            }, Keys.None, CustomHandlerFlags.Repopulate | CustomHandlerFlags.ClearMementos );
+                combinedObject.Meshes.AddRange(obj.Meshes);
+                combinedObject.Materials.AddRange(obj.Materials);
+            }
 
-            AddCustomHandlerSeparator();
+            Data.Objects.Clear();
+            Data.Objects.Add(combinedObject);
 
-            AddDirtyCustomHandler( "Convert all bones to osage", () =>
+            return true;
+        }, Keys.None, CustomHandlerFlags.Repopulate | CustomHandlerFlags.ClearMementos);
+
+        AddCustomHandlerSeparator();
+
+        AddDirtyCustomHandler("Convert all bones to osage", () =>
+        {
+            foreach (var obj in Data.Objects)
             {
-                foreach ( var obj in Data.Objects )
+                var movingBone = obj.Skin?.Bones.FirstOrDefault(x => x.Name == "kl_mune_b_wj");
+                if (movingBone == null)
+                    continue;
+
+                var nameMap = new Dictionary<string, string>();
+                var stringBuilder = new StringBuilder();
+
+                foreach (var bone in obj.Skin.Bones)
                 {
-                    var movingBone = obj.Skin?.Bones.FirstOrDefault( x => x.Name == "kl_mune_b_wj" );
-                    if ( movingBone == null )
+                    // Ignore bones if they are already OSG or EXP.
+                    // Also ignore the moving bone and its parents.
+
+                    // Ignore j_kao_wj for now because it fucks miku's headphones up
+                    if (bone.Name == "j_kao_wj")
                         continue;
 
-                    var nameMap = new Dictionary<string, string>();
-                    var stringBuilder = new StringBuilder();
+                    var boneToCompare = movingBone;
 
-                    foreach ( var bone in obj.Skin.Bones )
+                    do
                     {
-                        // Ignore bones if they are already OSG or EXP.
-                        // Also ignore the moving bone and its parents.
+                        if (boneToCompare == bone)
+                            break;
 
-                        // Ignore j_kao_wj for now because it fucks miku's headphones up
-                        if ( bone.Name == "j_kao_wj" )
-                            continue;
+                        boneToCompare = boneToCompare.Parent;
+                    } while (boneToCompare != null);
 
-                        var boneToCompare = movingBone;
+                    if (boneToCompare == bone)
+                        continue;
 
-                        do
+                    if (obj.Skin.Blocks.Any(x =>
                         {
-                            if ( boneToCompare == bone )
-                                break;
-
-                            boneToCompare = boneToCompare.Parent;
-                        } while ( boneToCompare != null );
-
-                        if ( boneToCompare == bone )
-                            continue;
-
-                        if ( obj.Skin.Blocks.Any( x =>
-                        {
-                            switch ( x )
+                            switch (x)
                             {
                                 case OsageBlock osgBlock:
-                                    return osgBlock.Nodes.Any( y => y.Name == bone.Name );
+                                    return osgBlock.Nodes.Any(y => y.Name == bone.Name);
                                 case ExpressionBlock expBlock:
                                     return expBlock.Name == bone.Name;
                                 default:
                                     return false;
                             }
-                        } ) )
+                        }))
+                        continue;
+
+                    if (bone.Parent == null)
+                        bone.Parent = movingBone;
+
+                    Matrix4x4.Invert(bone.InverseBindPoseMatrix, out var bindPoseMatrix);
+                    var matrix = Matrix4x4.Multiply(bindPoseMatrix, bone.Parent.InverseBindPoseMatrix);
+
+                    Matrix4x4.Decompose(matrix, out var scale, out var rotation, out var translation);
+
+                    rotation = Quaternion.Normalize(rotation);
+
+                    string newName = bone.Name;
+
+                    if (newName.EndsWith("_wj", StringComparison.OrdinalIgnoreCase))
+                        newName = newName.Remove(newName.Length - 3);
+
+                    newName += "_ragdoll";
+
+                    nameMap.Add(bone.Name, newName);
+
+                    bone.Name = newName;
+
+                    string baseName = newName;
+
+                    var osageBlock = new OsageBlock
+                    {
+                        ExternalName = $"c_{baseName}_osg",
+                        Name = $"e_{baseName}",
+                        ParentName = bone.Parent.Name,
+                        Position = translation,
+                        Rotation = rotation.ToEulerAngles(),
+                        Scale = scale
+                    };
+
+                    osageBlock.Nodes.Add(new OsageNode { Name = bone.Name, Length = 0.08f });
+                    obj.Skin.Blocks.Add(osageBlock);
+
+                    stringBuilder.AppendFormat(
+                        "{0}.node.0.coli_r=0.030000\r\n" +
+                        "{0}.node.0.hinge_ymax=179.000000\r\n" +
+                        "{0}.node.0.hinge_ymin=-179.000000\r\n" +
+                        "{0}.node.0.hinge_zmax=179.000000\r\n" +
+                        "{0}.node.0.hinge_zmin=-179.000000\r\n" +
+                        "{0}.node.0.inertial_cancel=1.000000\r\n" +
+                        "{0}.node.0.weight=3.000000\r\n" +
+                        "{0}.node.length=1\r\n" +
+                        "{0}.root.force=0.010000\r\n" +
+                        "{0}.root.force_gain=0.300000\r\n" +
+                        "{0}.root.friction=1.000000\r\n" +
+                        "{0}.root.init_rot_y=0.000000\r\n" +
+                        "{0}.root.init_rot_z=0.000000\r\n" +
+                        "{0}.root.rot_y=0.000000\r\n" +
+                        "{0}.root.rot_z=0.000000\r\n" +
+                        "{0}.root.stiffness=0.100000\r\n" +
+                        "{0}.root.wind_afc=0.500000\r\n",
+                        osageBlock.ExternalName);
+                }
+
+                Clipboard.SetText(stringBuilder.ToString());
+
+                foreach (var block in obj.Skin.Blocks.OfType<NodeBlock>())
+                {
+                    if (nameMap.TryGetValue(block.ParentName, out string newName))
+                        block.ParentName = newName;
+
+                    if (!(block is ExpressionBlock expBlock))
+                        continue;
+
+                    // Change the bone names in the expressions if necessary.
+                    for (int j = 0; j < expBlock.Expressions.Count; j++)
+                    {
+                        string expression = expBlock.Expressions[j];
+
+                        foreach (var kvp in nameMap)
+                            expression = expression.Replace(kvp.Key, kvp.Value);
+
+                        expBlock.Expressions[j] = expression;
+                    }
+                }
+            }
+
+            return true;
+        }, Keys.None, CustomHandlerFlags.Repopulate | CustomHandlerFlags.ClearMementos);
+
+        AddDirtyCustomHandler("Convert motion bones to osage", () =>
+        {
+            foreach (var obj in Data.Objects)
+            {
+                if (obj.Skin == null)
+                    continue;
+
+                var stringBuilder = new StringBuilder();
+
+                foreach (var block in obj.Skin.Blocks.ToList())
+                {
+                    if (!(block is MotionBlock motionBlock))
+                        continue;
+
+                    var parentBoneInfo = obj.Skin.Bones.FirstOrDefault(x => x.Name == motionBlock.ParentName);
+
+                    if (parentBoneInfo == null)
+                        continue;
+
+                    foreach (var motionBone in motionBlock.Nodes)
+                    {
+                        if (!motionBone.Name.EndsWith("_000_wj"))
                             continue;
 
-                        if ( bone.Parent == null )
-                            bone.Parent = movingBone;
+                        string nameNoSuffix = motionBone.Name.Substring(0, motionBone.Name.Length - 7);
+                        string nameNoPrefix = nameNoSuffix.Substring(2);
 
-                        Matrix4x4.Invert( bone.InverseBindPoseMatrix, out var bindPoseMatrix );
-                        var matrix = Matrix4x4.Multiply( bindPoseMatrix, bone.Parent.InverseBindPoseMatrix );
+                        var matrix = motionBone.Transformation * parentBoneInfo.InverseBindPoseMatrix;
 
-                        Matrix4x4.Decompose( matrix, out var scale, out var rotation, out var translation );
+                        Matrix4x4.Decompose(matrix, out var scale, out var rotation, out var translation);
 
-                        rotation = Quaternion.Normalize( rotation );
-
-                        string newName = bone.Name;
-
-                        if ( newName.EndsWith( "_wj", StringComparison.OrdinalIgnoreCase ) )
-                            newName = newName.Remove( newName.Length - 3 );
-
-                        newName += "_ragdoll";
-
-                        nameMap.Add( bone.Name, newName );
-
-                        bone.Name = newName;
-
-                        string baseName = newName;
+                        rotation = Quaternion.Normalize(rotation);
 
                         var osageBlock = new OsageBlock
                         {
-                            ExternalName = $"c_{baseName}_osg",
-                            Name = $"e_{baseName}",
-                            ParentName = bone.Parent.Name,
-                            Position = translation,
+                            ParentName = motionBlock.ParentName,
+                            ExternalName = "c_" + nameNoPrefix + "_osg",
+                            Name = "e_" + nameNoPrefix,
+                            Position = matrix.Translation,
                             Rotation = rotation.ToEulerAngles(),
                             Scale = scale
                         };
 
-                        osageBlock.Nodes.Add( new OsageNode { Name = bone.Name, Length = 0.08f } );
-                        obj.Skin.Blocks.Add( osageBlock );
+                        MotionNode previousMotionNode = null;
+                        OsageNode previousOsageNode = null;
 
-                        stringBuilder.AppendFormat(
-                            "{0}.node.0.coli_r=0.030000\r\n" +
-                            "{0}.node.0.hinge_ymax=179.000000\r\n" +
-                            "{0}.node.0.hinge_ymin=-179.000000\r\n" +
-                            "{0}.node.0.hinge_zmax=179.000000\r\n" +
-                            "{0}.node.0.hinge_zmin=-179.000000\r\n" +
-                            "{0}.node.0.inertial_cancel=1.000000\r\n" +
-                            "{0}.node.0.weight=3.000000\r\n" +
-                            "{0}.node.length=1\r\n" +
-                            "{0}.root.force=0.010000\r\n" +
-                            "{0}.root.force_gain=0.300000\r\n" +
-                            "{0}.root.friction=1.000000\r\n" +
-                            "{0}.root.init_rot_y=0.000000\r\n" +
-                            "{0}.root.init_rot_z=0.000000\r\n" +
-                            "{0}.root.rot_y=0.000000\r\n" +
-                            "{0}.root.rot_z=0.000000\r\n" +
-                            "{0}.root.stiffness=0.100000\r\n" +
-                            "{0}.root.wind_afc=0.500000\r\n",
-                            osageBlock.ExternalName );
-                    }
-
-                    Clipboard.SetText( stringBuilder.ToString() );
-
-                    foreach ( var block in obj.Skin.Blocks.OfType<NodeBlock>() )
-                    {
-                        if ( nameMap.TryGetValue( block.ParentName, out string newName ) )
-                            block.ParentName = newName;
-
-                        if ( !( block is ExpressionBlock expBlock ) )
-                            continue;
-
-                        // Change the bone names in the expressions if necessary.
-                        for ( int j = 0; j < expBlock.Expressions.Count; j++ )
+                        foreach (var alsoMotionBone in motionBlock.Nodes)
                         {
-                            string expression = expBlock.Expressions[ j ];
-
-                            foreach ( var kvp in nameMap )
-                                expression = expression.Replace( kvp.Key, kvp.Value );
-
-                            expBlock.Expressions[ j ] = expression;
-                        }
-                    }
-                }
-
-                return true;
-            }, Keys.None, CustomHandlerFlags.Repopulate | CustomHandlerFlags.ClearMementos );
-
-            AddDirtyCustomHandler( "Convert motion bones to osage", () =>
-            {
-                foreach ( var obj in Data.Objects )
-                {
-                    if ( obj.Skin == null )
-                        continue;
-
-                    var stringBuilder = new StringBuilder();
-
-                    foreach ( var block in obj.Skin.Blocks.ToList() )
-                    {
-                        if ( !( block is MotionBlock motionBlock ) )
-                            continue;
-
-                        var parentBoneInfo = obj.Skin.Bones.FirstOrDefault( x => x.Name == motionBlock.ParentName );
-
-                        if ( parentBoneInfo == null )
-                            continue;
-
-                        foreach ( var motionBone in motionBlock.Nodes )
-                        {
-                            if ( !motionBone.Name.EndsWith( "_000_wj" ) ) 
+                            if (!alsoMotionBone.Name.StartsWith(nameNoSuffix))
                                 continue;
 
-                            string nameNoSuffix = motionBone.Name.Substring( 0, motionBone.Name.Length - 7 );
-                            string nameNoPrefix = nameNoSuffix.Substring( 2 );
+                            if (previousOsageNode != null)
+                                previousOsageNode.Length = Vector3.Distance(previousMotionNode.Transformation.Translation,
+                                    alsoMotionBone.Transformation.Translation);
 
-                            var matrix = motionBone.Transformation * parentBoneInfo.InverseBindPoseMatrix;
+                            previousMotionNode = alsoMotionBone;
 
-                            Matrix4x4.Decompose( matrix, out var scale, out var rotation, out var translation );
+                            osageBlock.Nodes.Add(previousOsageNode = new OsageNode { Name = alsoMotionBone.Name, Length = 0.1f });
+                        }
 
-                            rotation = Quaternion.Normalize( rotation );
+                        if (osageBlock.Nodes.Count == 0)
+                            continue;
 
-                            var osageBlock = new OsageBlock
+                        var endMotionBone = osageBlock.Nodes[osageBlock.Nodes.Count - 1];
+                        var endBoneInfoIndex = obj.Skin.Bones.FindIndex(x => x.Name == endMotionBone.Name);
+
+                        if (endBoneInfoIndex != -1)
+                        {
+                            var aabb = new AxisAlignedBoundingBox();
+
+                            foreach (var mesh in obj.Meshes)
                             {
-                                ParentName = motionBlock.ParentName,
-                                ExternalName = "c_" + nameNoPrefix + "_osg",
-                                Name = "e_" + nameNoPrefix,
-                                Position = matrix.Translation,
-                                Rotation = rotation.ToEulerAngles(),
-                                Scale = scale
-                            };
-
-                            MotionNode previousMotionNode = null;
-                            OsageNode previousOsageNode = null;
-
-                            foreach ( var alsoMotionBone in motionBlock.Nodes )
-                            {
-                                if ( !alsoMotionBone.Name.StartsWith( nameNoSuffix ) )
+                                if (mesh.BoneWeights == null)
                                     continue;
 
-                                if ( previousOsageNode != null )
-                                    previousOsageNode.Length = Vector3.Distance( previousMotionNode.Transformation.Translation,
-                                        alsoMotionBone.Transformation.Translation );
-
-                                previousMotionNode = alsoMotionBone;
-
-                                osageBlock.Nodes.Add( previousOsageNode = new OsageNode { Name = alsoMotionBone.Name, Length = 0.1f } );
-                            }
-
-                            if ( osageBlock.Nodes.Count == 0 ) 
-                                continue;
-
-                            var endMotionBone = osageBlock.Nodes[ osageBlock.Nodes.Count - 1 ];
-                            var endBoneInfoIndex = obj.Skin.Bones.FindIndex( x => x.Name == endMotionBone.Name );
-
-                            if ( endBoneInfoIndex != -1 )
-                            {
-                                var aabb = new AxisAlignedBoundingBox();
-
-                                foreach ( var mesh in obj.Meshes )
+                                foreach (var subMesh in mesh.SubMeshes)
                                 {
-                                    if ( mesh.BoneWeights == null )
+                                    if (subMesh.BoneIndices == null)
                                         continue;
 
-                                    foreach ( var subMesh in mesh.SubMeshes )
+                                    for (int i = 0; i < subMesh.BoneIndices.Length; i++)
                                     {
-                                        if ( subMesh.BoneIndices == null )
+                                        if (subMesh.BoneIndices[i] != endBoneInfoIndex)
                                             continue;
 
-                                        for ( int i = 0; i < subMesh.BoneIndices.Length; i++ )
+                                        for (int j = 0; j < mesh.BoneWeights.Length; j++)
                                         {
-                                            if ( subMesh.BoneIndices[ i ] != endBoneInfoIndex )
-                                                continue;
+                                            var boneWeight = mesh.BoneWeights[j];
 
-                                            for ( int j = 0; j < mesh.BoneWeights.Length; j++ )
+                                            if (boneWeight.Index1 == i ||
+                                                boneWeight.Index2 == i ||
+                                                boneWeight.Index3 == i ||
+                                                boneWeight.Index4 == i)
                                             {
-                                                var boneWeight = mesh.BoneWeights[ j ];
-
-                                                if ( boneWeight.Index1 == i ||
-                                                     boneWeight.Index2 == i ||
-                                                     boneWeight.Index3 == i ||
-                                                     boneWeight.Index4 == i )
-                                                {
-                                                    aabb.AddPoint( mesh.Positions[ j ] );
-                                                }
+                                                aabb.AddPoint(mesh.Positions[j]);
                                             }
                                         }
                                     }
                                 }
-
-                                float distance = aabb.SizeMax;
-                                if ( !float.IsInfinity( distance ) )
-                                    endMotionBone.Length = distance;
                             }
 
-                            obj.Skin.Blocks.Add( osageBlock );
+                            float distance = aabb.SizeMax;
+                            if (!float.IsInfinity(distance))
+                                endMotionBone.Length = distance;
                         }
 
-                        obj.Skin.Blocks.Remove( block );
+                        obj.Skin.Blocks.Add(osageBlock);
                     }
 
-                    Clipboard.SetText( stringBuilder.ToString() );
+                    obj.Skin.Blocks.Remove(block);
                 }
 
-                return true;
-            }, Keys.None, CustomHandlerFlags.Repopulate | CustomHandlerFlags.ClearMementos );
-
-            AddCustomHandlerSeparator();
-
-            AddDirtyCustomHandler( "Convert triangles to triangle strips", () =>
-            {
-                foreach ( var subMesh in Data.Objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
-                {
-                    if ( subMesh.PrimitiveType != PrimitiveType.Triangles )
-                        continue;
-
-                    var triangleStrip = Stripifier.Stripify( subMesh.Indices );
-                    if ( triangleStrip == null )
-                        continue;
-
-                    subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
-                    subMesh.Indices = triangleStrip;
-                }
-
-                return true;
-            } );           
-            
-            AddDirtyCustomHandler( "Convert triangle strips to triangles", () =>
-            {
-                foreach ( var subMesh in Data.Objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
-                {
-                    if ( subMesh.PrimitiveType != PrimitiveType.TriangleStrip )
-                        continue;
-
-                    var triangles = subMesh.GetTriangles();
-                    var indices = new uint[ triangles.Count * 3 ];
-
-                    for ( int i = 0; i < triangles.Count; i++ )
-                    {
-                        indices[ i * 3 + 0 ] = triangles[ i ].A;
-                        indices[ i * 3 + 1 ] = triangles[ i ].B;
-                        indices[ i * 3 + 2 ] = triangles[ i ].C;
-                    }
-
-                    subMesh.PrimitiveType = PrimitiveType.Triangles;
-                    subMesh.Indices = indices;
-                }
-
-                return true;
-            } );
-
-            AddCustomHandlerSeparator();
-
-            AddDirtyCustomHandler( "Enable shadows", () =>
-            {
-                foreach ( var subMesh in Data.Objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
-                    subMesh.Flags |= SubMeshFlags.ReceiveShadow;
-
-                return true;
-            }, Keys.None, CustomHandlerFlags.ClearMementos );
-
-            AddCustomHandlerSeparator();
-
-            AddDirtyCustomHandler( "Generate tangents", () =>
-            {
-                foreach ( var mesh in Data.Objects.SelectMany( x => x.Meshes ) )
-                    mesh.GenerateTangents();
-
-                return true;
-            } );
-
-            AddCustomHandlerSeparator();
-
-            AddDirtyCustomHandler( "Rename all shaders to...", () =>
-            {
-                using ( var inputDialog = new InputDialog { WindowTitle = "Rename all shaders", Input = "BLINN" } )
-                {
-                    if ( inputDialog.ShowDialog() != DialogResult.OK )
-                        return false;
-
-                    foreach ( var material in Data.Objects.SelectMany( x => x.Materials ) )
-                        material.ShaderName = inputDialog.Input;
-                }
-
-                return true;
-            }, Keys.None, CustomHandlerFlags.ClearMementos );
-
-            base.Initialize();
-        }
-
-        protected override void PopulateCore()
-        {
-            Nodes.Add( new ListNode<Object>( "Objects", Data.Objects, x => x.Name ) );
-
-            if ( Parent != null && mTextureSetNode == null )
-            {
-                string textureSetName = null;
-
-                var objectDatabase = SourceConfiguration?.ObjectDatabase;
-                var objectSetInfo = objectDatabase?.GetObjectSetInfoByFileName( Name );
-
-                if ( objectSetInfo != null )
-                    textureSetName = objectSetInfo.TextureFileName;
-
-                var textureSetNode = Parent.FindNode<TextureSetNode>( textureSetName );
-
-                if ( textureSetNode == null )
-                {
-                    if ( Name.EndsWith( "_obj.bin", StringComparison.OrdinalIgnoreCase ) )
-                        textureSetName = $"{Name.Substring( 0, Name.Length - 8 )}_tex.bin";
-
-                    else if ( Name.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
-                        textureSetName = Path.ChangeExtension( Name, "txd" );
-
-                    textureSetNode = Parent.FindNode<TextureSetNode>( textureSetName );
-                }
-
-                if ( textureSetNode != null )
-                {
-                    var textureDatabase = SourceConfiguration?.TextureDatabase;
-
-                    textureSetNode.Populate();
-
-                    for ( int i = 0; i < Data.TextureIds.Count; i++ )
-                    {
-                        if ( i >= textureSetNode.Data.Textures.Count )
-                            break;
-
-                        var texture = textureSetNode.Data.Textures[ i ];
-                        var textureInfo = textureDatabase?.GetTextureInfo( Data.TextureIds[ i ] );
-
-                        texture.Id = Data.TextureIds[ i ];
-                        texture.Name = textureInfo?.Name ?? texture.Name;
-                    }
-
-                    Data.TextureSet = textureSetNode.Data;
-
-                    mTextureSetNode = new ReferenceNode( "Texture Set", textureSetNode );
-                }
-                else
-                {
-                    mTextureSetNode = null;
-                }
+                Clipboard.SetText(stringBuilder.ToString());
             }
 
-            if ( mTextureSetNode == null && Data.TextureSet != null )
-                mTextureSetNode = new TextureSetNode( "Texture Set", Data.TextureSet );
+            return true;
+        }, Keys.None, CustomHandlerFlags.Repopulate | CustomHandlerFlags.ClearMementos);
 
-            if ( mTextureSetNode != null )
-                Nodes.Add( mTextureSetNode );
+        AddCustomHandlerSeparator();
 
-            if ( mTextureSetNode is ReferenceNode referenceNode )
-                SetSubscription( referenceNode.Node );
-
-            if ( Parent != null && Name.EndsWith( ".osd", StringComparison.OrdinalIgnoreCase ) )
-                mObjDatabaseNode = Parent.FindNode<ObjectDatabaseNode>( Path.ChangeExtension( Name, "osi" ) );
-        }
-
-        protected override void SynchronizeCore()
+        AddDirtyCustomHandler("Convert triangles to triangle strips", () =>
         {
-            if ( mTextureSetNode == null ) 
-                return;
-
-            Data.TextureSet = ( TextureSet ) mTextureSetNode.Data;
-
-            Data.TextureIds.Clear();
-            Data.TextureIds.AddRange( Data.TextureSet.Textures.Select( x => x.Id ) );
-
-            if ( mObjDatabaseNode == null )
-                return;
-
-            ObjectSetInfo objSetInfo;
-
-            if ( mObjDatabaseNode.Data.ObjectSets.Count > 0 )
-                objSetInfo = mObjDatabaseNode.Data.ObjectSets[ 0 ];
-            else
+            foreach (var subMesh in Data.Objects.SelectMany(x => x.Meshes).SelectMany(x => x.SubMeshes))
             {
-                objSetInfo = new ObjectSetInfo();
-                objSetInfo.Name = Path.GetFileNameWithoutExtension( Name ).ToUpperInvariant();
-                objSetInfo.Id = MurmurHash.Calculate( objSetInfo.Name );
-                objSetInfo.FileName = Name;
-                objSetInfo.TextureFileName = Path.ChangeExtension( Name, "txd" );
-                objSetInfo.ArchiveFileName = Path.ChangeExtension( Name, "farc" );
-            }
-
-            objSetInfo.Objects.Clear();
-
-            foreach ( var obj in Data.Objects )
-            {
-                obj.Name = obj.Name.ToUpperInvariant();
-                obj.Id = MurmurHash.Calculate( obj.Name );
-                objSetInfo.Objects.Add( new ObjectInfo { Id = obj.Id, Name = obj.Name } );
-            }
-
-            var objDatabase = new ObjectDatabase();
-            objDatabase.ObjectSets.Add( objSetInfo );
-
-            mObjDatabaseNode.Replace( objDatabase );
-        }
-
-        protected override void OnReplace( ObjectSet previousData )
-        {
-            if ( Data.Objects.Count == 1 && previousData.Objects.Count == 1 )
-                Data.Objects[ 0 ].Name = previousData.Objects[ 0 ].Name;
-
-            var materialOverrideMap = new Dictionary<Material, (Object SourceObject, Material MatchingMaterial)>();
-
-            foreach ( var newObject in Data.Objects )
-            {
-                var oldObject = previousData.Objects.FirstOrDefault( x =>
-                    x.Name.Equals( newObject.Name, StringComparison.OrdinalIgnoreCase ) );
-
-                if ( oldObject == null )
+                if (subMesh.PrimitiveType != PrimitiveType.Triangles)
                     continue;
 
-                if ( newObject.Skin != null && oldObject.Skin != null )
-                {
-                    foreach ( var newBone in newObject.Skin.Bones )
-                    {
-                        if ( newBone.Id != 0xFFFFFFFF )
-                            continue;
+                var triangleStrip = Stripifier.Stripify(subMesh.Indices);
+                if (triangleStrip == null)
+                    continue;
 
-                        var oldBone = oldObject.Skin.Bones.FirstOrDefault( x => 
-                            x.Name.Equals( newBone.Name, StringComparison.OrdinalIgnoreCase ) );
-
-                        if ( oldBone != null )
-                            newBone.Id = oldBone.Id;
-                    }
-
-                    if ( newObject.Skin.Blocks.Count == 0 )
-                        newObject.Skin.Blocks.AddRange( oldObject.Skin.Blocks );
-                }
-
-                newObject.Name = oldObject.Name;
-                newObject.Id = oldObject.Id;
-
-                foreach ( var material in newObject.Materials )
-                {
-                    var matchingMaterial = oldObject.Materials.FirstOrDefault( x => 
-                        x.Name.Equals( material.Name, StringComparison.OrdinalIgnoreCase ) );
-
-                    if ( matchingMaterial == null )
-                        continue;
-
-                    materialOverrideMap.Add( material, ( newObject, matchingMaterial ) );
-                }
+                subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
+                subMesh.Indices = triangleStrip;
             }
 
-            if ( materialOverrideMap.Count > 0 )
+            return true;
+        });
+
+        AddDirtyCustomHandler("Convert triangle strips to triangles", () =>
+        {
+            foreach (var subMesh in Data.Objects.SelectMany(x => x.Meshes).SelectMany(x => x.SubMeshes))
             {
-                using ( var itemSelectForm = new ItemSelectForm<Material>( materialOverrideMap.OrderBy( x => x.Key.Name ).Select( x =>
-                {
-                    string name = x.Key.Name;
-                    if ( Data.Objects.Count > 1 )
-                        name += " (" + x.Value.SourceObject.Name + ")";
+                if (subMesh.PrimitiveType != PrimitiveType.TriangleStrip)
+                    continue;
 
-                    return ( x.Key, name );
-                } ) )
+                var triangles = subMesh.GetTriangles();
+                var indices = new uint[triangles.Count * 3];
+
+                for (int i = 0; i < triangles.Count; i++)
                 {
-                    Text = "Please select the materials you want to override.",
-                    GroupBoxText = "Materials",
-                    CheckBoxText = "Override only textures"
-                })
+                    indices[i * 3 + 0] = triangles[i].A;
+                    indices[i * 3 + 1] = triangles[i].B;
+                    indices[i * 3 + 2] = triangles[i].C;
+                }
+
+                subMesh.PrimitiveType = PrimitiveType.Triangles;
+                subMesh.Indices = indices;
+            }
+
+            return true;
+        });
+
+        AddCustomHandlerSeparator();
+
+        AddDirtyCustomHandler("Enable shadows", () =>
+        {
+            foreach (var subMesh in Data.Objects.SelectMany(x => x.Meshes).SelectMany(x => x.SubMeshes))
+                subMesh.Flags |= SubMeshFlags.ReceiveShadow;
+
+            return true;
+        }, Keys.None, CustomHandlerFlags.ClearMementos);
+
+        AddCustomHandlerSeparator();
+
+        AddDirtyCustomHandler("Generate tangents", () =>
+        {
+            foreach (var mesh in Data.Objects.SelectMany(x => x.Meshes))
+                mesh.GenerateTangents();
+
+            return true;
+        });
+
+        AddCustomHandlerSeparator();
+
+        AddDirtyCustomHandler("Rename all shaders to...", () =>
+        {
+            using (var inputDialog = new InputDialog { WindowTitle = "Rename all shaders", Input = "BLINN" })
+            {
+                if (inputDialog.ShowDialog() != DialogResult.OK)
+                    return false;
+
+                foreach (var material in Data.Objects.SelectMany(x => x.Materials))
+                    material.ShaderName = inputDialog.Input;
+            }
+
+            return true;
+        }, Keys.None, CustomHandlerFlags.ClearMementos);
+
+        base.Initialize();
+    }
+
+    protected override void PopulateCore()
+    {
+        Nodes.Add(new ListNode<Object>("Objects", Data.Objects, x => x.Name));
+
+        if (Parent != null && mTextureSetNode == null)
+        {
+            string textureSetName = null;
+
+            var objectDatabase = SourceConfiguration?.ObjectDatabase;
+            var objectSetInfo = objectDatabase?.GetObjectSetInfoByFileName(Name);
+
+            if (objectSetInfo != null)
+                textureSetName = objectSetInfo.TextureFileName;
+
+            var textureSetNode = Parent.FindNode<TextureSetNode>(textureSetName);
+
+            if (textureSetNode == null)
+            {
+                if (Name.EndsWith("_obj.bin", StringComparison.OrdinalIgnoreCase))
+                    textureSetName = $"{Name.Substring(0, Name.Length - 8)}_tex.bin";
+
+                else if (Name.EndsWith(".osd", StringComparison.OrdinalIgnoreCase))
+                    textureSetName = Path.ChangeExtension(Name, "txd");
+
+                textureSetNode = Parent.FindNode<TextureSetNode>(textureSetName);
+            }
+
+            if (textureSetNode != null)
+            {
+                var textureDatabase = SourceConfiguration?.TextureDatabase;
+
+                textureSetNode.Populate();
+
+                for (int i = 0; i < Data.TextureIds.Count; i++)
                 {
-                    if ( itemSelectForm.ShowDialog() == DialogResult.OK )
+                    if (i >= textureSetNode.Data.Textures.Count)
+                        break;
+
+                    var texture = textureSetNode.Data.Textures[i];
+                    var textureInfo = textureDatabase?.GetTextureInfo(Data.TextureIds[i]);
+
+                    texture.Id = Data.TextureIds[i];
+                    texture.Name = textureInfo?.Name ?? texture.Name;
+                }
+
+                Data.TextureSet = textureSetNode.Data;
+
+                mTextureSetNode = new ReferenceNode("Texture Set", textureSetNode);
+            }
+            else
+            {
+                mTextureSetNode = null;
+            }
+        }
+
+        if (mTextureSetNode == null && Data.TextureSet != null)
+            mTextureSetNode = new TextureSetNode("Texture Set", Data.TextureSet);
+
+        if (mTextureSetNode != null)
+            Nodes.Add(mTextureSetNode);
+
+        if (mTextureSetNode is ReferenceNode referenceNode)
+            SetSubscription(referenceNode.Node);
+
+        if (Parent != null && Name.EndsWith(".osd", StringComparison.OrdinalIgnoreCase))
+            mObjDatabaseNode = Parent.FindNode<ObjectDatabaseNode>(Path.ChangeExtension(Name, "osi"));
+    }
+
+    protected override void SynchronizeCore()
+    {
+        if (mTextureSetNode == null)
+            return;
+
+        Data.TextureSet = (TextureSet)mTextureSetNode.Data;
+
+        Data.TextureIds.Clear();
+        Data.TextureIds.AddRange(Data.TextureSet.Textures.Select(x => x.Id));
+
+        if (mObjDatabaseNode == null)
+            return;
+
+        ObjectSetInfo objSetInfo;
+
+        if (mObjDatabaseNode.Data.ObjectSets.Count > 0)
+            objSetInfo = mObjDatabaseNode.Data.ObjectSets[0];
+        else
+        {
+            objSetInfo = new ObjectSetInfo();
+            objSetInfo.Name = Path.GetFileNameWithoutExtension(Name).ToUpperInvariant();
+            objSetInfo.Id = MurmurHash.Calculate(objSetInfo.Name);
+            objSetInfo.FileName = Name;
+            objSetInfo.TextureFileName = Path.ChangeExtension(Name, "txd");
+            objSetInfo.ArchiveFileName = Path.ChangeExtension(Name, "farc");
+        }
+
+        objSetInfo.Objects.Clear();
+
+        foreach (var obj in Data.Objects)
+        {
+            obj.Name = obj.Name.ToUpperInvariant();
+            obj.Id = MurmurHash.Calculate(obj.Name);
+            objSetInfo.Objects.Add(new ObjectInfo { Id = obj.Id, Name = obj.Name });
+        }
+
+        var objDatabase = new ObjectDatabase();
+        objDatabase.ObjectSets.Add(objSetInfo);
+
+        mObjDatabaseNode.Replace(objDatabase);
+    }
+
+    protected override void OnReplace(ObjectSet previousData)
+    {
+        if (Data.Objects.Count == 1 && previousData.Objects.Count == 1)
+            Data.Objects[0].Name = previousData.Objects[0].Name;
+
+        var materialOverrideMap = new Dictionary<Material, (Object SourceObject, Material MatchingMaterial)>();
+
+        foreach (var newObject in Data.Objects)
+        {
+            var oldObject = previousData.Objects.FirstOrDefault(x =>
+                x.Name.Equals(newObject.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (oldObject == null)
+                continue;
+
+            if (newObject.Skin != null && oldObject.Skin != null)
+            {
+                foreach (var newBone in newObject.Skin.Bones)
+                {
+                    if (newBone.Id != 0xFFFFFFFF)
+                        continue;
+
+                    var oldBone = oldObject.Skin.Bones.FirstOrDefault(x =>
+                        x.Name.Equals(newBone.Name, StringComparison.OrdinalIgnoreCase));
+
+                    if (oldBone != null)
+                        newBone.Id = oldBone.Id;
+                }
+
+                if (newObject.Skin.Blocks.Count == 0)
+                    newObject.Skin.Blocks.AddRange(oldObject.Skin.Blocks);
+            }
+
+            newObject.Name = oldObject.Name;
+            newObject.Id = oldObject.Id;
+
+            foreach (var material in newObject.Materials)
+            {
+                var matchingMaterial = oldObject.Materials.FirstOrDefault(x =>
+                    x.Name.Equals(material.Name, StringComparison.OrdinalIgnoreCase));
+
+                if (matchingMaterial == null)
+                    continue;
+
+                materialOverrideMap.Add(material, (newObject, matchingMaterial));
+            }
+        }
+
+        if (materialOverrideMap.Count > 0)
+        {
+            using (var itemSelectForm = new ItemSelectForm<Material>(materialOverrideMap.OrderBy(x => x.Key.Name).Select(x =>
+                   {
+                       string name = x.Key.Name;
+                       if (Data.Objects.Count > 1)
+                           name += " (" + x.Value.SourceObject.Name + ")";
+
+                       return (x.Key, name);
+                   }))
+                   {
+                       Text = "Please select the materials you want to override.",
+                       GroupBoxText = "Materials",
+                       CheckBoxText = "Override only textures"
+                   })
+            {
+                if (itemSelectForm.ShowDialog() == DialogResult.OK)
+                {
+                    var selectedMaterials = itemSelectForm.CheckedItems.ToHashSet();
+
+                    var texturesToAdd = new HashSet<uint>();
+                    var texturesToRemove = new HashSet<uint>();
+
+                    foreach (var obj in Data.Objects)
                     {
-                        var selectedMaterials = itemSelectForm.CheckedItems.ToHashSet();
-
-                        var texturesToAdd = new HashSet<uint>();
-                        var texturesToRemove = new HashSet<uint>();
-
-                        foreach ( var obj in Data.Objects )
+                        for (int i = 0; i < obj.Materials.Count; i++)
                         {
-                            for ( int i = 0; i < obj.Materials.Count; i++ )
+                            var material = obj.Materials[i];
+
+                            if (!materialOverrideMap.TryGetValue(material, out var entry))
+                                continue;
+
+                            bool @override = selectedMaterials.Contains(material);
+
+                            // I made all the if statements separate to make everything clear.
+                            if (itemSelectForm.CheckBoxChecked)
                             {
-                                var material = obj.Materials[ i ];
-
-                                if ( !materialOverrideMap.TryGetValue( material, out var entry ) )
-                                    continue;
-
-                                bool @override = selectedMaterials.Contains( material );
-
-                                // I made all the if statements separate to make everything clear.
-                                if ( itemSelectForm.CheckBoxChecked )
+                                for (int j = 0; j < 8; j++)
                                 {
-                                    for ( int j = 0; j < 8; j++ )
-                                    {
-                                        var newMaterialTexture = material.MaterialTextures[ j ];
-                                        var oldMaterialTexture = entry.MatchingMaterial.MaterialTextures[ j ];
+                                    var newMaterialTexture = material.MaterialTextures[j];
+                                    var oldMaterialTexture = entry.MatchingMaterial.MaterialTextures[j];
 
-                                        if ( newMaterialTexture.TextureId == oldMaterialTexture.TextureId )
-                                            continue;
-
-                                        if ( @override )
-                                        {
-                                            if ( oldMaterialTexture.Type != MaterialTextureType.None )
-                                            {
-                                                if ( newMaterialTexture.Type != MaterialTextureType.None )
-                                                    oldMaterialTexture.TextureId = newMaterialTexture.TextureId;
-
-                                                else
-                                                    texturesToAdd.Add( oldMaterialTexture.TextureId );
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if ( newMaterialTexture.Type != MaterialTextureType.None )
-                                                texturesToRemove.Add( newMaterialTexture.TextureId );
-
-                                            if ( oldMaterialTexture.Type != MaterialTextureType.None )
-                                                texturesToAdd.Add( oldMaterialTexture.TextureId );
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if ( @override )
+                                    if (newMaterialTexture.TextureId == oldMaterialTexture.TextureId)
                                         continue;
 
-                                    for ( int j = 0; j < 8; j++ )
+                                    if (@override)
                                     {
-                                        var newMaterialTexture = material.MaterialTextures[ j ];
-                                        var oldMaterialTexture = entry.MatchingMaterial.MaterialTextures[ j ];
+                                        if (oldMaterialTexture.Type != MaterialTextureType.None)
+                                        {
+                                            if (newMaterialTexture.Type != MaterialTextureType.None)
+                                                oldMaterialTexture.TextureId = newMaterialTexture.TextureId;
 
-                                        if ( newMaterialTexture.TextureId == oldMaterialTexture.TextureId )
-                                            continue;
+                                            else
+                                                texturesToAdd.Add(oldMaterialTexture.TextureId);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (newMaterialTexture.Type != MaterialTextureType.None)
+                                            texturesToRemove.Add(newMaterialTexture.TextureId);
 
-                                        if ( newMaterialTexture.Type != MaterialTextureType.None )
-                                            texturesToRemove.Add( newMaterialTexture.TextureId );
-
-                                        if ( oldMaterialTexture.Type != MaterialTextureType.None )
-                                            texturesToAdd.Add( oldMaterialTexture.TextureId );
+                                        if (oldMaterialTexture.Type != MaterialTextureType.None)
+                                            texturesToAdd.Add(oldMaterialTexture.TextureId);
                                     }
                                 }
-
-                                obj.Materials[ i ] = entry.MatchingMaterial;
                             }
+                            else
+                            {
+                                if (@override)
+                                    continue;
+
+                                for (int j = 0; j < 8; j++)
+                                {
+                                    var newMaterialTexture = material.MaterialTextures[j];
+                                    var oldMaterialTexture = entry.MatchingMaterial.MaterialTextures[j];
+
+                                    if (newMaterialTexture.TextureId == oldMaterialTexture.TextureId)
+                                        continue;
+
+                                    if (newMaterialTexture.Type != MaterialTextureType.None)
+                                        texturesToRemove.Add(newMaterialTexture.TextureId);
+
+                                    if (oldMaterialTexture.Type != MaterialTextureType.None)
+                                        texturesToAdd.Add(oldMaterialTexture.TextureId);
+                                }
+                            }
+
+                            obj.Materials[i] = entry.MatchingMaterial;
                         }
-
-                        var allIds = Data.Objects.SelectMany( x => x.Materials ).SelectMany( x => x.MaterialTextures )
-                            .Where( x => x.Type != MaterialTextureType.None ).Select( x => x.TextureId ).ToHashSet();
-
-                        foreach ( uint textureToRemove in texturesToRemove.Except( allIds ) )
-                            Data.TextureSet.Textures.RemoveAll( x => x.Id == textureToRemove );
-
-                        foreach ( uint textureToAdd in texturesToAdd )
-                        {
-                            var oldTexture = previousData.TextureSet.Textures
-                                .FirstOrDefault( x => x.Id == textureToAdd );
-
-                            if ( oldTexture == null )
-                                continue;
-
-                            var newTexture = Data.TextureSet.Textures
-                                .FirstOrDefault( x => x.Id == textureToAdd );
-
-                            if ( newTexture != null )
-                                continue;
-
-                            Data.TextureSet.Textures.Add( oldTexture );
-                        }
-
-                        Data.TextureSet.Textures.Sort( ( x, y ) => string.Compare( x.Name, y.Name, StringComparison.Ordinal ) );
-
-                        Data.TextureIds.Clear();
-                        Data.TextureIds.AddRange( Data.TextureSet.Textures.Select( x => x.Id ) );
                     }
-                }
-            }
 
-            if ( previousData.Format.IsModern() && Data.TextureSet != null )
-            {
-                Dictionary<uint, uint> idDictionary = null;
+                    var allIds = Data.Objects.SelectMany(x => x.Materials).SelectMany(x => x.MaterialTextures)
+                        .Where(x => x.Type != MaterialTextureType.None).Select(x => x.TextureId).ToHashSet();
 
-                foreach ( var texture in Data.TextureSet.Textures )
-                {
-                    if ( string.IsNullOrEmpty( texture.Name ) )
-                        texture.Name = Guid.NewGuid().ToString();
+                    foreach (uint textureToRemove in texturesToRemove.Except(allIds))
+                        Data.TextureSet.Textures.RemoveAll(x => x.Id == textureToRemove);
 
-                    uint id = MurmurHash.Calculate( texture.Name );
-
-                    if ( id == texture.Id )
-                        continue;
-
-                    if ( idDictionary == null )
-                        idDictionary = new Dictionary<uint, uint>( Data.TextureSet.Textures.Count );
-
-                    idDictionary[ texture.Id ] = id;
-                    texture.Id = id;
-                }
-
-                if ( idDictionary != null )
-                {
-                    foreach ( var materialTexture in Data.Objects.SelectMany( x => x.Materials )
-                        .SelectMany( x => x.MaterialTextures ) )
+                    foreach (uint textureToAdd in texturesToAdd)
                     {
-                        if ( !idDictionary.TryGetValue( materialTexture.TextureId, out uint id ) )
+                        var oldTexture = previousData.TextureSet.Textures
+                            .FirstOrDefault(x => x.Id == textureToAdd);
+
+                        if (oldTexture == null)
                             continue;
 
-                        materialTexture.TextureId = id;
+                        var newTexture = Data.TextureSet.Textures
+                            .FirstOrDefault(x => x.Id == textureToAdd);
+
+                        if (newTexture != null)
+                            continue;
+
+                        Data.TextureSet.Textures.Add(oldTexture);
                     }
 
+                    Data.TextureSet.Textures.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
+
                     Data.TextureIds.Clear();
-                    Data.TextureIds.AddRange( Data.TextureSet.Textures.Select( x => x.Id ) );
+                    Data.TextureIds.AddRange(Data.TextureSet.Textures.Select(x => x.Id));
                 }
             }
-
-            if ( mTextureSetNode != null && Data.TextureSet != null )
-                mTextureSetNode.Replace( Data.TextureSet );
-
-            base.OnReplace( previousData );
         }
 
-        protected override void Dispose( bool disposing )
+        if (previousData.Format.IsModern() && Data.TextureSet != null)
         {
-            if ( disposing && mTextureSetNode is ReferenceNode referenceNode )
-                SetSubscription( referenceNode.Node, true );
+            Dictionary<uint, uint> idDictionary = null;
 
-            base.Dispose( disposing );
+            foreach (var texture in Data.TextureSet.Textures)
+            {
+                if (string.IsNullOrEmpty(texture.Name))
+                    texture.Name = Guid.NewGuid().ToString();
+
+                uint id = MurmurHash.Calculate(texture.Name);
+
+                if (id == texture.Id)
+                    continue;
+
+                if (idDictionary == null)
+                    idDictionary = new Dictionary<uint, uint>(Data.TextureSet.Textures.Count);
+
+                idDictionary[texture.Id] = id;
+                texture.Id = id;
+            }
+
+            if (idDictionary != null)
+            {
+                foreach (var materialTexture in Data.Objects.SelectMany(x => x.Materials)
+                             .SelectMany(x => x.MaterialTextures))
+                {
+                    if (!idDictionary.TryGetValue(materialTexture.TextureId, out uint id))
+                        continue;
+
+                    materialTexture.TextureId = id;
+                }
+
+                Data.TextureIds.Clear();
+                Data.TextureIds.AddRange(Data.TextureSet.Textures.Select(x => x.Id));
+            }
         }
 
-        public ObjectSetNode( string name, ObjectSet data ) : base( name, data )
-        {
-        }
+        if (mTextureSetNode != null && Data.TextureSet != null)
+            mTextureSetNode.Replace(Data.TextureSet);
 
-        public ObjectSetNode( string name, Func<Stream> streamGetter ) : base( name, streamGetter )
-        {
-        }
+        base.OnReplace(previousData);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && mTextureSetNode is ReferenceNode referenceNode)
+            SetSubscription(referenceNode.Node, true);
+
+        base.Dispose(disposing);
+    }
+
+    public ObjectSetNode(string name, ObjectSet data) : base(name, data)
+    {
+    }
+
+    public ObjectSetNode(string name, Func<Stream> streamGetter) : base(name, streamGetter)
+    {
     }
 }

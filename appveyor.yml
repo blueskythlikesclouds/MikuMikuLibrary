@@ -1,26 +1,20 @@
-image: Visual Studio 2019
+image: Visual Studio 2022
 configuration: Release
 
 before_build:
     - cmd: nuget restore
 
-    - ps: Start-FileDownload "https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2020-1/fbx20201_fbxsdk_vs2017_win.exe" -FileName "FBX.exe"
+    - ps: Start-FileDownload "https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2020-2-1/fbx202021_fbxsdk_vs2019_win.exe" -FileName "FBX.exe"
     - ps: Start-Process -Wait "FBX.exe" "/S /D=$($env:APPVEYOR_BUILD_FOLDER)\MikuMikuLibrary.Native\Dependencies\FBX"
 
 build:
     project: MikuMikuLibrary.sln
-
+    
 after_build:
-    - rmdir "./MikuMikuModel/bin/Release/runtimes/linux-x64" /S /Q
-    - rmdir "./MikuMikuModel/bin/Release/runtimes/osx-x64" /S /Q
-    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on MikuMikuModel.7z ./MikuMikuModel/bin/Release/*
-    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on DatabaseConverter.7z ./CliTools/DatabaseConverter/bin/Release/*
-    - 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=1024m -ms=on FarcPack.7z ./CliTools/FarcPack/bin/Release/*
+    - publish.bat
 
 artifacts:
-    - path: MikuMikuModel.7z
-      name: MikuMikuModel
-    - path: DatabaseConverter.7z
-      name: DatabaseConverter
-    - path: FarcPack.7z
-      name: FarcPack
+    - path: publish/MikuMikuLibrary-x64.7z
+      name: X64
+    - path: publish/MikuMikuLibrary-x86.7z
+      name: X86

@@ -1,9 +1,8 @@
-﻿namespace MikuMikuLibrary.Archives
+﻿namespace MikuMikuLibrary.Archives;
+
+public enum ConflictPolicy
 {
-    public enum ConflictPolicy
-    {
-        RaiseError,
-        Replace,
-        Ignore
-    }
+    RaiseError,
+    Replace,
+    Ignore
 }
