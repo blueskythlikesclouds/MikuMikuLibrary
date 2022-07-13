@@ -28,7 +28,7 @@ namespace MikuMikuLibrary.Motions
 
                 if ( bone != null )
                 {
-                    switch (bone.Type)
+                    switch ( bone.Type )
                     {
                         case BoneType.Rotation:
                             UnbindRotation( boneBinding );

@@ -17,7 +17,7 @@ namespace MikuMikuLibrary.Skeletons
     {
         public BoneType Type { get; set; }
         public bool HasParent { get; set; }
-        public byte ParentBone { get; set; }
+        public byte Parent { get; set; }
         public byte PoleTarget { get; set; }
         public byte Mirror { get; set; }
         public byte DisableMotAnim { get; set; }
@@ -27,7 +27,7 @@ namespace MikuMikuLibrary.Skeletons
         {
             Type = ( BoneType ) reader.ReadByte();
             HasParent = reader.ReadBoolean();
-            ParentBone = reader.ReadByte();
+            Parent = reader.ReadByte();
             PoleTarget = reader.ReadByte();
             Mirror = reader.ReadByte();
             DisableMotAnim = reader.ReadByte();
@@ -39,7 +39,7 @@ namespace MikuMikuLibrary.Skeletons
         {
             writer.Write( ( byte ) Type );
             writer.Write( HasParent );
-            writer.Write( ParentBone );
+            writer.Write( Parent );
             writer.Write( PoleTarget );
             writer.Write( Mirror );
             writer.Write( DisableMotAnim );
