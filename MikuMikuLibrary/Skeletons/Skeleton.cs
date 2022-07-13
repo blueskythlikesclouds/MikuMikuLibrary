@@ -17,14 +17,14 @@ namespace MikuMikuLibrary.Skeletons
         public List<string> ObjectBoneNames { get; }
         public List<string> MotionBoneNames { get; }
 
-        public uint UnknownValue { get; set; }
+        public float HeelHeight { get; set; }
 
         internal void Read( EndianBinaryReader reader )
         {
             long bonesOffset = reader.ReadOffset();
             int positionCount = reader.ReadInt32();
             long positionsOffset = reader.ReadOffset();
-            long unknownValueOffset = reader.ReadOffset();
+            long heelHeightOffset = reader.ReadOffset();
             int objectBoneNameCount = reader.ReadInt32();
             long objectBoneNamesOffset = reader.ReadOffset();
             int motionBoneNameCount = reader.ReadInt32();
@@ -53,7 +53,7 @@ namespace MikuMikuLibrary.Skeletons
                     Positions.Add( reader.ReadVector3() );
             } );
 
-            reader.ReadAtOffset( unknownValueOffset, () => { UnknownValue = reader.ReadUInt32(); } );
+            reader.ReadAtOffset( heelHeightOffset, () => { HeelHeight = reader.ReadSingle(); } );
 
             reader.ReadAtOffset( objectBoneNamesOffset, () =>
             {
@@ -103,7 +103,7 @@ namespace MikuMikuLibrary.Skeletons
                 foreach ( var position in Positions )
                     writer.Write( position );
             } );
-            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () => writer.Write( UnknownValue ) );
+            writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () => writer.Write( HeelHeight ) );
             writer.Write( ObjectBoneNames.Count );
             writer.ScheduleWriteOffset( 8, AlignmentMode.Left, () =>
             {

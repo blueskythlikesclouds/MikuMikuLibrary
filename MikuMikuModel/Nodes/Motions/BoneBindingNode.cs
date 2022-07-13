@@ -17,6 +17,10 @@ namespace MikuMikuModel.Nodes.Motions
 
             if ( Data.Rotation != null )
                 Nodes.Add( new KeyBindingNode( "Rotation", Data.Rotation ) );
+
+            if ( Data.IK != null )
+                Nodes.Add(new KeyBindingNode( "IK", Data.IK ) );
+
         }
 
         protected override void SynchronizeCore()
