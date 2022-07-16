@@ -24,6 +24,8 @@ namespace MikuMikuLibrary.Motions
         public ushort FrameCount { get; set; }
         public List<KeySet> KeySets { get; }
         public List<BoneInfo> BoneInfos { get; }
+        public ushort DivFrameCount { get; set; } = 0;
+        public byte DivFileCount { get; set; } = 0;
 
         public bool HasBinding => mBinding != null;
 
@@ -44,6 +46,8 @@ namespace MikuMikuLibrary.Motions
             {
                 long boneIdsOffset = reader.ReadOffset();
                 int boneInfoCount = reader.ReadInt32();
+                DivFrameCount = reader.ReadUInt16();
+                DivFileCount = reader.ReadByte();
 
                 BoneInfos.Capacity = boneInfoCount;
                 reader.ReadAtOffset( boneInfosOffset, () =>
@@ -162,6 +166,9 @@ namespace MikuMikuLibrary.Motions
                 } );
 
                 writer.Write( BoneInfos.Count );
+                writer.Write( DivFrameCount );
+                writer.Write( DivFileCount );
+                writer.WriteNulls( 1 );
                 writer.Align( 16 );
             }
             else
@@ -202,11 +209,27 @@ namespace MikuMikuLibrary.Motions
 
                 if ( bone != null )
                 {
-                    if ( bone.Type != BoneType.Rotation )
-                        boneBinding.Position = BindNext();
-
-                    if ( bone.Type != BoneType.Position )
-                        boneBinding.Rotation = BindNext();
+                    switch ( bone.Type )
+                    {
+                        case BoneType.Rotation:
+                            boneBinding.Rotation = BindNext();
+                            break;
+                        case BoneType.Type1:
+                            break;
+                        case BoneType.Position:
+                            boneBinding.Position = BindNext();
+                            break;
+                        case BoneType.PositionRotation:
+                            boneBinding.Position = BindNext();
+                            boneBinding.Rotation = BindNext();
+                            break;
+                        case BoneType.HeadIKRotation:
+                        case BoneType.ArmIKRotation:
+                        case BoneType.LegIKRotation:
+                            boneBinding.IK = BindNext();
+                            boneBinding.Position = BindNext();
+                            break;
+                    }
 
                     binding.BoneBindings.Add( boneBinding );
                 }

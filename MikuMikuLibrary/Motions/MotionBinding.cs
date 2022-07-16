@@ -28,11 +28,27 @@ namespace MikuMikuLibrary.Motions
 
                 if ( bone != null )
                 {
-                    if ( bone.Type != BoneType.Rotation )
-                        UnbindPosition( boneBinding );
-
-                    if ( bone.Type != BoneType.Position )
-                        UnbindRotation( boneBinding );
+                    switch ( bone.Type )
+                    {
+                        case BoneType.Rotation:
+                            UnbindRotation( boneBinding );
+                            break;
+                        case BoneType.Type1:
+                            break;
+                        case BoneType.Position:
+                            UnbindPosition( boneBinding );
+                            break;
+                        case BoneType.PositionRotation:
+                            UnbindPosition( boneBinding );
+                            UnbindRotation( boneBinding );
+                            break;
+                        case BoneType.HeadIKRotation:
+                        case BoneType.ArmIKRotation:
+                        case BoneType.LegIKRotation:
+                            UnbindIK( boneBinding );
+                            UnbindPosition( boneBinding );
+                            break;
+                    }
                 }
 
                 AddBone( boneBinding.Name );
@@ -58,6 +74,13 @@ namespace MikuMikuLibrary.Motions
                 Parent.KeySets.Add( boneBinding.Rotation?.X ?? new KeySet() );
                 Parent.KeySets.Add( boneBinding.Rotation?.Y ?? new KeySet() );
                 Parent.KeySets.Add( boneBinding.Rotation?.Z ?? new KeySet() );
+            }
+
+            void UnbindIK( BoneBinding boneBinding )
+            {
+                Parent.KeySets.Add( boneBinding.IK?.X ?? new KeySet() );
+                Parent.KeySets.Add( boneBinding.IK?.Y ?? new KeySet() );
+                Parent.KeySets.Add( boneBinding.IK?.Z ?? new KeySet() );
             }
 
             void AddBone( string name )

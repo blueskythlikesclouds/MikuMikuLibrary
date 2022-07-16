@@ -456,6 +456,8 @@ namespace MikuMikuModel.GUI.Forms
                     rootController.Merge( divController );
                 }
 
+                rootMotion.DivFileCount = 0;
+                rootMotion.DivFrameCount = 0;
                 rootMotion.Save( outputFilePath, skeleton );
             }
         }
