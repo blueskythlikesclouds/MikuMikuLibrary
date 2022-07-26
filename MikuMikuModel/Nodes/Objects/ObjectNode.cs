@@ -18,6 +18,7 @@ using MikuMikuLibrary.Objects.Extra.Blocks;
 using Newtonsoft.Json;
 using MikuMikuModel.Configurations;
 using MikuMikuLibrary.Extensions;
+using MikuMikuModel.Modules;
 
 namespace MikuMikuModel.Nodes.Objects
 {
@@ -101,20 +102,12 @@ namespace MikuMikuModel.Nodes.Objects
                     MessageBox.Show("BoneMap JSON file path is null!");
                     return;
                 }
-                    
+
                 // open base object farc
-                using (var objectFarcFileDialog = new OpenFileDialog()
-                {
-                    Title = "Select reference DIVA Object Set.",
-                    Filter = "FARC Archive (*.farc)|*.farc|Object Set (Classic) (*.bin)|*.bin|Object Set (Modern)|*.osd|All files(*.*)|*.*",
-                    FilterIndex = 0,
-                    RestoreDirectory = true,
-                })
-                {
-                    if (objectFarcFileDialog.ShowDialog() == DialogResult.OK)
-                        objectFarcFilePath = objectFarcFileDialog.FileName;
-                }
-                if (objectFarcFilePath != null)
+                objectFarcFilePath = ModuleImportUtilities.SelectModuleImport(new[]
+                    { typeof( FarcArchive ), typeof( ObjectSet ) }, "Select reference DIVA Object Set.");
+
+                if (!string.IsNullOrEmpty(objectFarcFilePath))
                 {
                     if (objectFarcFilePath.EndsWith(".farc"))
                     {
@@ -123,16 +116,14 @@ namespace MikuMikuModel.Nodes.Objects
                         baseObjectSet = BinaryFile.Load<ObjectSet>(baseObjBinSrc);
                     }
                     else
-                    {
                         baseObjectSet = BinaryFile.Load<ObjectSet>(objectFarcFilePath);
-                    }
-                }
+                } 
                 else
                 {
-                    MessageBox.Show("Object Set file not found!");
+                    MessageBox.Show("Reference DIVA Object Set file path is null!");
                     return;
                 }
-                    
+
 
                 // fix bone orientations
                 foreach ( var bone in Data.Skin.Bones )
