@@ -16,9 +16,9 @@ using MikuMikuModel.Nodes.TypeConverters;
 using MikuMikuModel.Resources;
 using MikuMikuLibrary.Objects.Extra.Blocks;
 using Newtonsoft.Json;
-using MikuMikuModel.Configurations;
 using MikuMikuLibrary.Extensions;
 using MikuMikuModel.Modules;
+using MikuMikuModel.Nodes.IO;
 
 namespace MikuMikuModel.Nodes.Objects
 {
@@ -109,12 +109,8 @@ namespace MikuMikuModel.Nodes.Objects
 
                 if (!string.IsNullOrEmpty(objectFarcFilePath))
                 {
-                    if (objectFarcFilePath.EndsWith(".farc"))
-                    {
-                        var baseObjFarc = BinaryFile.Load<FarcArchive>(objectFarcFilePath);
-                        var baseObjBinSrc = baseObjFarc.Open(baseObjFarc.First(x => x.EndsWith("_obj.bin")), EntryStreamMode.MemoryStream);
-                        baseObjectSet = BinaryFile.Load<ObjectSet>(baseObjBinSrc);
-                    }
+                    if (objectFarcFilePath.EndsWith(".farc", System.StringComparison.OrdinalIgnoreCase))
+                        baseObjectSet = BinaryFileNode<ObjectSet>.PromptFarcArchiveViewForm(objectFarcFilePath, "Select the reference DIVA Object Set file.", "This archive has no object set file.");
                     else
                         baseObjectSet = BinaryFile.Load<ObjectSet>(objectFarcFilePath);
                 } 
