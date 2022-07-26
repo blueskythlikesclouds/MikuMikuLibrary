@@ -92,33 +92,35 @@ namespace MikuMikuModel.Nodes.Objects
                         jsonFilePath = jsonFileDialog.FileName;
                 }
 
-                if (jsonFilePath != null)
+                try
                 {
                     var text = File.ReadAllText(jsonFilePath);
                     boneMap = JsonConvert.DeserializeObject<Dictionary<string, string>>(text);
-                }
-                else
+                } 
+                catch (System.ArgumentNullException exception)
                 {
-                    MessageBox.Show("BoneMap JSON file path is null!");
+                    return;
+                } 
+                catch (System.Exception exception)
+                {
+                    MessageBox.Show(exception.Message, Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error );
                     return;
                 }
 
+
                 // open base object farc
                 objectFarcFilePath = ModuleImportUtilities.SelectModuleImport(new[]
-                    { typeof( FarcArchive ), typeof( ObjectSet ) }, "Select reference DIVA Object Set.");
+                    { typeof( FarcArchive ), typeof( ObjectSet ) }, "Select reference object set.");
 
                 if (!string.IsNullOrEmpty(objectFarcFilePath))
                 {
                     if (objectFarcFilePath.EndsWith(".farc", System.StringComparison.OrdinalIgnoreCase))
-                        baseObjectSet = BinaryFileNode<ObjectSet>.PromptFarcArchiveViewForm(objectFarcFilePath, "Select the reference DIVA Object Set file.", "This archive has no object set file.");
+                        baseObjectSet = BinaryFileNode<ObjectSet>.PromptFarcArchiveViewForm(objectFarcFilePath, "Select the reference object set file.", "This archive has no object set file.");
                     else
                         baseObjectSet = BinaryFile.Load<ObjectSet>(objectFarcFilePath);
-                } 
-                else
-                {
-                    MessageBox.Show("Reference DIVA Object Set file path is null!");
-                    return;
                 }
+                else
+                    return;
 
 
                 // fix bone orientations
