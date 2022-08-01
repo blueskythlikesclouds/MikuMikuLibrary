@@ -15,10 +15,14 @@ using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.TypeConverters;
 using MikuMikuModel.Resources;
 using MikuMikuLibrary.Objects.Extra.Blocks;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 using Newtonsoft.Json;
 using MikuMikuLibrary.Extensions;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes.IO;
+using System.Text;
+using MikuMikuLibrary.Objects.Extra;
+using Ookii.Dialogs.WinForms;
 
 namespace MikuMikuModel.Nodes.Objects
 {
@@ -78,6 +82,8 @@ namespace MikuMikuModel.Nodes.Objects
                 string objectFarcFilePath = null;
                 ObjectSet baseObjectSet = new ObjectSet();
                 Dictionary<string, string> boneMap = null;
+                List<OsageSkinParameter> osgParams = new List<OsageSkinParameter>();
+                string osgPrefix = "osg_";
 
                 // open json
                 using (var jsonFileDialog = new OpenFileDialog()
@@ -123,6 +129,11 @@ namespace MikuMikuModel.Nodes.Objects
                     return;
 
 
+                // specific properties for osg
+                if (boneMap.TryGetValue("SPECIAL_OSG_BONE_PREFIX", out var specificOsgPrefix))
+                    osgPrefix = specificOsgPrefix;
+
+
                 // fix bone orientations
                 foreach ( var bone in Data.Skin.Bones )
                 {
@@ -153,7 +164,7 @@ namespace MikuMikuModel.Nodes.Objects
                 {
                     Name = "RootBone",
                     ParentName = "n_hara_cp",
-                    Position = new Vector3(0, -1.03f, 0),
+                    Position = new Vector3(0, -1f, 0),
                     Rotation = new Vector3(0, 0, 0),
                     Scale = Vector3.One,
                 };
@@ -199,7 +210,57 @@ namespace MikuMikuModel.Nodes.Objects
                         };
                         Data.Skin.Blocks.Add(oriConstraintBlock);
                     }
-                    else // If bone is not in constraint map, make dummy expression block instead
+
+                    // If bone is not in constraint map but has osg prefix, make osg block
+                    else if (bone.Name.StartsWith(osgPrefix, System.StringComparison.OrdinalIgnoreCase))
+                    {
+
+                        string nameNoPrefix = bone.Name.Substring(osgPrefix.Length);
+
+                        var osageBlock = new OsageBlock
+                        {
+                            ExternalName = $"c_{nameNoPrefix}_osg",
+                            Name = $"e_{nameNoPrefix}",
+                            ParentName = bone.Parent.Name,
+                            Position = translation,
+                            Rotation = rotation.ToEulerAngles(),
+                            Scale = scale
+                        };
+
+                        osageBlock.Nodes.Add(new OsageNode { Name = bone.Name, Length = 0.01f });
+                        Data.Skin.Blocks.Add(osageBlock);
+
+                        var newOsgParam = new OsageSkinParameter();
+                        newOsgParam.Name = $"c_{nameNoPrefix}_osg";
+                        newOsgParam.Force = 0;
+                        newOsgParam.ForceGain = 0;
+                        newOsgParam.AirResistance = 0;
+                        newOsgParam.RotationY = 0;
+                        newOsgParam.RotationZ = 0;
+                        newOsgParam.Friction = 0;
+                        newOsgParam.WindAffection = 0;
+                        newOsgParam.CollisionType = 0;
+                        newOsgParam.InitRotationY = 0;
+                        newOsgParam.InitRotationZ = 0;
+                        newOsgParam.HingeY = 90f;
+                        newOsgParam.HingeZ = 90f;
+                        newOsgParam.CollisionRadius = 0;
+                        newOsgParam.Stiffness = 0;
+                        newOsgParam.MoveCancel = 0;
+                        newOsgParam.Nodes.Add(new OsageNodeParameter()
+                        {
+                            HingeYMin = -180f,
+                            HingeYMax = 180f,
+                            HingeZMin = -180f,
+                            HingeZMax = 180f,
+                            Radius = 0,
+                            Weight = 0,
+                            InertialCancel = 0,
+                        });
+
+                        osgParams.Add(newOsgParam);
+                    }
+                    else // If bone is not in constraint map and not osg, make dummy expression block instead
                     {
                         var dummyExpBlock = new ExpressionBlock
                         {
@@ -209,7 +270,7 @@ namespace MikuMikuModel.Nodes.Objects
                             Rotation = rotation.ToEulerAngles(),
                             Scale = scale,
                         };
-                        dummyExpBlock.Expressions.Add("");
+                        dummyExpBlock.Expressions.Add("= 6 n 1");
                         Data.Skin.Blocks.Add(dummyExpBlock);
                     }
                 }
@@ -233,8 +294,23 @@ namespace MikuMikuModel.Nodes.Objects
 
                 Data.Skin.Blocks.Clear();
                 Data.Skin.Blocks.AddRange(sortedBlocks);
-
                 NotifyModified(NodeModifyFlags.Property);
+
+                if (osgParams.Count > 0)
+                {
+                    var paramSet = new OsageSkinParameterSet();
+                    paramSet.Parameters.AddRange(osgParams);
+
+                    paramSet.Format = BinaryFormat.DT;
+                    using (var folderBrowserDialog = new VistaFolderBrowserDialog
+                    { Description = "Select a folder to save Skin Parameter file(s) to.", UseDescriptionForTitle = true })
+                    {
+                        if (folderBrowserDialog.ShowDialog() != DialogResult.OK)
+                            return;
+
+                        paramSet.Save(Path.Combine(folderBrowserDialog.SelectedPath, $"ext_skp_{Data.Name.ToLower()}.txt"));
+                    }
+                }
             });
 
         }

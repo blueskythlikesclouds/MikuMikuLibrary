@@ -48,4 +48,5 @@
   "bip_knee_L": "j_sune_l_wj",
   "bip_hip_R": "n_momo_a_r_wj_cd_ex",
   "bip_knee_R": "j_sune_r_wj",
+  "SPECIAL_OSG_BONE_PREFIX":  "osg_",
 }
