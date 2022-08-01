@@ -46,7 +46,11 @@
   "bip_pinky_2_R": "nl_ko_c_r_wj",
   "bip_hip_L": "n_momo_a_l_wj_cd_ex",
   "bip_knee_L": "j_sune_l_wj",
+  "bip_foot_L": "kl_asi_l_wj_co",
+  "bip_toe_L": "kl_toe_l_wj",
   "bip_hip_R": "n_momo_a_r_wj_cd_ex",
   "bip_knee_R": "j_sune_r_wj",
-  "SPECIAL_OSG_BONE_PREFIX":  "osg_",
+  "bip_foot_R": "kl_asi_r_wj_co",
+  "bip_toe_R": "kl_toe_r_wj",
+  "SPECIAL_OSG_BONE_PREFIX": "osg_"
 }
