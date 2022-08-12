@@ -4,6 +4,7 @@ using System.IO;
 using System.Numerics;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
+using Newtonsoft.Json;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks
 {
@@ -127,13 +128,14 @@ namespace MikuMikuLibrary.Objects.Extra.Blocks
         }
     }
 
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class DirectionConstraintData : IConstraintData
     {
         public ConstraintType Type => ConstraintType.Direction;
 
-        public UpVectorData UpVector { get; }
-        public Vector3 AlignAxis { get; set; }
-        public Vector3 TargetOffset { get; set; }
+        [JsonProperty] public UpVectorData UpVector { get; }
+        [JsonProperty] public Vector3 AlignAxis { get; set; }
+        [JsonProperty] public Vector3 TargetOffset { get; set; }
 
         public void Read( EndianBinaryReader reader )
         {

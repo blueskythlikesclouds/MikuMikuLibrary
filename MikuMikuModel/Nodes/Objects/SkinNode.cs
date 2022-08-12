@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.Extensions;
 using MikuMikuLibrary.IO;
@@ -13,6 +16,7 @@ using MikuMikuModel.GUI.Forms;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes.Collections;
 using MikuMikuModel.Nodes.IO;
+using MikuMikuLibrary.Objects.Processing.Json;
 using Object = MikuMikuLibrary.Objects.Object;
 
 namespace MikuMikuModel.Nodes.Objects
@@ -105,6 +109,108 @@ namespace MikuMikuModel.Nodes.Objects
                 OnPropertyChanged( nameof( Data.Blocks ) );
             }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate );
 
+            AddCustomHandler("Import ex data from Json", () =>
+            {
+                //var skin = PrompImportExData();
+                // Testing imports from Json
+                // So this should just simply be...
+                //taking this straight from keikei's part for testing. thanks oomf
+                string jsonFilePath = null;
+                // open json
+                using (var jsonFileDialog = new OpenFileDialog()
+                {
+                    Title = "Select NodeBlock json file.",
+                    Filter = "JSON files (*.json)|*.json|All files(*.*)|*.*",
+                    FilterIndex = 0,
+                    RestoreDirectory = true,
+                })
+                {
+                    if (jsonFileDialog.ShowDialog() == DialogResult.OK)
+                        jsonFilePath = jsonFileDialog.FileName;
+                }
+
+                try
+                {
+                    var placeholderImportedBlocks = File.ReadAllText(jsonFilePath);
+                    List<NodeBlock> skin = JsonConvert.DeserializeObject<List<NodeBlock>>(placeholderImportedBlocks, new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+                    if (skin == null)
+                        return;
+                    var nodeBlocks = skin;
+
+                    using (var itemSelectForm = new ItemSelectForm<NodeBlock>(nodeBlocks.Select(
+                        x => (x, $"{x.Signature} - {(x is OsageBlock osageBlock ? osageBlock.ExternalName : x.Name)}")).OrderBy(x => x.Item2))
+                    {
+                        Text = "Please select the blocks you want to import.",
+                        GroupBoxText = "Blocks"
+                    })
+                    {
+                        if (itemSelectForm.ShowDialog() != DialogResult.OK)
+                            return;
+
+                        var importedBlocks = skin;
+
+                        foreach (var nodeBlock in itemSelectForm.CheckedItems)
+                        {
+                            importedBlocks.AddRange(nodeBlock.TraverseParents(nodeBlocks));
+                            importedBlocks.Add(nodeBlock);
+                        }
+
+                        Data.Blocks.AddRange(importedBlocks.Distinct());
+                    }
+                }
+                catch (System.ArgumentNullException exception)
+                {
+                    return;
+                }
+                catch (System.Exception exception)
+                {
+                    MessageBox.Show(exception.Message, Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                OnPropertyChanged(nameof(Data.Blocks));
+            }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate);
+
+            AddCustomHandler("Export ex data to JSON", () =>
+            {
+                var skin = PrompImportExData();
+
+                if (skin == null)
+                    return;
+
+                var nodeBlocks = skin.Blocks.OfType<NodeBlock>().ToList();
+
+                using (var itemSelectForm = new ItemSelectForm<NodeBlock>(nodeBlocks.Select(
+                    x => (x, $"{x.Signature} - {(x is OsageBlock osageBlock ? osageBlock.ExternalName : x.Name)}")).OrderBy(x => x.Item2))
+                {
+                    Text = "Please select the blocks you want to export.",
+                    GroupBoxText = "Blocks"
+                })
+                {
+                    if (itemSelectForm.ShowDialog() != DialogResult.OK)
+                        return;
+
+                    var importedBlocks = new List<NodeBlock>(skin.Blocks.Count);
+
+                    foreach (var nodeBlock in itemSelectForm.CheckedItems)
+                    {
+                        importedBlocks.AddRange(nodeBlock.TraverseParents(nodeBlocks));
+                        importedBlocks.Add(nodeBlock);
+                    }
+                    
+                    // Borrowing the Module Export Utilities to try this...
+                    // And this works!
+                    var filePath = ModuleExportUtilities.SelectModuleExport<Stream>("Select a file to export to.");
+                    JsonExporter.ExportToFile(importedBlocks.Distinct(), filePath);
+                    
+                }
+
+            }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate);
+
             AddCustomHandler( "Replace ex data", () =>
             {
                 var skin = PrompImportExData();
@@ -117,6 +223,46 @@ namespace MikuMikuModel.Nodes.Objects
 
                 OnPropertyChanged( nameof( Data.Blocks ) );
             }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate );
+
+            AddCustomHandler("Replace ex data from JSON", () =>
+            {
+                //taking this straight from keikei's part for testing. thanks oomf
+                string jsonFilePath = null;
+                // open json
+                using (var jsonFileDialog = new OpenFileDialog()
+                {
+                    Title = "Select NodeBlock json file.",
+                    Filter = "JSON files (*.json)|*.json|All files(*.*)|*.*",
+                    FilterIndex = 0,
+                    RestoreDirectory = true,
+                })
+                {
+                    if (jsonFileDialog.ShowDialog() == DialogResult.OK)
+                        jsonFilePath = jsonFileDialog.FileName;
+                }
+
+                try
+                {
+                    var placeholderImportedBlocks = File.ReadAllText(jsonFilePath);
+                    List<NodeBlock> importedBlocks = JsonConvert.DeserializeObject<List<NodeBlock>>(placeholderImportedBlocks, new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+                    Data.Blocks.Clear();
+                    Data.Blocks.AddRange(importedBlocks.Distinct());
+                }
+                catch (System.ArgumentNullException exception)
+                {
+                    return;
+                }
+                catch (System.Exception exception)
+                {
+                    MessageBox.Show(exception.Message, Program.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                OnPropertyChanged(nameof(Data.Blocks));
+            }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate);
         }
 
         protected override void PopulateCore()

@@ -50,6 +50,9 @@
     <Reference Include="AssimpNet, Version=5.0.0.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
       <HintPath>..\packages\AssimpNet.5.0.0-beta1\lib\net40\AssimpNet.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -119,6 +122,7 @@
     <Compile Include="Objects\Extra\Parameters\OsageCollisionParameter.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageNodeParameter.cs" />
     <Compile Include="Objects\Extra\Parameters\OsageSkinParameter.cs" />
+    <Compile Include="Objects\Processing\Json\JsonExporter.cs" />
     <Compile Include="Parameters\Extensions\ParameterTreeEx.cs" />
     <Compile Include="Parameters\Extensions\ParameterTreeWriterEx.cs" />
     <Compile Include="Parameters\ParameterTree.cs" />
