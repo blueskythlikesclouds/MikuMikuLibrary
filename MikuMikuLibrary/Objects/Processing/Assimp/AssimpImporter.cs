@@ -394,6 +394,10 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                     break;
 
                 case Ai.TextureType.Normals:
+                // 3ds max outputs FBXs with height...as normal, for some reason
+                // So as a workaround, a texturetype of Height is assigned normal
+                // Additionally, DIVA never actually *uses* height maps anyways so
+                case Ai.TextureType.Height:
                     type = MaterialTextureType.Normal;
                     flags = MaterialFlags.Normal;
                     break;
@@ -401,6 +405,15 @@ namespace MikuMikuLibrary.Objects.Processing.Assimp
                 case Ai.TextureType.Opacity:
                     type = MaterialTextureType.Transparency;
                     flags = MaterialFlags.Transparency;
+                    break;
+
+                // DIVA never actually *uses* displacement maps
+                // so as a workaround (and to alleviate headaches)
+                // Displacement can be assigned as Translucency for stuff like
+                // hair and a couple other shaders that use it
+                case Ai.TextureType.Displacement:
+                    type = MaterialTextureType.Translucency;
+                    flags = MaterialFlags.Translucency;
                     break;
 
                 case Ai.TextureType.Reflection:
