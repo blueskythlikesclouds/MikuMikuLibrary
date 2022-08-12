@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Forms;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.Extensions;
 using MikuMikuLibrary.IO;
@@ -109,7 +108,23 @@ namespace MikuMikuModel.Nodes.Objects
                 OnPropertyChanged( nameof( Data.Blocks ) );
             }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate );
 
-            AddCustomHandler("Import ex data from Json", () =>
+
+            AddCustomHandler( "Replace ex data", () =>
+            {
+                var skin = PrompImportExData();
+
+                if ( skin == null )
+                    return;
+
+                Data.Blocks.Clear();
+                Data.Blocks.AddRange( skin.Blocks );
+
+                OnPropertyChanged( nameof( Data.Blocks ) );
+            }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate );
+
+            AddCustomHandlerSeparator();
+
+            AddCustomHandler("Import ex data from JSON", () =>
             {
                 //var skin = PrompImportExData();
                 // Testing imports from Json
@@ -119,7 +134,7 @@ namespace MikuMikuModel.Nodes.Objects
                 // open json
                 using (var jsonFileDialog = new OpenFileDialog()
                 {
-                    Title = "Select NodeBlock json file.",
+                    Title = "Select NodeBlock JSON file.",
                     Filter = "JSON files (*.json)|*.json|All files(*.*)|*.*",
                     FilterIndex = 0,
                     RestoreDirectory = true,
@@ -201,28 +216,15 @@ namespace MikuMikuModel.Nodes.Objects
                         importedBlocks.AddRange(nodeBlock.TraverseParents(nodeBlocks));
                         importedBlocks.Add(nodeBlock);
                     }
-                    
+
                     // Borrowing the Module Export Utilities to try this...
                     // And this works!
                     var filePath = ModuleExportUtilities.SelectModuleExport<Stream>("Select a file to export to.");
                     JsonExporter.ExportToFile(importedBlocks.Distinct(), filePath);
-                    
+
                 }
 
             }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate);
-
-            AddCustomHandler( "Replace ex data", () =>
-            {
-                var skin = PrompImportExData();
-
-                if ( skin == null )
-                    return;
-
-                Data.Blocks.Clear();
-                Data.Blocks.AddRange( skin.Blocks );
-
-                OnPropertyChanged( nameof( Data.Blocks ) );
-            }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate );
 
             AddCustomHandler("Replace ex data from JSON", () =>
             {
@@ -263,6 +265,7 @@ namespace MikuMikuModel.Nodes.Objects
                 }
                 OnPropertyChanged(nameof(Data.Blocks));
             }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate);
+
         }
 
         protected override void PopulateCore()
