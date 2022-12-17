@@ -28,6 +28,13 @@ namespace MikuMikuModel.GUI.Forms
             mTextureDatabasePathTextBox.Text = configuration?.TextureDatabaseFilePath;
             mBoneDatabasePathTextBox.Text = configuration?.BoneDatabaseFilePath;
             mMotionDatabasePathTextBox.Text = configuration?.MotionDatabaseFilePath;
+
+            if (configuration != null)
+            {
+                mForceGeometryConvCheckBox.Checked = configuration.ForceGeometryConversion;
+                mForcedGeometryComboBox.Enabled = configuration.ForceGeometryConversion;
+                mForcedGeometryComboBox.SelectedIndex = (int)configuration.ForcedGeometry;
+            }
         }
 
         private void OnSelectedIndexChanged( object sender, EventArgs e )
@@ -47,6 +54,7 @@ namespace MikuMikuModel.GUI.Forms
             mCloneButton.Enabled = enabled;
             mReloadButton.Enabled = enabled;
             mSearchButton.Enabled = enabled;
+            mForceGeometryConvCheckBox.Enabled = enabled;
 
             SetConfiguration( enabled ? mConfigurationList.Configurations[ mListBox.SelectedIndex ] : null );
         }
@@ -208,6 +216,17 @@ namespace MikuMikuModel.GUI.Forms
                 SelectedConfiguration?.MotionDatabaseFilePath ) ?? mMotionDatabasePathTextBox.Text;
         }
 
+        private void OnForceGeometryConvCheckBoxChange( object sender, EventArgs e )
+        {
+            SelectedConfiguration.ForceGeometryConversion = mForceGeometryConvCheckBox.Checked;
+            mForcedGeometryComboBox.Enabled = mForceGeometryConvCheckBox.Checked;
+        }
+
+        private void OnForcedGeometryChange(object sender, EventArgs e)
+        {
+            SelectedConfiguration.ForcedGeometry = (ConfigurationGeometry)mForcedGeometryComboBox.SelectedIndex;
+        }
+
         private void OnSearch( object sender, EventArgs e )
         {
             using ( var folderBrowseDialog = new VistaFolderBrowserDialog() )
@@ -263,6 +282,8 @@ namespace MikuMikuModel.GUI.Forms
             mRenameButton.Enabled = false;
             mCloneButton.Enabled = false;
             mReloadButton.Enabled = false;
+            mForceGeometryConvCheckBox.Enabled = false;
+            mForcedGeometryComboBox.Enabled = false;
 
             base.OnLoad( e );
         }

@@ -503,43 +503,13 @@ namespace MikuMikuModel.Nodes.Objects
 
             AddDirtyCustomHandler( "Convert triangles to triangle strips", () =>
             {
-                foreach ( var subMesh in Data.Objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
-                {
-                    if ( subMesh.PrimitiveType != PrimitiveType.Triangles )
-                        continue;
-
-                    var triangleStrip = Stripifier.Stripify( subMesh.Indices );
-                    if ( triangleStrip == null )
-                        continue;
-
-                    subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
-                    subMesh.Indices = triangleStrip;
-                }
-
+                ConvertTrianglesToStrips( Data.Objects );
                 return true;
             } );           
             
             AddDirtyCustomHandler( "Convert triangle strips to triangles", () =>
             {
-                foreach ( var subMesh in Data.Objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
-                {
-                    if ( subMesh.PrimitiveType != PrimitiveType.TriangleStrip )
-                        continue;
-
-                    var triangles = subMesh.GetTriangles();
-                    var indices = new uint[ triangles.Count * 3 ];
-
-                    for ( int i = 0; i < triangles.Count; i++ )
-                    {
-                        indices[ i * 3 + 0 ] = triangles[ i ].A;
-                        indices[ i * 3 + 1 ] = triangles[ i ].B;
-                        indices[ i * 3 + 2 ] = triangles[ i ].C;
-                    }
-
-                    subMesh.PrimitiveType = PrimitiveType.Triangles;
-                    subMesh.Indices = indices;
-                }
-
+                ConvertStripsToTriangles( Data.Objects );
                 return true;
             } );
 
@@ -740,6 +710,20 @@ namespace MikuMikuModel.Nodes.Objects
                 }
             }
 
+            var configuration = ConfigurationList.Instance.CurrentConfiguration;
+            if (configuration != null && configuration.ForceGeometryConversion)
+            {
+                switch (configuration.ForcedGeometry)
+                {
+                    case ConfigurationGeometry.TriStrips:
+                        ConvertTrianglesToStrips(Data.Objects);
+                        break;
+                    case ConfigurationGeometry.Triangles:
+                        ConvertStripsToTriangles(Data.Objects);
+                        break;
+                }
+            }
+
             if ( materialOverrideMap.Count > 0 )
             {
                 using ( var itemSelectForm = new ItemSelectForm<Material>( materialOverrideMap.OrderBy( x => x.Key.Name ).Select( x =>
@@ -911,6 +895,44 @@ namespace MikuMikuModel.Nodes.Objects
                 SetSubscription( referenceNode.Node, true );
 
             base.Dispose( disposing );
+        }
+
+        private void ConvertTrianglesToStrips( List<Object> objects )
+        {
+            foreach ( var subMesh in objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
+            {
+                if ( subMesh.PrimitiveType != PrimitiveType.Triangles )
+                    continue;
+
+                var triangleStrip = Stripifier.Stripify( subMesh.Indices );
+                if ( triangleStrip == null )
+                    continue;
+
+                subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
+                subMesh.Indices = triangleStrip;
+            }
+        }
+
+        private void ConvertStripsToTriangles( List<Object> objects )
+        {
+            foreach ( var subMesh in objects.SelectMany( x => x.Meshes ).SelectMany( x => x.SubMeshes ) )
+            {
+                if ( subMesh.PrimitiveType != PrimitiveType.TriangleStrip )
+                    continue;
+
+                var triangles = subMesh.GetTriangles();
+                var indices = new uint[triangles.Count * 3];
+
+                for ( int i = 0; i < triangles.Count; i++ )
+                {
+                    indices[i * 3 + 0] = triangles[i].A;
+                    indices[i * 3 + 1] = triangles[i].B;
+                    indices[i * 3 + 2] = triangles[i].C;
+                }
+
+                subMesh.PrimitiveType = PrimitiveType.Triangles;
+                subMesh.Indices = indices;
+            }
         }
 
         public ObjectSetNode( string name, ObjectSet data ) : base( name, data )

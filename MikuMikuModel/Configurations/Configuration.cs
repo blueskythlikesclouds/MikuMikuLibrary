@@ -24,6 +24,9 @@ namespace MikuMikuModel.Configurations
         public string TextureDatabaseFilePath { get; set; }
         public string BoneDatabaseFilePath { get; set; }
         public string MotionDatabaseFilePath { get; set; }
+        public bool ForceGeometryConversion { get; set; }
+        public ConfigurationGeometry ForcedGeometry { get; set; }
+
 
         public DirectoryInfo BaseDirectory => new DirectoryInfo( ResourceStore.GetPath( Path.Combine( "Configurations", Name ) ) );
 
@@ -73,7 +76,9 @@ namespace MikuMikuModel.Configurations
                 ObjectDatabaseFilePath = ObjectDatabaseFilePath,
                 TextureDatabaseFilePath = TextureDatabaseFilePath,
                 BoneDatabaseFilePath = BoneDatabaseFilePath,
-                MotionDatabaseFilePath = MotionDatabaseFilePath
+                MotionDatabaseFilePath = MotionDatabaseFilePath,
+                ForceGeometryConversion = ForceGeometryConversion,
+                ForcedGeometry = ForcedGeometry
             };
         }
 
@@ -83,7 +88,9 @@ namespace MikuMikuModel.Configurations
                    StringEquals( other.ObjectDatabaseFilePath, ObjectDatabaseFilePath ) &&
                    StringEquals( other.TextureDatabaseFilePath, TextureDatabaseFilePath ) &&
                    StringEquals( other.BoneDatabaseFilePath, BoneDatabaseFilePath ) &&
-                   StringEquals( other.MotionDatabaseFilePath, MotionDatabaseFilePath );
+                   StringEquals( other.MotionDatabaseFilePath, MotionDatabaseFilePath ) &&
+                   other.ForceGeometryConversion == ForceGeometryConversion &&
+                   other.ForcedGeometry == ForcedGeometry;
 
             bool StringEquals( string left, string right ) => 
                 ( string.IsNullOrEmpty( left ) && string.IsNullOrEmpty( right ) ) || left == right;
@@ -199,4 +206,10 @@ namespace MikuMikuModel.Configurations
             sSerializers = new Dictionary<Type, XmlSerializer>();
         }
     }
+
+    public enum ConfigurationGeometry
+    {
+        TriStrips = 0,
+        Triangles
+    };
 }

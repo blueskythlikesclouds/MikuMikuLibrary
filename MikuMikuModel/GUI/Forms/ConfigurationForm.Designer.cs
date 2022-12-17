@@ -36,6 +36,8 @@
             this.mRemoveButton = new System.Windows.Forms.Button();
             this.mListBox = new System.Windows.Forms.ListBox();
             this.mGroupBox2 = new System.Windows.Forms.GroupBox();
+            this.mForcedGeometryComboBox = new System.Windows.Forms.ComboBox();
+            this.mForceGeometryConvCheckBox = new System.Windows.Forms.CheckBox();
             this.mMotionDatabaseLabel = new System.Windows.Forms.Label();
             this.mMotionDatabasePathTextBox = new System.Windows.Forms.TextBox();
             this.mMotionDatabaseBrowseButton = new System.Windows.Forms.Button();
@@ -144,6 +146,8 @@
             // 
             // mGroupBox2
             // 
+            this.mGroupBox2.Controls.Add(this.mForcedGeometryComboBox);
+            this.mGroupBox2.Controls.Add(this.mForceGeometryConvCheckBox);
             this.mGroupBox2.Controls.Add(this.mMotionDatabaseLabel);
             this.mGroupBox2.Controls.Add(this.mMotionDatabasePathTextBox);
             this.mGroupBox2.Controls.Add(this.mMotionDatabaseBrowseButton);
@@ -158,10 +162,36 @@
             this.mGroupBox2.Controls.Add(this.mObjectDatabasePathTextBox);
             this.mGroupBox2.Location = new System.Drawing.Point(12, 199);
             this.mGroupBox2.Name = "mGroupBox2";
-            this.mGroupBox2.Size = new System.Drawing.Size(410, 136);
+            this.mGroupBox2.Size = new System.Drawing.Size(410, 177);
             this.mGroupBox2.TabIndex = 1;
             this.mGroupBox2.TabStop = false;
             this.mGroupBox2.Text = "Configuration";
+            // 
+            // mForcedGeometryComboBox
+            // 
+            this.mForcedGeometryComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.mForcedGeometryComboBox.Enabled = false;
+            this.mForcedGeometryComboBox.FormattingEnabled = true;
+            this.mForcedGeometryComboBox.Items.AddRange(new object[] {
+            "Triangle Strips",
+            "Triangles"});
+            this.mForcedGeometryComboBox.Location = new System.Drawing.Point(221, 138);
+            this.mForcedGeometryComboBox.Name = "mForcedGeometryComboBox";
+            this.mForcedGeometryComboBox.Size = new System.Drawing.Size(183, 21);
+            this.mForcedGeometryComboBox.TabIndex = 14;
+            this.mForcedGeometryComboBox.SelectedIndexChanged += new System.EventHandler(this.OnForcedGeometryChange);
+            // 
+            // mForceGeometryConvCheckBox
+            // 
+            this.mForceGeometryConvCheckBox.AutoSize = true;
+            this.mForceGeometryConvCheckBox.Enabled = false;
+            this.mForceGeometryConvCheckBox.Location = new System.Drawing.Point(10, 138);
+            this.mForceGeometryConvCheckBox.Name = "mForceGeometryConvCheckBox";
+            this.mForceGeometryConvCheckBox.Size = new System.Drawing.Size(204, 17);
+            this.mForceGeometryConvCheckBox.TabIndex = 13;
+            this.mForceGeometryConvCheckBox.Text = "Force Geometry Conversion on Import";
+            this.mForceGeometryConvCheckBox.UseVisualStyleBackColor = true;
+            this.mForceGeometryConvCheckBox.CheckedChanged += new System.EventHandler(this.OnForceGeometryConvCheckBoxChange);
             // 
             // mMotionDatabaseLabel
             // 
@@ -275,7 +305,7 @@
             // mOkButton
             // 
             this.mOkButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.mOkButton.Location = new System.Drawing.Point(347, 341);
+            this.mOkButton.Location = new System.Drawing.Point(347, 382);
             this.mOkButton.Name = "mOkButton";
             this.mOkButton.Size = new System.Drawing.Size(75, 23);
             this.mOkButton.TabIndex = 2;
@@ -285,7 +315,7 @@
             // mCancelButton
             // 
             this.mCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.mCancelButton.Location = new System.Drawing.Point(266, 341);
+            this.mCancelButton.Location = new System.Drawing.Point(266, 382);
             this.mCancelButton.Name = "mCancelButton";
             this.mCancelButton.Size = new System.Drawing.Size(75, 23);
             this.mCancelButton.TabIndex = 3;
@@ -297,7 +327,7 @@
             this.mSearchButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.mSearchButton.Enabled = false;
-            this.mSearchButton.Location = new System.Drawing.Point(12, 342);
+            this.mSearchButton.Location = new System.Drawing.Point(12, 383);
             this.mSearchButton.Name = "mSearchButton";
             this.mSearchButton.Size = new System.Drawing.Size(75, 22);
             this.mSearchButton.TabIndex = 13;
@@ -310,7 +340,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.mCancelButton;
-            this.ClientSize = new System.Drawing.Size(434, 370);
+            this.ClientSize = new System.Drawing.Size(434, 411);
             this.Controls.Add(this.mSearchButton);
             this.Controls.Add(this.mCancelButton);
             this.Controls.Add(this.mOkButton);
@@ -355,5 +385,7 @@
         private System.Windows.Forms.TextBox mMotionDatabasePathTextBox;
         private System.Windows.Forms.Button mMotionDatabaseBrowseButton;
         private System.Windows.Forms.Button mSearchButton;
+        private System.Windows.Forms.ComboBox mForcedGeometryComboBox;
+        private System.Windows.Forms.CheckBox mForceGeometryConvCheckBox;
     }
 }
