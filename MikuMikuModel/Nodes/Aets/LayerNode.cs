@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using MikuMikuLibrary.Aets;
+using MikuMikuModel.Nodes;
 using MikuMikuModel.Nodes.Collections;
 
 namespace MikuMikuModel.Nodes.Aets
@@ -70,6 +71,11 @@ namespace MikuMikuModel.Nodes.Aets
 
         protected override void Initialize()
         {
+            if ( Data.Markers.Count > 0 ) {
+                AddCustomHandler ( "Add dummy marker", () => {
+                    Data.Markers.Add ( new Marker() { Frame = 0, Name = "DUMMY" } );
+                }, Keys.None, CustomHandlerFlags.Repopulate );
+            }
         }
 
         protected override void PopulateCore()
