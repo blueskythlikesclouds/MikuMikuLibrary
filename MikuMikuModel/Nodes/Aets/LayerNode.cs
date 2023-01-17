@@ -69,6 +69,12 @@ public class LayerNode : Node<Layer>
 
     protected override void Initialize()
     {
+        if (Data.Markers.Count > 0)
+        {
+            AddCustomHandler("Add dummy marker",
+                () => { Data.Markers.Add(new Marker() { Frame = 0, Name = "DUMMY" }); }, Keys.None,
+                CustomHandlerFlags.Repopulate);
+        }
     }
 
     protected override void PopulateCore()

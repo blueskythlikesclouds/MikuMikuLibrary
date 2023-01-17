@@ -8,9 +8,9 @@
 #pragma warning(pop)
 
 #include <fbxsdk.h>
-#include <vcclr.h>
-
+#include <memory>
 #include <meshoptimizer.h>
+#include <vcclr.h>
 
 #undef min
 #undef max
