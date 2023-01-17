@@ -1,12 +1,12 @@
 @echo off
 
-msbuild -p:Configuration=Release MikuMikuLibrary.Native\MikuMikuLibrary.Native.vcxproj
+msbuild -p:Configuration=Release -p:Platform=x64 MikuMikuLibrary.Native\MikuMikuLibrary.Native.vcxproj
 call :publish CliTools DatabaseConverter
 call :publish CliTools FarcPack
 call :publish . MikuMikuModel
 call :7z x86
 call :7z x64
-exit
+exit /b
 
 :publish
 call :pub x86 %1 %2

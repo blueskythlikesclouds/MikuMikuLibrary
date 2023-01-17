@@ -88,7 +88,7 @@ public class ObjectNode : Node<Object>
                 var text = File.ReadAllText(jsonFilePath);
                 boneMap = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
             }
-            catch (System.ArgumentNullException exception)
+            catch (System.ArgumentNullException)
             {
                 return;
             }

@@ -170,7 +170,7 @@ public class SkinNode : Node<Skin>
                     Data.Blocks.AddRange(importedBlocks.Distinct());
                 }
             }
-            catch (System.ArgumentNullException exception)
+            catch (System.ArgumentNullException)
             {
                 return;
             }
@@ -246,7 +246,7 @@ public class SkinNode : Node<Skin>
                 Data.Blocks.Clear();
                 Data.Blocks.AddRange(importedBlocks.Distinct());
             }
-            catch (System.ArgumentNullException exception)
+            catch (System.ArgumentNullException)
             {
                 return;
             }
