@@ -276,7 +276,9 @@ public static class AssimpImporter
                 subMesh.Indices = aiMesh.Faces.Where(x => x.IndexCount == 3).SelectMany(x => x.Indices)
                     .Select(x => (uint)(vertexOffset + x)).ToArray();
 
-                subMesh.PrimitiveType = PrimitiveType.Triangles;
+                subMesh.Indices = Stripifier.Stripify(subMesh.Indices);
+
+                subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
                 subMesh.IndexFormat = IndexFormat.UInt16;
 
                 var aiMaterial = aiScene.Materials[aiMesh.MaterialIndex];
