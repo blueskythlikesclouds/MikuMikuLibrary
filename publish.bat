@@ -14,7 +14,7 @@ call :pub x64 %1 %2
 exit /b
 
 :pub
-dotnet publish --runtime win-%~1 --no-self-contained --output publish\%~1 --configuration Release -p:PublishSingleFile=true -p:PublishReadyToRun=true %~2\%~3\%~3.csproj
+dotnet publish --runtime win-%~1 --no-self-contained --output publish\%~1 --configuration Release -p:PublishSingleFile=false -p:PublishReadyToRun=true %~2\%~3\%~3.csproj
 exit /b
 
 :7z
