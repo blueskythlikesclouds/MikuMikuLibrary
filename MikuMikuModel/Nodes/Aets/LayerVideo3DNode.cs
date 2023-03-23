@@ -1,9 +1,11 @@
 ﻿using MikuMikuLibrary.Aets;
+using MikuMikuModel.Resources;
 
 namespace MikuMikuModel.Nodes.Aets;
 
 public class LayerVideo3DNode : Node<LayerVideo3D>
 {
+    public override Bitmap Image => ResourceStore.LoadBitmap("Icons/Motion.png");
     public override NodeFlags Flags => NodeFlags.Add;
 
     protected override void Initialize()

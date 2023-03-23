@@ -12,81 +12,81 @@ public class MotionNode : BinaryFileNode<Motion>
     public override NodeFlags Flags =>
         NodeFlags.Add | NodeFlags.Export | NodeFlags.Replace | NodeFlags.Rename;
 
-    public override Bitmap Image => ResourceStore.LoadBitmap( "Icons/Motion.png" );
+    public override Bitmap Image => ResourceStore.LoadBitmap("Icons/Motion.png");
 
-    [Category( "General" )]
-    [DisplayName( "Frame count" )]
+    [Category("General")]
+    [DisplayName("Frame count")]
     public ushort FrameCount
     {
         get => GetProperty<ushort>();
-        set => SetProperty( value );
+        set => SetProperty(value);
     }
 
     protected override void Initialize()
     {
-        AddReplaceHandler<Motion>( filePath =>
+        AddReplaceHandler<Motion>(filePath =>
         {
             var configuration = ConfigurationList.Instance.CurrentConfiguration;
             var motion = new Motion();
             {
-                motion.Load( filePath, configuration?.BoneData?.Skeletons?[ 0 ] );
+                motion.Load(filePath, configuration?.BoneData?.Skeletons?[0]);
             }
             return motion;
-        } );
-        AddExportHandler<Motion>( filePath =>
+        });
+        AddExportHandler<Motion>(filePath =>
         {
             var configuration = ConfigurationList.Instance.CurrentConfiguration;
             {
-                Data.Save( filePath, configuration?.BoneData?.Skeletons?[ 0 ] );
+                Data.Save(filePath, configuration?.BoneData?.Skeletons?[0]);
             }
-        } );
-        AddExportHandler<MotionSet>( filePath =>
+        });
+        AddExportHandler<MotionSet>(filePath =>
         {
-            using ( var motionSet = new MotionSet() )
+            using (var motionSet = new MotionSet())
             {
-                motionSet.Motions.Add( Data );
+                motionSet.Motions.Add(Data);
 
                 var configuration = ConfigurationList.Instance.CurrentConfiguration;
                 {
-                    motionSet.Save( filePath, configuration?.BoneData?.Skeletons?[ 0 ], configuration?.MotionDatabase );
+                    motionSet.Save(filePath, configuration?.BoneData?.Skeletons?[0], configuration?.MotionDatabase);
                 }
             }
-        } );
-        AddCustomHandler( "Copy bone names to clipboard",
-            () => Clipboard.SetText( string.Join( "\n", Data.BoneInfos.Select( x => x.Name ) ) ) );
+        });
+        AddCustomHandler("Copy bone names to clipboard",
+            () => Clipboard.SetText(string.Join("\n", Data.BoneInfos.Select(x => x.Name))));
     }
 
-    protected override void Load( Motion data, Stream source )
+    protected override void Load(Motion data, Stream source)
     {
-        data.Load( source, SourceConfiguration?.BoneData?.Skeletons?[ 0 ] );
+        data.Load(source, SourceConfiguration?.BoneData?.Skeletons?[0]);
     }
 
     protected override void PopulateCore()
     {
-        if ( !Data.HasBinding )
+        if (!Data.HasBinding)
         {
-            var skeleton = SourceConfiguration?.BoneData?.Skeletons?[ 0 ];
+            var skeleton = SourceConfiguration?.BoneData?.Skeletons?[0];
             var motionDatabase = SourceConfiguration?.MotionDatabase;
 
             try
             {
-                Data.Bind( skeleton, motionDatabase );
+                Data.Bind(skeleton, motionDatabase);
             }
 
-            catch ( ArgumentNullException )
+            catch (ArgumentNullException)
             {
             }
         }
 
-        if ( Data.HasBinding )
+        if (Data.HasBinding)
         {
-            Nodes.Add( new MotionBindingNode( "Binding", Data.Bind() ) );
+            Nodes.Add(new MotionBindingNode("Binding", Data.Bind()));
         }
 
         else
         {
-            Nodes.Add( new ListNode<KeySet>( "Key sets", Data.KeySets ) );
-            Nodes.Add( new ListNode<BoneInfo>( "Bones", Data.BoneInfos, x => x.Name ) );
+            Nodes.Add(new ListNode<KeySet>("Key sets", Data.KeySets));
+            Nodes.Add(new ListNode<BoneInfo>("Bones", Data.BoneInfos, x => x.Name));
         }
     }
 
@@ -94,11 +94,11 @@ public class MotionNode : BinaryFileNode<Motion>
     {
     }
 
-    public MotionNode( string name, Motion data ) : base( name, data )
+    public MotionNode(string name, Motion data) : base(name, data)
     {
     }
 
-    public MotionNode( string name, Func<Stream> streamGetter ) : base( name, streamGetter )
+    public MotionNode(string name, Func<Stream> streamGetter) : base(name, streamGetter)
     {
     }
 }

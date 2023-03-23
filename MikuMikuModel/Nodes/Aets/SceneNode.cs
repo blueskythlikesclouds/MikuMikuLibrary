@@ -62,7 +62,7 @@ public class AetSceneNode : Node<Scene>
         if (Data.Camera != null)
             Nodes.Add(new CameraNode("Camera", Data.Camera));
 
-        Nodes.Add(new ListNode<Composition>("Compositions", Data.Compositions));
+        Nodes.Add(new CompositionNode("Composition", Data.Compositions[^1]));
         Nodes.Add(new ListNode<Video>("Videos", Data.Videos, x => x.Sources.Count == 1 ? x.Sources[0].Name : null));
         Nodes.Add(new ListNode<Audio>("Audios", Data.Audios, x => $"Audio (Sound Id: {x.SoundId})"));
     }
