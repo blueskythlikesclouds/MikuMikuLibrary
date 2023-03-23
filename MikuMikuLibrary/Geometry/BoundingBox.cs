@@ -9,12 +9,10 @@ public struct BoundingBox
 
     public BoundingSphere ToBoundingSphere()
     {
-        float radius = Math.Max(Width, Math.Max(Height, Depth)) * (float)Math.Sqrt(2.0) / 2.0f;
-
         return new BoundingSphere
         {
             Center = Center,
-            Radius = radius
+            Radius = MathF.Sqrt(Width * Width + Height * Height + Depth * Depth) / 2.0f
         };
     }
 

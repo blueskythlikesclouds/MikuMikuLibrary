@@ -28,7 +28,7 @@ public class AxisAlignedBoundingBox
         return new BoundingSphere
         {
             Center = Center,
-            Radius = SizeMax * (float)Math.Sqrt(2.0) / 2.0f
+            Radius = Vector3.Distance(Min, Max) / 2.0f
         };
     }
 
