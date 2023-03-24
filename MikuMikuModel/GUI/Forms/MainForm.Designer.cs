@@ -42,6 +42,9 @@
             this.mConvertOspToClassicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mConvertOspToF2ndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mConvertOspToXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertObjectSetsToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertObjectSetsToTrianglesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mConvertObjectSetsToTriangleStripToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mAutoCheckUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
@@ -57,6 +60,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mPanel = new System.Windows.Forms.Panel();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).BeginInit();
             this.mMainSplitContainer.Panel2.SuspendLayout();
             this.mMainSplitContainer.SuspendLayout();
@@ -73,20 +77,23 @@
             this.mMainSplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.mMainSplitContainer.Location = new System.Drawing.Point(12, 31);
+            this.mMainSplitContainer.Location = new System.Drawing.Point(14, 36);
+            this.mMainSplitContainer.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.mMainSplitContainer.Name = "mMainSplitContainer";
             // 
             // mMainSplitContainer.Panel2
             // 
             this.mMainSplitContainer.Panel2.Controls.Add(this.mRightSplitContainer);
-            this.mMainSplitContainer.Size = new System.Drawing.Size(712, 397);
-            this.mMainSplitContainer.SplitterDistance = 448;
+            this.mMainSplitContainer.Size = new System.Drawing.Size(831, 458);
+            this.mMainSplitContainer.SplitterDistance = 522;
+            this.mMainSplitContainer.SplitterWidth = 5;
             this.mMainSplitContainer.TabIndex = 0;
             // 
             // mRightSplitContainer
             // 
             this.mRightSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mRightSplitContainer.Location = new System.Drawing.Point(0, 0);
+            this.mRightSplitContainer.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.mRightSplitContainer.Name = "mRightSplitContainer";
             this.mRightSplitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -97,8 +104,9 @@
             // mRightSplitContainer.Panel2
             // 
             this.mRightSplitContainer.Panel2.Controls.Add(this.mPropertyGrid);
-            this.mRightSplitContainer.Size = new System.Drawing.Size(260, 397);
-            this.mRightSplitContainer.SplitterDistance = 181;
+            this.mRightSplitContainer.Size = new System.Drawing.Size(304, 458);
+            this.mRightSplitContainer.SplitterDistance = 207;
+            this.mRightSplitContainer.SplitterWidth = 5;
             this.mRightSplitContainer.TabIndex = 0;
             // 
             // mNodeTreeView
@@ -107,10 +115,11 @@
             this.mNodeTreeView.HideSelection = false;
             this.mNodeTreeView.ImageIndex = 0;
             this.mNodeTreeView.Location = new System.Drawing.Point(0, 0);
+            this.mNodeTreeView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.mNodeTreeView.Name = "mNodeTreeView";
             this.mNodeTreeView.SelectedImageIndex = 0;
             this.mNodeTreeView.SelectedNode = null;
-            this.mNodeTreeView.Size = new System.Drawing.Size(260, 181);
+            this.mNodeTreeView.Size = new System.Drawing.Size(304, 207);
             this.mNodeTreeView.TabIndex = 0;
             this.mNodeTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.OnAfterSelect);
             // 
@@ -119,9 +128,10 @@
             this.mPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mPropertyGrid.HelpVisible = false;
             this.mPropertyGrid.Location = new System.Drawing.Point(0, 0);
+            this.mPropertyGrid.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.mPropertyGrid.Name = "mPropertyGrid";
             this.mPropertyGrid.PropertySort = System.Windows.Forms.PropertySort.Categorized;
-            this.mPropertyGrid.Size = new System.Drawing.Size(260, 212);
+            this.mPropertyGrid.Size = new System.Drawing.Size(304, 246);
             this.mPropertyGrid.TabIndex = 0;
             this.mPropertyGrid.ToolbarVisible = false;
             this.mPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.OnPropertyValueChanged);
@@ -138,7 +148,8 @@
             this.mHelpToolStripMenuItem});
             this.mMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mMenuStrip.Name = "mMenuStrip";
-            this.mMenuStrip.Size = new System.Drawing.Size(736, 25);
+            this.mMenuStrip.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
+            this.mMenuStrip.Size = new System.Drawing.Size(859, 29);
             this.mMenuStrip.TabIndex = 0;
             this.mMenuStrip.Text = "menuStrip1";
             // 
@@ -153,7 +164,7 @@
             this.mToolStripSeparator2,
             this.mExitToolStripMenuItem});
             this.mFileToolStripMenuItem.Name = "mFileToolStripMenuItem";
-            this.mFileToolStripMenuItem.Size = new System.Drawing.Size(37, 21);
+            this.mFileToolStripMenuItem.Size = new System.Drawing.Size(37, 25);
             this.mFileToolStripMenuItem.Text = "File";
             this.mFileToolStripMenuItem.DropDownOpening += new System.EventHandler(this.OnFileDropDownOpening);
             // 
@@ -219,7 +230,7 @@
             this.mUndoToolStripMenuItem,
             this.mRedoToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 21);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 25);
             this.editToolStripMenuItem.Text = "Edit";
             this.editToolStripMenuItem.DropDownClosed += new System.EventHandler(this.OnEditDropDownClosed);
             this.editToolStripMenuItem.DropDownOpening += new System.EventHandler(this.OnEditDropDownOpening);
@@ -243,7 +254,7 @@
             // mConfigurationsToolStripMenuItem
             // 
             this.mConfigurationsToolStripMenuItem.Name = "mConfigurationsToolStripMenuItem";
-            this.mConfigurationsToolStripMenuItem.Size = new System.Drawing.Size(98, 21);
+            this.mConfigurationsToolStripMenuItem.Size = new System.Drawing.Size(98, 25);
             this.mConfigurationsToolStripMenuItem.Text = "Configurations";
             this.mConfigurationsToolStripMenuItem.Click += new System.EventHandler(this.OnConfigurations);
             // 
@@ -254,9 +265,11 @@
             this.toolStripSeparator1,
             this.mGenerateMurmurHashesToolStripMenuItem,
             this.toolStripSeparator6,
-            this.mConvertOsageSkinParametersToToolStripMenuItem});
+            this.mConvertOsageSkinParametersToToolStripMenuItem,
+            this.toolStripSeparator7,
+            this.mConvertObjectSetsToToolStripMenuItem});
             this.mToolsToolStripMenuItem.Name = "mToolsToolStripMenuItem";
-            this.mToolsToolStripMenuItem.Size = new System.Drawing.Size(46, 21);
+            this.mToolsToolStripMenuItem.Size = new System.Drawing.Size(46, 25);
             this.mToolsToolStripMenuItem.Text = "Tools";
             // 
             // mCombineMotsFileToolStripMenuItem
@@ -314,6 +327,29 @@
             this.mConvertOspToXToolStripMenuItem.Text = "X";
             this.mConvertOspToXToolStripMenuItem.Click += new System.EventHandler(this.OnConvertOspToX);
             // 
+            // mConvertObjectSetsToToolStripMenuItem
+            // 
+            this.mConvertObjectSetsToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mConvertObjectSetsToTrianglesToolStripMenuItem,
+            this.mConvertObjectSetsToTriangleStripToolStripMenuItem});
+            this.mConvertObjectSetsToToolStripMenuItem.Name = "mConvertObjectSetsToToolStripMenuItem";
+            this.mConvertObjectSetsToToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
+            this.mConvertObjectSetsToToolStripMenuItem.Text = "Convert object sets in directory to...";
+            // 
+            // mConvertObjectSetsToTrianglesToolStripMenuItem
+            // 
+            this.mConvertObjectSetsToTrianglesToolStripMenuItem.Name = "mConvertObjectSetsToTrianglesToolStripMenuItem";
+            this.mConvertObjectSetsToTrianglesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mConvertObjectSetsToTrianglesToolStripMenuItem.Text = "Triangles";
+            this.mConvertObjectSetsToTrianglesToolStripMenuItem.Click += new System.EventHandler(this.OnConvertToTriangles);
+            // 
+            // mConvertObjectSetsToTriangleStripToolStripMenuItem
+            // 
+            this.mConvertObjectSetsToTriangleStripToolStripMenuItem.Name = "mConvertObjectSetsToTriangleStripToolStripMenuItem";
+            this.mConvertObjectSetsToTriangleStripToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mConvertObjectSetsToTriangleStripToolStripMenuItem.Text = "Triangle Strip";
+            this.mConvertObjectSetsToTriangleStripToolStripMenuItem.Click += new System.EventHandler(this.OnConvertToTriangleStrip);
+            // 
             // mOptionsToolStripMenuItem
             // 
             this.mOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -323,7 +359,7 @@
             this.toolStripSeparator5,
             this.mCamerasToolStripMenuItem});
             this.mOptionsToolStripMenuItem.Name = "mOptionsToolStripMenuItem";
-            this.mOptionsToolStripMenuItem.Size = new System.Drawing.Size(61, 21);
+            this.mOptionsToolStripMenuItem.Size = new System.Drawing.Size(61, 25);
             this.mOptionsToolStripMenuItem.Text = "Options";
             // 
             // mAutoCheckUpdatesToolStripMenuItem
@@ -386,7 +422,7 @@
             this.toolStripSeparator2,
             this.mAboutToolStripMenuItem});
             this.mHelpToolStripMenuItem.Name = "mHelpToolStripMenuItem";
-            this.mHelpToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
+            this.mHelpToolStripMenuItem.Size = new System.Drawing.Size(44, 25);
             this.mHelpToolStripMenuItem.Text = "Help";
             // 
             // mUserGuideToolStripMenuItem
@@ -425,22 +461,29 @@
             this.mPanel.Controls.Add(this.mMenuStrip);
             this.mPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.mPanel.Location = new System.Drawing.Point(0, 0);
+            this.mPanel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.mPanel.Name = "mPanel";
-            this.mPanel.Size = new System.Drawing.Size(736, 25);
+            this.mPanel.Size = new System.Drawing.Size(859, 29);
             this.mPanel.TabIndex = 1;
+            // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(261, 6);
             // 
             // MainForm
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(736, 440);
+            this.ClientSize = new System.Drawing.Size(859, 508);
             this.Controls.Add(this.mPanel);
             this.Controls.Add(this.mMainSplitContainer);
             this.DoubleBuffered = true;
             this.KeyPreview = true;
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
-            this.Text = typeof(MikuMikuModel.Program).Name;
+            this.Text = "Miku Miku Model";
             this.mMainSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.mMainSplitContainer)).EndInit();
             this.mMainSplitContainer.ResumeLayout(false);
@@ -500,5 +543,9 @@
         private System.Windows.Forms.ToolStripMenuItem mConvertOspToClassicToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mConvertOspToF2ndToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mConvertOspToXToolStripMenuItem;
+        private ToolStripMenuItem mConvertObjectSetsToToolStripMenuItem;
+        private ToolStripMenuItem mConvertObjectSetsToTrianglesToolStripMenuItem;
+        private ToolStripMenuItem mConvertObjectSetsToTriangleStripToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator7;
     }
 }

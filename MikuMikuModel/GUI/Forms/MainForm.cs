@@ -3,7 +3,9 @@ using System.Threading;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.Motions;
+using MikuMikuLibrary.Objects;
 using MikuMikuLibrary.Objects.Extra.Parameters;
+using MikuMikuLibrary.Objects.Processing;
 using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Mementos;
@@ -693,6 +695,72 @@ public partial class MainForm : Form
         ModelViewControl.UseOrbitCamera = sender == mOrbitCameraToolStripMenuItem;
         ValueCache.Set("UseOrbitCamera", ModelViewControl.UseOrbitCamera);
         UpdateCameraModeFlags();
+    }
+
+    private void PromptConvertToPrimitiveType(PrimitiveType targetPrimitiveType)
+    {
+        using var folderDialog = new VistaFolderBrowserDialog
+        {
+            Description = "Select a folder to convert all object sets inside.", 
+            UseDescriptionForTitle = true,
+        };
+
+        if (folderDialog.ShowDialog() == DialogResult.OK)
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    Invoke(() => Enabled = false);
+
+                    BatchProcessor.ProcessObjectSetsInDirectory(folderDialog.SelectedPath, false, objSet =>
+                    {
+                        bool shouldSave = false;
+
+                        foreach (var subMesh in objSet.Objects
+                                     .SelectMany(x => x.Meshes)
+                                     .SelectMany(x => x.SubMeshes))
+                        {
+                            // From Triangle Strip to Triangles
+                            if (targetPrimitiveType == PrimitiveType.Triangles &&
+                                subMesh.PrimitiveType == PrimitiveType.TriangleStrip)
+                            {
+                                subMesh.Indices = Stripifier.Unstripify(subMesh.Indices);
+                                subMesh.PrimitiveType = PrimitiveType.Triangles;
+
+                                shouldSave = true;
+                            }
+
+                            // From Triangles to Triangle Strip
+                            else if (targetPrimitiveType == PrimitiveType.TriangleStrip &&
+                                     subMesh.PrimitiveType == PrimitiveType.Triangles)
+                            {
+                                subMesh.Indices = Stripifier.Stripify(subMesh.Indices);
+                                subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
+
+                                shouldSave = true;
+                            }
+                        }
+
+                        return shouldSave;
+                    });
+                }
+                finally
+                {
+                    Invoke(() => Enabled = true);
+                }
+            }).Start();
+        }
+    }
+
+    private void OnConvertToTriangles(object sender, EventArgs e)
+    {
+        PromptConvertToPrimitiveType(PrimitiveType.Triangles);
+    }
+
+    private void OnConvertToTriangleStrip(object sender, EventArgs e)
+    {
+        PromptConvertToPrimitiveType(PrimitiveType.TriangleStrip);
     }
 
     protected override void OnLoad(EventArgs eventArgs)

@@ -118,7 +118,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
         for (int i = 0; i < mesh->SubMeshes->Count; i++)
         {
             SubMesh^ subMesh = mesh->SubMeshes[i];
-            List<Triangle>^ triangles = subMesh->GetTriangles();
+            array<uint>^ indices = subMesh->GetTriangleIndices();
 
             int materialIndex;
 
@@ -128,23 +128,23 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
                 materialMap->Add(subMesh->MaterialIndex, materialIndex);
             }
 
-            for each (Triangle triangle in triangles)
+            for (int j = 0; j < indices->Length; j += 3)
             {
-                vertexIndices->Add(triangle.A);
-                vertexIndices->Add(triangle.B);
-                vertexIndices->Add(triangle.C);
+                vertexIndices->Add(indices[j + 0]);
+                vertexIndices->Add(indices[j + 1]);
+                vertexIndices->Add(indices[j + 2]);
 
                 lMesh->BeginPolygon(materialIndex, -1, -1, false);
-                lMesh->AddPolygon(triangle.A);
-                lMesh->AddPolygon(triangle.B);
-                lMesh->AddPolygon(triangle.C);
+                lMesh->AddPolygon((int)indices[j + 0]);
+                lMesh->AddPolygon((int)indices[j + 1]);
+                lMesh->AddPolygon((int)indices[j + 2]);
                 lMesh->EndPolygon();
 
                 if (lElementVertexColor)
                 {
-                    lElementVertexColor->GetIndexArray().Add(triangle.A); 
-                    lElementVertexColor->GetIndexArray().Add(triangle.B); 
-                    lElementVertexColor->GetIndexArray().Add(triangle.C); 
+                    lElementVertexColor->GetIndexArray().Add((int)indices[j + 0]); 
+                    lElementVertexColor->GetIndexArray().Add((int)indices[j + 1]); 
+                    lElementVertexColor->GetIndexArray().Add((int)indices[j + 2]); 
                 }
             }
 

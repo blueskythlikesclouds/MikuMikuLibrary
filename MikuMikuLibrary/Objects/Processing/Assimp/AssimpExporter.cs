@@ -213,19 +213,18 @@ public static class AssimpExporter
             }
         }
 
-        var triangles = subMesh.GetTriangles();
+        var indices = subMesh.GetTriangleIndices();
 
-        aiMesh.Faces.Capacity = triangles.Count;
+        aiMesh.Faces.Capacity = indices.Length / 3;
 
-        aiMesh.Faces.AddRange(triangles.Select(x =>
+        for (int i = 0; i < indices.Length; i += 3)
         {
             var aiFace = new Ai.Face();
-            aiFace.Indices.Capacity = 3;
-            aiFace.Indices.Add((int)x.A);
-            aiFace.Indices.Add((int)x.B);
-            aiFace.Indices.Add((int)x.C);
-            return aiFace;
-        }));
+            aiFace.Indices.Add((int)indices[i + 0]);
+            aiFace.Indices.Add((int)indices[i + 1]);
+            aiFace.Indices.Add((int)indices[i + 2]);
+            aiMesh.Faces.Add(aiFace);
+        }
 
         var material = obj.Materials[(int)subMesh.MaterialIndex];
 

@@ -513,18 +513,12 @@ public class ObjectSetNode : BinaryFileNode<ObjectSet>
                 if (subMesh.PrimitiveType != PrimitiveType.TriangleStrip)
                     continue;
 
-                var triangles = subMesh.GetTriangles();
-                var indices = new uint[triangles.Count * 3];
-
-                for (int i = 0; i < triangles.Count; i++)
-                {
-                    indices[i * 3 + 0] = triangles[i].A;
-                    indices[i * 3 + 1] = triangles[i].B;
-                    indices[i * 3 + 2] = triangles[i].C;
-                }
+                var triangles = Stripifier.Unstripify(subMesh.Indices);
+                if (triangles == null)
+                    continue;
 
                 subMesh.PrimitiveType = PrimitiveType.Triangles;
-                subMesh.Indices = indices;
+                subMesh.Indices = triangles;
             }
 
             return true;

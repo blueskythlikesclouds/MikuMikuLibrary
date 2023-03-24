@@ -2,6 +2,7 @@
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections.Objects;
+using MikuMikuLibrary.Objects.Processing;
 
 namespace MikuMikuLibrary.Objects;
 
@@ -263,56 +264,19 @@ public class SubMesh
             writer.WriteNulls(sizeof(uint));
     }
 
-    public unsafe List<Triangle> GetTriangles()
+    public uint[] GetTriangleIndices()
     {
-        var triangles = new List<Triangle>();
-        if (Indices == null || Indices.Length == 0)
-            return triangles;
-
-        fixed (uint* indicesPtr = Indices)
+        switch (PrimitiveType)
         {
-            var start = indicesPtr;
-            var end = start + Indices.Length;
+            case PrimitiveType.Triangles:
+                return Indices;
 
-            if (PrimitiveType == PrimitiveType.Triangles)
-            {
-                triangles.Capacity = Indices.Length / 3;
+            case PrimitiveType.TriangleStrip:
+                return Stripifier.Unstripify(Indices);
 
-                while (start < end)
-                    triangles.Add(new Triangle(*start++, *start++, *start++));
-            }
-
-            else if (PrimitiveType == PrimitiveType.TriangleStrip)
-            {
-                uint a = *start++;
-                uint b = *start++;
-                int direction = -1;
-
-                while (start < end)
-                {
-                    uint c = *start++;
-
-                    if (c == 0xFFFFFFFF)
-                    {
-                        a = *start++;
-                        b = *start++;
-                        direction = -1;
-                    }
-
-                    else
-                    {
-                        direction *= -1;
-                        if (a != b && b != c && c != a)
-                            triangles.Add(direction > 0 ? new Triangle(a, b, c) : new Triangle(a, c, b));
-
-                        a = b;
-                        b = c;
-                    }
-                }
-            }
+            default:
+                throw new InvalidOperationException("Expected primitive type of triangles or triangle strip");
         }
-
-        return triangles;
     }
 
     public SubMesh()

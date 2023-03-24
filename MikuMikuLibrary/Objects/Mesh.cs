@@ -124,26 +124,28 @@ public class Mesh
 
         foreach (var subMesh in SubMeshes)
         {
-            foreach (var triangle in subMesh.GetTriangles())
-            {
-                var positionA = Positions[triangle.C] - Positions[triangle.A];
-                var positionB = Positions[triangle.B] - Positions[triangle.A];
+            var indices = subMesh.GetTriangleIndices();
 
-                var texCoordA = TexCoords0[triangle.C] - TexCoords0[triangle.A];
-                var texCoordB = TexCoords0[triangle.B] - TexCoords0[triangle.A];
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                var positionA = Positions[indices[i + 2]] - Positions[indices[i + 0]];
+                var positionB = Positions[indices[i + 1]] - Positions[indices[i + 0]];
+
+                var texCoordA = TexCoords0[indices[i + 2]] - TexCoords0[indices[i + 0]];
+                var texCoordB = TexCoords0[indices[i + 1]] - TexCoords0[indices[i + 0]];
 
                 float direction = texCoordA.X * texCoordB.Y - texCoordA.Y * texCoordB.X > 0.0f ? 1.0f : -1.0f;
 
                 var tangent = (positionA * texCoordB.Y - positionB * texCoordA.Y) * direction;
                 var bitangent = (positionB * texCoordA.X - positionA * texCoordB.X) * direction;
 
-                tangents[triangle.A] += tangent;
-                tangents[triangle.B] += tangent;
-                tangents[triangle.C] += tangent;
+                tangents[indices[i + 0]] += tangent;
+                tangents[indices[i + 1]] += tangent;
+                tangents[indices[i + 2]] += tangent;
 
-                bitangents[triangle.A] += bitangent;
-                bitangents[triangle.B] += bitangent;
-                bitangents[triangle.C] += bitangent;
+                bitangents[indices[i + 0]] += bitangent;
+                bitangents[indices[i + 1]] += bitangent;
+                bitangents[indices[i + 2]] += bitangent;
             }
         }
 
