@@ -19,8 +19,17 @@
     <ClInclude Include="LightMapImporterCore.h">
       <Filter>IBLs\Processing</Filter>
     </ClInclude>
+    <ClInclude Include="OptimizerCore.h">
+      <Filter>Objects\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="UnifierCore.h">
+      <Filter>Objects\Processing</Filter>
+    </ClInclude>
     <ClInclude Include="StripifierCore.h">
-      <Filter>Objects</Filter>
+      <Filter>Objects\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="TangentGeneratorCore.h">
+      <Filter>Objects\Processing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -47,8 +56,62 @@
     <ClCompile Include="Dependencies\meshoptimizer\stripifier.cpp">
       <Filter>Dependencies\meshoptimizer</Filter>
     </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\vfetchoptimizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\vfetchanalyzer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\vertexfilter.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\vertexcodec.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\vcacheoptimizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\vcacheanalyzer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\spatialorder.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\simplifier.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\overdrawoptimizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\overdrawanalyzer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\indexgenerator.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\indexcodec.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\clusterizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\allocator.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="OptimizerCore.cpp">
+      <Filter>Objects\Processing</Filter>
+    </ClCompile>
     <ClCompile Include="StripifierCore.cpp">
-      <Filter>Objects</Filter>
+      <Filter>Objects\Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="UnifierCore.cpp">
+      <Filter>Objects\Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="TangentGeneratorCore.cpp">
+      <Filter>Objects\Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\MikkTSpace\mikktspace.c">
+      <Filter>Dependencies\MikkTSpace</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +144,9 @@
     </Filter>
     <Filter Include="Dependencies\meshoptimizer">
       <UniqueIdentifier>{b15371b5-20a5-4d0f-87dc-69b5318802e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\MikkTSpace">
+      <UniqueIdentifier>{b17add62-a032-4b40-91f4-c10b24fdf9ac}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

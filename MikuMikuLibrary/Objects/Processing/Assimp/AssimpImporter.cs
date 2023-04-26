@@ -77,26 +77,21 @@ public static class AssimpImporter
         obj.Id = MurmurHash.Calculate(aiNode.Name);
         obj.Skin = new Skin();
 
-        var aabb = new AxisAlignedBoundingBox();
-
         CreateRecursively(aiNode);
 
         void CreateRecursively(Ai.Node aiChildNode)
         {
             if (aiChildNode.HasMeshes)
             {
-                var meshes = CreateMeshesFromAiNode(aiChildNode, aiScene, obj, ref aabb, objectSet,
-                    texturesDirectoryPath);
+                var mesh = CreateMeshFromAiNode(aiChildNode, aiScene, obj, objectSet, texturesDirectoryPath);
 
-                if (meshes?.Count > 0)
-                    obj.Meshes.AddRange(meshes);
+                if (mesh != null)
+                    obj.Meshes.Add(mesh);
             }
 
             foreach (var aiAlsoChildNode in aiChildNode.Children)
                 CreateRecursively(aiAlsoChildNode);
         }
-
-        obj.BoundingSphere = aabb.ToBoundingSphere();
 
         if (obj.Skin.Bones.Count > 0)
         {
@@ -109,77 +104,50 @@ public static class AssimpImporter
                 boneInfo.Parent = obj.Skin.Bones.FirstOrDefault(x => x.Name == aiBoneNode.Parent.Name);
             }
         }
-
         else
         {
             obj.Skin = null;
         }
 
+        ProcessingHelper.ProcessPostImport(obj, true);
         return obj;
     }
 
-    private static List<Mesh> CreateMeshesFromAiNode(Ai.Node aiNode, Ai.Scene aiScene, Object obj,
-        ref AxisAlignedBoundingBox objectAABB, ObjectSet objectSet, string texturesDirectoryPath)
+    private static Mesh CreateMeshFromAiNode(Ai.Node aiNode, Ai.Scene aiScene, Object obj, ObjectSet objectSet, string texturesDirectoryPath)
     {
-        var aiMeshes = aiNode.MeshIndices.Select(x => aiScene.Meshes[x]).Where(x => x.PrimitiveType == Ai.PrimitiveType.Triangle)
-            .OrderBy(x => x.VertexCount).ThenBy(x => x.FaceCount).ToList();
+        uint vertexCount = 0;
 
-        if (aiMeshes.Count == 0)
+        foreach (int meshIndex in aiNode.MeshIndices)
+        {
+            var aiMesh = aiScene.Meshes[meshIndex];
+
+            if ((aiMesh.PrimitiveType & Ai.PrimitiveType.Triangle) != 0)
+                vertexCount += (uint)aiMesh.VertexCount;
+        }
+
+        if (vertexCount == 0)
             return null;
 
-        var meshes = new List<Mesh>();
+        var mesh = new Mesh { Name = aiNode.Name };
         var transform = GetWorldTransform(aiNode);
+        uint vertexOffset = 0;
 
-        int subIndex = 0;
-
-        for (int index = 0; index < aiMeshes.Count;)
+        foreach (int meshIndex in aiNode.MeshIndices)
         {
-            int begin = index;
-            int end = index + 1;
+            var aiMesh = aiScene.Meshes[meshIndex];
+            if ((aiMesh.PrimitiveType & Ai.PrimitiveType.Triangle) == 0)
+                continue;
 
-            int vertexCount = aiMeshes[index].VertexCount;
-
-            // Collect meshes till we hit the vertex count limit.
-            while (end < aiMeshes.Count)
+            if (aiMesh.HasVertices)
             {
-                if (vertexCount + aiMeshes[end].VertexCount > 32768)
-                    break;
+                mesh.Positions ??= new Vector3[vertexCount];
 
-                vertexCount += aiMeshes[end++].VertexCount;
-            }
-
-            var mesh = new Mesh { Name = aiNode.Name };
-            if (index != 0)
-                mesh.Name += "." + (++subIndex).ToString("D3");
-
-            var aabbMesh = new AxisAlignedBoundingBox();
-
-            int vertexOffset = 0;
-
-            for (int it = begin; it < end; it++) // we goin C++
-            {
-                var aiMesh = aiMeshes[it];
-                var aabbSubMesh = new AxisAlignedBoundingBox();
-
-                if (aiMesh.HasVertices)
-                {
-                    if (mesh.Positions == null)
-                        mesh.Positions = new Vector3[vertexCount];
-
-                    for (int i = 0; i < aiMesh.VertexCount; i++)
-                    {
-                        var position = Vector3.Transform(aiMesh.Vertices[i].ToNumerics(), transform);
-
-                        mesh.Positions[vertexOffset + i] = position;
-
-                        aabbSubMesh.AddPoint(position);
-                    }
-                }
+                for (int i = 0; i < aiMesh.VertexCount; i++)
+                    mesh.Positions[vertexOffset + i] = Vector3.Transform(aiMesh.Vertices[i].ToNumerics(), transform);
 
                 if (aiMesh.HasNormals)
                 {
-                    if (mesh.Normals == null)
-                        mesh.Normals = new Vector3[vertexCount];
+                    mesh.Normals ??= new Vector3[vertexCount];
 
                     for (int i = 0; i < aiMesh.VertexCount; i++)
                         mesh.Normals[vertexOffset + i] = Vector3.Normalize(Vector3.TransformNormal(aiMesh.Normals[i].ToNumerics(), transform));
@@ -293,12 +261,13 @@ public static class AssimpImporter
                     subMesh.BonesPerVertex = 4;
                 }
 
-                subMesh.Indices = aiMesh.Faces.Where(x => x.IndexCount == 3).SelectMany(x => x.Indices)
-                    .Select(x => (uint)(vertexOffset + x)).ToArray();
+                subMesh.Indices = aiMesh.Faces
+                    .Where(x => x.IndexCount == 3)
+                    .SelectMany(x => x.Indices)
+                    .Select(x => vertexOffset + (uint)x)
+                    .ToArray();
 
-                subMesh.Indices = Stripifier.Stripify(subMesh.Indices);
-
-                subMesh.PrimitiveType = PrimitiveType.TriangleStrip;
+                subMesh.PrimitiveType = PrimitiveType.Triangles;
                 subMesh.IndexFormat = IndexFormat.UInt16;
 
                 var aiMaterial = aiScene.Materials[aiMesh.MaterialIndex];
@@ -313,44 +282,29 @@ public static class AssimpImporter
 
                 subMesh.MaterialIndex = (uint)materialIndex;
 
-                subMesh.BoundingSphere = aabbSubMesh.ToBoundingSphere();
-                subMesh.BoundingBox = aabbSubMesh.ToBoundingBox();
-
                 mesh.SubMeshes.Add(subMesh);
 
-                vertexOffset += aiMesh.VertexCount;
-
-                aabbMesh.Merge(aabbSubMesh);
+                vertexOffset += (uint)aiMesh.VertexCount;
             }
-
-            if (mesh.BlendWeights != null && mesh.BlendIndices != null)
-            {
-                for (int i = 0; i < vertexCount; i++)
-                {
-                    ref var blendWeights = ref mesh.BlendWeights[i];
-                    ref var blendIndices = ref mesh.BlendIndices[i];
-
-                    blendWeights = blendWeights.NormalizeSum();
-
-                    if (blendWeights.X <= 0.0f) blendIndices.X = -1;
-                    if (blendWeights.Y <= 0.0f) blendIndices.Y = -1;
-                    if (blendWeights.Z <= 0.0f) blendIndices.Z = -1;
-                    if (blendWeights.W <= 0.0f) blendIndices.W = -1;
-                }
-            }
-
-            mesh.GenerateTangents();
-
-            mesh.BoundingSphere = aabbMesh.ToBoundingSphere();
-            meshes.Add(mesh);
-
-            objectAABB.Merge(aabbMesh);
-
-            // Go to the next mesh
-            index = end;
         }
 
-        return meshes;
+        if (mesh.BlendWeights != null && mesh.BlendIndices != null)
+        {
+            for (int i = 0; i < vertexCount; i++)
+            {
+                ref var blendWeights = ref mesh.BlendWeights[i];
+                ref var blendIndices = ref mesh.BlendIndices[i];
+
+                blendWeights = blendWeights.NormalizeSum();
+
+                if (blendWeights.X <= 0.0f) blendIndices.X = -1;
+                if (blendWeights.Y <= 0.0f) blendIndices.Y = -1;
+                if (blendWeights.Z <= 0.0f) blendIndices.Z = -1;
+                if (blendWeights.W <= 0.0f) blendIndices.W = -1;
+            }
+        }
+
+        return mesh;
     }
 
     private static Material CreateMaterialFromAiMaterial(Ai.Material aiMaterial, TextureSet textureSet, string texturesDirectoryPath)

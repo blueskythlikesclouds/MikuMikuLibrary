@@ -538,8 +538,12 @@ public class ObjectSetNode : BinaryFileNode<ObjectSet>
 
         AddDirtyCustomHandler("Generate tangents", () =>
         {
-            foreach (var mesh in Data.Objects.SelectMany(x => x.Meshes))
-                mesh.GenerateTangents();
+            foreach (var obj in Data.Objects)
+            {
+                ProcessingHelper.GenerateTangents(obj,
+                    Data.Objects.SelectMany(x => x.Meshes).SelectMany(x => x.SubMeshes)
+                        .All(x => x.PrimitiveType == PrimitiveType.TriangleStrip));
+            }
 
             return true;
         });

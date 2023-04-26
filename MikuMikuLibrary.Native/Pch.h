@@ -10,6 +10,7 @@
 #include <fbxsdk.h>
 #include <memory>
 #include <meshoptimizer.h>
+#include <mikktspace.h>
 #include <vcclr.h>
 
 #undef min

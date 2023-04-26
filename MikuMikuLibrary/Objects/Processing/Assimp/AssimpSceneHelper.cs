@@ -10,17 +10,11 @@ public static class AssimpSceneHelper
         var aiContext = new Ai.AssimpContext();
 
         aiContext.SetConfig(new FBXPreservePivotsConfig(false));
-        aiContext.SetConfig(new MaxBoneCountConfig(64));
-        aiContext.SetConfig(new MeshTriangleLimitConfig(524288));
-        aiContext.SetConfig(new MeshVertexLimitConfig(32768));
-        aiContext.SetConfig(new VertexBoneWeightLimitConfig(4));
-        aiContext.SetConfig(new VertexCacheSizeConfig(63));
 
         return aiContext.ImportFile(filePath,
-            Ai.PostProcessSteps.JoinIdenticalVertices | Ai.PostProcessSteps.Triangulate |
-            Ai.PostProcessSteps.SplitLargeMeshes | Ai.PostProcessSteps.LimitBoneWeights |
-            Ai.PostProcessSteps.ImproveCacheLocality | Ai.PostProcessSteps.SortByPrimitiveType |
-            Ai.PostProcessSteps.SplitByBoneCount | Ai.PostProcessSteps.FlipUVs);
+            Ai.PostProcessSteps.Triangulate |
+            Ai.PostProcessSteps.SortByPrimitiveType |
+            Ai.PostProcessSteps.FlipUVs);
     }
 
     public static void Export(Ai.Scene aiScene, string filePath,

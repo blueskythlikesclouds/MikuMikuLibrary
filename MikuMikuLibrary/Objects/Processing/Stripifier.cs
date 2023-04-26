@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace MikuMikuLibrary.Objects.Processing;
+﻿namespace MikuMikuLibrary.Objects.Processing;
 
 public static class Stripifier
 {

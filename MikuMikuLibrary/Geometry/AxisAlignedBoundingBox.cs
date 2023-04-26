@@ -11,13 +11,13 @@ public class AxisAlignedBoundingBox
     public float SizeMax => Math.Max(SizeX, Math.Max(SizeY, SizeZ));
     public float Area => SizeX * SizeY * SizeZ;
 
-    public void AddPoint(Vector3 point)
+    public void AddPoint(in Vector3 point)
     {
         Min = Vector3.Min(Min, point);
         Max = Vector3.Max(Max, point);
     }
 
-    public void Merge(AxisAlignedBoundingBox aabb)
+    public void Merge(in AxisAlignedBoundingBox aabb)
     {
         Min = Vector3.Min(Min, aabb.Min);
         Max = Vector3.Max(Max, aabb.Max);

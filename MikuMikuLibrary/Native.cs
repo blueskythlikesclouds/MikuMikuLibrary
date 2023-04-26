@@ -19,6 +19,9 @@ public static class Native
     public static ITextureEncoder TextureEncoder { get; }
     public static ILightMapImporter LightMapImporter { get; }
     public static IStripifier Stripifier { get; }
+    public static IUnifier Unifier { get; }
+    public static IOptimizer Optimizer { get; }
+    public static ITangentGenerator TangentGenerator { get; }
 
     static Native()
     {
@@ -56,5 +59,14 @@ public static class Native
 
         Stripifier = (IStripifier)Activator.CreateInstance(
             assembly.GetType("MikuMikuLibrary.Objects.Processing.StripifierCore"));
+
+        Unifier = (IUnifier)Activator.CreateInstance(
+            assembly.GetType("MikuMikuLibrary.Objects.Processing.UnifierCore"));    
+        
+        Optimizer = (IOptimizer)Activator.CreateInstance(
+            assembly.GetType("MikuMikuLibrary.Objects.Processing.OptimizerCore"));  
+        
+        TangentGenerator = (ITangentGenerator)Activator.CreateInstance(
+            assembly.GetType("MikuMikuLibrary.Objects.Processing.TangentGeneratorCore"));
     }
 }
