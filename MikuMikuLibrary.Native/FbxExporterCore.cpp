@@ -11,6 +11,7 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
     using namespace Extensions;
     using namespace Materials;
     using namespace Misc;
+    using namespace Numerics;
     using namespace Textures;
     using namespace Textures::Processing;
 
@@ -179,19 +180,20 @@ namespace MikuMikuLibrary::Objects::Processing::Fbx
 
                     for each (unsigned int index in vertexIndices)
                     {
-                        BoneWeight boneWeight = mesh->BoneWeights[index];
+                        Vector4 blendWeights = mesh->BlendWeights[index];
+                        Vector4Int blendIndices = mesh->BlendIndices[index];
 
-                        if (boneWeight.Index1 == j)
-                            lCluster->AddControlPointIndex(index, boneWeight.Weight1);
+                        if (blendWeights.X > 0.0f && blendIndices.X == j)
+                            lCluster->AddControlPointIndex(index, blendWeights.X);
 
-                        if (boneWeight.Index2 == j)
-                            lCluster->AddControlPointIndex(index, boneWeight.Weight2);
+                        if (blendWeights.Y > 0.0f && blendIndices.Y == j)
+                            lCluster->AddControlPointIndex(index, blendWeights.Y);
 
-                        if (boneWeight.Index3 == j)
-                            lCluster->AddControlPointIndex(index, boneWeight.Weight3);
+                        if (blendWeights.Z > 0.0f && blendIndices.Z == j)
+                            lCluster->AddControlPointIndex(index, blendWeights.Z);
 
-                        if (boneWeight.Index4 == j)
-                            lCluster->AddControlPointIndex(index, boneWeight.Weight4);
+                        if (blendWeights.W > 0.0f && blendIndices.W == j)
+                            lCluster->AddControlPointIndex(index, blendWeights.W);
                     }
 
                     lSkin->AddCluster(lCluster);

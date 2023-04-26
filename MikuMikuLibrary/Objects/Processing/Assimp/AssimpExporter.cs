@@ -180,7 +180,7 @@ public static class AssimpExporter
             aiMesh.VertexColorChannels[i].AddRange(colors.Select(x => x.ToAssimpColor()));
         }
 
-        if (mesh.BoneWeights != null)
+        if (mesh.BlendWeights != null)
         {
             for (int i = 0; i < subMesh.BoneIndices.Length; i++)
             {
@@ -192,21 +192,22 @@ public static class AssimpExporter
                 aiBone.Name = bone.Name;
                 aiBone.OffsetMatrix = bone.InverseBindPoseMatrix.ToAssimpTransposed();
 
-                for (int j = 0; j < mesh.BoneWeights.Length; j++)
+                for (int j = 0; j < mesh.BlendWeights.Length; j++)
                 {
-                    var boneWeight = mesh.BoneWeights[j];
+                    ref var blendWeights = ref mesh.BlendWeights[j];
+                    ref var blendIndices = ref mesh.BlendIndices[j];
 
-                    if (boneWeight.Index1 == i)
-                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, boneWeight.Weight1));
+                    if (blendWeights.X > 0.0f && blendIndices.X == i)
+                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, blendWeights.X));
 
-                    if (boneWeight.Index2 == i)
-                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, boneWeight.Weight2));
+                    if (blendWeights.Y > 0.0f && blendIndices.Y == i)
+                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, blendWeights.Y));
 
-                    if (boneWeight.Index3 == i)
-                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, boneWeight.Weight3));
+                    if (blendWeights.Z > 0.0f && blendIndices.Z == i)
+                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, blendWeights.Z));
 
-                    if (boneWeight.Index4 == i)
-                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, boneWeight.Weight4));
+                    if (blendWeights.W > 0.0f && blendIndices.W == i)
+                        aiBone.VertexWeights.Add(new Ai.VertexWeight(j, blendWeights.W));
                 }
 
                 aiMesh.Bones.Add(aiBone);

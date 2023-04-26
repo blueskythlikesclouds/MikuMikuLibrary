@@ -1,4 +1,5 @@
 ﻿using MikuMikuLibrary.Geometry;
+using MikuMikuLibrary.Numerics;
 using MikuMikuLibrary.Objects;
 using MikuMikuModel.GUI.Controls;
 using MikuMikuModel.Nodes.Collections;
@@ -103,10 +104,18 @@ public class MeshNode : Node<Mesh>
     }
 
     [Category("General")]
-    [DisplayName("Bone weights")]
-    public BoneWeight[] BoneWeights
+    [DisplayName("Blend weights")]
+    public Vector4[] BlendWeights
     {
-        get => GetProperty<BoneWeight[]>();
+        get => GetProperty<Vector4[]>();
+        set => SetProperty(value);
+    }
+
+    [Category("General")]
+    [DisplayName("Blend indices")]
+    public Vector4Int[] BlendIndices
+    {
+        get => GetProperty<Vector4Int[]>();
         set => SetProperty(value);
     }
 

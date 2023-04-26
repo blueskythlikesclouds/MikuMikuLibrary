@@ -440,7 +440,7 @@ public class ObjectSetNode : BinaryFileNode<ObjectSet>
 
                             foreach (var mesh in obj.Meshes)
                             {
-                                if (mesh.BoneWeights == null)
+                                if (mesh.BlendIndices == null)
                                     continue;
 
                                 foreach (var subMesh in mesh.SubMeshes)
@@ -453,14 +453,14 @@ public class ObjectSetNode : BinaryFileNode<ObjectSet>
                                         if (subMesh.BoneIndices[i] != endBoneInfoIndex)
                                             continue;
 
-                                        for (int j = 0; j < mesh.BoneWeights.Length; j++)
+                                        for (int j = 0; j < mesh.BlendIndices.Length; j++)
                                         {
-                                            var boneWeight = mesh.BoneWeights[j];
+                                            ref var blendIndices = ref mesh.BlendIndices[j];
 
-                                            if (boneWeight.Index1 == i ||
-                                                boneWeight.Index2 == i ||
-                                                boneWeight.Index3 == i ||
-                                                boneWeight.Index4 == i)
+                                            if (blendIndices.X == i ||
+                                                blendIndices.Y == i ||
+                                                blendIndices.Z == i ||
+                                                blendIndices.W == i)
                                             {
                                                 aabb.AddPoint(mesh.Positions[j]);
                                             }

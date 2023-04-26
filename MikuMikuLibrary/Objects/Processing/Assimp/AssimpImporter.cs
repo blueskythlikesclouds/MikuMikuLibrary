@@ -1,6 +1,7 @@
 ﻿using MikuMikuLibrary.Geometry;
 using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.Materials;
+using MikuMikuLibrary.Numerics;
 using MikuMikuLibrary.Textures;
 using MikuMikuLibrary.Textures.Processing;
 using Ai = Assimp;
@@ -231,11 +232,10 @@ public static class AssimpImporter
 
                 if (aiMesh.HasBones)
                 {
-                    if (mesh.BoneWeights == null)
+                    if (mesh.BlendWeights == null || mesh.BlendIndices == null)
                     {
-                        mesh.BoneWeights = new BoneWeight[vertexCount];
-                        for (int i = 0; i < mesh.BoneWeights.Length; i++)
-                            mesh.BoneWeights[i] = BoneWeight.Empty;
+                        mesh.BlendWeights = new Vector4[vertexCount];
+                        mesh.BlendIndices = new Vector4Int[vertexCount];
                     }
 
                     subMesh.BoneIndices = new ushort[aiMesh.BoneCount];
@@ -264,8 +264,28 @@ public static class AssimpImporter
                             });
                         }
 
-                        foreach (var boneWeight in aiBone.VertexWeights)
-                            mesh.BoneWeights[vertexOffset + boneWeight.VertexID].AddWeight(i, boneWeight.Weight);
+                        foreach (var vertexWeight in aiBone.VertexWeights)
+                        {
+                            ref var blendWeights = ref mesh.BlendWeights[vertexOffset + vertexWeight.VertexID];
+                            ref var blendIndices = ref mesh.BlendIndices[vertexOffset + vertexWeight.VertexID];
+
+                            for (int j = 0; j < 4; j++)
+                            {
+                                if (vertexWeight.Weight > blendWeights[j])
+                                {
+                                    for (int k = 3; k > j; k--)
+                                    {
+                                        blendWeights[k] = blendWeights[k - 1];
+                                        blendIndices[k] = blendIndices[k - 1];
+                                    }
+
+                                    blendWeights[j] = vertexWeight.Weight;
+                                    blendIndices[j] = i;
+
+                                    break;
+                                }
+                            }
+                        }
 
                         subMesh.BoneIndices[i] = (ushort)boneIndex;
                     }
@@ -303,10 +323,20 @@ public static class AssimpImporter
                 aabbMesh.Merge(aabbSubMesh);
             }
 
-            if (mesh.BoneWeights != null)
+            if (mesh.BlendWeights != null && mesh.BlendIndices != null)
             {
-                for (int i = 0; i < mesh.BoneWeights.Length; i++)
-                    mesh.BoneWeights[i].Validate();
+                for (int i = 0; i < vertexCount; i++)
+                {
+                    ref var blendWeights = ref mesh.BlendWeights[i];
+                    ref var blendIndices = ref mesh.BlendIndices[i];
+
+                    blendWeights = blendWeights.NormalizeSum();
+
+                    if (blendWeights.X <= 0.0f) blendIndices.X = -1;
+                    if (blendWeights.Y <= 0.0f) blendIndices.Y = -1;
+                    if (blendWeights.Z <= 0.0f) blendIndices.Z = -1;
+                    if (blendWeights.W <= 0.0f) blendIndices.W = -1;
+                }
             }
 
             mesh.GenerateTangents();

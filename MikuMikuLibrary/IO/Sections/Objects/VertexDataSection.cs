@@ -41,18 +41,21 @@ public class VertexDataSection : Section<object>
                 writer.Write(mesh.TexCoords1?[i] ?? mesh.TexCoords0?[i] ?? Vector2.Zero, VectorBinaryFormat.Half);
                 writer.Write(mesh.Colors0?[i] ?? Vector4.One, VectorBinaryFormat.Half);
 
-                if (mesh.BoneWeights == null)
+                if (mesh.BlendWeights == null)
                     continue;
 
-                writer.Write((ushort)(mesh.BoneWeights[i].Index1 >= 0 ? mesh.BoneWeights[i].Weight1 * 32767f : 0));
-                writer.Write((ushort)(mesh.BoneWeights[i].Index2 >= 0 ? mesh.BoneWeights[i].Weight2 * 32767f : 0));
-                writer.Write((ushort)(mesh.BoneWeights[i].Index3 >= 0 ? mesh.BoneWeights[i].Weight3 * 32767f : 0));
-                writer.Write((ushort)(mesh.BoneWeights[i].Index4 >= 0 ? mesh.BoneWeights[i].Weight4 * 32767f : 0));
+                ref var blendWeights = ref mesh.BlendWeights[i];
+                ref var blendIndices = ref mesh.BlendIndices[i];
 
-                writer.Write((byte)(mesh.BoneWeights[i].Index1 >= 0 ? mesh.BoneWeights[i].Index1 * 3 : 0));
-                writer.Write((byte)(mesh.BoneWeights[i].Index2 >= 0 ? mesh.BoneWeights[i].Index2 * 3 : 0));
-                writer.Write((byte)(mesh.BoneWeights[i].Index3 >= 0 ? mesh.BoneWeights[i].Index3 * 3 : 0));
-                writer.Write((byte)(mesh.BoneWeights[i].Index4 >= 0 ? mesh.BoneWeights[i].Index4 * 3 : 0));
+                writer.Write((ushort)(blendIndices.X >= 0 ? blendWeights.X * 32767f : 0));
+                writer.Write((ushort)(blendIndices.Y >= 0 ? blendWeights.Y * 32767f : 0));
+                writer.Write((ushort)(blendIndices.Z >= 0 ? blendWeights.Z * 32767f : 0));
+                writer.Write((ushort)(blendIndices.W >= 0 ? blendWeights.W * 32767f : 0));
+
+                writer.Write((byte)(blendIndices.X >= 0 ? blendIndices.X * 3 : 0));
+                writer.Write((byte)(blendIndices.Y >= 0 ? blendIndices.Y * 3 : 0));
+                writer.Write((byte)(blendIndices.Z >= 0 ? blendIndices.Z * 3 : 0));
+                writer.Write((byte)(blendIndices.W >= 0 ? blendIndices.W * 3 : 0));
             }
         }
     }

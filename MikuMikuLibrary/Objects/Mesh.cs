@@ -2,6 +2,7 @@
 using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.IO.Sections.Objects;
+using MikuMikuLibrary.Numerics;
 
 namespace MikuMikuLibrary.Objects;
 
@@ -25,7 +26,8 @@ public class Mesh
     public Vector2[] TexCoords3 { get; set; }
     public Vector4[] Colors0 { get; set; }
     public Vector4[] Colors1 { get; set; }
-    public BoneWeight[] BoneWeights { get; set; }
+    public Vector4[] BlendWeights { get; set; }
+    public Vector4Int[] BlendIndices { get; set; }
     public MeshFlags Flags { get; set; }
     public string Name { get; set; }
 
@@ -242,8 +244,8 @@ public class Mesh
 
         void ReadVertexAttributesClassic()
         {
-            Vector4[] boneWeights = null;
-            Vector4[] boneIndices = null;
+            Vector4[] blendWeights = null;
+            Vector4[] blendIndices = null;
 
             for (int i = 0; i < attributeOffsets.Length; i++)
             {
@@ -289,12 +291,12 @@ public class Mesh
                             Colors1 = reader.ReadVector4s(vertexCount);
                             break;
 
-                        case VertexFormatAttributes.BoneWeight:
-                            boneWeights = reader.ReadVector4s(vertexCount);
+                        case VertexFormatAttributes.BlendWeight:
+                            blendWeights = reader.ReadVector4s(vertexCount);
                             break;
 
-                        case VertexFormatAttributes.BoneIndex:
-                            boneIndices = reader.ReadVector4s(vertexCount);
+                        case VertexFormatAttributes.BlendIndices:
+                            blendIndices = reader.ReadVector4s(vertexCount);
                             break;
 
                         default:
@@ -304,31 +306,26 @@ public class Mesh
                 });
             }
 
-            if (boneWeights == null || boneIndices == null)
-                return;
-
-            BoneWeights = new BoneWeight[vertexCount];
-
-            for (int i = 0; i < vertexCount; i++)
+            if (blendWeights != null && blendIndices != null)
             {
-                var weight4 = boneWeights[i];
-                var index4 = Vector4.Divide(boneIndices[i], 3);
+                BlendWeights = blendWeights;
+                BlendIndices = new Vector4Int[vertexCount];
 
-                var boneWeight = new BoneWeight
+                for (int i = 0; i < vertexCount; i++)
                 {
-                    Weight1 = weight4.X,
-                    Weight2 = weight4.Y,
-                    Weight3 = weight4.Z,
-                    Weight4 = weight4.W,
-                    Index1 = (int)index4.X,
-                    Index2 = (int)index4.Y,
-                    Index3 = (int)index4.Z,
-                    Index4 = (int)index4.W
-                };
+                    ref var weights = ref BlendWeights[i];
+                    ref var indices = ref blendIndices[i];
 
-                boneWeight.Validate();
+                    weights = weights.NormalizeSum();
 
-                BoneWeights[i] = boneWeight;
+                    BlendIndices[i] = new Vector4Int
+                    {
+                        X = weights.X > 0.0f && indices.X >= 0.0f ? (int)(indices.X / 3.0f + 0.5f) : -1,
+                        Y = weights.Y > 0.0f && indices.Y >= 0.0f ? (int)(indices.Y / 3.0f + 0.5f) : -1,
+                        Z = weights.Z > 0.0f && indices.Z >= 0.0f ? (int)(indices.Z / 3.0f + 0.5f) : -1,
+                        W = weights.W > 0.0f && indices.W >= 0.0f ? (int)(indices.W / 3.0f + 0.5f) : -1,
+                    };
+                }
             }
         }
 
@@ -351,7 +348,10 @@ public class Mesh
             Colors0 = new Vector4[vertexCount];
 
             if (attributeFlags == 4)
-                BoneWeights = new BoneWeight[vertexCount];
+            {
+                BlendWeights = new Vector4[vertexCount];
+                BlendIndices = new Vector4Int[vertexCount];
+            }
 
             bool hasTangents = false;
 
@@ -394,25 +394,23 @@ public class Mesh
 
                 if (attributeFlags == 4)
                 {
-                    var boneWeight = new BoneWeight
-                    {
-                        Weight1 = vertexReader.ReadUInt16() / 32767f,
-                        Weight2 = vertexReader.ReadUInt16() / 32767f,
-                        Weight3 = vertexReader.ReadUInt16() / 32767f,
-                        Weight4 = vertexReader.ReadUInt16() / 32767f,
-                        Index1 = vertexReader.ReadByte() / 3,
-                        Index2 = vertexReader.ReadByte() / 3,
-                        Index3 = vertexReader.ReadByte() / 3,
-                        Index4 = vertexReader.ReadByte() / 3
-                    };
+                    ref var blendWeights = ref BlendWeights[i];
+                    ref var blendIndices = ref BlendIndices[i];
 
-                    boneWeight.Validate();
+                    blendWeights = vertexReader.ReadVector4(VectorBinaryFormat.Int16)
+                        .NormalizeSum();
 
-                    BoneWeights[i] = boneWeight;
+                    blendIndices = new Vector4Int(
+                        reader.ReadByte() / 3,
+                        reader.ReadByte() / 3,
+                        reader.ReadByte() / 3, 
+                        reader.ReadByte() / 3);
+
+                    if (blendWeights.X <= 0.0f) blendIndices.X = -1;
+                    if (blendWeights.Y <= 0.0f) blendIndices.Y = -1;
+                    if (blendWeights.Z <= 0.0f) blendIndices.Z = -1;
+                    if (blendWeights.W <= 0.0f) blendIndices.W = -1;
                 }
-
-                // Normalize normal because precision
-                Normals[i] = Vector3.Normalize(Normals[i]);
 
                 // Checks to get rid of useless data after reading
                 if (Tangents[i] != Vector4.Zero) hasTangents = true;
@@ -421,17 +419,6 @@ public class Mesh
             if (!hasTangents) Tangents = null;
 
             reader.SeekBegin(current);
-        }
-
-        if (Tangents == null)
-            return;
-
-        for (int i = 0; i < Tangents.Length; i++)
-        {
-            int direction = Math.Sign(Tangents[i].W);
-            var tangent = Vector3.Normalize(new Vector3(Tangents[i].X, Tangents[i].Y, Tangents[i].Z));
-
-            Tangents[i] = new Vector4(tangent, direction);
         }
     }
 
@@ -453,7 +440,7 @@ public class Mesh
         if (section != null)
         {
             vertexFormat = VertexFormatAttributes.UsesModernStorage;
-            vertexSize = BoneWeights != null ? 56 : 44;
+            vertexSize = BlendWeights != null ? 56 : 44;
         }
 
         else
@@ -512,9 +499,9 @@ public class Mesh
                 vertexSize += 16;
             }
 
-            if (BoneWeights != null)
+            if (BlendWeights != null)
             {
-                vertexFormat |= VertexFormatAttributes.BoneWeight | VertexFormatAttributes.BoneIndex;
+                vertexFormat |= VertexFormatAttributes.BlendWeight | VertexFormatAttributes.BlendIndices;
                 vertexSize += 32;
             }
         }
@@ -531,7 +518,7 @@ public class Mesh
 
         writer.Write((int)Flags);
 
-        writer.Write(section != null ? (BoneWeights != null ? 4 : 2) : 0);
+        writer.Write(section != null ? (BlendWeights != null ? 4 : 2) : 0);
 
         writer.WriteNulls(6 * sizeof(uint)); // Reserved
 
@@ -583,24 +570,17 @@ public class Mesh
                             writer.Write(Colors1);
                             break;
 
-                        case VertexFormatAttributes.BoneWeight:
-                            foreach (var weight in BoneWeights)
-                            {
-                                writer.Write(weight.Weight1);
-                                writer.Write(weight.Weight2);
-                                writer.Write(weight.Weight3);
-                                writer.Write(weight.Weight4);
-                            }
-
+                        case VertexFormatAttributes.BlendWeight:
+                            writer.Write(BlendWeights);
                             break;
 
-                        case VertexFormatAttributes.BoneIndex:
-                            foreach (var weight in BoneWeights)
+                        case VertexFormatAttributes.BlendIndices:
+                            foreach (ref var indices in BlendIndices.AsSpan())
                             {
-                                writer.Write(weight.Index1 < 0 ? -1f : weight.Index1 * 3.0f);
-                                writer.Write(weight.Index2 < 0 ? -1f : weight.Index2 * 3.0f);
-                                writer.Write(weight.Index3 < 0 ? -1f : weight.Index3 * 3.0f);
-                                writer.Write(weight.Index4 < 0 ? -1f : weight.Index4 * 3.0f);
+                                writer.Write(indices.X < 0 ? -1.0f : indices.X * 3.0f);
+                                writer.Write(indices.Y < 0 ? -1.0f : indices.Y * 3.0f);
+                                writer.Write(indices.Z < 0 ? -1.0f : indices.Z * 3.0f);
+                                writer.Write(indices.W < 0 ? -1.0f : indices.W * 3.0f);
                             }
 
                             break;
@@ -637,9 +617,8 @@ public class Mesh
         TexCoord3 = 1 << 7,
         Color0 = 1 << 8,
         Color1 = 1 << 9,
-        BoneWeight = 1 << 10,
-        BoneIndex = 1 << 11,
-        VertexData = 1 << 13,
+        BlendWeight = 1 << 10,
+        BlendIndices = 1 << 11,
         UsesModernStorage = 1 << 31
     }
 }
