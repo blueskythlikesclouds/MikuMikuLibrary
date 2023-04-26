@@ -772,6 +772,13 @@ public class EndianBinaryWriter : BinaryWriter
                 Write((ushort)BitHelper.QuantizeSnorm(value.W, 16));
                 break;
 
+            case VectorBinaryFormat.UInt8:
+                Write((byte)BitHelper.QuantizeUnorm(value.X, 8));
+                Write((byte)BitHelper.QuantizeUnorm(value.Y, 8));
+                Write((byte)BitHelper.QuantizeUnorm(value.Z, 8));
+                Write((byte)BitHelper.QuantizeUnorm(value.W, 8));
+                break;
+
             default:
                 throw new ArgumentException(nameof(format));
         }
