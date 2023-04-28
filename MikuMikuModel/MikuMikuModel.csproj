@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Ookii.Dialogs.WinForms" Version="4.0.0" />
-    <PackageReference Include="OpenTK" Version="4.7.2" />
+    <PackageReference Include="OpenTK" Version="4.7.7" />
     <PackageReference Include="OpenTK.WinForms" Version="4.0.0-pre.6" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
 # assimp
+
 Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
@@ -79,6 +80,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # AssimpNet
+
 Copyright (c) 2012-2020 AssimpNet - Nicholas Woodfield
  
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -100,6 +102,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 # DirectXTex
+
 Copyright (c) 2011-2020 Microsoft Corp
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this 
@@ -120,9 +123,11 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # FBX SDK
+
 This software contains Autodesk® FBX® code developed by Autodesk, Inc. Copyright 2019 Autodesk, Inc. All rights, reserved. Such code is provided “as is” and Autodesk, Inc. disclaims any and all warranties, whether express or implied, including without limitation the implied warranties of merchantability, fitness for a particular purpose or non-infringement of third party rights. In no event shall Autodesk, Inc. be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of such code.
 
 # meshoptimizer
+
 MIT License
 
 Copyright (c) 2016-2020 Arseny Kapoulkine
@@ -145,7 +150,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+# MikkTSpace
+
+Copyright (C) 2011 by Morten S. Mikkelsen
+
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
 # Ookii.Dialogs.WinForms
+
 Copyright (c) Sven Groot (Ookii.org) 2009
 All rights reserved.
 
@@ -175,6 +201,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 
 # OpenTK
+
 Copyright (c) 2006-2019 Stefanos Apostolopoulos for the Open Toolkit project.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

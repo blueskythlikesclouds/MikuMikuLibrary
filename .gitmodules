@@ -1,0 +1,9 @@
+[submodule "MikuMikuLibrary.Native/Dependencies/DirectXTex"]
+	path = MikuMikuLibrary.Native/Dependencies/DirectXTex
+	url = https://github.com/microsoft/DirectXTex
+[submodule "MikuMikuLibrary.Native/Dependencies/meshoptimizer"]
+	path = MikuMikuLibrary.Native/Dependencies/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer.git
+[submodule "MikuMikuLibrary.Native/Dependencies/MikkTSpace"]
+	path = MikuMikuLibrary.Native/Dependencies/MikkTSpace
+	url = https://github.com/mmikk/MikkTSpace.git

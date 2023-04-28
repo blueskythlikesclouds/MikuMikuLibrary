@@ -53,51 +53,6 @@
     <ClCompile Include="LightMapImporterCore.cpp">
       <Filter>IBLs\Processing</Filter>
     </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\stripifier.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\vfetchoptimizer.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\vfetchanalyzer.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\vertexfilter.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\vertexcodec.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\vcacheoptimizer.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\vcacheanalyzer.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\spatialorder.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\simplifier.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\overdrawoptimizer.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\overdrawanalyzer.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\indexgenerator.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\indexcodec.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\clusterizer.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\meshoptimizer\allocator.cpp">
-      <Filter>Dependencies\meshoptimizer</Filter>
-    </ClCompile>
     <ClCompile Include="OptimizerCore.cpp">
       <Filter>Objects\Processing</Filter>
     </ClCompile>
@@ -112,6 +67,51 @@
     </ClCompile>
     <ClCompile Include="Dependencies\MikkTSpace\mikktspace.c">
       <Filter>Dependencies\MikkTSpace</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\allocator.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\clusterizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\indexcodec.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\indexgenerator.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\overdrawanalyzer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\overdrawoptimizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\simplifier.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\spatialorder.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\stripifier.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\vcacheanalyzer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\vcacheoptimizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\vertexcodec.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\vertexfilter.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\vfetchanalyzer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\meshoptimizer\src\vfetchoptimizer.cpp">
+      <Filter>Dependencies\meshoptimizer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

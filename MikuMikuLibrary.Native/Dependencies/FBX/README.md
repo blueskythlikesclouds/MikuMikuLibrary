@@ -1,1 +1,1 @@
-Get FBX SDK from [here](https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2020-2-1/fbx202021_fbxsdk_vs2019_win.exe) and copy the "include" and "lib" folders to this directory.
+Get FBX SDK from [here](https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2020-3-2/fbx202032_fbxsdk_vs2019_win.exe) and copy the "include" and "lib" folders to this directory.
