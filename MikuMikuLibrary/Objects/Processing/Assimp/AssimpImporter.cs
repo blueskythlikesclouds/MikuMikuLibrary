@@ -208,66 +208,86 @@ public static class AssimpImporter
                         Array.Fill(mesh.BlendIndices, new Vector4Int(-1, -1, -1, -1));
                     }
 
-                    subMesh.BoneIndices = new ushort[aiMesh.BoneCount];
+                    var boneIndices = new List<ushort>(aiMesh.BoneCount);
 
-                    for (int i = 0; i < aiMesh.BoneCount; i++)
+                    // Blender has this weird quirk where it duplicates bones.
+                    // We can handle it by grouping bones of the same name.
+                    foreach (var boneGroup in aiMesh.Bones.GroupBy(x => x.Name))
                     {
-                        var aiBone = aiMesh.Bones[i];
+                        // Likely going to have duplicates! Order by vertex ID so we can detect them.
+	                    var vertexWeights = boneGroup
+		                    .SelectMany(x => x.VertexWeights).OrderBy(x => x.VertexID).ToList();
+
+                        // Skip if empty (apparently those also exist when exporting from Blender)
+                        if (vertexWeights.Count == 0)
+	                        continue;
+
+                        var aiBone = boneGroup.First();
 
                         int boneIndex = obj.Skin.Bones.FindIndex(
-                            x => x.Name == aiBone.Name);
+	                        x => x.Name == aiBone.Name);
 
                         if (boneIndex == -1)
                         {
-                            boneIndex = obj.Skin.Bones.Count;
+	                        boneIndex = obj.Skin.Bones.Count;
 
-                            var aiBoneNode = aiScene.RootNode.FindNode(aiBone.Name);
+	                        var aiBoneNode = aiScene.RootNode.FindNode(aiBone.Name);
 
-                            // This is not right, but I'm not sure how to transform the bind pose matrix
-                            // while not having duplicate bones.
-                            Matrix4x4.Invert(GetWorldTransform(aiBoneNode), out var inverseBindPoseMatrix);
+	                        // This is not right, but I'm not sure how to transform the bind pose matrix
+	                        // while not having duplicate bones.
+	                        Matrix4x4.Invert(GetWorldTransform(aiBoneNode), out var inverseBindPoseMatrix);
 
-                            obj.Skin.Bones.Add(new BoneInfo
-                            {
-                                Name = aiBoneNode.Name,
-                                InverseBindPoseMatrix = inverseBindPoseMatrix
-                            });
+	                        obj.Skin.Bones.Add(new BoneInfo
+	                        {
+		                        Name = aiBoneNode.Name,
+		                        InverseBindPoseMatrix = inverseBindPoseMatrix
+	                        });
                         }
-                        
-                        // Sort weights by vertex ID so we can detect duplicate ones properly.
-                        aiBone.VertexWeights.Sort((x, y) => x.VertexID.CompareTo(y.VertexID));
+
+                        int boneIndexInSubMesh = boneIndices.Count;
+                        boneIndices.Add((ushort)boneIndex);
 
                         foreach (var vertexWeight in aiBone.VertexWeights)
                         {
-                            ref var blendWeights = ref mesh.BlendWeights[vertexOffset + vertexWeight.VertexID];
-                            ref var blendIndices = ref mesh.BlendIndices[vertexOffset + vertexWeight.VertexID];
+	                        ref var blendWeights = ref mesh.BlendWeights[vertexOffset + vertexWeight.VertexID];
+	                        ref var blendIndices = ref mesh.BlendIndices[vertexOffset + vertexWeight.VertexID];
 
-                            for (int j = 0; j < 4; j++)
-                            {
-	                            if (i == blendIndices[j])
-	                            {
-		                            blendWeights[j] += vertexWeight.Weight;
-	                            }
-                                else if (vertexWeight.Weight > blendWeights[j])
-                                {
-                                    for (int k = 3; k > j; k--)
-                                    {
-                                        blendWeights[k] = blendWeights[k - 1];
-                                        blendIndices[k] = blendIndices[k - 1];
-                                    }
+	                        for (int j = 0; j < 4; j++)
+	                        {
+		                        // Add to the existing weight if it was already assigned before.
+								if (boneIndexInSubMesh == blendIndices[j])
+		                        {
+			                        blendWeights[j] += vertexWeight.Weight;
+			                        break;
+		                        }
+                                // Sort weights in descending order otherwise.
+		                        if (vertexWeight.Weight > blendWeights[j])
+		                        {
+			                        for (int k = 3; k > j; k--)
+			                        {
+				                        blendWeights[k] = blendWeights[k - 1];
+				                        blendIndices[k] = blendIndices[k - 1];
+			                        }
 
-                                    blendWeights[j] = vertexWeight.Weight;
-                                    blendIndices[j] = i;
+			                        blendWeights[j] = vertexWeight.Weight;
+			                        blendIndices[j] = boneIndexInSubMesh;
 
-                                    break;
-                                }
-                            }
+			                        break;
+		                        }
+	                        }
                         }
+					}
 
-                        subMesh.BoneIndices[i] = (ushort)boneIndex;
+                    if (boneIndices.Count > 0)
+                    {
+	                    subMesh.BoneIndices = boneIndices.ToArray();
+	                    subMesh.BonesPerVertex = 4;
                     }
-
-                    subMesh.BonesPerVertex = 4;
+                    else
+                    {
+	                    mesh.BlendIndices = null;
+	                    mesh.BlendWeights = null;
+                    }
                 }
 
                 subMesh.Indices = aiMesh.Faces
