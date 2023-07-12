@@ -204,6 +204,8 @@ public static class AssimpImporter
                     {
                         mesh.BlendWeights = new Vector4[vertexCount];
                         mesh.BlendIndices = new Vector4Int[vertexCount];
+
+                        Array.Fill(mesh.BlendIndices, new Vector4Int(-1, -1, -1, -1));
                     }
 
                     subMesh.BoneIndices = new ushort[aiMesh.BoneCount];
@@ -231,6 +233,9 @@ public static class AssimpImporter
                                 InverseBindPoseMatrix = inverseBindPoseMatrix
                             });
                         }
+                        
+                        // Sort weights by vertex ID so we can detect duplicate ones properly.
+                        aiBone.VertexWeights.Sort((x, y) => x.VertexID.CompareTo(y.VertexID));
 
                         foreach (var vertexWeight in aiBone.VertexWeights)
                         {
@@ -239,7 +244,11 @@ public static class AssimpImporter
 
                             for (int j = 0; j < 4; j++)
                             {
-                                if (vertexWeight.Weight > blendWeights[j])
+	                            if (i == blendIndices[j])
+	                            {
+		                            blendWeights[j] += vertexWeight.Weight;
+	                            }
+                                else if (vertexWeight.Weight > blendWeights[j])
                                 {
                                     for (int k = 3; k > j; k--)
                                     {
