@@ -207,10 +207,13 @@ public class ObjectSet : BinaryFile
 
         if (boneData != null)
         {
+	        var cmnSkeleton =
+		        boneData.Skeletons.FirstOrDefault(x => x.Name.Equals("CMN", StringComparison.OrdinalIgnoreCase));
+
             foreach (var obj in Objects.Where(x => x.Skin != null))
             {
                 var skeleton = boneData.Skeletons.FirstOrDefault(x =>
-                    obj.Name.StartsWith(x.Name, StringComparison.OrdinalIgnoreCase));
+                    obj.Name.StartsWith(x.Name, StringComparison.OrdinalIgnoreCase)) ?? cmnSkeleton;
 
                 if (skeleton == null)
                     continue;
