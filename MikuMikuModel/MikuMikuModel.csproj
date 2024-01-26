@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
 	<UseWindowsForms>true</UseWindowsForms>
 	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -19,8 +19,8 @@
 
   <ItemGroup>
     <PackageReference Include="Ookii.Dialogs.WinForms" Version="4.0.0" />
-    <PackageReference Include="OpenTK" Version="4.7.7" />
-    <PackageReference Include="OpenTK.WinForms" Version="4.0.0-pre.6" />
+    <PackageReference Include="OpenTK" Version="4.8.2" />
+    <PackageReference Include="OpenTK.WinForms" Version="4.0.0-pre.7" />
   </ItemGroup>
 
   <ItemGroup>
