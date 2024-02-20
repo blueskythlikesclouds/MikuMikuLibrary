@@ -1,9 +1,14 @@
 ﻿using MikuMikuLibrary.Archives;
 using MikuMikuLibrary.Extensions;
 using MikuMikuLibrary.IO;
+using MikuMikuLibrary.IO.Common;
 using MikuMikuLibrary.Objects;
 using MikuMikuLibrary.Objects.Extra;
 using MikuMikuLibrary.Objects.Extra.Blocks;
+using MikuMikuLibrary.Objects.Extra.Parameters;
+using MikuMikuLibrary.Parameters;
+using MikuMikuLibrary.Parameters.Extensions;
+using MikuMikuModel.Configurations;
 using MikuMikuModel.GUI.Forms;
 using MikuMikuModel.Modules;
 using MikuMikuModel.Nodes.Collections;
@@ -110,6 +115,306 @@ public class SkinNode : Node<Skin>
             Data.Blocks.AddRange(skin.Blocks);
 
             OnPropertyChanged(nameof(Data.Blocks));
+        }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate);
+
+        AddCustomHandlerSeparator();
+
+        AddCustomHandler("Export Internal Skin Parameter", () =>
+        {
+            var configuration = ConfigurationList.Instance.CurrentConfiguration;
+            using (SaveFileDialog dlg = new SaveFileDialog() { Filter = "Skin Parameter (*.txt)|*.txt" })
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    ParameterTreeWriter externalSkinParam = new ParameterTreeWriter();
+                    foreach (var block in Data.Blocks)
+                    {
+                        if (block is OsageBlock)
+                        {
+                            OsageBlock osgBlock = block as OsageBlock;  // i could've sworn there was a better way to do this
+
+                            if (osgBlock.InternalSkinParameter != null)
+                            {
+                                externalSkinParam.PushScope(osgBlock.InternalSkinParameter.Name);
+                                {
+                                    externalSkinParam.Write("node", osgBlock.Nodes, (OsageNode x) =>
+                                    {
+                                        externalSkinParam.Write("coli_r", osgBlock.InternalSkinParameter.CollisionRadius);
+                                        externalSkinParam.Write("hinge_ymin", -osgBlock.InternalSkinParameter.HingeY);
+                                        externalSkinParam.Write("hinge_ymax", osgBlock.InternalSkinParameter.HingeY);
+                                        externalSkinParam.Write("hinge_zmin", -osgBlock.InternalSkinParameter.HingeZ);
+                                        externalSkinParam.Write("hinge_zmax", osgBlock.InternalSkinParameter.HingeZ);
+                                        externalSkinParam.Write("weight", 1.0f);
+                                        externalSkinParam.Write("inertial_cancel", 0.0f);
+                                    });
+                                    externalSkinParam.PushScope("root");
+                                    {
+                                        externalSkinParam.Write("air_res", osgBlock.InternalSkinParameter.AirResistance);
+                                        externalSkinParam.Write("coli", osgBlock.InternalSkinParameter.Collisions, (OsageInternalCollisionParameter x) =>
+                                        {
+                                            externalSkinParam.Write("type", (int)x.CollisionType);
+                                            externalSkinParam.Write("radius", x.CollisionRadius);
+                                            externalSkinParam.PushScope("bone");
+                                            {
+                                                externalSkinParam.PushScope(0);
+                                                {
+                                                    // try to get the name
+                                                    string boneName = configuration?.BoneData.Skeletons[0].ObjectBoneNames[(int)x.Head];
+                                                    externalSkinParam.Write("name", boneName);
+                                                    externalSkinParam.Write("posx", x.HeadPosition.X);
+                                                    externalSkinParam.Write("posy", x.HeadPosition.Y);
+                                                    externalSkinParam.Write("posz", x.HeadPosition.Z);
+                                                }
+                                                externalSkinParam.PopScope();
+
+                                                externalSkinParam.PushScope(1);
+                                                {
+                                                    // try to get the name
+                                                    string boneName = configuration?.BoneData.Skeletons[0].ObjectBoneNames[(int)(x.Tail == 0 ? x.Head : x.Tail)];
+                                                    externalSkinParam.Write("name", boneName);
+                                                    externalSkinParam.Write("posx", x.TailPosition.X);
+                                                    externalSkinParam.Write("posy", x.TailPosition.Y);
+                                                    externalSkinParam.Write("posz", x.TailPosition.Z);
+                                                }
+                                                externalSkinParam.PopScope();
+                                            }
+                                            externalSkinParam.PopScope();
+                                        });
+                                        externalSkinParam.Write("coli_type", 0);
+                                        externalSkinParam.Write("force", osgBlock.InternalSkinParameter.Force);
+                                        externalSkinParam.Write("force_gain", osgBlock.InternalSkinParameter.ForceGain);
+                                        externalSkinParam.Write("friction", osgBlock.InternalSkinParameter.Friction);
+                                        externalSkinParam.Write("init_rot_y", 0f);
+                                        externalSkinParam.Write("init_rot_z", 0f);
+                                        externalSkinParam.Write("rot_y", osgBlock.InternalSkinParameter.RotationY);
+                                        externalSkinParam.Write("rot_z", osgBlock.InternalSkinParameter.RotationZ);
+                                        externalSkinParam.Write("stiffness", 0f);
+                                        externalSkinParam.Write("wind_afc", osgBlock.InternalSkinParameter.WindAffection);
+                                    }
+                                    externalSkinParam.PopScope();
+                                }
+                                externalSkinParam.PopScope();
+                            }
+                        }
+                        else if (block is ClothBlock)
+                        {
+                            ClothBlock osgBlock = block as ClothBlock;  // i could've sworn there was a better way to do this
+
+                            if (osgBlock.InternalSkinParameter != null)
+                            {
+                                externalSkinParam.PushScope(osgBlock.InternalSkinParameter.Name);
+                                {
+                                    externalSkinParam.PushScope("root");
+                                    {
+                                        externalSkinParam.Write("air_res", osgBlock.InternalSkinParameter.AirResistance);
+                                        externalSkinParam.Write("coli", osgBlock.InternalSkinParameter.Collisions, (OsageInternalCollisionParameter x) =>
+                                        {
+                                            externalSkinParam.Write("type", (int)x.CollisionType);
+                                            externalSkinParam.Write("radius", x.CollisionRadius);
+                                            externalSkinParam.PushScope("bone");
+                                            {
+                                                externalSkinParam.PushScope(0);
+                                                {
+                                                    // try to get the name
+                                                    string boneName = configuration?.BoneData.Skeletons[0].ObjectBoneNames[(int)x.Head];
+                                                    externalSkinParam.Write("name", boneName);
+                                                    externalSkinParam.Write("posx", x.HeadPosition.X);
+                                                    externalSkinParam.Write("posy", x.HeadPosition.Y);
+                                                    externalSkinParam.Write("posz", x.HeadPosition.Z);
+                                                }
+                                                externalSkinParam.PopScope();
+
+                                                externalSkinParam.PushScope(1);
+                                                {
+                                                    // try to get the name
+                                                    string boneName = configuration?.BoneData.Skeletons[0].ObjectBoneNames[(int)(x.Tail == 0 ? x.Head : x.Tail)];
+                                                    externalSkinParam.Write("name", boneName);
+                                                    externalSkinParam.Write("posx", x.TailPosition.X);
+                                                    externalSkinParam.Write("posy", x.TailPosition.Y);
+                                                    externalSkinParam.Write("posz", x.TailPosition.Z);
+                                                }
+                                                externalSkinParam.PopScope();
+                                            }
+                                            externalSkinParam.PopScope();
+                                        });
+                                        externalSkinParam.Write("coli_type", 0);
+                                        externalSkinParam.Write("force", osgBlock.InternalSkinParameter.Force);
+                                        externalSkinParam.Write("force_gain", osgBlock.InternalSkinParameter.ForceGain);
+                                        externalSkinParam.Write("friction", osgBlock.InternalSkinParameter.Friction);
+                                        externalSkinParam.Write("init_rot_y", 0f);
+                                        externalSkinParam.Write("init_rot_z", 0f);
+                                        externalSkinParam.Write("rot_y", osgBlock.InternalSkinParameter.RotationY);
+                                        externalSkinParam.Write("rot_z", osgBlock.InternalSkinParameter.RotationZ);
+                                        externalSkinParam.Write("stiffness", 0f);
+                                        externalSkinParam.Write("wind_afc", osgBlock.InternalSkinParameter.WindAffection);
+                                    }
+                                    externalSkinParam.PopScope();
+                                }
+                                externalSkinParam.PopScope();
+                            }
+                        }
+                    }
+                    externalSkinParam.Save(dlg.FileName);
+                }
+            }
+        }, Keys.None, CustomHandlerFlags.None);
+
+        AddCustomHandler("Create Internal Skin Parameter", () =>
+        {
+            var configuration = ConfigurationList.Instance.CurrentConfiguration;
+            using (OpenFileDialog dlg = new OpenFileDialog() { Filter = "Skin Parameter (*.txt)|*.txt" })
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    ParameterTree externalSkinParam = new ParameterTree(new EndianBinaryReader(File.OpenRead(dlg.FileName), Endianness.Little));
+                    foreach (var block in Data.Blocks)
+                    {
+                        if (block is OsageBlock)
+                        {
+                            var osgBlock = block as OsageBlock;
+
+                            if (externalSkinParam.OpenScope(osgBlock.ExternalName))
+                            {
+                                OsageInternalSkinParameter skp = new OsageInternalSkinParameter();
+
+                                if (externalSkinParam.OpenScope("node"))
+                                {
+                                    if (externalSkinParam.OpenScope(0))
+                                    {
+                                        skp.CollisionRadius = externalSkinParam.Get<float>("coli_r");
+                                        skp.HingeY = externalSkinParam.Get<float>("hinge_ymax");
+                                        skp.HingeZ = externalSkinParam.Get<float>("hinge_zmax");
+                                        externalSkinParam.CloseScope();
+                                    }
+                                    externalSkinParam.CloseScope();
+                                }
+
+                                if (externalSkinParam.OpenScope("root"))
+                                {
+                                    skp.AirResistance = externalSkinParam.Get<float>("air_res");
+                                    externalSkinParam.Enumerate("coli", i =>
+                                    {
+                                        OsageInternalCollisionParameter coll = new OsageInternalCollisionParameter();
+                                        coll.CollisionType = (OsageInternalCollisionType)externalSkinParam.Get<int>("type");
+                                        coll.CollisionRadius = externalSkinParam.Get<float>("radius");
+                                        if (externalSkinParam.OpenScope("bone"))
+                                        {
+                                            string headName = "";
+                                            string tailName = "";
+                                            if (externalSkinParam.OpenScope(0))
+                                            {
+                                                headName = externalSkinParam.Get<string>("name");
+                                                coll.Head = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == headName);
+                                                coll.HeadPosition = new Vector3(
+                                                    externalSkinParam.Get<float>("posx"),
+                                                    externalSkinParam.Get<float>("posy"),
+                                                    externalSkinParam.Get<float>("posz"));
+                                                externalSkinParam.CloseScope();
+                                            }
+                                            if (externalSkinParam.OpenScope(1))
+                                            {
+                                                tailName = externalSkinParam.Get<string>("name");
+                                                if (headName == tailName)
+                                                {
+                                                    coll.Tail = 0;
+                                                }
+                                                else
+                                                {
+                                                    coll.Tail = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
+                                                }
+                                                coll.TailPosition = new Vector3(
+                                                    externalSkinParam.Get<float>("posx"),
+                                                    externalSkinParam.Get<float>("posy"),
+                                                    externalSkinParam.Get<float>("posz"));
+                                                externalSkinParam.CloseScope();
+                                            }
+                                            externalSkinParam.CloseScope();
+                                        }
+                                        skp.Collisions.Add(coll);
+                                    });
+                                    skp.Force = externalSkinParam.Get<float>("force");
+                                    skp.ForceGain = externalSkinParam.Get<float>("force_gain");
+                                    skp.Friction = externalSkinParam.Get<float>("friction");
+                                    skp.Name = osgBlock.Name;
+                                    skp.RotationY = externalSkinParam.Get<float>("rot_y");
+                                    skp.RotationZ = externalSkinParam.Get<float>("rot_z");
+                                    skp.WindAffection = externalSkinParam.Get<float>("wind_afc");
+                                    osgBlock.InternalSkinParameter = skp;
+                                    externalSkinParam.CloseScope();
+                                }
+                                externalSkinParam.CloseScope();
+                            }
+                        }
+                        else if (block is ClothBlock)
+                        {
+                            var clsBlock = block as ClothBlock;
+
+                            if (externalSkinParam.OpenScope(clsBlock.Name))
+                            {
+                                OsageInternalSkinParameter skp = new OsageInternalSkinParameter();
+
+                                if (externalSkinParam.OpenScope("root"))
+                                {
+                                    skp.AirResistance = externalSkinParam.Get<float>("air_res");
+                                    externalSkinParam.Enumerate("coli", i =>
+                                    {
+                                        OsageInternalCollisionParameter coll = new OsageInternalCollisionParameter();
+                                        coll.CollisionType = (OsageInternalCollisionType)externalSkinParam.Get<int>("type");
+                                        coll.CollisionRadius = externalSkinParam.Get<float>("radius");
+                                        if (externalSkinParam.OpenScope("bone"))
+                                        {
+                                            string headName = "";
+                                            string tailName = "";
+                                            if (externalSkinParam.OpenScope(0))
+                                            {
+                                                headName = externalSkinParam.Get<string>("name");
+                                                coll.Head = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == headName);
+                                                coll.HeadPosition = new Vector3(
+                                                    externalSkinParam.Get<float>("posx"),
+                                                    externalSkinParam.Get<float>("posy"),
+                                                    externalSkinParam.Get<float>("posz"));
+                                                externalSkinParam.CloseScope();
+                                            }
+                                            if (externalSkinParam.OpenScope(1))
+                                            {
+                                                tailName = externalSkinParam.Get<string>("name");
+                                                if (headName == tailName)
+                                                {
+                                                    coll.Tail = 0;
+                                                }
+                                                else
+                                                {
+                                                    coll.Tail = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
+                                                }
+                                                coll.TailPosition = new Vector3(
+                                                    externalSkinParam.Get<float>("posx"),
+                                                    externalSkinParam.Get<float>("posy"),
+                                                    externalSkinParam.Get<float>("posz"));
+                                                externalSkinParam.CloseScope();
+                                            }
+                                            externalSkinParam.CloseScope();
+                                        }
+                                        skp.Collisions.Add(coll);
+                                    });
+                                    skp.CollisionRadius = externalSkinParam.Get<float>("coli_r");
+                                    skp.Force = externalSkinParam.Get<float>("force");
+                                    skp.ForceGain = externalSkinParam.Get<float>("force_gain");
+                                    skp.Friction = externalSkinParam.Get<float>("friction");
+                                    skp.HingeY = externalSkinParam.Get<float>("hinge_y");
+                                    skp.HingeY = externalSkinParam.Get<float>("hinge_z");
+                                    skp.Name = clsBlock.Name;
+                                    skp.RotationY = externalSkinParam.Get<float>("rot_y");
+                                    skp.RotationZ = externalSkinParam.Get<float>("rot_z");
+                                    skp.WindAffection = externalSkinParam.Get<float>("wind_afc");
+                                    clsBlock.InternalSkinParameter = skp;
+                                    externalSkinParam.CloseScope();
+                                }
+                                externalSkinParam.CloseScope();
+                            }
+                        }
+                    }
+                }
+            }
         }, Keys.None, CustomHandlerFlags.ClearMementos | CustomHandlerFlags.Repopulate);
 
         AddCustomHandlerSeparator();
