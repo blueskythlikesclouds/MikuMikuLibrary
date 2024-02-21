@@ -129,10 +129,8 @@ public class SkinNode : Node<Skin>
                     ParameterTreeWriter externalSkinParam = new ParameterTreeWriter();
                     foreach (var block in Data.Blocks)
                     {
-                        if (block is OsageBlock)
+                        if (block is OsageBlock osgBlock)
                         {
-                            OsageBlock osgBlock = block as OsageBlock;  // i could've sworn there was a better way to do this
-
                             if (osgBlock.InternalSkinParameter != null)
                             {
                                 externalSkinParam.PushScope(osgBlock.InternalSkinParameter.Name);
@@ -196,18 +194,16 @@ public class SkinNode : Node<Skin>
                                 externalSkinParam.PopScope();
                             }
                         }
-                        else if (block is ClothBlock)
+                        else if (block is ClothBlock clsBlock)
                         {
-                            ClothBlock osgBlock = block as ClothBlock;  // i could've sworn there was a better way to do this
-
-                            if (osgBlock.InternalSkinParameter != null)
+                            if (clsBlock.InternalSkinParameter != null)
                             {
-                                externalSkinParam.PushScope(osgBlock.InternalSkinParameter.Name);
+                                externalSkinParam.PushScope(clsBlock.InternalSkinParameter.Name);
                                 {
                                     externalSkinParam.PushScope("root");
                                     {
-                                        externalSkinParam.Write("air_res", osgBlock.InternalSkinParameter.AirResistance);
-                                        externalSkinParam.Write("coli", osgBlock.InternalSkinParameter.Collisions, (OsageInternalCollisionParameter x) =>
+                                        externalSkinParam.Write("air_res", clsBlock.InternalSkinParameter.AirResistance);
+                                        externalSkinParam.Write("coli", clsBlock.InternalSkinParameter.Collisions, (OsageInternalCollisionParameter x) =>
                                         {
                                             externalSkinParam.Write("type", (int)x.CollisionType);
                                             externalSkinParam.Write("radius", x.CollisionRadius);
@@ -238,15 +234,15 @@ public class SkinNode : Node<Skin>
                                             externalSkinParam.PopScope();
                                         });
                                         externalSkinParam.Write("coli_type", 0);
-                                        externalSkinParam.Write("force", osgBlock.InternalSkinParameter.Force);
-                                        externalSkinParam.Write("force_gain", osgBlock.InternalSkinParameter.ForceGain);
-                                        externalSkinParam.Write("friction", osgBlock.InternalSkinParameter.Friction);
+                                        externalSkinParam.Write("force", clsBlock.InternalSkinParameter.Force);
+                                        externalSkinParam.Write("force_gain", clsBlock.InternalSkinParameter.ForceGain);
+                                        externalSkinParam.Write("friction", clsBlock.InternalSkinParameter.Friction);
                                         externalSkinParam.Write("init_rot_y", 0f);
                                         externalSkinParam.Write("init_rot_z", 0f);
-                                        externalSkinParam.Write("rot_y", osgBlock.InternalSkinParameter.RotationY);
-                                        externalSkinParam.Write("rot_z", osgBlock.InternalSkinParameter.RotationZ);
+                                        externalSkinParam.Write("rot_y", clsBlock.InternalSkinParameter.RotationY);
+                                        externalSkinParam.Write("rot_z", clsBlock.InternalSkinParameter.RotationZ);
                                         externalSkinParam.Write("stiffness", 0f);
-                                        externalSkinParam.Write("wind_afc", osgBlock.InternalSkinParameter.WindAffection);
+                                        externalSkinParam.Write("wind_afc", clsBlock.InternalSkinParameter.WindAffection);
                                     }
                                     externalSkinParam.PopScope();
                                 }
@@ -269,10 +265,8 @@ public class SkinNode : Node<Skin>
                     ParameterTree externalSkinParam = new ParameterTree(new EndianBinaryReader(File.OpenRead(dlg.FileName), Endianness.Little));
                     foreach (var block in Data.Blocks)
                     {
-                        if (block is OsageBlock)
+                        if (block is OsageBlock osgBlock)
                         {
-                            var osgBlock = block as OsageBlock;
-
                             if (externalSkinParam.OpenScope(osgBlock.ExternalName))
                             {
                                 OsageInternalSkinParameter skp = new OsageInternalSkinParameter();
@@ -345,10 +339,8 @@ public class SkinNode : Node<Skin>
                                 externalSkinParam.CloseScope();
                             }
                         }
-                        else if (block is ClothBlock)
+                        else if (block is ClothBlock clsBlock)
                         {
-                            var clsBlock = block as ClothBlock;
-
                             if (externalSkinParam.OpenScope(clsBlock.Name))
                             {
                                 OsageInternalSkinParameter skp = new OsageInternalSkinParameter();
