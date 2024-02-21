@@ -329,7 +329,7 @@ public class SkinNode : Node<Skin>
                                     skp.Force = externalSkinParam.Get<float>("force");
                                     skp.ForceGain = externalSkinParam.Get<float>("force_gain");
                                     skp.Friction = externalSkinParam.Get<float>("friction");
-                                    skp.Name = osgBlock.Name;
+                                    skp.Name = osgBlock.ExternalName;
                                     skp.RotationY = externalSkinParam.Get<float>("rot_y");
                                     skp.RotationZ = externalSkinParam.Get<float>("rot_z");
                                     skp.WindAffection = externalSkinParam.Get<float>("wind_afc");
