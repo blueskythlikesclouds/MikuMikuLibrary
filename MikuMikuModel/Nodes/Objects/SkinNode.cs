@@ -223,7 +223,7 @@ public class SkinNode : Node<Skin>
                                                 externalSkinParam.PushScope(1);
                                                 {
                                                     // try to get the name
-                                                    string boneName = configuration?.BoneData.Skeletons[0].ObjectBoneNames[(int)(x.Tail == 0 ? x.Head : x.Tail)];
+                                                    string boneName = configuration?.BoneData.Skeletons[0].ObjectBoneNames[(int)x.Tail];
                                                     externalSkinParam.Write("name", boneName);
                                                     externalSkinParam.Write("posx", x.TailPosition.X);
                                                     externalSkinParam.Write("posy", x.TailPosition.Y);
@@ -293,12 +293,9 @@ public class SkinNode : Node<Skin>
                                         coll.CollisionRadius = externalSkinParam.Get<float>("radius");
                                         if (externalSkinParam.OpenScope("bone"))
                                         {
-                                            string headName = "";
-                                            string tailName = "";
                                             if (externalSkinParam.OpenScope(0))
                                             {
-                                                headName = externalSkinParam.Get<string>("name");
-                                                coll.Head = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == headName);
+                                                coll.Head = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
                                                 coll.HeadPosition = new Vector3(
                                                     externalSkinParam.Get<float>("posx"),
                                                     externalSkinParam.Get<float>("posy"),
@@ -307,15 +304,7 @@ public class SkinNode : Node<Skin>
                                             }
                                             if (externalSkinParam.OpenScope(1))
                                             {
-                                                tailName = externalSkinParam.Get<string>("name");
-                                                if (headName == tailName)
-                                                {
-                                                    coll.Tail = 0;
-                                                }
-                                                else
-                                                {
-                                                    coll.Tail = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
-                                                }
+                                                coll.Tail = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
                                                 coll.TailPosition = new Vector3(
                                                     externalSkinParam.Get<float>("posx"),
                                                     externalSkinParam.Get<float>("posy"),
@@ -355,12 +344,9 @@ public class SkinNode : Node<Skin>
                                         coll.CollisionRadius = externalSkinParam.Get<float>("radius");
                                         if (externalSkinParam.OpenScope("bone"))
                                         {
-                                            string headName = "";
-                                            string tailName = "";
                                             if (externalSkinParam.OpenScope(0))
                                             {
-                                                headName = externalSkinParam.Get<string>("name");
-                                                coll.Head = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == headName);
+                                                coll.Head = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
                                                 coll.HeadPosition = new Vector3(
                                                     externalSkinParam.Get<float>("posx"),
                                                     externalSkinParam.Get<float>("posy"),
@@ -369,15 +355,7 @@ public class SkinNode : Node<Skin>
                                             }
                                             if (externalSkinParam.OpenScope(1))
                                             {
-                                                tailName = externalSkinParam.Get<string>("name");
-                                                if (headName == tailName)
-                                                {
-                                                    coll.Tail = 0;
-                                                }
-                                                else
-                                                {
-                                                    coll.Tail = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
-                                                }
+                                                coll.Tail = (uint)configuration?.BoneData.Skeletons[0].ObjectBoneNames.FindIndex(x => x == externalSkinParam.Get<string>("name"));
                                                 coll.TailPosition = new Vector3(
                                                     externalSkinParam.Get<float>("posx"),
                                                     externalSkinParam.Get<float>("posy"),
