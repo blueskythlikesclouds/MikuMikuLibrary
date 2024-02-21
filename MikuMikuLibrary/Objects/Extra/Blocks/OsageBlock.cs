@@ -1,5 +1,6 @@
 ﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks;
 
@@ -12,6 +13,7 @@ public class OsageBlock : NodeBlock
 
     public List<OsageNode> Nodes { get; }
     public string ExternalName { get; set; }
+    public OsageInternalSkinParameter InternalSkinParameter { get; set; }
 
     internal override void ReadBody(EndianBinaryReader reader, StringSet stringSet)
     {
@@ -29,15 +31,21 @@ public class OsageBlock : NodeBlock
         reader.ReadOffset(() =>
         {
             long current = reader.Position;
+            if (reader.ReadUInt32() == 0)
             {
-                if (reader.ReadUInt32() == 0) // Integrated SKP, yet to support.
-                    return;
+                // read the internal skin param
+                reader.SeekBegin(current);
+                InternalSkinParameter = new OsageInternalSkinParameter();
+                InternalSkinParameter.Read(reader);
             }
+            else
+            {
+                // read rotation
+                reader.SeekBegin(current);
 
-            reader.SeekBegin(current);
-
-            foreach (var bone in Nodes)
-                bone.ReadOsgBlockInfo(reader, stringSet);
+                foreach (var bone in Nodes)
+                    bone.ReadOsgBlockInfo(reader, stringSet);
+            }
         });
 
         if (reader.AddressSpace == AddressSpace.Int64)
@@ -53,16 +61,34 @@ public class OsageBlock : NodeBlock
         stringSet.WriteString(writer, ExternalName);
         stringSet.WriteString(writer, Name);
 
-        bool shouldWriteRotation = format == BinaryFormat.FT && Nodes.Any(x =>
+        bool shouldWriteRotation = Nodes.Any(x =>
             Math.Abs(x.Rotation.X) > 0 ||
             Math.Abs(x.Rotation.Y) > 0 ||
             Math.Abs(x.Rotation.Z) > 0);
 
-        writer.WriteOffsetIf(shouldWriteRotation, 4, AlignmentMode.Left, () =>
+        bool shouldWriteInternalSkinParam = InternalSkinParameter != null;
+
+        if (format == BinaryFormat.FT)
         {
-            foreach (var bone in Nodes)
-                bone.WriteOsgBlockInfo(writer, stringSet);
-        });
+            writer.WriteOffsetIf(shouldWriteRotation, 4, AlignmentMode.Left, () =>
+            {
+                foreach (var bone in Nodes)
+                    bone.WriteOsgBlockInfo(writer, stringSet);
+            });
+        }
+
+        else if (format == BinaryFormat.DT)
+        {
+            writer.WriteOffsetIf(shouldWriteInternalSkinParam, 16, AlignmentMode.Left, () =>
+            {
+                InternalSkinParameter.Write(writer);
+            });
+        }
+
+        else
+        {
+            writer.WriteOffsetIf(false, () => { });
+        }
 
         if (writer.AddressSpace == AddressSpace.Int64)
             writer.WriteNulls(4 * sizeof(ulong));

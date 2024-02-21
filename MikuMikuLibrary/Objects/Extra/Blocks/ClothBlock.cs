@@ -1,5 +1,6 @@
 ﻿using MikuMikuLibrary.IO;
 using MikuMikuLibrary.IO.Common;
+using MikuMikuLibrary.Objects.Extra.Parameters;
 
 namespace MikuMikuLibrary.Objects.Extra.Blocks;
 
@@ -17,7 +18,7 @@ public class ClothBlock : IBlock
     public List<Field20Data> Field20 { get; set; }
     public ushort[] Field24 { get; set; }
     public ushort[] Field28 { get; set; }
-    public uint Field2C { get; set; }
+    public OsageInternalSkinParameter InternalSkinParameter { get; set; }
     public uint Field30 { get; set; }
 
     public void Read(EndianBinaryReader reader, StringSet stringSet)
@@ -66,7 +67,11 @@ public class ClothBlock : IBlock
 
         reader.ReadOffset(() => { Field28 = reader.ReadUInt16s(reader.ReadUInt16()); });
 
-        Field2C = reader.ReadUInt32();
+        reader.ReadOffset(() =>
+        {
+            InternalSkinParameter = new OsageInternalSkinParameter();
+            InternalSkinParameter.Read(reader);
+        });
         Field30 = reader.ReadUInt32();
     }
 
@@ -112,7 +117,10 @@ public class ClothBlock : IBlock
             writer.Write(Field28);
         });
 
-        writer.Write(Field2C);
+        writer.WriteOffsetIf(InternalSkinParameter != null, 16, AlignmentMode.Left, () =>
+        {
+            InternalSkinParameter.Write(writer);
+        });
         writer.Write(Field30);
     }
 
