@@ -133,7 +133,7 @@ public class SkinNode : Node<Skin>
                         {
                             if (osgBlock.InternalSkinParameter != null)
                             {
-                                externalSkinParam.PushScope(osgBlock.InternalSkinParameter.Name);
+                                externalSkinParam.PushScope(osgBlock.ExternalName);
                                 {
                                     externalSkinParam.Write("node", osgBlock.Nodes, (OsageNode x) =>
                                     {
@@ -198,7 +198,7 @@ public class SkinNode : Node<Skin>
                         {
                             if (clsBlock.InternalSkinParameter != null)
                             {
-                                externalSkinParam.PushScope(clsBlock.InternalSkinParameter.Name);
+                                externalSkinParam.PushScope(clsBlock.Name);
                                 {
                                     externalSkinParam.PushScope("root");
                                     {
