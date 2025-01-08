@@ -113,10 +113,13 @@ public class ObjectNode : Node<Object>
             else
                 return;
 
+            ushort baseID = 32770;
 
             // fix bone orientations
             foreach (var bone in Data.Skin.Bones)
             {
+                bone.Id = baseID;
+                baseID++;
                 boneMap.TryGetValue(bone.Name, out var srcbonename);
                 var srcbone = baseObjectSet.Objects[0].Skin.Bones.FirstOrDefault(x => x.Name == srcbonename);
 
