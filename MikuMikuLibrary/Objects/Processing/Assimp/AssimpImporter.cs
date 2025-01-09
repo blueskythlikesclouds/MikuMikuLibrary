@@ -1,5 +1,4 @@
-﻿using MikuMikuLibrary.Geometry;
-using MikuMikuLibrary.Hashes;
+﻿using MikuMikuLibrary.Hashes;
 using MikuMikuLibrary.Materials;
 using MikuMikuLibrary.Numerics;
 using MikuMikuLibrary.Textures;
@@ -69,6 +68,13 @@ public static class AssimpImporter
         return transform.ToNumericsTransposed();
     }
 
+    private static Matrix4x4 GetWorldTransformInverse(Ai.Node aiNode)
+    {
+        var transform = GetWorldTransform(aiNode);
+        Matrix4x4.Invert(transform, out Matrix4x4 inverse);
+        return inverse;
+    }
+
     private static Object CreateObjectFromAiNode(Ai.Node aiNode, Ai.Scene aiScene, ObjectSet objectSet, string texturesDirectoryPath)
     {
         var obj = new Object();
@@ -111,6 +117,39 @@ public static class AssimpImporter
 
         ProcessingHelper.ProcessPostImport(obj, true);
         return obj;
+    }
+
+
+    /// <summary>
+    /// Adds a bone to the given skin block from the given node
+    /// </summary>
+    /// <param name="aiBoneNode">The node representing the bone to add</param>
+    /// <param name="skin">The skin block to add the bone to</param>
+    /// <returns>A reference to the bone info created from the node</returns>
+    private static void AddBoneToSkin(Ai.Node aiBoneNode, Skin skin)
+    {
+        skin.Bones.Add(new BoneInfo
+        {
+            Name = aiBoneNode.Name,
+            InverseBindPoseMatrix = GetWorldTransformInverse(aiBoneNode)
+        });
+    }
+
+    private static void AddParentsToSkin(Ai.Node aiBoneNode, Ai.Scene aiScene, Skin skin)
+    {
+        Ai.Node parentNode = aiBoneNode.Parent;
+        if (parentNode != null && !parentNode.HasMeshes && parentNode != aiScene.RootNode && (!aiScene.RootNode.Children.Contains(parentNode)))
+        {
+            if (skin.GetBoneInfoByName(parentNode.Name) == null)
+            {
+                AddBoneToSkin(parentNode, skin);
+
+                if (parentNode.Parent != null)
+                {
+                    AddParentsToSkin(parentNode, aiScene, skin);
+                }
+            }
+        }
     }
 
     private static Mesh CreateMeshFromAiNode(Ai.Node aiNode, Ai.Scene aiScene, Object obj, ObjectSet objectSet, string texturesDirectoryPath)
@@ -231,41 +270,14 @@ public static class AssimpImporter
                         if (boneIndex == -1)
                         {
                             var aiBoneNode = aiScene.RootNode.FindNode(aiBone.Name);
-
-                            void AddParents(Ai.Node aiBoneNode)
-                            {
-                                Ai.Node parentNode = aiScene.RootNode.FindNode(aiBoneNode.Parent.Name);
-                                if (parentNode != null && !parentNode.HasMeshes && parentNode != aiScene.RootNode && (!aiScene.RootNode.Children.Contains(parentNode)))
-                                {
-                                    if (obj.Skin.Bones.Find(x => x.Name == parentNode.Name) == null)
-                                    {
-                                        Matrix4x4.Invert(GetWorldTransform(parentNode), out var inverseBindPoseMatrix);
-                                        obj.Skin.Bones.Add(new BoneInfo
-                                        {
-                                            Name = parentNode.Name,
-                                            InverseBindPoseMatrix = inverseBindPoseMatrix,
-                                        });
-                                        if (parentNode.Parent != null)
-                                        {
-                                            AddParents(parentNode);
-                                        }
-                                    }
-                                }
-                            }
                             if (aiBoneNode.Parent != null)
-                                AddParents(aiBoneNode);
+                                AddParentsToSkin(aiBoneNode, aiScene, obj.Skin);
 
                             boneIndex = obj.Skin.Bones.Count;
 
                             // This is not right, but I'm not sure how to transform the bind pose matrix
                             // while not having duplicate bones.
-                            Matrix4x4.Invert(GetWorldTransform(aiBoneNode), out var inverseBindPoseMatrix);
-
-                            obj.Skin.Bones.Add(new BoneInfo
-                            {
-                                Name = aiBoneNode.Name,
-                                InverseBindPoseMatrix = inverseBindPoseMatrix
-                            });
+                            AddBoneToSkin(aiBoneNode, obj.Skin);
                         }
 
                         int boneIndexInSubMesh = boneIndices.Count;
