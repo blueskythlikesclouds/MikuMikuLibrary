@@ -140,7 +140,7 @@ public static class AssimpImporter
         Ai.Node parentNode = aiBoneNode.Parent;
         if (parentNode != null && !parentNode.HasMeshes && parentNode != aiScene.RootNode && (!aiScene.RootNode.Children.Contains(parentNode)))
         {
-            if (skin.GetBoneInfoByName(parentNode.Name) == null)
+            if (!skin.Bones.Any(x => x.Name == parentNode.Name))
             {
                 AddBoneToSkin(parentNode, skin);
 
