@@ -113,8 +113,7 @@ public class ObjectNode : Node<Object>
             else
                 return;
 
-
-            // fix bone orientations
+            // fix bone orientations 
             foreach (var bone in Data.Skin.Bones)
             {
                 boneMap.TryGetValue(bone.Name, out var srcbonename);
