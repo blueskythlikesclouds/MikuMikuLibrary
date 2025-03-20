@@ -734,7 +734,7 @@ public class ModelViewControl : GLControl
         Dispose(false);
     }
 
-    private ModelViewControl() : base(new GLControlSettings { NumberOfSamples = 2 })
+    private ModelViewControl() : base(new GLControlSettings { NumberOfSamples = 2, Flags = OpenTK.Windowing.Common.ContextFlags.ForwardCompatible })
     {
         MakeCurrent();
         
