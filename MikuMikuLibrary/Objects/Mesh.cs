@@ -132,7 +132,7 @@ public class Mesh
 
         Flags = (MeshFlags)reader.ReadInt32();
 
-        uint attributeFlags = reader.ReadUInt32();
+        uint vertexFormatIndex = reader.ReadUInt32();
 
         reader.SkipNulls(6 * sizeof(uint));
 
@@ -252,17 +252,72 @@ public class Mesh
             TexCoords0 = new Vector2[vertexCount];
             TexCoords1 = new Vector2[vertexCount];
 
-            if (attributeFlags == 10)
+            bool hasTexCoord2 = false;
+            bool hasTexCoord3 = false;
+            bool hasTexCoord4 = false;
+            bool hasTexCoord5 = false;
+            bool hasBlend = false;
+
+            switch (vertexFormatIndex)
             {
-                TexCoords2 = new Vector2[vertexCount];
-                TexCoords3 = new Vector2[vertexCount];
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(vertexFormatIndex));
+                case 2:
+                    break;
+                case 4:
+                    hasBlend = true;
+                    break;
+                case 6:
+                    hasTexCoord2 = true;
+                    break;
+                case 8:
+                    hasTexCoord2 = true;
+                    hasBlend = true;
+                    break;
+                case 10:
+                    hasTexCoord2 = true;
+                    hasTexCoord3 = true;
+                    break;
+                case 12:
+                    hasTexCoord2 = true;
+                    hasTexCoord3 = true;
+                    hasBlend = true;
+                    break;
+                case 14:
+                    hasTexCoord2 = true;
+                    hasTexCoord3 = true;
+                    hasTexCoord4 = true;
+                    break;
+                case 16:
+                    hasTexCoord2 = true;
+                    hasTexCoord3 = true;
+                    hasTexCoord4 = true;
+                    hasBlend = true;
+                    break;
+                case 18:
+                    hasTexCoord2 = true;
+                    hasTexCoord3 = true;
+                    hasTexCoord4 = true;
+                    hasTexCoord5 = true;
+                    break;
+                case 20:
+                    hasTexCoord2 = true;
+                    hasTexCoord3 = true;
+                    hasTexCoord4 = true;
+                    hasTexCoord5 = true;
+                    hasBlend = true;
+                    break;
             }
-            else if (attributeFlags == 6)
+
+            if (hasTexCoord2)
                 TexCoords2 = new Vector2[vertexCount];
+
+            if (hasTexCoord3)
+                TexCoords3 = new Vector2[vertexCount];
 
             Colors0 = new Vector4[vertexCount];
 
-            if (attributeFlags == 4)
+            if (hasBlend)
             {
                 BlendWeights = new Vector4[vertexCount];
                 BlendIndices = new Vector4Int[vertexCount];
@@ -297,17 +352,21 @@ public class Mesh
                 TexCoords0[i] = vertexReader.ReadVector2(VectorBinaryFormat.Half);
                 TexCoords1[i] = vertexReader.ReadVector2(VectorBinaryFormat.Half);
 
-                if (attributeFlags == 10)
-                {
+                if (hasTexCoord2)
                     TexCoords2[i] = vertexReader.ReadVector2(VectorBinaryFormat.Half);
+
+                if (hasTexCoord3)
                     TexCoords3[i] = vertexReader.ReadVector2(VectorBinaryFormat.Half);
-                }
-                else if (attributeFlags == 6)
-                    TexCoords2[i] = vertexReader.ReadVector2(VectorBinaryFormat.Half);
+
+                if (hasTexCoord4)
+                    vertexReader.SeekCurrent(4);
+
+                if (hasTexCoord5)
+                    vertexReader.SeekCurrent(4);
 
                 Colors0[i] = vertexReader.ReadVector4(VectorBinaryFormat.Half);
 
-                if (attributeFlags == 4)
+                if (hasBlend)
                 {
                     ref var blendWeights = ref BlendWeights[i];
                     ref var blendIndices = ref BlendIndices[i];
@@ -328,7 +387,7 @@ public class Mesh
                 }
 
                 // Checks to get rid of useless data after reading
-                if (Tangents[i] != Vector4.Zero) hasTangents = true;
+                if (!hasTangents && Tangents[i] != Vector4.Zero) hasTangents = true;
             }
 
             if (!hasTangents) Tangents = null;
@@ -351,11 +410,31 @@ public class Mesh
 
         int vertexSize = 0;
         VertexFormatAttributes vertexFormat = default;
+        uint vertexFormatIndex = 0;
 
         if (section != null)
         {
+            vertexSize = 44;
             vertexFormat = VertexFormatAttributes.UsesModernStorage;
-            vertexSize = BlendWeights != null ? 56 : 44;
+            vertexFormatIndex = 2;
+
+            if (TexCoords2 != null)
+            {
+                vertexSize += 4;
+                vertexFormatIndex += 4;
+            }
+
+            if (TexCoords2 != null && TexCoords3 != null)
+            {
+                vertexSize += 4;
+                vertexFormatIndex += 4;
+            }
+
+            if (BlendWeights != null)
+            {
+                vertexSize += 12;
+                vertexFormatIndex += 2;
+            }
         }
 
         else
@@ -433,7 +512,7 @@ public class Mesh
 
         writer.Write((int)Flags);
 
-        writer.Write(section != null ? (BlendWeights != null ? 4 : 2) : 0);
+        writer.Write(section != null ? vertexFormatIndex : 0);
 
         writer.WriteNulls(6 * sizeof(uint)); // Reserved
 
