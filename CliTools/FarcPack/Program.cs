@@ -12,7 +12,7 @@ internal class Program
         string destinationFileName = null;
 
         bool compress = false;
-        int alignment = 16;
+        uint alignment = 16;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -22,7 +22,7 @@ internal class Program
                 compress = true;
 
             else if (EqualsAny("-a", "--alignment"))
-                alignment = int.Parse(args[++i]);
+                alignment = uint.Parse(args[++i]);
 
             else if (sourceFileName == null)
                 sourceFileName = arg;
