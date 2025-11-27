@@ -153,9 +153,13 @@ public class FarcArchive : BinaryFile, IArchive
                 entryCount = reader.ReadUInt32();
                 uint entrySize = reader.ReadUInt32();
 
-                if (headerSize < innerHeaderSize)
+                // Why three additions instead of a single value?
+                // First is offset of data after Signature and actual Header Size.
+                // Second is two unencrypted fields in the Header.
+                // Third is IV.
+                if (headerSize - (0x08 + 0x08 + 0x10) < innerHeaderSize)
                     throw new InvalidDataException(string.Format(
-                        "Invalid FARC Inner Header Size (Header Size is smaller than Inner Header Size)"));
+                        "Invalid FARC Inner Header Size (Adjusted Header Size is smaller than Inner Header Size)"));
 
                 else if (innerHeaderSize < 0x10)
                     throw new InvalidDataException(string.Format(
