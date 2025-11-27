@@ -140,14 +140,45 @@ public class FarcArchive : BinaryFile, IArchive
                 var decryptor = aesManaged.CreateDecryptor();
                 var cryptoStream = new CryptoStream(reader.BaseStream, decryptor, CryptoStreamMode.Read);
                 reader = new EndianBinaryReader(cryptoStream, Encoding.UTF8, Endianness.Big);
-                mAlignment = reader.ReadUInt32();
             }
 
-            Format = reader.ReadUInt32() == 1 ? BinaryFormat.FT : BinaryFormat.DT;
+            uint entryPadding;
+            uint headerPadding;
+            uint entryCount;
 
-            uint entryCount = reader.ReadUInt32();
             if (Format == BinaryFormat.FT)
-                padding = reader.ReadUInt32(); // No SeekCurrent!! CryptoStream does not support it.
+            {
+                uint innerHeaderSize = reader.ReadUInt32();
+                mAlignment = reader.ReadUInt32();
+                entryCount = reader.ReadUInt32();
+                uint entrySize = reader.ReadUInt32();
+
+                if (headerSize < innerHeaderSize)
+                    throw new InvalidDataException(string.Format(
+                        "Invalid FARC Inner Header Size (Header Size is smaller than Inner Header Size)"));
+
+                else if (innerHeaderSize < 0x10)
+                    throw new InvalidDataException(string.Format(
+                        "Invalid FARC Inner Header Size (expected size 16 bytes or more, got {0} {1})",
+                        innerHeaderSize, innerHeaderSize == 1 ? "byte" : "bytes"));
+
+                else if (entrySize < 0x10)
+                    throw new InvalidDataException(string.Format(
+                        "Invalid FARC Entry Size (expected size 16 bytes or more, got {0} {1})",
+                        innerHeaderSize, innerHeaderSize == 1 ? "byte" : "bytes"));
+
+                headerPadding = innerHeaderSize - 0x10;
+                entryPadding = entrySize - 0x10;
+            }
+            else
+            {
+                entryPadding = reader.ReadUInt32();
+                headerPadding = reader.ReadUInt32();
+                entryCount = 0;
+            }
+
+            if (headerPadding > 0)
+                reader.ReadBytes((int)headerPadding); // No SeekCurrent!! CryptoStream does not support it. *sigh*
 
             while (originalStream.Position < headerSize)
             {
@@ -162,6 +193,9 @@ public class FarcArchive : BinaryFile, IArchive
                     isCompressed = (flags & 2) != 0;
                     isEncrypted = (flags & 4) != 0;
                 }
+
+                if (entryPadding > 0)
+                    reader.ReadBytes((int)entryPadding); // No SeekCurrent!! (2)
 
                 long fixedSize = 0;
 
