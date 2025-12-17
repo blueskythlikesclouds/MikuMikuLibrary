@@ -246,6 +246,13 @@ public class FarcArchive : BinaryFile, IArchive
 
                 long fixedSize = Math.Min(compressedSize, reader.Length - offset);
 
+                bool isCompressed = true;
+                if (uncompressedSize != 0)
+                {
+                    isCompressed = false;
+                    uncompressedSize = (uint)fixedSize;
+                }
+
                 mEntries.Add(name, new Entry
                 {
                     Name = name,
@@ -253,7 +260,7 @@ public class FarcArchive : BinaryFile, IArchive
                     UnpackedLength = uncompressedSize,
                     CompressedLength = fixedSize,
                     Length = fixedSize,
-                    IsCompressed = compressedSize != uncompressedSize
+                    IsCompressed = isCompressed
                 });
             }
 
