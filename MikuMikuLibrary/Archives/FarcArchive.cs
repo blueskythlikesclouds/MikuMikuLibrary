@@ -9,9 +9,9 @@ namespace MikuMikuLibrary.Archives;
 public class FarcArchive : BinaryFile, IArchive
 {
     private readonly Dictionary<string, Entry> mEntries;
-    private int mAlignment;
+    private uint mAlignment;
 
-    public int Alignment
+    public uint Alignment
     {
         get => mAlignment;
         set => mAlignment = (value & (value - 1)) != 0 ? AlignmentHelper.AlignToNextPowerOfTwo(value) : value;
@@ -120,11 +120,11 @@ public class FarcArchive : BinaryFile, IArchive
 
         if (signature == "FARC")
         {
-            int flags = reader.ReadInt32();
+            uint flags = reader.ReadUInt32();
             bool isCompressed = (flags & 2) != 0;
             bool isEncrypted = (flags & 4) != 0;
-            int padding = reader.ReadInt32();
-            mAlignment = reader.ReadInt32();
+            uint padding = reader.ReadUInt32();
+            mAlignment = reader.ReadUInt32();
 
             IsCompressed = isCompressed;
 
@@ -140,14 +140,49 @@ public class FarcArchive : BinaryFile, IArchive
                 var decryptor = aesManaged.CreateDecryptor();
                 var cryptoStream = new CryptoStream(reader.BaseStream, decryptor, CryptoStreamMode.Read);
                 reader = new EndianBinaryReader(cryptoStream, Encoding.UTF8, Endianness.Big);
-                mAlignment = reader.ReadInt32();
             }
 
-            Format = reader.ReadInt32() == 1 ? BinaryFormat.FT : BinaryFormat.DT;
+            uint entryPadding;
+            uint headerPadding;
+            uint entryCount;
 
-            int entryCount = reader.ReadInt32();
             if (Format == BinaryFormat.FT)
-                padding = reader.ReadInt32(); // No SeekCurrent!! CryptoStream does not support it.
+            {
+                uint innerHeaderSize = reader.ReadUInt32();
+                mAlignment = reader.ReadUInt32();
+                entryCount = reader.ReadUInt32();
+                uint entrySize = reader.ReadUInt32();
+
+                // Why three additions instead of a single value?
+                // First is offset of data after Signature and actual Header Size.
+                // Second is two unencrypted fields in the Header.
+                // Third is IV.
+                if (headerSize - (0x08 + 0x08 + 0x10) < innerHeaderSize)
+                    throw new InvalidDataException(string.Format(
+                        "Invalid FARC Inner Header Size (Adjusted Header Size is smaller than Inner Header Size)"));
+
+                else if (innerHeaderSize < 0x10)
+                    throw new InvalidDataException(string.Format(
+                        "Invalid FARC Inner Header Size (expected size 16 bytes or more, got {0} {1})",
+                        innerHeaderSize, innerHeaderSize == 1 ? "byte" : "bytes"));
+
+                else if (entrySize < 0x10)
+                    throw new InvalidDataException(string.Format(
+                        "Invalid FARC Entry Size (expected size 16 bytes or more, got {0} {1})",
+                        innerHeaderSize, innerHeaderSize == 1 ? "byte" : "bytes"));
+
+                headerPadding = innerHeaderSize - 0x10;
+                entryPadding = entrySize - 0x10;
+            }
+            else
+            {
+                entryPadding = reader.ReadUInt32();
+                headerPadding = reader.ReadUInt32();
+                entryCount = 0;
+            }
+
+            if (headerPadding > 0)
+                reader.ReadBytes((int)headerPadding); // No SeekCurrent!! CryptoStream does not support it. *sigh*
 
             while (originalStream.Position < headerSize)
             {
@@ -158,10 +193,13 @@ public class FarcArchive : BinaryFile, IArchive
 
                 if (Format == BinaryFormat.FT)
                 {
-                    flags = reader.ReadInt32();
+                    flags = reader.ReadUInt32();
                     isCompressed = (flags & 2) != 0;
                     isEncrypted = (flags & 4) != 0;
                 }
+
+                if (entryPadding > 0)
+                    reader.ReadBytes((int)entryPadding); // No SeekCurrent!! (2)
 
                 long fixedSize = 0;
 
@@ -197,7 +235,7 @@ public class FarcArchive : BinaryFile, IArchive
 
         else if (signature == "FArC")
         {
-            mAlignment = reader.ReadInt32();
+            mAlignment = reader.ReadUInt32();
 
             while (reader.Position < headerSize)
             {
@@ -208,6 +246,13 @@ public class FarcArchive : BinaryFile, IArchive
 
                 long fixedSize = Math.Min(compressedSize, reader.Length - offset);
 
+                bool isCompressed = true;
+                if (uncompressedSize != 0)
+                {
+                    isCompressed = false;
+                    uncompressedSize = (uint)fixedSize;
+                }
+
                 mEntries.Add(name, new Entry
                 {
                     Name = name,
@@ -215,7 +260,7 @@ public class FarcArchive : BinaryFile, IArchive
                     UnpackedLength = uncompressedSize,
                     CompressedLength = fixedSize,
                     Length = fixedSize,
-                    IsCompressed = compressedSize != uncompressedSize
+                    IsCompressed = isCompressed
                 });
             }
 
@@ -224,7 +269,7 @@ public class FarcArchive : BinaryFile, IArchive
 
         else if (signature == "FArc")
         {
-            mAlignment = reader.ReadInt32();
+            mAlignment = reader.ReadUInt32();
 
             while (reader.Position < headerSize)
             {
@@ -259,7 +304,7 @@ public class FarcArchive : BinaryFile, IArchive
                 writer.Write(entry.Name, StringBinaryFormat.NullTerminated);
                 writer.WriteOffset(OffsetMode.OffsetAndSize, () =>
                 {
-                    writer.Align(mAlignment, 0x78);
+                    writer.Align((int)mAlignment, 0x78);
 
                     long position = writer.Position;
 
@@ -302,7 +347,7 @@ public class FarcArchive : BinaryFile, IArchive
         });
 
         writer.PerformScheduledWrites();
-        writer.Align(mAlignment, 0x78);
+        writer.Align((int)mAlignment, 0x78);
     }
 
     protected override void Dispose(bool disposing)

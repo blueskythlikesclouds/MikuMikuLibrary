@@ -15,9 +15,9 @@ public class FarcArchiveNode : BinaryFileNode<FarcArchive>
     public override Bitmap Image => ResourceStore.LoadBitmap("Icons/Archive.png");
 
     [Category("General")]
-    public int Alignment
+    public uint Alignment
     {
-        get => GetProperty<int>();
+        get => GetProperty<uint>();
         set => SetProperty(value);
     }
 
