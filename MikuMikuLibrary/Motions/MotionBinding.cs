@@ -43,7 +43,7 @@ public class MotionBinding
                     case BoneType.ArmIKRotation:
                     case BoneType.LegIKRotation:
                         UnbindIK(boneBinding);
-                        UnbindPosition(boneBinding);
+                        UnbindRotation(boneBinding);
                         break;
                 }
             }

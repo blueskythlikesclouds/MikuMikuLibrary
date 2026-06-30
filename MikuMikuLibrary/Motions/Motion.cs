@@ -223,7 +223,7 @@ public class Motion : BinaryFile
                     case BoneType.ArmIKRotation:
                     case BoneType.LegIKRotation:
                         boneBinding.IK = BindNext();
-                        boneBinding.Position = BindNext();
+                        boneBinding.Rotation = BindNext();
                         break;
                 }
 

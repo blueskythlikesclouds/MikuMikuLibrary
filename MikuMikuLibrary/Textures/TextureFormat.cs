@@ -16,18 +16,20 @@ public enum TextureFormat
     ATI1 = 10,
     ATI2 = 11,
     L8 = 12,
-    L8A8 = 13
+    L8A8 = 13,
+    BC7 = 15,
+    BC6H = 127
 }
 
 public static class TextureFormatUtilities
 {
     public static bool IsBlockCompressed(TextureFormat format) =>
-        format >= TextureFormat.DXT1 && format <= TextureFormat.ATI2;
+        (format >= TextureFormat.DXT1 && format <= TextureFormat.ATI2) || format == TextureFormat.BC7 || format == TextureFormat.BC6H;
 
     public static bool HasAlpha(TextureFormat format)
     {
         return format == TextureFormat.A8 || format == TextureFormat.RGBA8 || format == TextureFormat.RGB5A1 || format == TextureFormat.RGBA4 ||
-               format == TextureFormat.DXT1a || format == TextureFormat.DXT3 || format == TextureFormat.DXT5;
+               format == TextureFormat.DXT1a || format == TextureFormat.DXT3 || format == TextureFormat.DXT5 || format == TextureFormat.BC7;
     }
 
     public static int GetBlockSize(TextureFormat format)
@@ -42,6 +44,8 @@ public static class TextureFormatUtilities
             case TextureFormat.DXT3:
             case TextureFormat.DXT5:
             case TextureFormat.ATI2:
+            case TextureFormat.BC7:
+            case TextureFormat.BC6H:
                 return 16;
         }
 

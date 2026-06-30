@@ -24,7 +24,7 @@ public class BoneData : BinaryFile
 
             for (int i = 0; i < skeletonCount; i++)
             {
-                reader.ReadAtOffset(reader.ReadUInt32(), () =>
+                reader.ReadOffset(() =>
                 {
                     var skeleton = new Skeleton();
                     skeleton.Read(reader);

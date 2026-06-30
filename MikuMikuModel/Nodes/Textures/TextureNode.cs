@@ -114,6 +114,7 @@ public class TextureNode : Node<Texture>
             AppendCustomHandler("ATI1", () => EncodeTexture(TextureFormat.ATI1, false, false));
             AppendCustomHandler("ATI2", () => EncodeTexture(TextureFormat.ATI2, false, false));
             AppendCustomHandler("YCbCr", () => EncodeTexture(TextureFormat.Unknown, true, false));
+            AppendCustomHandler("BC7 (MM+ Only)", () => EncodeTexture(TextureFormat.BC7, false, false));
         }
 
         AddCustomHandler("Replace as... (flipped)");
@@ -123,6 +124,7 @@ public class TextureNode : Node<Texture>
             AppendCustomHandler("ATI1", () => EncodeTexture(TextureFormat.ATI1, false, true));
             AppendCustomHandler("ATI2", () => EncodeTexture(TextureFormat.ATI2, false, true));
             AppendCustomHandler("YCbCr", () => EncodeTexture(TextureFormat.Unknown, true, true));
+            AppendCustomHandler("BC7 (MM+ Only)", () => EncodeTexture(TextureFormat.BC7, false, true));
         }
     }
 

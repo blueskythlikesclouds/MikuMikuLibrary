@@ -23,6 +23,12 @@ namespace MikuMikuLibrary::Textures::Processing
 
         case TextureFormat::ATI2:
             return DXGI_FORMAT_BC5_UNORM;
+
+        case TextureFormat::BC7:
+            return DXGI_FORMAT_BC7_UNORM;
+
+        case TextureFormat::BC6H:
+            return DXGI_FORMAT_BC6H_UF16;
         }
 
         return DXGI_FORMAT_UNKNOWN;
@@ -54,6 +60,14 @@ namespace MikuMikuLibrary::Textures::Processing
         case DXGI_FORMAT_BC5_TYPELESS:
         case DXGI_FORMAT_BC5_UNORM:
             return TextureFormat::ATI2;
+
+        case DXGI_FORMAT_BC7_TYPELESS:
+        case DXGI_FORMAT_BC7_UNORM:
+            return TextureFormat::BC7;
+
+        case DXGI_FORMAT_BC6H_TYPELESS:
+        case DXGI_FORMAT_BC6H_UF16:
+            return TextureFormat::BC6H;
         }
 
         return TextureFormat::Unknown;

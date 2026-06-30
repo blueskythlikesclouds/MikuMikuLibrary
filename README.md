@@ -5,7 +5,7 @@ Format library and file editor for Hatsune Miku: Project DIVA games.
 # Building
 
 * [Stable (release) builds](https://github.com/blueskythlikesclouds/MikuMikuLibrary/releases)
-* [Unstable (development) builds](https://ci.appveyor.com/project/blueskythlikesclouds/mikumikulibrary/build/artifacts)
+* [Unstable (development) builds](https://github.com/blueskythlikesclouds/MikuMikuLibrary/releases/tag/nightly)
 
 ## Manually building
 

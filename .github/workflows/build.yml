@@ -1,0 +1,60 @@
+name: Build Miku Miku Library
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install FBX SDK
+        run: |
+          Invoke-WebRequest "https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2020-3-2/fbx202032_fbxsdk_vs2019_win.exe" -OutFile "FBX.exe"
+          Start-Process -Wait -FilePath "FBX.exe" -ArgumentList "/S /D=$env:GITHUB_WORKSPACE\MikuMikuLibrary.Native\Dependencies\FBX"
+        shell: pwsh
+
+      - name: Setup MSVC environment
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Miku Miku Library
+        run: |
+          nuget restore MikuMikuLibrary.sln
+          ./publish.bat
+
+      - name: Upload x64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MikuMikuLibrary-x64
+          path: publish/MikuMikuLibrary-x64.7z
+          compression-level: 0
+
+      - name: Upload x86 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MikuMikuLibrary-x86
+          path: publish/MikuMikuLibrary-x86.7z
+          compression-level: 0
+
+      - name: Upload nightly release
+        if: github.repository == 'blueskythlikesclouds/MikuMikuLibrary' && github.ref == 'refs/heads/master'
+        uses: andelf/nightly-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: nightly
+          name: "Nightly Release $$"
+          body: "Nightly release based on ${{ github.sha }}"
+          prerelease: true
+          files: |
+            publish/MikuMikuLibrary-x64.7z
+            publish/MikuMikuLibrary-x86.7z

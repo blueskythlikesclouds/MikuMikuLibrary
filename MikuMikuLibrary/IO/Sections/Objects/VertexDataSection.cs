@@ -39,6 +39,13 @@ public class VertexDataSection : Section<object>
                 writer.Write(mesh.Tangents?[i] ?? Vector4.Zero, VectorBinaryFormat.Int16);
                 writer.Write(mesh.TexCoords0?[i] ?? Vector2.Zero, VectorBinaryFormat.Half);
                 writer.Write(mesh.TexCoords1?[i] ?? mesh.TexCoords0?[i] ?? Vector2.Zero, VectorBinaryFormat.Half);
+
+                if (mesh.TexCoords2 != null)
+                    writer.Write(mesh.TexCoords2[i], VectorBinaryFormat.Half);
+
+                if (mesh.TexCoords2 != null && mesh.TexCoords3 != null)
+                    writer.Write(mesh.TexCoords3[i], VectorBinaryFormat.Half);
+
                 writer.Write(mesh.Colors0?[i] ?? Vector4.One, VectorBinaryFormat.Half);
 
                 if (mesh.BlendWeights == null)
